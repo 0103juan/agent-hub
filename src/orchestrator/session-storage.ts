@@ -32,6 +32,7 @@ export class SessionStorage {
         const raw = fs.readFileSync(this.sessionsFile, 'utf8');
         const list: ConversationSession[] = JSON.parse(raw);
         for (const s of list) {
+          this.normalizeSessionProvider(s);
           this.sessions.set(s.id, s);
         }
         if (list.length > 0) {
@@ -164,8 +165,25 @@ export class SessionStorage {
     if (profileId) s.profileId = profileId;
     if (modelName) s.modelName = modelName;
     if (effort) s.effort = effort;
+    this.normalizeSessionProvider(s);
     s.updatedAt = Date.now();
     this.saveSessionsToDisk();
+  }
+
+  public normalizeSessionProvider(session: ConversationSession): void {
+    const model = session.modelName || '';
+    const isGoogle =
+      model.startsWith('gemini-') ||
+      model.startsWith('claude-opus-5') ||
+      model.startsWith('claude-sonnet-5') ||
+      model === 'gpt-oss-120b-medium';
+    const isClaudeNative = model.startsWith('Claude 3') || model === 'Claude Opus 5.5';
+
+    if (isGoogle && (!session.profileId || session.profileId.startsWith('claude'))) {
+      session.profileId = 'google-workspace';
+    } else if (isClaudeNative && (!session.profileId || session.profileId.startsWith('google'))) {
+      session.profileId = 'claude-main';
+    }
   }
 
   public updateSessionMessages(

@@ -1807,7 +1807,7 @@ ROLLBACK;
             }
           });
         </script>
-        <script nonce="${nonce}" src="${scriptUri}"></script>
+        <script nonce="${nonce}" src="${scriptUri}?v=${Date.now()}"></script>
       </body>
     </html>`;
   }
