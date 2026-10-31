@@ -55,12 +55,21 @@ export class CLIRunner {
 
     if (attachments && attachments.length > 0) {
       const contextBlocks = attachments.map((att) => {
+        if (att.mediaType === 'image') {
+          return `\n---\n[IMAGEN ADJUNTA]: "${att.file}"\nRuta local: ${att.fsPath || att.file}\n(Por favor inspecciona y analiza esta imagen como parte de la instrucción)\n---`;
+        }
+        if (att.mediaType === 'audio') {
+          return `\n---\n[AUDIO ADJUNTO]: "${att.file}"\nRuta local: ${att.fsPath || att.file}\n(Por favor analiza el contenido de este archivo de audio/voz)\n---`;
+        }
+        if (att.mediaType === 'video') {
+          return `\n---\n[VIDEO ADJUNTO]: "${att.file}"\nRuta local: ${att.fsPath || att.file}\n(Por favor analiza el contenido de este archivo de video/grabación)\n---`;
+        }
         const header = att.lines ? `Archivo: \`${att.file}#${att.lines}\`` : `Archivo: \`${att.file}\``;
         const lang = att.language || '';
         return `\n---\n${header}\n\`\`\`${lang}\n${att.content}\n\`\`\`\n---`;
       }).join('\n');
 
-      enrichedPrompt = `Contexto seleccionado del workspace:\n${contextBlocks}\n\nInstrucción:\n${prompt}`;
+      enrichedPrompt = `Contexto del workspace y archivos multimedia adjuntos:\n${contextBlocks}\n\nInstrucción:\n${prompt}`;
     }
 
     if (profileId.startsWith('google') || profileId === 'chatgpt-free') {

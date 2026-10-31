@@ -33,6 +33,10 @@ export interface FileContextAttachment {
   lines?: string;
   content: string;
   language?: string;
+  mediaType?: 'text' | 'image' | 'audio' | 'video';
+  mediaUri?: string;
+  fsPath?: string;
+  sizeFormatted?: string;
 }
 
 export interface SessionTelemetry {

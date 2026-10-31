@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Square, Terminal, ShieldAlert, Paperclip, X, FileCode, CornerDownLeft, GitCompare, Play, FileText, Check, GitBranch, GitPullRequest, ShieldCheck, History, Lock, Box, Smartphone, Shield, Radio, GitFork, Wrench, ChevronDown, Sparkles, SlidersHorizontal, Ghost, Zap, Database, FileCode2, Trash2, Gauge, BookOpen, Scale, Network, EyeOff, RotateCcw, Container, HeartPulse, FileSpreadsheet, Eye, KeyRound, FileCheck, ArrowRightLeft } from 'lucide-react';
+import { Send, Square, Terminal, ShieldAlert, Paperclip, X, FileCode, CornerDownLeft, GitCompare, Play, FileText, Check, GitBranch, GitPullRequest, ShieldCheck, History, Lock, Box, Smartphone, Shield, Radio, GitFork, Wrench, ChevronDown, Sparkles, SlidersHorizontal, Ghost, Zap, Database, FileCode2, Trash2, Gauge, BookOpen, Scale, Network, EyeOff, RotateCcw, Container, HeartPulse, FileSpreadsheet, Eye, KeyRound, FileCheck, ArrowRightLeft, Image, Music, Film } from 'lucide-react';
 import { ChatMessage, AccountProfile, FileContextAttachment } from '../../orchestrator/types';
 import { vscode } from '../vscode-api';
 
@@ -14,6 +14,8 @@ interface Props {
   onAddAttachment: (attachment: FileContextAttachment) => void;
   onRemoveAttachment: (index: number) => void;
   onRequestActiveContext: () => void;
+  onRequestAttachMedia?: () => void;
+  onSaveClipboardMedia?: (dataUri: string, fileName: string, mediaType: 'image' | 'audio' | 'video') => void;
   onSearchFiles: (query: string) => void;
   onSendMessage: (prompt: string) => void;
   onStop: () => void;
@@ -31,6 +33,8 @@ export const ChatCanvas: React.FC<Props> = ({
   onAddAttachment,
   onRemoveAttachment,
   onRequestActiveContext,
+  onRequestAttachMedia,
+  onSaveClipboardMedia,
   onSearchFiles,
   onSendMessage,
   onStop,
@@ -75,6 +79,69 @@ export const ChatCanvas: React.FC<Props> = ({
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSubmit(e);
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement | HTMLFormElement>) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.type.indexOf('image') !== -1) {
+        const blob = item.getAsFile();
+        if (blob) {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const dataUri = event.target?.result as string;
+            if (dataUri && onSaveClipboardMedia) {
+              onSaveClipboardMedia(dataUri, `clip_${Date.now()}.png`, 'image');
+            }
+          };
+          reader.readAsDataURL(blob);
+        }
+      } else if (item.type.indexOf('audio') !== -1) {
+        const blob = item.getAsFile();
+        if (blob) {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const dataUri = event.target?.result as string;
+            if (dataUri && onSaveClipboardMedia) {
+              onSaveClipboardMedia(dataUri, `clip_audio_${Date.now()}.wav`, 'audio');
+            }
+          };
+          reader.readAsDataURL(blob);
+        }
+      }
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const files = e.dataTransfer?.files;
+    if (files && files.length > 0) {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        let mediaType: 'image' | 'audio' | 'video' = 'image';
+        if (file.type.startsWith('audio/')) mediaType = 'audio';
+        else if (file.type.startsWith('video/')) mediaType = 'video';
+        else if (file.type.startsWith('image/')) mediaType = 'image';
+        else continue;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const dataUri = event.target?.result as string;
+          if (dataUri && onSaveClipboardMedia) {
+            onSaveClipboardMedia(dataUri, file.name, mediaType);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
     }
   };
 
@@ -705,6 +772,69 @@ export const ChatCanvas: React.FC<Props> = ({
               <div className="whitespace-pre-wrap font-sans select-text">
                 {msg.content}
               </div>
+
+              {/* Multimedia & File Attachments inside message bubble */}
+              {msg.attachments && msg.attachments.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2 pt-2 border-t border-zinc-800/80">
+                  {msg.attachments.map((att, aIdx) => {
+                    if (att.mediaType === 'image') {
+                      return (
+                        <div key={aIdx} className="space-y-1">
+                          {att.mediaUri && (
+                            <img
+                              src={att.mediaUri}
+                              alt={att.file}
+                              className="max-h-52 max-w-full rounded-lg border border-zinc-750 object-contain bg-black/40 cursor-pointer hover:opacity-90 transition"
+                              onClick={() => {
+                                const w = window.open('');
+                                if (w) {
+                                  w.document.write(`<body style="margin:0;background:#111;display:flex;align-items:center;justify-content:center;height:100vh;"><img src="${att.mediaUri}" style="max-width:95vw;max-height:95vh;border-radius:8px;"/></body>`);
+                                }
+                              }}
+                            />
+                          )}
+                          <div className="text-[10px] text-pink-300 font-mono flex items-center gap-1">
+                            <Image className="w-3 h-3 text-pink-400" />
+                            <span className="truncate max-w-[200px]">{att.file}</span>
+                            {att.sizeFormatted && <span className="text-zinc-500 text-[9px]">({att.sizeFormatted})</span>}
+                          </div>
+                        </div>
+                      );
+                    }
+                    if (att.mediaType === 'audio') {
+                      return (
+                        <div key={aIdx} className="w-full max-w-md space-y-1 p-2 rounded-lg bg-zinc-950/60 border border-zinc-800">
+                          <div className="text-[10px] text-amber-300 font-mono flex items-center gap-1.5 mb-1">
+                            <Music className="w-3.5 h-3.5 text-amber-400" />
+                            <span className="truncate font-semibold">{att.file}</span>
+                            {att.sizeFormatted && <span className="text-zinc-500 text-[9px]">({att.sizeFormatted})</span>}
+                          </div>
+                          {att.mediaUri ? (
+                            <audio controls src={att.mediaUri} className="w-full h-8" />
+                          ) : (
+                            <div className="text-[9px] text-zinc-400 font-mono truncate">{att.fsPath || att.file}</div>
+                          )}
+                        </div>
+                      );
+                    }
+                    if (att.mediaType === 'video') {
+                      return (
+                        <div key={aIdx} className="space-y-1 w-full max-w-lg">
+                          {att.mediaUri ? (
+                            <video controls src={att.mediaUri} className="max-h-64 w-full rounded-lg border border-zinc-750 bg-black/60" />
+                          ) : null}
+                          <div className="text-[10px] text-purple-300 font-mono flex items-center gap-1">
+                            <Film className="w-3.5 h-3.5 text-purple-400" />
+                            <span className="truncate font-semibold">{att.file}</span>
+                            {att.sizeFormatted && <span className="text-zinc-500 text-[9px]">({att.sizeFormatted})</span>}
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })}
+                </div>
+              )}
             </div>
           ))
         )}
@@ -767,6 +897,17 @@ export const ChatCanvas: React.FC<Props> = ({
             >
               <Paperclip className="w-3.5 h-3.5 text-indigo-400" />
               <span>Adjuntar contexto</span>
+            </button>
+
+            {/* Multimedia attachment button (Images, Audio, Video) */}
+            <button
+              type="button"
+              onClick={onRequestAttachMedia}
+              className="flex items-center gap-1.5 text-[11px] font-medium text-pink-300 hover:text-pink-200 bg-pink-950/40 hover:bg-pink-900/50 px-2.5 py-1 rounded-md border border-pink-700/50 transition shrink-0 shadow-xs"
+              title="Adjuntar imágenes (.png, .jpg, .webp), audios (.mp3, .wav) o videos (.mp4, .webm)"
+            >
+              <Image className="w-3.5 h-3.5 text-pink-400" />
+              <span>Multimedia</span>
             </button>
 
             {/* Quick Test Pill (Primary frequent action) */}
@@ -877,12 +1018,18 @@ export const ChatCanvas: React.FC<Props> = ({
         </div>
 
         {/* Integrated Textarea Box */}
-        <form onSubmit={handleSubmit} className="relative rounded-xl border border-zinc-700/80 bg-zinc-900/90 focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500/30 transition shadow-sm overflow-hidden">
+        <form
+          onSubmit={handleSubmit}
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          className="relative rounded-xl border border-zinc-700/80 bg-zinc-900/90 focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500/30 transition shadow-sm overflow-hidden"
+        >
           <textarea
             ref={textareaRef}
             value={prompt}
             onChange={handleTextChange}
             onKeyDown={handleKeyDown}
+            onPaste={handlePaste}
             placeholder={`Pregunta a ${activeProfile?.name || 'el agente'} o escribe @ para archivos...`}
             rows={2}
             className="w-full bg-transparent text-zinc-100 text-xs p-3 pr-12 focus:outline-none resize-none placeholder-zinc-500 leading-relaxed font-sans"

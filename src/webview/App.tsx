@@ -41,6 +41,41 @@ export const App: React.FC = () => {
   const [modalProvider, setModalProvider] = useState<ProviderType>('claude');
   const [modalLabel, setModalLabel] = useState<string>('');
 
+  const sanitizeSessionProfileAndModel = (profileId?: string, modelName?: string, profs: AccountProfile[] = profiles) => {
+    let pId = profileId || (profs[0] ? profs[0].id : 'claude-main');
+    let mName = modelName || 'Claude 3.7 Sonnet';
+
+    const isGoogleModel =
+      mName.startsWith('gemini-') ||
+      mName.startsWith('claude-opus-5') ||
+      mName.startsWith('claude-sonnet-5') ||
+      mName === 'gpt-oss-120b-medium';
+    const isClaudeNative =
+      mName.startsWith('Claude 3') ||
+      mName === 'Claude Opus 5.5';
+
+    const p = profs.find((x) => x.id === pId);
+    if (p) {
+      if (p.provider === 'claude' && isGoogleModel) {
+        const gProf = profs.find((x) => x.provider === 'google');
+        if (gProf) {
+          pId = gProf.id;
+        } else {
+          mName = 'Claude 3.7 Sonnet';
+        }
+      } else if (p.provider === 'google' && isClaudeNative) {
+        const cProf = profs.find((x) => x.provider === 'claude');
+        if (cProf) {
+          pId = cProf.id;
+        } else {
+          mName = 'gemini-3.8-flash-high';
+        }
+      }
+    }
+    return { profileId: pId, modelName: mName };
+  };
+
+
   useEffect(() => {
     vscode.postMessage({ command: 'init' });
 
@@ -61,8 +96,10 @@ export const App: React.FC = () => {
             const s = msg.data.activeSession as ConversationSession;
             setActiveSessionId(s.id);
             setMessages(s.messages || []);
-            setActiveProfileId(s.profileId || 'claude-main');
-            setSelectedModel(s.modelName || 'Claude 3.7 Sonnet');
+            const curProfs = msg.data.profiles || profiles;
+            const sanitized = sanitizeSessionProfileAndModel(s.profileId, s.modelName, curProfs);
+            setActiveProfileId(sanitized.profileId);
+            setSelectedModel(sanitized.modelName);
             setEffort(s.effort || 'medium');
             setActiveProtocolRole(s.protocolRole);
           }
@@ -73,8 +110,9 @@ export const App: React.FC = () => {
             const s = msg.data.session as ConversationSession;
             setActiveSessionId(s.id);
             setMessages(s.messages || []);
-            setActiveProfileId(s.profileId || 'claude-main');
-            setSelectedModel(s.modelName || 'Claude 3.7 Sonnet');
+            const sanitized = sanitizeSessionProfileAndModel(s.profileId, s.modelName, profiles);
+            setActiveProfileId(sanitized.profileId);
+            setSelectedModel(sanitized.modelName);
             setEffort(s.effort || 'medium');
             setActiveProtocolRole(s.protocolRole);
           }
@@ -105,6 +143,12 @@ export const App: React.FC = () => {
               if (exists) return prev;
               return [...prev, msg.data];
             });
+          }
+          break;
+
+        case 'mediaAttached':
+          if (msg.data) {
+            setAttachments((prev) => [...prev, msg.data]);
           }
           break;
 
@@ -279,13 +323,14 @@ export const App: React.FC = () => {
       modelName.startsWith('Claude 3') ||
       modelName === 'Claude Opus 5.5';
 
-    if (isGoogleModel && !profId.startsWith('google')) {
+    const currentProfile = profiles.find((p) => p.id === profId);
+    if (isGoogleModel && currentProfile?.provider !== 'google') {
       const gProf = profiles.find((p) => p.provider === 'google');
       if (gProf) {
         profId = gProf.id;
         setActiveProfileId(profId);
       }
-    } else if (isClaudeNativeModel && profId.startsWith('google')) {
+    } else if (isClaudeNativeModel && currentProfile?.provider !== 'claude') {
       const cProf = profiles.find((p) => p.provider === 'claude');
       if (cProf) {
         profId = cProf.id;
@@ -615,6 +660,10 @@ export const App: React.FC = () => {
                 onAddAttachment={(att) => setAttachments((prev) => [...prev, att])}
                 onRemoveAttachment={handleRemoveAttachment}
                 onRequestActiveContext={handleRequestActiveContext}
+                onRequestAttachMedia={() => vscode.postMessage({ command: 'requestAttachMedia' })}
+                onSaveClipboardMedia={(dataUri, fileName, mediaType) =>
+                  vscode.postMessage({ command: 'saveClipboardMedia', dataUri, fileName, mediaType })
+                }
                 onSearchFiles={handleSearchFiles}
                 onSendMessage={handleSendMessage}
                 onStop={handleStop}

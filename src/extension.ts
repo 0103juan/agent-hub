@@ -406,6 +406,107 @@ export class AgentHubViewProvider implements vscode.WebviewViewProvider {
           break;
         }
 
+        case 'requestAttachMedia': {
+          try {
+            const uris = await vscode.window.showOpenDialog({
+              canSelectMany: true,
+              openLabel: 'Adjuntar a AgentHub',
+              filters: {
+                'Multimedia (Imágenes, Audio, Video)': [
+                  'png', 'jpg', 'jpeg', 'webp', 'gif', 'svg', 'bmp',
+                  'mp3', 'wav', 'ogg', 'm4a', 'aac', 'flac',
+                  'mp4', 'webm', 'mov', 'avi', 'mkv'
+                ],
+                'Imágenes': ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg', 'bmp'],
+                'Audios': ['mp3', 'wav', 'ogg', 'm4a', 'aac', 'flac'],
+                'Videos': ['mp4', 'webm', 'mov', 'avi', 'mkv'],
+                'Todos los archivos': ['*']
+              }
+            });
+
+            if (uris && uris.length > 0) {
+              for (const u of uris) {
+                const fsPath = u.fsPath;
+                const ext = path.extname(fsPath).toLowerCase().replace('.', '');
+                const fileName = path.basename(fsPath);
+                let mediaType: 'image' | 'audio' | 'video' = 'image';
+
+                if (['mp3', 'wav', 'ogg', 'm4a', 'aac', 'flac'].includes(ext)) {
+                  mediaType = 'audio';
+                } else if (['mp4', 'webm', 'mov', 'avi', 'mkv'].includes(ext)) {
+                  mediaType = 'video';
+                }
+
+                let dataUri = '';
+                let sizeFormatted = '';
+                try {
+                  const stat = fs.statSync(fsPath);
+                  const sizeMb = (stat.size / (1024 * 1024)).toFixed(1);
+                  sizeFormatted = `${sizeMb} MB`;
+                  if (stat.size < 25 * 1024 * 1024) {
+                    const buffer = fs.readFileSync(fsPath);
+                    const mime =
+                      mediaType === 'image'
+                        ? ext === 'svg' ? 'image/svg+xml' : `image/${ext === 'jpg' ? 'jpeg' : ext}`
+                        : mediaType === 'audio'
+                        ? `audio/${ext}`
+                        : `video/${ext}`;
+                    dataUri = `data:${mime};base64,${buffer.toString('base64')}`;
+                  }
+                } catch {}
+
+                webview.postMessage({
+                  type: 'mediaAttached',
+                  data: {
+                    file: fileName,
+                    fsPath,
+                    mediaType,
+                    mediaUri: dataUri,
+                    sizeFormatted,
+                    content: `[Archivo Multimedia Adjunto: ${fileName} (${fsPath})]`
+                  }
+                });
+              }
+              vscode.window.showInformationMessage(`✓ ${uris.length} archivo(s) multimedia adjuntado(s) a la sesión.`);
+            }
+          } catch (e: any) {
+            vscode.window.showErrorMessage(`Error al adjuntar archivo multimedia: ${e.message}`);
+          }
+          break;
+        }
+
+        case 'saveClipboardMedia': {
+          try {
+            const dataUri = message.dataUri || '';
+            const mediaType = message.mediaType || 'image';
+            const fileName = message.fileName || `clip_${Date.now()}.${mediaType === 'audio' ? 'wav' : 'png'}`;
+
+            const cacheDir = path.join(this.sessionManager.getHomeDir(), '.agent-hub', 'media_cache');
+            if (!fs.existsSync(cacheDir)) {
+              fs.mkdirSync(cacheDir, { recursive: true });
+            }
+
+            const targetPath = path.join(cacheDir, fileName);
+            const base64Data = dataUri.replace(/^data:[^;]+;base64,/, '');
+            fs.writeFileSync(targetPath, Buffer.from(base64Data, 'base64'));
+
+            webview.postMessage({
+              type: 'mediaAttached',
+              data: {
+                file: fileName,
+                fsPath: targetPath,
+                mediaType,
+                mediaUri: dataUri,
+                content: `[Archivo Multimedia Pegado: ${fileName}]`
+              }
+            });
+            vscode.window.showInformationMessage(`✓ Multimedia guardada en caché para análisis del agente.`);
+          } catch (e: any) {
+            vscode.window.showErrorMessage(`Error al guardar multimedia del portapapeles: ${e.message}`);
+          }
+          break;
+        }
+
         case 'searchWorkspaceFiles': {
           const query = message.query || '';
           const pattern = query ? `**/*${query}*` : '**/*';
