@@ -208,6 +208,19 @@ export const App: React.FC = () => {
                 ...prev.slice(0, -1),
                 { ...last, content: msg.data.fullResponse || last.content, isStreaming: false }
               ];
+            } else if (msg.data.fullResponse) {
+              finalized = [
+                ...prev,
+                {
+                  id: Date.now().toString(),
+                  role: 'assistant',
+                  content: msg.data.fullResponse,
+                  profileId: activeProfileId,
+                  modelName: selectedModel || 'Agente',
+                  timestamp: Date.now(),
+                  isStreaming: false
+                }
+              ];
             }
             
             // Persistir la conversación automáticamente en disco

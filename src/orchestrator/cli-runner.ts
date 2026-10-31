@@ -105,7 +105,7 @@ export class CLIRunner {
   ): void {
     const env = { ...process.env, CLAUDE_CONFIG_DIR: configDir };
     const args = [
-      '-p', prompt,
+      '-p', '-',
       '--output-format=stream-json',
       '--verbose',
       '--dangerously-skip-permissions'
@@ -125,6 +125,11 @@ export class CLIRunner {
       shell: true
     });
     this.currentProcess = child;
+
+    if (child.stdin) {
+      child.stdin.write(prompt);
+      child.stdin.end();
+    }
 
     let fullText = '';
     let buffer = '';
@@ -244,11 +249,23 @@ export class CLIRunner {
     callbacks: RunCallbacks
   ): void {
     const args = [
-      '-p', prompt,
-      '--output-format', 'json',
-      '--effort', effort,
+      '--output-format', 'stream-json',
       '--dangerously-skip-permissions'
     ];
+
+    // Evitar conflicto: si el modelName ya contiene sufijo de esfuerzo (-high, -medium, -low, -xhigh, -max),
+    // no pasar el flag --effort porque agy.exe genera error fatal de conflicto de modelo
+    const hasEffortSuffix =
+      modelName &&
+      (modelName.endsWith('-high') ||
+        modelName.endsWith('-medium') ||
+        modelName.endsWith('-low') ||
+        modelName.endsWith('-xhigh') ||
+        modelName.endsWith('-max'));
+
+    if (!hasEffortSuffix && effort) {
+      args.push('--effort', effort);
+    }
 
     if (cliSessionId) {
       args.push('--conversation', cliSessionId);
@@ -264,53 +281,107 @@ export class CLIRunner {
       ANTIGRAVITY_APP_DATA_DIR: path.join(configDir, 'antigravity')
     };
 
+    // Usar shell: false para que los argumentos no sean alterados por cmd.exe y pasar el prompt por stdin
     const child = spawn(this.agyBinaryPath, args, {
       cwd: workspaceDir,
-      shell: true,
+      shell: false,
       env
     });
     this.currentProcess = child;
 
-    let stdoutData = '';
+    if (child.stdin) {
+      child.stdin.write(prompt);
+      child.stdin.end();
+    }
+
+    let fullText = '';
+    let buffer = '';
+    let stderrData = '';
+    let latestTelemetry: SessionTelemetry = {};
+    let activeSessionId = cliSessionId;
 
     child.stdout.on('data', (data: Buffer) => {
-      stdoutData += data.toString();
+      buffer += data.toString();
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed || !trimmed.startsWith('{')) continue;
+
+        try {
+          const json = JSON.parse(trimmed);
+
+          if (json.event === 'init' && json.conversation_id) {
+            activeSessionId = json.conversation_id;
+            if (callbacks.onSessionId) {
+              callbacks.onSessionId(json.conversation_id);
+            }
+          }
+
+          if (json.event === 'step_update' && json.step_update) {
+            const step = json.step_update;
+            if (step.text_delta) {
+              fullText += step.text_delta;
+              callbacks.onChunk(step.text_delta);
+            }
+            if (step.usage) {
+              latestTelemetry = {
+                ...latestTelemetry,
+                inputTokens: step.usage.input_tokens,
+                outputTokens: step.usage.output_tokens,
+                thinkingTokens: step.usage.thinking_tokens ?? 0,
+                cacheReadTokens: step.usage.cache_read_tokens ?? 0
+              };
+              if (callbacks.onTelemetry) {
+                callbacks.onTelemetry(latestTelemetry);
+              }
+            }
+          }
+
+          if (json.event === 'result' && json.result) {
+            const res = json.result;
+            if (res.conversation_id) {
+              activeSessionId = res.conversation_id;
+              if (callbacks.onSessionId) {
+                callbacks.onSessionId(res.conversation_id);
+              }
+            }
+            if (res.response && !fullText) {
+              fullText = res.response;
+              callbacks.onChunk(res.response);
+            }
+            if (res.usage) {
+              latestTelemetry = {
+                ...latestTelemetry,
+                inputTokens: res.usage.input_tokens,
+                outputTokens: res.usage.output_tokens,
+                thinkingTokens: res.usage.thinking_tokens ?? 0,
+                cacheReadTokens: res.usage.cache_read_tokens ?? 0
+              };
+              if (callbacks.onTelemetry) {
+                callbacks.onTelemetry(latestTelemetry);
+              }
+            }
+          }
+        } catch {}
+      }
     });
 
-    child.on('close', () => {
+    child.stderr.on('data', (data: Buffer) => {
+      stderrData += data.toString();
+    });
+
+    child.on('close', (code: number | null) => {
       this.currentProcess = null;
-      let telemetry: SessionTelemetry = {};
-      let sessionId: string | undefined = cliSessionId;
 
-      try {
-        const parsed = JSON.parse(stdoutData.trim());
-        const responseText = parsed.response || parsed.result || stdoutData;
-
-        if (parsed.conversation_id) {
-          sessionId = parsed.conversation_id;
-          if (callbacks.onSessionId && sessionId) {
-            callbacks.onSessionId(sessionId);
-          }
-        }
-
-        if (parsed.usage) {
-          telemetry = {
-            inputTokens: parsed.usage.input_tokens,
-            outputTokens: parsed.usage.output_tokens,
-            thinkingTokens: parsed.usage.thinking_tokens ?? 0,
-            cacheReadTokens: parsed.usage.cache_read_tokens ?? 0
-          };
-          if (callbacks.onTelemetry) {
-            callbacks.onTelemetry(telemetry);
-          }
-        }
-
-        callbacks.onChunk(responseText);
-        callbacks.onDone(responseText, telemetry, sessionId);
-      } catch {
-        callbacks.onChunk(stdoutData);
-        callbacks.onDone(stdoutData, telemetry, sessionId);
+      if (!fullText && code !== 0 && stderrData) {
+        const errorMsg = stderrData.trim();
+        callbacks.onError(errorMsg);
+        return;
       }
+
+      callbacks.onDone(fullText, latestTelemetry, activeSessionId);
     });
 
     child.on('error', (err) => {
