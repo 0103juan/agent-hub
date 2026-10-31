@@ -534,3 +534,4 @@ export function auditEnvSync(code: string, envExampleContent: string): EnvSyncRe
     isCompliant: undocumentedVars.length === 0
   };
 }
+

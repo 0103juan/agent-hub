@@ -266,7 +266,33 @@ export const App: React.FC = () => {
   };
 
   const handleSelectModel = (modelName: string, overrideProfileId?: string) => {
-    const profId = overrideProfileId || activeProfileId;
+    let profId = overrideProfileId || activeProfileId;
+
+    // Conmutación inteligente de cuenta si el modelo pertenece a otro proveedor
+    const isGoogleModel =
+      modelName.startsWith('gemini-') ||
+      modelName.startsWith('claude-opus-5') ||
+      modelName.startsWith('claude-sonnet-5') ||
+      modelName === 'gpt-oss-120b-medium';
+
+    const isClaudeNativeModel =
+      modelName.startsWith('Claude 3') ||
+      modelName === 'Claude Opus 5.5';
+
+    if (isGoogleModel && !profId.startsWith('google')) {
+      const gProf = profiles.find((p) => p.provider === 'google');
+      if (gProf) {
+        profId = gProf.id;
+        setActiveProfileId(profId);
+      }
+    } else if (isClaudeNativeModel && profId.startsWith('google')) {
+      const cProf = profiles.find((p) => p.provider === 'claude');
+      if (cProf) {
+        profId = cProf.id;
+        setActiveProfileId(profId);
+      }
+    }
+
     setSelectedModel(modelName);
 
     // Adaptación dinámica de esfuerzo según variante de modelo:
@@ -275,7 +301,7 @@ export const App: React.FC = () => {
       newEffort = 'high';
     } else if (modelName.includes('-low') || modelName.includes('Haiku') || modelName.includes('Flash') || modelName.includes('mini')) {
       newEffort = 'low';
-    } else if (modelName.includes('3.7') || modelName.includes('Sonnet') || modelName.includes('-medium')) {
+    } else if (modelName.includes('3.7') || modelName.includes('Sonnet') || modelName.includes('-medium') || modelName.includes('argon')) {
       newEffort = 'medium';
     }
     setEffort(newEffort);
@@ -294,15 +320,22 @@ export const App: React.FC = () => {
   const handleSelectEffort = (newEffort: ReasoningEffort) => {
     setEffort(newEffort);
 
-    // Si el perfil activo es Google Gemini, sincronizar dinámicamente con la variante del modelo
-    let updatedModel = selectedModel;
-    const targetProfile = profiles.find((p) => p.id === activeProfileId);
-    if (targetProfile?.provider === 'google' && targetProfile.availableModels) {
-      const matchingModel = targetProfile.availableModels.find((m) => m.endsWith(`-${newEffort}`));
-      if (matchingModel) {
-        updatedModel = matchingModel;
-        setSelectedModel(matchingModel);
+    // Si el modelo activo contiene sufijo de esfuerzo (-high, -medium, -low), conmutar a la variante del modelo
+    if (selectedModel.includes('-high') || selectedModel.includes('-medium') || selectedModel.includes('-low')) {
+      const baseName = selectedModel.replace(/-high|-medium|-low/, '');
+      const matchingVariant = `${baseName}-${newEffort === 'max' || newEffort === 'xhigh' ? 'high' : newEffort}`;
+      setSelectedModel(matchingVariant);
+
+      if (activeSessionId) {
+        vscode.postMessage({
+          command: 'updateSessionSettings',
+          sessionId: activeSessionId,
+          profileId: activeProfileId,
+          modelName: matchingVariant,
+          effort: newEffort
+        });
       }
+      return;
     }
 
     if (activeSessionId) {
@@ -310,7 +343,7 @@ export const App: React.FC = () => {
         command: 'updateSessionSettings',
         sessionId: activeSessionId,
         profileId: activeProfileId,
-        modelName: updatedModel,
+        modelName: selectedModel,
         effort: newEffort
       });
     }

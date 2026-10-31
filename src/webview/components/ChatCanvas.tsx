@@ -755,9 +755,9 @@ export const ChatCanvas: React.FC<Props> = ({
       {/* Input & Context Action Buttons */}
       <div className="relative space-y-2">
         {/* Superior Action Bar: Context + Quick Pills + Categorized Tools Popover */}
-        <div className="flex items-center justify-between gap-2 px-0.5">
+        <div className="flex items-center justify-between gap-2 px-0.5 relative z-20 overflow-visible">
           {/* Left: Quick Actions Group */}
-          <div className="flex items-center gap-1.5 overflow-hidden">
+          <div className="flex items-center gap-1.5 overflow-visible">
             {/* Context attachment button */}
             <button
               type="button"
@@ -787,7 +787,7 @@ export const ChatCanvas: React.FC<Props> = ({
                 onClick={() => setShowToolsMenu(!showToolsMenu)}
                 className={`flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-md transition shrink-0 border ${
                   showToolsMenu
-                    ? 'bg-indigo-600/20 text-indigo-300 border-indigo-500/40'
+                    ? 'bg-indigo-600/30 text-indigo-200 border-indigo-500/60 shadow-sm'
                     : 'bg-zinc-800/80 hover:bg-zinc-700/80 text-zinc-300 border-zinc-700/60'
                 }`}
                 title="Abrir menú de herramientas del protocolo y DevOps"
@@ -799,14 +799,14 @@ export const ChatCanvas: React.FC<Props> = ({
 
               {/* Categorized Tools Popover */}
               {showToolsMenu && (
-                <div className="absolute left-0 bottom-full mb-2 w-72 bg-zinc-900 border border-zinc-700/80 rounded-xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-100">
-                  <div className="flex items-center justify-between px-2 py-1 border-b border-zinc-800 text-[10px] uppercase tracking-wider text-zinc-500 font-semibold">
+                <div className="absolute left-0 bottom-full mb-2 w-80 bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-100 ring-1 ring-zinc-700/80">
+                  <div className="flex items-center justify-between px-2 py-1 border-b border-zinc-800 text-[10px] uppercase tracking-wider text-zinc-400 font-semibold">
                     <span>Herramientas DevOps & Protocolo</span>
-                    <span>10 Acciones</span>
+                    <span className="text-indigo-400 font-mono">{devopsTools.length} Acciones</span>
                   </div>
 
-                  <div className="max-h-72 overflow-y-auto py-1 divide-y divide-zinc-800/60 space-y-1">
-                    {['Git & Ramas', 'Seguridad', 'Infraestructura', 'Diseño'].map((cat) => {
+                  <div className="max-h-80 overflow-y-auto py-1 divide-y divide-zinc-800/60 space-y-1">
+                    {['Ejecución', 'Git & Ramas', 'Seguridad', 'Infraestructura', 'Diseño'].map((cat) => {
                       const toolsInCat = devopsTools.filter((t) => t.category === cat);
                       if (toolsInCat.length === 0) return null;
                       return (

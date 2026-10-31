@@ -80,7 +80,7 @@ export class CLIRunner {
         const folderName = profileId.replace('claude-', '.claude-');
         configDir = path.join(this.homeDir, folderName);
       }
-      this.runClaude(enrichedPrompt, configDir, workspaceDir, profileId, cliSessionId, effort, callbacks);
+      this.runClaude(enrichedPrompt, configDir, workspaceDir, profileId, cliSessionId, effort, callbacks, modelName);
     }
   }
 
@@ -91,7 +91,8 @@ export class CLIRunner {
     profileId: string,
     cliSessionId: string | undefined,
     effort: ReasoningEffort,
-    callbacks: RunCallbacks
+    callbacks: RunCallbacks,
+    modelName?: string
   ): void {
     const env = { ...process.env, CLAUDE_CONFIG_DIR: configDir };
     const args = [
@@ -100,6 +101,10 @@ export class CLIRunner {
       '--verbose',
       '--dangerously-skip-permissions'
     ];
+
+    if (modelName) {
+      args.push('--model', modelName);
+    }
 
     if (cliSessionId) {
       args.push('--resume', cliSessionId);

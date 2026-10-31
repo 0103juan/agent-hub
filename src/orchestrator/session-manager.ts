@@ -226,7 +226,13 @@ export class SessionManager {
               subscriptionType: parsed.subscriptionType || undefined,
               configDir,
               activeModel: 'Claude 3.7 Sonnet',
-              availableModels: ['Claude 3.7 Sonnet', 'Claude 3.5 Haiku', 'Claude 3.5 Sonnet']
+              availableModels: [
+                'Claude 3.7 Sonnet',
+                'Claude Opus 5.5',
+                'Claude 3.5 Sonnet',
+                'Claude 3.5 Haiku',
+                'Claude 3 Opus'
+              ]
             });
           } catch {
             return resolve({
@@ -236,7 +242,13 @@ export class SessionManager {
               status: 'disconnected',
               configDir,
               activeModel: 'Claude 3.7 Sonnet',
-              availableModels: ['Claude 3.7 Sonnet', 'Claude 3.5 Haiku']
+              availableModels: [
+                'Claude 3.7 Sonnet',
+                'Claude Opus 5.5',
+                'Claude 3.5 Sonnet',
+                'Claude 3.5 Haiku',
+                'Claude 3 Opus'
+              ]
             });
           }
         }
@@ -252,7 +264,13 @@ export class SessionManager {
             subscriptionType: parsed.subscriptionType || 'pro',
             configDir,
             activeModel: 'Claude 3.7 Sonnet',
-            availableModels: ['Claude 3.7 Sonnet', 'Claude 3.5 Haiku', 'Claude 3.5 Sonnet']
+            availableModels: [
+              'Claude 3.7 Sonnet',
+              'Claude Opus 5.5',
+              'Claude 3.5 Sonnet',
+              'Claude 3.5 Haiku',
+              'Claude 3 Opus'
+            ]
           });
         } catch {
           resolve({
@@ -263,7 +281,13 @@ export class SessionManager {
             email: fallbackEmail || undefined,
             configDir,
             activeModel: 'Claude 3.7 Sonnet',
-            availableModels: ['Claude 3.7 Sonnet', 'Claude 3.5 Haiku']
+            availableModels: [
+              'Claude 3.7 Sonnet',
+              'Claude Opus 5.5',
+              'Claude 3.5 Sonnet',
+              'Claude 3.5 Haiku',
+              'Claude 3 Opus'
+            ]
           });
         }
       });
@@ -271,7 +295,7 @@ export class SessionManager {
   }
 
   private checkGoogleStatus(id: string, name: string, configDir: string): Promise<AccountProfile> {
-    return new Promise((resolve) => {
+    return new Promise(async (resolve) => {
       // Verificar archivo google_accounts.json en el directorio
       const accFile = path.join(configDir, 'google_accounts.json');
       let email: string | undefined;
@@ -287,6 +311,35 @@ export class SessionManager {
         } catch {}
       }
 
+      const defaultGoogleModels = [
+        'gemini-4-argon-high',
+        'gemini-4-argon-medium',
+        'gemini-4-argon-low',
+        'gemini-3.8-flash-high',
+        'gemini-3.8-flash-medium',
+        'gemini-3.8-flash-low',
+        'gemini-3.6-flash-high',
+        'gemini-3.6-flash-medium',
+        'gemini-3.6-flash-low',
+        'claude-opus-5-5-high',
+        'claude-opus-5-5-medium',
+        'claude-opus-5-5-low',
+        'claude-sonnet-5-5-high',
+        'claude-sonnet-5-5-medium',
+        'claude-sonnet-5-5-low',
+        'gpt-oss-120b-medium'
+      ];
+
+      let dynamicModels = defaultGoogleModels;
+      try {
+        if (isConnected) {
+          const agyModels = await this.fetchAgyModels();
+          if (agyModels && agyModels.length > 0) {
+            dynamicModels = agyModels;
+          }
+        }
+      } catch {}
+
       resolve({
         id,
         name,
@@ -295,14 +348,31 @@ export class SessionManager {
         email,
         subscriptionType: 'Workspace / Personal',
         configDir,
-        activeModel: 'gemini-3.8-flash-high',
-        availableModels: [
-          'gemini-3.8-flash-high',
-          'gemini-3.8-flash-medium',
-          'gemini-3.8-flash-low',
-          'claude-sonnet-4-6',
-          'claude-opus-4-6-thinking'
-        ]
+        activeModel: dynamicModels[0] || 'gemini-4-argon-high',
+        availableModels: dynamicModels
+      });
+    });
+  }
+
+  private fetchAgyModels(): Promise<string[]> {
+    return new Promise((resolve) => {
+      if (!fs.existsSync(this.agyBinaryPath)) {
+        return resolve([]);
+      }
+      exec(`"${this.agyBinaryPath}" models`, { timeout: 3500 }, (error, stdout) => {
+        if (error || !stdout) {
+          return resolve([]);
+        }
+        const models: string[] = [];
+        for (const line of stdout.split('\n')) {
+          const trimmed = line.trim();
+          if (!trimmed || trimmed.toLowerCase().includes('fetching')) continue;
+          const parts = trimmed.split(/\s+/);
+          if (parts[0] && !parts[0].includes('...')) {
+            models.push(parts[0]);
+          }
+        }
+        resolve(models.length > 0 ? models : []);
       });
     });
   }
