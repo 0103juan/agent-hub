@@ -1,0 +1,129 @@
+{
+  "name": "agent-hub",
+  "displayName": "AgentHub (Multi-Subscription & MCP Orchestrator)",
+  "description": "Orquesta tus cuentas de Claude Pro, Google Antigravity y GPT sin API keys, con contexto de archivos y MCPs",
+  "version": "0.1.0",
+  "publisher": "personal",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "AI",
+    "Machine Learning",
+    "Productivity"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "agent-hub-sidebar",
+          "title": "AgentHub",
+          "icon": "resources/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "agent-hub-sidebar": [
+        {
+          "type": "webview",
+          "id": "agent-hub.dashboardView",
+          "name": "AgentHub Control Center"
+        }
+      ],
+      "explorer": [
+        {
+          "type": "webview",
+          "id": "agent-hub.dashboardViewExplorer",
+          "name": "AgentHub Control Center"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "agent-hub.openDashboard",
+        "title": "AgentHub: Abrir Dashboard en la Barra Lateral"
+      },
+      {
+        "command": "agent-hub.openBeside",
+        "title": "AgentHub: Abrir en Panel Lateral Derecho / Editor Dividido",
+        "icon": "$(split-horizontal)"
+      },
+      {
+        "command": "agent-hub.loginClaudeAccount2",
+        "title": "AgentHub: Iniciar sesión en Claude (Cuenta 2)"
+      },
+      {
+        "command": "agent-hub.syncMCPs",
+        "title": "AgentHub: Sincronizar Servidores MCP"
+      },
+      {
+        "command": "agent-hub.explainSelection",
+        "title": "AgentHub: Explicar Selección (Rol Explorador)"
+      },
+      {
+        "command": "agent-hub.testSelection",
+        "title": "AgentHub: Generar Pruebas (Rol Tester)"
+      },
+      {
+        "command": "agent-hub.auditSelection",
+        "title": "AgentHub: Auditar Código (Rol Revisor)"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "agent-hub.explainSelection",
+          "group": "AgentHub@1",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "agent-hub.testSelection",
+          "group": "AgentHub@2",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "agent-hub.auditSelection",
+          "group": "AgentHub@3",
+          "when": "editorHasSelection"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "agent-hub.openBeside",
+          "when": "view == agent-hub.dashboardView",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build:extension": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --sourcemap",
+    "build:webview": "vite build",
+    "build": "npm run build:extension && npm run build:webview",
+    "test": "esbuild tests/exhaustive.test.ts --bundle --platform=node --outfile=tests/dist.test.js && node --test tests/dist.test.js",
+    "watch:extension": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --sourcemap --watch",
+    "watch:webview": "vite build --watch",
+    "dev": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@types/vscode": "^1.90.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.19",
+    "esbuild": "^0.21.5",
+    "lucide-react": "^0.395.0",
+    "postcss": "^8.4.38",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwindcss": "^3.4.4",
+    "typescript": "^5.4.5",
+    "vite": "^5.3.1"
+  }
+}

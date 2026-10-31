@@ -1,0 +1,7 @@
+node_modules/
+dist/
+tests/dist.test.js
+*.vsix
+.DS_Store
+Thumbs.db
+*.log
