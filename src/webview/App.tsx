@@ -520,8 +520,13 @@ export const App: React.FC = () => {
               <ChatCanvas
                 messages={messages}
                 activeProfile={activeProfile}
+                availableProfiles={profiles}
                 isGenerating={isGenerating}
-                rateLimitInfo={null}
+                rateLimitInfo={
+                  activeTelemetry?.fiveHourUtilization !== undefined
+                    ? { utilization: Math.min(100, Math.round(activeTelemetry.fiveHourUtilization * 100)) }
+                    : null
+                }
                 attachments={attachments}
                 workspaceFiles={workspaceFiles}
                 onAddAttachment={(att) => setAttachments((prev) => [...prev, att])}
@@ -530,6 +535,7 @@ export const App: React.FC = () => {
                 onSearchFiles={handleSearchFiles}
                 onSendMessage={handleSendMessage}
                 onStop={handleStop}
+                onSwitchProfile={handleSelectProfile}
               />
             </div>
           </div>

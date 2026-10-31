@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Square, Terminal, ShieldAlert, Paperclip, X, FileCode, CornerDownLeft, GitCompare, Play, FileText, Check, GitBranch, GitPullRequest, ShieldCheck, History, Lock, Box, Smartphone, Shield, Radio, GitFork, Wrench, ChevronDown, Sparkles, SlidersHorizontal, Ghost, Zap, Database, FileCode2, Trash2, Gauge, BookOpen, Scale, Network, EyeOff, RotateCcw, Container, HeartPulse } from 'lucide-react';
+import { Send, Square, Terminal, ShieldAlert, Paperclip, X, FileCode, CornerDownLeft, GitCompare, Play, FileText, Check, GitBranch, GitPullRequest, ShieldCheck, History, Lock, Box, Smartphone, Shield, Radio, GitFork, Wrench, ChevronDown, Sparkles, SlidersHorizontal, Ghost, Zap, Database, FileCode2, Trash2, Gauge, BookOpen, Scale, Network, EyeOff, RotateCcw, Container, HeartPulse, FileSpreadsheet, Eye, KeyRound, FileCheck, ArrowRightLeft } from 'lucide-react';
 import { ChatMessage, AccountProfile, FileContextAttachment } from '../../orchestrator/types';
 import { vscode } from '../vscode-api';
 
 interface Props {
   messages: ChatMessage[];
   activeProfile: AccountProfile | undefined;
+  availableProfiles?: AccountProfile[];
   isGenerating: boolean;
   rateLimitInfo: { utilization: number; resetsAt?: number } | null;
   attachments: FileContextAttachment[];
@@ -16,11 +17,13 @@ interface Props {
   onSearchFiles: (query: string) => void;
   onSendMessage: (prompt: string) => void;
   onStop: () => void;
+  onSwitchProfile?: (profileId: string) => void;
 }
 
 export const ChatCanvas: React.FC<Props> = ({
   messages,
   activeProfile,
+  availableProfiles = [],
   isGenerating,
   rateLimitInfo,
   attachments,
@@ -30,7 +33,8 @@ export const ChatCanvas: React.FC<Props> = ({
   onRequestActiveContext,
   onSearchFiles,
   onSendMessage,
-  onStop
+  onStop,
+  onSwitchProfile
 }) => {
   const [prompt, setPrompt] = useState('');
   const [showFileSearch, setShowFileSearch] = useState(false);
@@ -218,6 +222,30 @@ export const ChatCanvas: React.FC<Props> = ({
     vscode.postMessage({ command: 'autoHealFromTerminalError' });
   };
 
+  const handleAuditAccessibility = () => {
+    vscode.postMessage({ command: 'auditAccessibility' });
+  };
+
+  const handleDetectNPlusOne = () => {
+    vscode.postMessage({ command: 'detectNPlusOne' });
+  };
+
+  const handleGenerateMockData = () => {
+    vscode.postMessage({ command: 'generateMockData', schema: prompt });
+  };
+
+  const handleAuditEnvSync = () => {
+    vscode.postMessage({ command: 'auditEnvSync', code: prompt });
+  };
+
+  const handleExportPRSummary = () => {
+    vscode.postMessage({ command: 'exportPRSummary' });
+  };
+
+  const handleAutoRollback = () => {
+    vscode.postMessage({ command: 'executeAutoRollback' });
+  };
+
   const quickSkills = [
     'Explicar arquitectura del proyecto',
     'Revisar vulnerabilidades y seguridad',
@@ -264,6 +292,26 @@ export const ChatCanvas: React.FC<Props> = ({
       color: 'text-rose-400',
       description: 'Diagnosticar y reparar errores activos en el proyecto',
       action: handleAutoHeal
+    },
+    {
+      id: 'n-plus-one',
+      label: '🔍 Profiler ORM (N+1)',
+      shortLabel: 'N+1 Profiler',
+      icon: Database,
+      category: 'Ejecución',
+      color: 'text-amber-400',
+      description: 'Detectar bucles con consultas repetitivas a la base de datos',
+      action: handleDetectNPlusOne
+    },
+    {
+      id: 'auto-rollback',
+      label: '🔄 Auto-Rollback Git',
+      shortLabel: 'Rollback',
+      icon: RotateCcw,
+      category: 'Ejecución',
+      color: 'text-rose-400',
+      description: 'Revertir archivos sucios ante fallos de tests o compilación',
+      action: handleAutoRollback
     },
     {
       id: 'list-worktrees',
@@ -366,6 +414,26 @@ export const ChatCanvas: React.FC<Props> = ({
       action: handleSanitizePii
     },
     {
+      id: 'wcag-audit',
+      label: '♿ Accesibilidad Web (WCAG 2.1)',
+      shortLabel: 'WCAG 2.1',
+      icon: Eye,
+      category: 'Seguridad',
+      color: 'text-sky-400',
+      description: 'Auditar etiquetas alt, roles accesibles y navegación por teclado',
+      action: handleAuditAccessibility
+    },
+    {
+      id: 'env-sync',
+      label: '🔑 Sincronizar .env.example',
+      shortLabel: '.env Sync',
+      icon: KeyRound,
+      category: 'Seguridad',
+      color: 'text-yellow-400',
+      description: 'Detectar variables en código no documentadas en .env.example',
+      action: handleAuditEnvSync
+    },
+    {
       id: 'flags',
       label: '🏷️ Feature Flags',
       shortLabel: 'Flags',
@@ -446,6 +514,16 @@ export const ChatCanvas: React.FC<Props> = ({
       action: handleCreateSandbox
     },
     {
+      id: 'mock-data',
+      label: '🌱 Generador Mock Data & Fixtures',
+      shortLabel: 'Mock Data',
+      icon: FileSpreadsheet,
+      category: 'Infraestructura',
+      color: 'text-emerald-400',
+      description: 'Generar fixtures JSON y fábricas FactoryBoy desde esquemas',
+      action: handleGenerateMockData
+    },
+    {
       id: 'mermaid',
       label: 'Diagrama Mermaid',
       shortLabel: 'Mermaid',
@@ -484,23 +562,54 @@ export const ChatCanvas: React.FC<Props> = ({
       color: 'text-blue-400',
       description: 'Generar docs/runbooks/INCIDENT_RUNBOOK.md para prod',
       action: handleGenerateRunbook
+    },
+    {
+      id: 'pr-summary',
+      label: '📋 Resumen PR Markdown',
+      shortLabel: 'Resumen PR',
+      icon: FileCheck,
+      category: 'Diseño',
+      color: 'text-indigo-400',
+      description: 'Exportar historial de la tarea a PULL_REQUEST.md con badges',
+      action: handleExportPRSummary
     }
   ];
 
   return (
     <div className="flex flex-col h-full space-y-2">
-      {/* Rate Limit Info */}
-      {rateLimitInfo && (
-        <div className="flex items-center justify-between px-2.5 py-1.5 rounded bg-zinc-900 border border-amber-900/40 text-amber-300 text-[11px]">
-          <div className="flex items-center gap-1.5">
-            <ShieldAlert className="w-3.5 h-3.5" />
-            <span>Utilización de cuota semanal:</span>
+      {/* Smart Load-Balancing & Quota Alert */}
+      {rateLimitInfo && rateLimitInfo.utilization >= 90 ? (
+        <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-amber-950/50 border border-amber-600/60 text-amber-200 text-xs shadow-md">
+          <div className="flex items-center gap-2">
+            <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0" />
+            <span>
+              <strong>Alerta de Cuota ({rateLimitInfo.utilization}%):</strong> Ventana saturada. Conmuta a Google Antigravity (Gemini 3.8 Flash) para continuar.
+            </span>
           </div>
-          <span className="font-mono font-bold">
-            {(rateLimitInfo.utilization * 100).toFixed(0)}%
+          {onSwitchProfile && (
+            <button
+              onClick={() => {
+                const alt = availableProfiles.find(p => p.id !== activeProfile?.id && p.provider === 'google');
+                if (alt) onSwitchProfile(alt.id);
+              }}
+              className="flex items-center gap-1 px-2.5 py-1 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-semibold rounded text-[11px] transition shrink-0 ml-2 shadow"
+            >
+              <ArrowRightLeft className="w-3 h-3" />
+              <span>Conmutar a Gemini</span>
+            </button>
+          )}
+        </div>
+      ) : rateLimitInfo && rateLimitInfo.utilization > 0 ? (
+        <div className="flex items-center justify-between px-2.5 py-1.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 text-[11px]">
+          <div className="flex items-center gap-1.5">
+            <ShieldAlert className="w-3.5 h-3.5 text-zinc-500" />
+            <span>Utilización de cuota de ventana:</span>
+          </div>
+          <span className="font-mono font-bold text-zinc-200">
+            {rateLimitInfo.utilization}%
           </span>
         </div>
-      )}
+      ) : null}
 
       {/* Messages Scroll Area */}
       <div className="flex-1 overflow-y-auto space-y-3 p-1 min-h-[160px] max-h-[340px]">

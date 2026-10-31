@@ -1,6 +1,6 @@
 # AgentHub — Multi-Subscription & MCP Orchestrator for VS Code
 
-[![Node.js Tests](https://img.shields.io/badge/tests-11%20passed-brightgreen.svg)](#-suite-de-pruebas-automatizadas)
+[![Node.js Tests](https://img.shields.io/badge/tests-27%20passed%20(16%20suites)-brightgreen.svg)](#-suite-de-pruebas-automatizadas)
 [![Zero API Keys](https://img.shields.io/badge/API%20Keys-%240.00%20Zero%20Token%20Costs-blue.svg)](#-arquitectura-cero-api-keys)
 [![VS Code Extension](https://img.shields.io/badge/VS%20Code-v0.1.0-blueviolet.svg)](#)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](#)
@@ -54,13 +54,23 @@ El proyecto cuenta con un arnés de pruebas unitarias exhaustivas con el runner 
 npm test
 ```
 
-### Resultados de la Suite (11/11 Pasados):
+### Resultados de la Suite (27/27 Pasados, 16 Suites, 0 Fallos):
 * **Suite 1: SessionStorage & Persistence Engine:** Creación de sesión, sincronización bidireccional de perfil/modelo/esfuerzo y acumulación de telemetría de tokens/turnos.
 * **Suite 2: Protocol Roles Specification:** Validación de los 7 roles y sus directivas de sistema.
 * **Suite 3: Seguridad & Escáner de Secretos:** Detección de claves de Anthropic, GitHub, Google y AWS en código fuente.
 * **Suite 4: Guardián de BD & Auditoría de Migraciones:** Detección y bloqueo de DDL destructivo.
 * **Suite 5: Profiler SQL:** Detección de anti-patrones SQL (`SELECT *`, `JOIN` sin `ON`, comodines iniciales).
 * **Suite 6: Anonimizador PII (GDPR Sanitizer):** Reemplazo seguro de información confidencial.
+* **Suite 7: Smart Load-Balancing & Cuota Switcher:** Sugerencia inteligente de conmutación a Gemini ante saturación de ventana 5h (>90%).
+* **Suite 8: Auto-Rollback Engine:** Reversión atómica de archivos sucios ante fallos de build o tests.
+* **Suite 9: Generador de Mock Data & Fixtures:** Detección de modelos ORM y generación de JSON fixtures y fábricas FactoryBoy.
+* **Suite 10: Modo Dry-Run & Verificación AST:** Verificación estricta de firmas públicas antes de aplicar cambios.
+* **Suite 11: Generador de Diagramas de Secuencia Mermaid:** Creación programática de diagramas autonumerados con participantes y respuestas.
+* **Suite 12: Detector de Consultas N+1 en ORMs:** Identificación de bucles con llamadas navegacionales a relaciones foráneas.
+* **Suite 13: Terminal Sandbox con Timeout Estricto:** Ejecución protegida contra comandos congelados con aborto automático.
+* **Suite 14: Exportador de Resumen PR Markdown:** Creación de `PULL_REQUEST.md` con checklist y telemetría de costos \$0.00.
+* **Suite 15: Auditor de Accesibilidad Web (WCAG 2.1):** Escaneo de atributos `alt`, roles interactivos y accesibilidad de teclado.
+* **Suite 16: Inspector de Variables de Entorno (.env.example):** Verificación de variables en código no documentadas en la plantilla.
 
 ---
 

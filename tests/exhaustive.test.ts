@@ -214,3 +214,206 @@ describe('6. Anonimizador PII (GDPR Sanitizer)', () => {
     assert.ok(result.includes('[JWT_TOKEN_MASCARADO]'));
   });
 });
+
+
+import {
+  evaluateAutoRollback,
+  evaluateQuotaAndSuggestSwitch,
+  generateMockDataFromSchema,
+  verifyPublicSignatures,
+  generateMermaidSequence,
+  detectNPlusOneQueries,
+  runCommandWithTimeout,
+  exportSessionToPRSummary,
+  auditAccessibilityWCAG,
+  auditEnvSync
+} from '../src/orchestrator/vanguard-engine';
+
+describe('7. Smart Load-Balancing & Cuota Switcher', () => {
+  const profiles = [
+    { id: 'claude-main', provider: 'claude', model: 'Claude 3.7 Sonnet' },
+    { id: 'google-antigravity', provider: 'google', model: 'gemini-3.8-flash-high' }
+  ];
+
+  it('no debe sugerir cambio si la cuota de la ventana de 5h es menor a 90%', () => {
+    const rec = evaluateQuotaAndSuggestSwitch('claude-main', 65, profiles);
+    assert.strictEqual(rec.shouldSwitch, false);
+  });
+
+  it('debe sugerir conmutar a Gemini cuando Claude supera el 90% de cuota', () => {
+    const rec = evaluateQuotaAndSuggestSwitch('claude-main', 92, profiles);
+    assert.strictEqual(rec.shouldSwitch, true);
+    assert.strictEqual(rec.recommendedProfileId, 'google-antigravity');
+    assert.strictEqual(rec.recommendedModel, 'gemini-3.8-flash-high');
+    assert.ok(rec.reason.includes('92%'));
+  });
+});
+
+describe('8. Auto-Rollback Engine', () => {
+  it('debe aprobar y no revertir cuando los tests pasan (código 0)', () => {
+    const result = evaluateAutoRollback(0, ['src/contracts/views.py']);
+    assert.strictEqual(result.rolledBack, false);
+    assert.strictEqual(result.filesReverted.length, 0);
+  });
+
+  it('debe solicitar rollback cuando los tests fallan (código != 0)', () => {
+    const files = ['src/contracts/views.py', 'src/contracts/models.py'];
+    const result = evaluateAutoRollback(1, files);
+    assert.strictEqual(result.rolledBack, true);
+    assert.strictEqual(result.filesReverted.length, 2);
+    assert.ok(result.message.includes('Fallo detectado'));
+  });
+});
+
+describe('9. Generador de Mock Data & Fixtures', () => {
+  it('debe detectar campos de modelo Django y generar JSON y FactoryBoy', () => {
+    const djangoModel = `
+class ContratoPublico(models.Model):
+    numero = models.CharField(max_length=50)
+    valor = models.DecimalField(max_digits=12, decimal_places=2)
+    email_contacto = models.EmailField()
+    activo = models.BooleanField(default=True)
+`;
+    const res = generateMockDataFromSchema(djangoModel);
+    assert.strictEqual(res.modelName, 'ContratoPublico');
+    assert.ok(res.fieldsDetected.includes('numero'));
+    assert.ok(res.fieldsDetected.includes('valor'));
+    assert.ok(res.fieldsDetected.includes('email_contacto'));
+    assert.strictEqual(res.mockDataJson.email_contacto, 'usuario.test@ejemplo.com');
+    assert.strictEqual(res.mockDataJson.activo, true);
+    assert.ok(res.factoryPython.includes('ContratoPublicoFactory'));
+  });
+});
+
+describe('10. Modo Dry-Run & Verificación de Firmas AST', () => {
+  it('debe certificar código seguro cuando no se rompen firmas públicas', () => {
+    const orig = `export function calcularImpuesto(monto: number) { return monto * 0.19; }`;
+    const mod = `export function calcularImpuesto(monto: number) { const factor = 0.19; return monto * factor; }`;
+    const check = verifyPublicSignatures(orig, mod);
+    assert.strictEqual(check.isSafe, true);
+    assert.strictEqual(check.brokenSignatures.length, 0);
+    assert.strictEqual(check.preservedCount, 1);
+  });
+
+  it('debe alertar cuando se elimina o rompe una firma exportada', () => {
+    const orig = `export function funcionAntigua() {}\nexport function otraFuncion() {}`;
+    const mod = `export function funcionModificadaNueva() {}`;
+    const check = verifyPublicSignatures(orig, mod);
+    assert.strictEqual(check.isSafe, false);
+    assert.strictEqual(check.brokenSignatures.length, 2);
+  });
+});
+
+describe('11. Generador de Diagramas de Secuencia Mermaid', () => {
+  it('debe generar código Mermaid estructurado con autonumber y participantes', () => {
+    const res = generateMermaidSequence('Flujo de Autenticación', [
+      { from: 'Cliente', to: 'APIGateway', message: 'POST /auth/login', response: '200 Token' },
+      { from: 'APIGateway', to: 'AuthService', message: 'validateCredentials()' }
+    ]);
+    assert.ok(res.mermaidCode.startsWith('sequenceDiagram'));
+    assert.ok(res.mermaidCode.includes('autonumber'));
+    assert.ok(res.mermaidCode.includes('Cliente->>APIGateway: POST /auth/login'));
+    assert.ok(res.participants.includes('Cliente'));
+    assert.ok(res.participants.includes('AuthService'));
+  });
+});
+
+describe('12. Detector de Consultas N+1 en ORMs', () => {
+  it('debe detectar iteración sobre relaciones foráneas sin select_related', () => {
+    const badDjangoCode = `
+for contrato in contratos:
+    empresa_nombre = contrato.empresa.nombre_razon_social
+    print(empresa_nombre)
+`;
+    const analysis = detectNPlusOneQueries(badDjangoCode);
+    assert.strictEqual(analysis.hasNPlusOne, true);
+    assert.ok(analysis.warnings.length > 0);
+    assert.strictEqual(analysis.warnings[0].relation, 'empresa');
+    assert.ok(analysis.warnings[0].recommendation.includes('select_related'));
+  });
+
+  it('no debe disparar falsos positivos en bucles simples', () => {
+    const goodCode = `
+for numero in range(10):
+    total += numero
+`;
+    const analysis = detectNPlusOneQueries(goodCode);
+    assert.strictEqual(analysis.hasNPlusOne, false);
+  });
+});
+
+describe('13. Terminal Sandbox con Timeout Estricto', () => {
+  it('debe ejecutar comandos rápidos sin timeout', async () => {
+    const res = await runCommandWithTimeout('node -e "console.log(42)"', 3000);
+    assert.strictEqual(res.exitCode, 0);
+    assert.strictEqual(res.timedOut, false);
+    assert.strictEqual(res.stdout.trim(), '42');
+  });
+
+  it('debe abortar y marcar timedOut en comandos colgados', async () => {
+    // node con sleep mayor que el timeout de 300ms
+    const res = await runCommandWithTimeout('node -e "setTimeout(() => {}, 2000)"', 300);
+    assert.strictEqual(res.timedOut, true);
+  });
+});
+
+describe('14. Exportador de Sesión a PR Summary Markdown', () => {
+  it('debe generar markdown con badges, checklist y telemetría $0.00 API Keys', () => {
+    const md = exportSessionToPRSummary({
+      taskTitle: 'Integración de Detección de Cuellos de Botella',
+      summaryPoints: ['Añadido profiler SQL', 'Añadido sanitizer PII'],
+      testResults: '16/16 tests passing in 85ms',
+      tokensIn: 3200,
+      tokensOut: 1100,
+      profileName: 'Claude Pro (Principal)'
+    });
+    assert.ok(md.includes('# 🚀 Pull Request'));
+    assert.ok(md.includes('Añadido profiler SQL'));
+    assert.ok(md.includes('$0.00 (Suscripción Directa)'));
+    assert.ok(md.includes('16/16 tests passing'));
+  });
+});
+
+describe('15. Auditor de Accesibilidad Web (WCAG 2.1)', () => {
+  it('debe detectar etiquetas <img> sin atributo alt y <button> sin etiqueta accesible', () => {
+    const dirtyJsx = `
+<img src="/avatar.png" />
+<button onClick={handleClick}></button>
+<div onClick={doAction}>Haz clic aquí</div>
+`;
+    const res = auditAccessibilityWCAG(dirtyJsx);
+    assert.strictEqual(res.issuesCount >= 3, true);
+    assert.ok(res.issues.some(i => i.rule.includes('1.1.1')));
+    assert.ok(res.issues.some(i => i.rule.includes('4.1.2')));
+    assert.ok(res.issues.some(i => i.rule.includes('2.1.1')));
+  });
+
+  it('debe pasar código accesible', () => {
+    const cleanJsx = `
+<img src="/avatar.png" alt="Avatar del usuario" />
+<button aria-label="Cerrar modal" onClick={handleClick}>Cerrar</button>
+<input id="email" aria-label="Correo" placeholder="tucorreo@ejemplo.com" />
+`;
+    const res = auditAccessibilityWCAG(cleanJsx);
+    assert.strictEqual(res.issuesCount, 0);
+  });
+});
+
+describe('16. Inspector de Variables de Entorno (.env.example)', () => {
+  it('debe detectar variables referenciadas en código que faltan en .env.example', () => {
+    const code = `
+const dbUrl = process.env.DATABASE_URL;
+const stripeKey = process.env.STRIPE_SECRET_KEY;
+const redisHost = os.environ.get("REDIS_HOST");
+`;
+    const envExample = `
+DATABASE_URL=postgres://localhost:5432/db
+REDIS_HOST=localhost
+`;
+    const res = auditEnvSync(code, envExample);
+    assert.strictEqual(res.isCompliant, false);
+    assert.strictEqual(res.undocumentedVars.length, 1);
+    assert.strictEqual(res.undocumentedVars[0], 'STRIPE_SECRET_KEY');
+    assert.strictEqual(res.documentedVars.includes('DATABASE_URL'), true);
+  });
+});
