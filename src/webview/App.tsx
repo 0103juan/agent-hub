@@ -10,10 +10,10 @@ import { MCPManagerView } from './components/MCPManagerView';
 import { ChatCanvas } from './components/ChatCanvas';
 import { ProfileCard } from './components/ProfileCard';
 import { SessionDrawer } from './components/SessionDrawer';
-import { MessageSquare, Wrench, BarChart3, Users, SplitSquareVertical, RefreshCw, History, Plus } from 'lucide-react';
+import { MessageSquare, Wrench, BarChart3, Users, SplitSquareVertical, RefreshCw, History, Plus, FolderGit2, Layers, ChevronDown } from 'lucide-react';
 
 export const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'chat' | 'mcps' | 'telemetry' | 'accounts'>('chat');
+  const [activeTab, setActiveTab] = useState<'chat' | 'sessions' | 'mcps' | 'telemetry' | 'accounts'>('chat');
   const [profiles, setProfiles] = useState<AccountProfile[]>([]);
   const [activeProfileId, setActiveProfileId] = useState<string>('claude-main');
   const [selectedModel, setSelectedModel] = useState<string>('Claude 3.7 Sonnet');
@@ -447,6 +447,17 @@ export const App: React.FC = () => {
           </button>
 
           <button
+            onClick={() => setActiveTab('sessions')}
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition ${
+              activeTab === 'sessions' ? 'bg-indigo-600 text-white shadow' : 'text-zinc-400 hover:text-zinc-200'
+            }`}
+            title="Ver y organizar historial por proyectos y carpetas"
+          >
+            <FolderGit2 className="w-3.5 h-3.5" />
+            <span>Historial ({sessions.length})</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('mcps')}
             className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition ${
               activeTab === 'mcps' ? 'bg-indigo-600 text-white shadow' : 'text-zinc-400 hover:text-zinc-200'
@@ -497,6 +508,26 @@ export const App: React.FC = () => {
 
       {/* Main Tab Content */}
       <div className="flex-1 overflow-y-auto p-3">
+        {activeTab === 'sessions' && (
+          <div className="h-full flex flex-col min-h-0">
+            <SessionDrawer
+              sessions={sessions}
+              activeSessionId={activeSessionId}
+              onSelectSession={(id) => {
+                handleSwitchSession(id);
+                setActiveTab('chat');
+              }}
+              onCreateSession={(proj, task, role) => {
+                handleCreateNewSession(proj, task, role);
+                setActiveTab('chat');
+              }}
+              onDeleteSession={handleDeleteSession}
+              onClose={() => setActiveTab('chat')}
+              isInline={true}
+            />
+          </div>
+        )}
+
         {activeTab === 'chat' && (
           <div className="flex flex-col h-full space-y-2.5">
             {/* Session Switcher Bar */}
@@ -504,20 +535,39 @@ export const App: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowSessionDrawer(true)}
-                className="flex items-center gap-1.5 text-zinc-300 hover:text-indigo-300 transition font-medium truncate max-w-[200px]"
+                className="flex items-center gap-1.5 text-zinc-300 hover:text-indigo-300 transition font-medium truncate max-w-[260px] p-1 rounded hover:bg-zinc-850"
+                title="Abrir organizador de proyectos y tareas"
               >
-                <History className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-                <span className="truncate">{currentSession?.title || 'Sesión Actual'}</span>
+                <FolderGit2 className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                <span className="text-zinc-500 font-mono text-[10px]">
+                  {currentSession?.projectName || 'General'} /
+                </span>
+                <span className="truncate font-semibold text-zinc-200">
+                  {currentSession?.title || 'Sesión Actual'}
+                </span>
+                <ChevronDown className="w-3 h-3 text-zinc-500 shrink-0" />
               </button>
 
-              <button
-                type="button"
-                onClick={() => handleCreateNewSession()}
-                className="flex items-center gap-1 text-[11px] px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 transition"
-              >
-                <Plus className="w-3 h-3 text-indigo-400" />
-                <span>Nueva</span>
-              </button>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('sessions')}
+                  className="flex items-center gap-1 text-[11px] px-2 py-0.5 rounded bg-zinc-800/80 hover:bg-zinc-750 text-zinc-300 border border-zinc-700/60 transition"
+                  title="Ver todas las sesiones organizadas por carpetas de proyectos"
+                >
+                  <Layers className="w-3 h-3 text-indigo-400" />
+                  <span>Historial ({sessions.length})</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowSessionDrawer(true)}
+                  className="flex items-center gap-1 text-[11px] px-2 py-0.5 rounded bg-indigo-600 hover:bg-indigo-500 text-white font-medium transition shadow"
+                  title="Crear nueva tarea en un proyecto"
+                >
+                  <Plus className="w-3 h-3" />
+                  <span>Nueva Tarea</span>
+                </button>
+              </div>
             </div>
 
             {/* Account & Model Selector Bar */}

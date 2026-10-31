@@ -23,6 +23,7 @@ interface Props {
   onCreateSession: (projectName?: string, taskSlug?: string, role?: ProtocolRole) => void;
   onDeleteSession: (id: string) => void;
   onClose: () => void;
+  isInline?: boolean;
 }
 
 export const SessionDrawer: React.FC<Props> = ({
@@ -31,7 +32,8 @@ export const SessionDrawer: React.FC<Props> = ({
   onSelectSession,
   onCreateSession,
   onDeleteSession,
-  onClose
+  onClose,
+  isInline = false
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProjectFilter, setSelectedProjectFilter] = useState<string>('all');
@@ -89,22 +91,29 @@ export const SessionDrawer: React.FC<Props> = ({
     onClose();
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-xs flex z-40">
-      <div className="w-80 bg-zinc-900 border-r border-zinc-800 h-full flex flex-col p-3 space-y-3 shadow-2xl">
-        {/* Header */}
-        <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
-          <div className="text-xs font-bold text-zinc-100 flex items-center gap-1.5">
-            <Layers className="w-4 h-4 text-indigo-400" />
-            <span>Proyectos y Tareas</span>
-          </div>
+  const drawerContent = (
+    <div
+      className={`h-full flex flex-col space-y-3 ${
+        isInline
+          ? 'bg-zinc-900 border border-zinc-800 rounded-xl p-4 w-full shadow-md'
+          : 'w-80 bg-zinc-900 border-r border-zinc-800 p-3 shadow-2xl'
+      }`}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
+        <div className="text-xs font-bold text-zinc-100 flex items-center gap-1.5">
+          <Layers className="w-4 h-4 text-indigo-400" />
+          <span>Gestor de Proyectos, Tareas e Historial</span>
+        </div>
+        {!isInline && (
           <button
             onClick={onClose}
             className="text-zinc-400 hover:text-zinc-200 text-xs px-2 py-0.5 rounded hover:bg-zinc-800 transition"
           >
             Cerrar
           </button>
-        </div>
+        )}
+      </div>
 
         {/* Action Button: Nueva Tarea / Sesión */}
         {!showNewTaskForm ? (
@@ -317,8 +326,16 @@ export const SessionDrawer: React.FC<Props> = ({
           )}
         </div>
       </div>
+    );
 
-      <div className="flex-1" onClick={onClose} />
-    </div>
-  );
-};
+    if (isInline) {
+      return drawerContent;
+    }
+
+    return (
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-xs flex z-40">
+        {drawerContent}
+        <div className="flex-1" onClick={onClose} />
+      </div>
+    );
+  };
