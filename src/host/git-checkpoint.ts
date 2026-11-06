@@ -15,9 +15,30 @@ export function createCheckpoint(workspaceDir: string): string | undefined {
       windowsHide: true,
       stdio: ['ignore', 'pipe', 'ignore']
     }).trim();
-    return hash || undefined;
+    // Con el árbol limpio `stash create` no crea nada: el punto de partida es HEAD.
+    return hash || headCommit(workspaceDir);
   } catch {
     return undefined;
+  }
+}
+
+function headCommit(workspaceDir: string): string | undefined {
+  try {
+    return execFileSync('git', ['rev-parse', '--verify', 'HEAD'], { cwd: workspaceDir, encoding: 'utf8', windowsHide: true, stdio: ['ignore', 'pipe', 'ignore'] }).trim() || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** Archivos nuevos que git aún no sigue (respeta .gitignore). */
+export function listUntracked(workspaceDir: string): string[] {
+  if (!workspaceDir || !fs.existsSync(path.join(workspaceDir, '.git'))) return [];
+  try {
+    return execFileSync('git', ['ls-files', '--others', '--exclude-standard'], { cwd: workspaceDir, encoding: 'utf8', windowsHide: true })
+      .split('\n')
+      .filter(Boolean);
+  } catch {
+    return [];
   }
 }
 

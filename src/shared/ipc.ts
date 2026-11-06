@@ -1,6 +1,8 @@
 import {
   AccountProfile,
   ArchivedSessionInfo,
+  Notice,
+  SquadDiffFile,
   AgentMessage,
   LiveStatus,
   QueuedMessage,
@@ -56,6 +58,11 @@ export type WebviewMessage =
   | { command: 'startPipeline'; projectName?: string; prompt: string; requireApproval?: boolean; template?: string; isolate?: boolean }
   | { command: 'compareModels'; prompt: string }
   | { command: 'searchSessions'; query: string }
+  | { command: 'teamReport'; sessionId: string }
+  | { command: 'squadDiff'; sessionId: string }
+  | { command: 'restoreStage'; sessionId: string; messageId: string }
+  | { command: 'queueAction'; sessionId: string; action: 'cancel' | 'prioritize' }
+  | { command: 'pruneExperience' }
   | { command: 'finishSquad'; sessionId: string; action: 'merge' | 'discard' }
   | { command: 'approveHandoff'; id: string; approve: boolean }
   | { command: 'listArchive' }
@@ -101,6 +108,8 @@ export interface HubStatePatch {
   costs?: CostSummary;
   /** Traspasos entre agentes esperando tu aprobación. */
   pendingHandoffs?: AgentMessage[];
+  /** Turnos esperando cupo, en orden de llegada. */
+  waitingSessionIds?: string[];
 }
 
 /** Mensajes extensión → webview. */
@@ -116,5 +125,8 @@ export type HostMessage =
   | { type: 'searchResults'; query: string; hits: SearchHit[] }
   | { type: 'focusComposer' }
   | { type: 'archive'; items: ArchivedSessionInfo[] }
+  | { type: 'notice'; notice: Notice }
+  | { type: 'teamReport'; squad: string; markdown: string }
+  | { type: 'squadDiff'; squad: string; files: SquadDiffFile[] }
   | { type: 'experience'; content: string }
   | { type: 'fileDiff'; checkpointHash: string; file: string; diff: string };

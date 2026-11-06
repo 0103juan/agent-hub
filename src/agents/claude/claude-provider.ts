@@ -21,7 +21,14 @@ const MAIN_DIR_NAME = '.claude';
 const EXTRA_DIR_PREFIX = '.claude-';
 
 /** El ejecutable real evita pasar por cmd.exe; el shim de npm queda como respaldo. */
-function resolveClaudeBinary(): { command: string; shell: boolean } {
+export interface ClaudeBinary {
+  command: string;
+  shell: boolean;
+  /** Argumentos antes de los de la CLI (p. ej. un script de node). */
+  prefixArgs?: string[];
+}
+
+function resolveClaudeBinary(): ClaudeBinary {
   const binary = path.join(process.env.APPDATA ?? '', 'npm', 'node_modules', '@anthropic-ai', 'claude-code', 'bin', 'claude.exe');
   return fs.existsSync(binary) ? { command: binary, shell: false } : { command: 'claude', shell: process.platform === 'win32' };
 }
@@ -33,12 +40,12 @@ function capitalize(text: string): string {
 export class ClaudeProvider implements AgentProvider {
   public readonly type: ProviderType = 'claude';
   private readonly homeDir = os.homedir();
-  private readonly binary = resolveClaudeBinary();
   private cachedAccounts?: Promise<AccountProfile[]>;
 
   constructor(
     private readonly openTerminal: TerminalOpener,
-    private readonly pool: CliProcessPool
+    private readonly pool: CliProcessPool,
+    private readonly binary: ClaudeBinary = resolveClaudeBinary()
   ) {}
 
   public discoverAccounts(forceRefresh: boolean): Promise<AccountProfile[]> {
@@ -102,6 +109,7 @@ export class ClaudeProvider implements AgentProvider {
 
   private buildSpec({ account, workspaceDir, modelId, effort, readOnly }: AgentTarget): PooledCliSpec {
     const args = [
+      ...(this.binary.prefixArgs ?? []),
       '-p',
       '--input-format=stream-json',
       '--output-format=stream-json',

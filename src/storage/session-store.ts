@@ -20,6 +20,8 @@ export interface NewSessionOptions {
   squad?: string;
   approveStages?: boolean;
   isolatedBranch?: string;
+  isolatedBase?: string;
+  handoffTo?: ProtocolRole[];
 }
 
 type StoredSession = Omit<ConversationSession, 'modelId'> & { modelId?: string; modelName?: string };
@@ -124,6 +126,8 @@ export class SessionStore {
       squad: options.squad,
       approveStages: options.approveStages,
       isolatedBranch: options.isolatedBranch,
+      isolatedBase: options.isolatedBase,
+      handoffTo: options.handoffTo,
       profileId: options.profileId ?? DEFAULT_PROFILE_ID,
       modelId: options.modelId ?? DEFAULT_MODEL_ID,
       effort: options.effort ?? 'medium',

@@ -8,6 +8,8 @@ import {
   FileContextAttachment,
   MCPServerInfo,
   ArchivedSessionInfo,
+  Notice,
+  SquadDiffFile,
   CostSummary,
   SearchHit,
   QueuedMessage,
@@ -35,6 +37,11 @@ export interface HubState {
   /** Diff por archivo y turno, clave `${checkpointHash}:${file}`. */
   fileDiffs: Record<string, string>;
   pendingHandoffs: AgentMessage[];
+  waitingSessionIds: string[];
+  /** Avisos recientes, el más nuevo al final. */
+  notices: Notice[];
+  teamReport?: { squad: string; markdown: string };
+  squadDiff?: { squad: string; files: SquadDiffFile[] };
   /** Sube cada vez que la extensión pide enfocar el composer. */
   focusComposerTick: number;
   live: Record<string, LiveStatus>;
@@ -67,6 +74,8 @@ export const INITIAL_HUB_STATE: HubState = {
   archive: [],
   fileDiffs: {},
   pendingHandoffs: [],
+  waitingSessionIds: [],
+  notices: [],
   focusComposerTick: 0,
   live: {},
   attachments: [],
@@ -121,6 +130,12 @@ export function hubReducer(state: HubState, action: HubAction): HubState {
       return { ...state, workspaceFiles: action.files };
     case 'searchResults':
       return { ...state, searchQuery: action.query, searchHits: action.hits };
+    case 'notice':
+      return { ...state, notices: [...state.notices, action.notice].slice(-50) };
+    case 'teamReport':
+      return { ...state, teamReport: { squad: action.squad, markdown: action.markdown } };
+    case 'squadDiff':
+      return { ...state, squadDiff: { squad: action.squad, files: action.files } };
     case 'archive':
       return { ...state, archive: action.items };
     case 'experience':

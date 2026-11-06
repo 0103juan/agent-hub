@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { EXPERIENCE_FILE } from '../../agents/prompt-composer';
+import { pruneExperience } from '../../shared/experience';
 import { getCheckpointFileDiff } from '../git-checkpoint';
 import { HubContext } from '../hub-context';
 import { isInsideWorkspace } from '../safe-path';
@@ -10,7 +11,7 @@ import { workspaceDirForSession } from './session-handlers';
 
 /** Sesiones archivadas, memoria del proyecto, diffs por archivo, mensajes fijados y traspasos por aprobar. */
 export function libraryHandlers(hub: HubContext): HandlerMap<
-  'listArchive' | 'restoreSession' | 'readExperience' | 'saveExperience' | 'fileDiff' | 'pinMessage' | 'approveHandoff'
+  'listArchive' | 'restoreSession' | 'readExperience' | 'saveExperience' | 'pruneExperience' | 'fileDiff' | 'pinMessage' | 'approveHandoff'
 > {
   const experiencePath = () => {
     const dir = workspaceDir();
@@ -43,6 +44,13 @@ export function libraryHandlers(hub: HubContext): HandlerMap<
       if (!file) throw new Error('Abre una carpeta de trabajo para guardar la memoria del proyecto.');
       fs.mkdirSync(path.dirname(file), { recursive: true });
       fs.writeFileSync(file, content, 'utf8');
+      publishExperience();
+    },
+
+    pruneExperience: () => {
+      const file = experiencePath();
+      if (!file || !fs.existsSync(file)) return;
+      fs.writeFileSync(file, pruneExperience(fs.readFileSync(file, 'utf8')), 'utf8');
       publishExperience();
     },
 

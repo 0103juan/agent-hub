@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowRight, Brain, MessageSquare, Plus, Square, Terminal, Users, X, LayoutGrid, Network, Columns3 } from 'lucide-react';
+import { ArrowRight, Brain, Clock, MessageSquare, Plus, Square, Terminal, Users, X, LayoutGrid, Network, Columns3 } from 'lucide-react';
 import { PendingHandoffs, SquadCanvas } from './SquadCanvas';
 import { agentName } from '../../shared/agent-name';
 import { PROTOCOL_ROLES } from '../../shared/protocol-roles';
@@ -104,8 +104,47 @@ const SpawnForm: React.FC<{ projects: string[] }> = ({ projects }) => {
   );
 };
 
+/** Turnos esperando cupo, en orden; se puede subir uno al frente o quitarlo. */
+const WaitingQueue: React.FC<{ state: HubState }> = ({ state }) => {
+  const waiting = state.waitingSessionIds.flatMap((id) => state.sessions.filter((session) => session.id === id));
+  if (waiting.length === 0) return null;
+  return (
+    <section aria-label="Esperando turno" className="space-y-1.5">
+      <h2 className="text-[11px] font-semibold text-amber-300">Esperando turno ({waiting.length})</h2>
+      <ul className="space-y-1">
+        {waiting.map((session, index) => (
+          <li key={session.id} className="flex items-center gap-1.5 p-1.5 bg-zinc-900 border border-zinc-800 rounded-lg text-[11px]">
+            <Clock className="w-3 h-3 text-amber-400 shrink-0" aria-hidden />
+            <span className="font-mono text-zinc-400 shrink-0">#{index + 1}</span>
+            <span className="font-semibold text-zinc-100 truncate">{agentName(session)}</span>
+            <span className="ml-auto flex items-center gap-1 shrink-0">
+              {index > 0 && (
+                <button
+                  type="button"
+                  onClick={() => postToHost({ command: 'queueAction', sessionId: session.id, action: 'prioritize' })}
+                  className="px-1.5 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 transition"
+                >
+                  Subir
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => postToHost({ command: 'queueAction', sessionId: session.id, action: 'cancel' })}
+                className="px-1.5 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-red-300 border border-zinc-700 transition"
+              >
+                Quitar
+              </button>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+};
+
 const AgentCard: React.FC<{ session: ConversationSession; state: HubState; onOpenChat: (id: string) => void }> = ({ session, state, onOpenChat }) => {
-  const running = state.runningSessionIds.includes(session.id);
+  const waitPosition = state.waitingSessionIds.indexOf(session.id) + 1;
+  const running = state.runningSessionIds.includes(session.id) && waitPosition === 0;
   const live = state.live[session.id];
   const queued = state.queues[session.id]?.length ?? 0;
   const role = session.protocolRole && PROTOCOL_ROLES[session.protocolRole]?.label;
@@ -121,7 +160,7 @@ const AgentCard: React.FC<{ session: ConversationSession; state: HubState; onOpe
         <span className="ml-auto text-zinc-400 font-mono truncate">{session.modelId}</span>
       </div>
       <div className="text-zinc-400">
-        {running ? 'Trabajando' : 'En espera'}
+        {running ? 'Trabajando' : waitPosition > 0 ? `En espera #${waitPosition}` : 'En espera'}
         {session.projectName && <> · {session.projectName}</>}
         {queued > 0 && <span className="text-amber-400"> · {queued} en cola</span>}
       </div>
@@ -172,7 +211,8 @@ const BOARD_COLUMNS = ['Esperando', 'Trabajando', 'Te espera', 'Hecho'] as const
 
 const Board: React.FC<{ agents: ConversationSession[]; state: HubState; onOpenChat: (id: string) => void }> = ({ agents, state, onOpenChat }) => {
   const columnOf = (session: ConversationSession): (typeof BOARD_COLUMNS)[number] =>
-    state.runningSessionIds.includes(session.id) ? 'Trabajando'
+    state.waitingSessionIds.includes(session.id) ? 'Esperando'
+      : state.runningSessionIds.includes(session.id) ? 'Trabajando'
       : state.attentionSessionIds.includes(session.id) ? 'Te espera'
       : session.messages.some((m) => m.role === 'assistant') || (session.messageCount ?? 0) >= 2 ? 'Hecho'
       : 'Esperando';
@@ -206,9 +246,10 @@ const Board: React.FC<{ agents: ConversationSession[]; state: HubState; onOpenCh
 
 export const AgentsView: React.FC<Props> = ({ state, onOpenChat }) => {
   const [viewMode, setViewMode] = useState<'cards' | 'canvas' | 'board'>('cards');
+  const isWorking = (session: ConversationSession) => state.runningSessionIds.includes(session.id) && !state.waitingSessionIds.includes(session.id);
   const agents = state.sessions
-    .filter((session) => session.squad || state.runningSessionIds.includes(session.id) || state.queues[session.id]?.length)
-    .sort((a, b) => Number(state.runningSessionIds.includes(b.id)) - Number(state.runningSessionIds.includes(a.id)));
+    .filter((session) => session.squad || state.runningSessionIds.includes(session.id) || state.waitingSessionIds.includes(session.id) || state.queues[session.id]?.length)
+    .sort((a, b) => Number(isWorking(b)) - Number(isWorking(a)));
   const projects = [...new Set(state.sessions.flatMap((session) => (session.projectName ? [session.projectName] : [])))];
 
   return (
@@ -247,6 +288,8 @@ export const AgentsView: React.FC<Props> = ({ state, onOpenChat }) => {
       </div>
 
       <PendingHandoffs handoffs={state.pendingHandoffs} />
+
+      <WaitingQueue state={state} />
 
       {viewMode === 'board' ? (
         <Board agents={agents} state={state} onOpenChat={onOpenChat} />

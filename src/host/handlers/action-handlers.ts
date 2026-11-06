@@ -9,6 +9,7 @@ import { findSecrets } from '../../analysis/secret-scanner';
 import { findDestructiveStatements, findQueryIssues } from '../../analysis/sql-review';
 import { WORKSPACE_ACTIONS } from '../../shared/workspace-actions';
 import { HubContext } from '../hub-context';
+import { pullRequestCommand } from '../pull-request';
 import { currentEditor, openTerminal } from '../workspace';
 import { HandlerMap } from './handler-types';
 import { workspaceDirForSession } from './session-handlers';
@@ -177,7 +178,7 @@ const ACTION_RUNNERS: Record<string, (run: ActionRun) => void | Promise<void>> =
   'dev-sandbox': terminalAction('sandbox', ({ cwd }) => `docker run --rm -it -v "${cwd}:/workspace" -w /workspace alpine:latest sh`),
   'local-tunnel': openTunnel,
   'worktree': createWorktree,
-  'pull-request': terminalAction('pull request', () => 'gh pr create --fill'),
+  'pull-request': terminalAction('pull request', ({ input }) => pullRequestCommand(input)),
   'pre-push-hook': installPrePushHook,
   'rollback': discardChanges,
   'scan-secrets': scanSecrets,

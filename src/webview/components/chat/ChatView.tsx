@@ -1,8 +1,10 @@
 import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { CheckSquare, ChevronDown, Cpu, Download, FolderGit2, Layers, ListTree, Pin, Plus, Square, Wallet, X } from 'lucide-react';
+import { agentName } from '../../../shared/agent-name';
 import { resolveSelection } from '../../../shared/model-selection';
 import { ConversationSession, ProtocolRole, ProviderType, QueuedMessage, ReasoningEffort, SessionPermission } from '../../../shared/types';
 import { HubAction, HubState } from '../../state/hub-state';
+import { ACCENTS, getAccent, setAccent } from '../../state/accent';
 import { postToHost } from '../../vscode-api';
 import { EffortSelector } from '../EffortSelector';
 import { ProtocolRoleSelector } from '../ProtocolRoleSelector';
@@ -27,6 +29,8 @@ const NO_QUEUE: QueuedMessage[] = [];
 interface Props {
   state: HubState;
   session: ConversationSession;
+  /** Oculta las barras secundarias; quedan el chat y el composer. */
+  focusMode?: boolean;
   dispatch: React.Dispatch<HubAction>;
   onOpenHistory: () => void;
   onNewTask: () => void;
@@ -112,9 +116,44 @@ const ConversationIndex: React.FC<{ session: ConversationSession }> = ({ session
   );
 };
 
+/** Color del proyecto, guardado en localStorage; marca la cabecera y los chips de la franja de agentes. */
+const AccentPicker: React.FC<{ current?: string; onPick: (color: string) => void }> = ({ current, onPick }) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <span className="relative shrink-0">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        aria-expanded={open}
+        aria-label="Color del proyecto"
+        title="Color del proyecto"
+        className="block w-3 h-3 rounded-full border border-zinc-600"
+        style={{ backgroundColor: current ?? 'transparent' }}
+      />
+      {open && (
+        <span className="absolute left-0 top-full mt-1 z-30 flex gap-1 p-1.5 rounded-lg border border-zinc-700 bg-zinc-900 shadow-xl">
+          {ACCENTS.map((color) => (
+            <button
+              key={color}
+              type="button"
+              aria-label={`Color ${color}`}
+              onClick={() => {
+                onPick(color);
+                setOpen(false);
+              }}
+              className={`w-4 h-4 rounded-full border ${color === current ? 'border-white' : 'border-transparent'}`}
+              style={{ backgroundColor: color }}
+            />
+          ))}
+        </span>
+      )}
+    </span>
+  );
+};
+
 const formatTokens = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(1)}k` : `${n}`);
 
-export const ChatView: React.FC<Props> = ({ state, session, dispatch, onOpenHistory, onNewTask }) => {
+export const ChatView: React.FC<Props> = ({ state, session, focusMode, dispatch, onOpenHistory, onNewTask }) => {
   const { id: sessionId, profileId, modelId, effort: sessionEffort } = session;
   const selection = useMemo(
     () => resolveSelection({ profileId, modelId, effort: sessionEffort }, state.accounts),
@@ -146,14 +185,25 @@ export const ChatView: React.FC<Props> = ({ state, session, dispatch, onOpenHist
   const attachmentsRef = useRef(state.attachments);
   attachmentsRef.current = state.attachments;
 
+  // `targetId` envía a otro agente del equipo (menciones con @).
   const sendPrompt = useCallback(
-    async (prompt: string, planFirst?: boolean) => {
+    async (prompt: string, planFirst?: boolean, targetId?: string) => {
       dispatch({ type: 'clearAttachments' });
       const attachments = await withThumbnails(attachmentsRef.current);
-      postToHost({ command: 'sendPrompt', sessionId, prompt, attachments, ...(planFirst ? { planFirst } : {}) });
+      postToHost({ command: 'sendPrompt', sessionId: targetId ?? sessionId, prompt, attachments, ...(planFirst ? { planFirst } : {}) });
     },
     [sessionId, dispatch]
   );
+
+  const mates = state.sessions
+    .filter((candidate) => session.squad && candidate.squad === session.squad && candidate.id !== sessionId)
+    .map((candidate) => ({ id: candidate.id, name: agentName(candidate) }));
+  const matesKey = mates.map((mate) => `${mate.id}:${mate.name}`).join('|');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const mentionAgents = useMemo(() => mates, [matesKey]);
+
+  const [, setAccentTick] = useState(0);
+  const accent = getAccent(session.projectName);
 
   const contextBudget = useMemo(() => {
     const modelName = model?.label.toLowerCase() ?? '';
@@ -179,7 +229,17 @@ export const ChatView: React.FC<Props> = ({ state, session, dispatch, onOpenHist
 
   return (
     <div className="flex flex-col h-full space-y-2.5">
-      <div className="flex items-center justify-between gap-2 px-1 text-xs shrink-0">
+      <div
+        className="flex items-center justify-between gap-2 px-1 text-xs shrink-0 border-l-2 pl-1.5"
+        style={{ borderLeftColor: accent ?? 'transparent' }}
+      >
+        <AccentPicker
+          current={accent}
+          onPick={(color) => {
+            setAccent(session.projectName, color);
+            setAccentTick((tick) => tick + 1);
+          }}
+        />
         <button
           type="button"
           onClick={onOpenHistory}
@@ -238,13 +298,14 @@ export const ChatView: React.FC<Props> = ({ state, session, dispatch, onOpenHist
         </div>
       </div>
 
+      {!focusMode && (<>
       <div className="shrink-0">
         <AccountBar sessionId={sessionId} accounts={state.accounts} selection={selection} />
       </div>
 
       <div className="flex items-center gap-2 px-1 shrink-0">
         <Effort effort={effort ?? sessionEffort} supportedEfforts={model?.efforts ?? NO_EFFORTS} onChange={selectEffort} />
-        <Roles selectedRole={session.protocolRole} onSelectRole={selectRole} />
+        <Roles selectedRole={session.protocolRole} onSelectRole={selectRole} handoffTo={session.handoffTo} />
       </div>
 
       <div className="shrink-0">
@@ -307,6 +368,7 @@ export const ChatView: React.FC<Props> = ({ state, session, dispatch, onOpenHist
       <Quota telemetry={telemetry} accounts={state.accounts} activeAccount={account} onFailover={failover} />
 
       {session.messages.length === 0 && <Onboarding state={state} />}
+      </>)}
 
       <MessageList
         key={sessionId}
@@ -332,6 +394,7 @@ export const ChatView: React.FC<Props> = ({ state, session, dispatch, onOpenHist
         accountName={account?.name}
         isRunning={state.runningSessionIds.includes(sessionId)}
         queue={state.queues[sessionId] ?? NO_QUEUE}
+        mentionAgents={mentionAgents}
         dispatch={dispatch}
         onSend={sendPrompt}
       />

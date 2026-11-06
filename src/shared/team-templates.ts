@@ -6,6 +6,8 @@ export interface TeamTemplate {
   description: string;
   /** Orden de trabajo; el primero recibe el requerimiento. */
   roles: ProtocolRole[];
+  /** Traspasos que reemplazan el `handoffTo` del rol dentro de este equipo (p. ej. en paralelo). */
+  handoffs?: Partial<Record<ProtocolRole, ProtocolRole[]>>;
 }
 
 export const TEAM_TEMPLATES: TeamTemplate[] = [
@@ -14,6 +16,13 @@ export const TEAM_TEMPLATES: TeamTemplate[] = [
     label: 'Feature completa',
     description: 'Arquitecto → Tester → Desarrollador → Revisor → Documentador',
     roles: ['arquitecto', 'tester', 'desarrollador', 'revisor', 'documentador']
+  },
+  {
+    id: 'paralelo',
+    label: 'Feature con revisión y docs en paralelo',
+    description: 'Arquitecto → Tester → Desarrollador → (Revisor + Documentador a la vez)',
+    roles: ['arquitecto', 'tester', 'desarrollador', 'revisor', 'documentador'],
+    handoffs: { desarrollador: ['revisor', 'documentador'], revisor: [] }
   },
   {
     id: 'bug',

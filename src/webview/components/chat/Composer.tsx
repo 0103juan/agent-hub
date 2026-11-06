@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   AlertTriangle,
+  Bot,
   ChevronDown,
   Clock,
   FolderUp,
@@ -46,9 +47,13 @@ interface Props {
   accountName?: string;
   isRunning: boolean;
   queue: QueuedMessage[];
+  /** Compañeros del mismo equipo a los que se puede escribir con `@nombre`. */
+  mentionAgents?: Array<{ id: string; name: string }>;
   dispatch: React.Dispatch<HubAction>;
-  onSend: (prompt: string, planFirst?: boolean) => void;
+  onSend: (prompt: string, planFirst?: boolean, targetId?: string) => void;
 }
+
+const NO_AGENTS: Array<{ id: string; name: string }> = [];
 
 function savePastedFile(file: File): void {
   const reader = new FileReader();
@@ -60,7 +65,7 @@ function savePastedFile(file: File): void {
   reader.readAsDataURL(file);
 }
 
-export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, composerText, focusTick = 0, sessionId, accountName, isRunning, queue, dispatch, onSend }) => {
+export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, composerText, focusTick = 0, sessionId, accountName, isRunning, queue, mentionAgents = NO_AGENTS, dispatch, onSend }) => {
   const [prompt, setPrompt] = useState('');
   const [isSearchingFiles, setIsSearchingFiles] = useState(false);
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
@@ -190,7 +195,13 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
       } catch {}
       setIsListening(false);
     }
-    onSend(prompt.trim(), planFirst || undefined);
+    // `@agente mensaje` va a la sesión de ese agente, sin el prefijo.
+    const text = prompt.trim();
+    const target = [...mentionAgents]
+      .sort((a, b) => b.name.length - a.name.length)
+      .find((agent) => text.startsWith(`@${agent.name}`) && /^\s+\S/.test(text.slice(agent.name.length + 1)));
+    if (target) onSend(text.slice(target.name.length + 1).trim(), planFirst || undefined, target.id);
+    else onSend(text, planFirst || undefined);
     setPlanFirst(false);
     setPrompt('');
     setIsSearchingFiles(false);
@@ -207,6 +218,15 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
         FILE_SEARCH_DELAY_MS
       );
     }
+  };
+
+  const mentionQuery = isSearchingFiles ? (prompt.split(/\s+/).pop() ?? '').slice(1).toLowerCase() : undefined;
+  const mentionMatches = mentionQuery === undefined ? [] : mentionAgents.filter((agent) => agent.name.toLowerCase().includes(mentionQuery));
+
+  const mentionAgent = (name: string) => {
+    setPrompt(prompt.replace(/@\S*$/, `@${name} `));
+    setIsSearchingFiles(false);
+    textareaRef.current?.focus();
   };
 
   const attachFile = (file: string) => {
@@ -270,8 +290,20 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
         </div>
       )}
 
-      {isSearchingFiles && workspaceFiles.length > 0 && (
+      {isSearchingFiles && (mentionMatches.length > 0 || workspaceFiles.length > 0) && (
         <div className="max-h-40 overflow-y-auto rounded-lg border border-zinc-800 bg-zinc-900/95 p-1 shadow-lg">
+          {mentionMatches.map((agent) => (
+            <button
+              key={agent.id}
+              type="button"
+              onClick={() => mentionAgent(agent.name)}
+              className="flex w-full items-center gap-1.5 text-left px-2 py-1 text-[11px] text-purple-300 hover:bg-zinc-800 rounded"
+            >
+              <Bot className="w-3 h-3 shrink-0" />
+              <span className="truncate">@{agent.name}</span>
+              <span className="ml-auto text-zinc-500">agente</span>
+            </button>
+          ))}
           {workspaceFiles.slice(0, 8).map((file) => (
             <button
               key={file}
@@ -413,7 +445,7 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
           <ChevronDown className="w-3 h-3" />
         </button>
 
-        <span className="ml-auto text-[11px] text-zinc-400 font-mono shrink-0 hidden md:inline-block">@ para archivos</span>
+        <span className="ml-auto text-[11px] text-zinc-400 font-mono shrink-0 hidden md:inline-block">@ para agentes y archivos</span>
       </div>
 
       <form
@@ -434,7 +466,7 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
           rows={2}
           aria-label="Mensaje"
           onFocus={() => postToHost({ command: 'prewarmSession', sessionId })}
-          placeholder={`Pregunta a ${accountName ?? 'el agente'}, @ para archivos, / para comandos...`}
+          placeholder={`Pregunta a ${accountName ?? 'el agente'}, @ para agentes y archivos, / para comandos...`}
           onChange={(event) => handleChange(event.target.value)}
           onKeyDown={(event) => {
             if (event.key === 'Enter' && !event.shiftKey) {

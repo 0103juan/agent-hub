@@ -110,3 +110,10 @@ Tu misión es reproducir el fallo, aislar su causa raíz y escribir una prueba q
 Reporta la causa con archivo y línea, no apliques el arreglo: entrégalo al Desarrollador.`
   }
 };
+
+/** A quién pasa el trabajo un agente: lo fijado en su equipo o, si no, el `handoffTo` de su rol. */
+export function nextRoles(session: { protocolRole?: ProtocolRole; handoffTo?: ProtocolRole[] }): ProtocolRole[] {
+  if (session.handoffTo) return session.handoffTo;
+  const next = session.protocolRole && PROTOCOL_ROLES[session.protocolRole].handoffTo;
+  return next ? [next] : [];
+}

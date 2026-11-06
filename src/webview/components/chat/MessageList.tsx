@@ -6,6 +6,7 @@ import { extractQuestionOptions, QuestionOptions } from '../../../shared/questio
 import { postToHost } from '../../vscode-api';
 import { ProviderBadge } from '../ProviderBadge';
 import { ROLE_COLORS } from '../SquadCanvas';
+import { DiffLines } from './DiffLines';
 import { Markdown } from './Markdown';
 
 const STICK_TO_BOTTOM_PX = 320;
@@ -291,19 +292,6 @@ const TurnStatus: React.FC<{ message: ChatMessage; hasAnswer: boolean; live?: Li
   );
 };
 
-const DiffLines: React.FC<{ diff: string }> = ({ diff }) => (
-  <pre className="mt-0.5 max-h-60 overflow-auto rounded bg-zinc-950 border border-zinc-800 p-1.5 text-[11px] font-mono leading-snug">
-    {diff.split('\n').map((line, index) => (
-      <span
-        key={index}
-        className={`block ${line.startsWith('+') && !line.startsWith('+++') ? 'text-emerald-300 bg-emerald-500/10' : line.startsWith('-') && !line.startsWith('---') ? 'text-rose-300 bg-rose-500/10' : 'text-zinc-400'}`}
-      >
-        {line || ' '}
-      </span>
-    ))}
-  </pre>
-);
-
 const ChangedFile: React.FC<{ sessionId: string; checkpointHash: string; file: string; diff?: string }> = ({ sessionId, checkpointHash, file, diff }) => {
   const [open, setOpen] = useState(false);
   const toggle = () => {
@@ -331,6 +319,76 @@ const ChangedFile: React.FC<{ sessionId: string; checkpointHash: string; file: s
     </li>
   );
 };
+
+/** Vuelve la copia aparte del equipo al commit de esta etapa; pide confirmación en línea. */
+const RestoreStage: React.FC<{ sessionId: string; messageId: string }> = ({ sessionId, messageId }) => {
+  const [confirming, setConfirming] = useState(false);
+  return confirming ? (
+    <span className="flex items-center gap-1.5">
+      <span className="text-amber-400">¿Volver a esta etapa? Se pierde lo posterior.</span>
+      <button
+        type="button"
+        onClick={() => {
+          postToHost({ command: 'restoreStage', sessionId, messageId });
+          setConfirming(false);
+        }}
+        className="px-1.5 py-0.5 rounded bg-red-700 hover:bg-red-600 text-white transition"
+      >
+        Sí, volver
+      </button>
+      <button type="button" aria-label="Cancelar" onClick={() => setConfirming(false)} className="text-zinc-400 hover:text-zinc-200">
+        <X className="w-3 h-3" />
+      </button>
+    </span>
+  ) : (
+    <button
+      type="button"
+      onClick={() => setConfirming(true)}
+      className="flex items-center gap-1 text-indigo-300 hover:text-indigo-200 hover:underline px-1 py-0.5 rounded transition"
+      title="Devolver la copia aparte del equipo al estado en que terminó esta etapa"
+    >
+      <RotateCcw className="w-3 h-3" />
+      <span>Volver aquí</span>
+    </button>
+  );
+};
+
+/** Agrupa las notas de sistema consecutivas (2 o más); el resto queda como está. */
+function groupSystemNotes(messages: ChatMessage[]): Array<ChatMessage | ChatMessage[]> {
+  const items: Array<ChatMessage | ChatMessage[]> = [];
+  let run: ChatMessage[] = [];
+  const flush = () => {
+    items.push(...(run.length > 1 ? [run] : run));
+    run = [];
+  };
+  for (const message of messages) {
+    if (message.role === 'system') run.push(message);
+    else {
+      flush();
+      items.push(message);
+    }
+  }
+  flush();
+  return items;
+}
+
+/** Notas de sistema seguidas, en una sola tarjeta plegable. */
+const SystemGroup: React.FC<{ messages: ChatMessage[]; defaultOpen: boolean }> = ({ messages, defaultOpen }) => (
+  <details open={defaultOpen} className="group rounded-md border border-zinc-800 bg-zinc-950/40 text-[12px] overflow-hidden">
+    <summary className="flex cursor-pointer select-none items-center gap-1.5 px-2 py-1 text-[11px] text-zinc-400 hover:text-zinc-200">
+      <ChevronRight className="h-3 w-3 shrink-0 transition-transform group-open:rotate-90" />
+      <span className="font-medium text-zinc-300">{messages.length} eventos</span>
+      {messages.some((m) => m.isError) && <AlertCircle className="w-3 h-3 text-red-400" aria-label="Con error" />}
+    </summary>
+    <ul className="space-y-1 border-t border-zinc-800 px-2 py-2">
+      {messages.map((m) => (
+        <li key={m.id} id={`msg-${m.id}`} className={m.isError ? 'text-red-300' : 'text-zinc-400'}>
+          <Markdown text={m.content} withCodeActions={false} />
+        </li>
+      ))}
+    </ul>
+  </details>
+);
 
 interface BubbleProps {
   message: ChatMessage;
@@ -458,6 +516,12 @@ const MessageBubble = memo<BubbleProps>(({ message, sessionId, onSendSuggestion,
             <RotateCcw className="w-3 h-3" />
             <span>Deshacer turno</span>
           </button>
+        </div>
+      )}
+
+      {!isUser && !message.isStreaming && message.stageCommit && (
+        <div className="mt-2 pt-1.5 border-t border-zinc-800/80 flex items-center justify-end text-[11px] text-zinc-400">
+          <RestoreStage sessionId={sessionId} messageId={message.id} />
         </div>
       )}
 
@@ -632,19 +696,27 @@ export const MessageList: React.FC<Props> = ({ sessionId, messages, accountName,
               Mostrar {Math.min(hiddenCount, PAGE_SIZE)} anteriores ({hiddenCount} ocultos)
             </button>
           )}
-          {shownMessages.map((message) => (
-            <MessageBubble
-              key={message.id}
-              message={message}
-              sessionId={sessionId}
-              onSendSuggestion={onSendSuggestion}
-              provider={accounts.find((account) => account.id === message.profileId)?.provider}
-              role={role}
-              fileDiffs={fileDiffs}
-              live={message === lastMessage ? live : undefined}
-              isLast={message === lastMessage}
-            />
-          ))}
+          {groupSystemNotes(shownMessages).map((item) =>
+            Array.isArray(item) ? (
+              <SystemGroup
+                key={item[0].id}
+                messages={item}
+                defaultOpen={item[item.length - 1] === lastMessage && item.some((m) => m.isError)}
+              />
+            ) : (
+              <MessageBubble
+                key={item.id}
+                message={item}
+                sessionId={sessionId}
+                onSendSuggestion={onSendSuggestion}
+                provider={accounts.find((account) => account.id === item.profileId)?.provider}
+                role={role}
+                fileDiffs={fileDiffs}
+                live={item === lastMessage ? live : undefined}
+                isLast={item === lastMessage}
+              />
+            )
+          )}
         </>
       )}
     </div>

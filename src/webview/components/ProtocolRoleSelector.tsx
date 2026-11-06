@@ -6,6 +6,8 @@ import { Compass, PenTool, CheckSquare, Code2, ShieldAlert, Globe2, FileText, Pa
 interface Props {
   selectedRole?: ProtocolRole;
   onSelectRole: (role: ProtocolRole | undefined) => void;
+  /** Traspasos del equipo; mandan sobre el `handoffTo` del rol. */
+  handoffTo?: ProtocolRole[];
 }
 
 const ROLE_ICONS: Record<ProtocolRole, React.ReactNode> = {
@@ -21,13 +23,14 @@ const ROLE_ICONS: Record<ProtocolRole, React.ReactNode> = {
   depurador: <Bug className="w-3 h-3 text-red-400 shrink-0" />
 };
 
-export const ProtocolRoleSelector: React.FC<Props> = ({ selectedRole, onSelectRole }) => {
+export const ProtocolRoleSelector: React.FC<Props> = ({ selectedRole, onSelectRole, handoffTo }) => {
   const role = selectedRole ? PROTOCOL_ROLES[selectedRole] : undefined;
+  const next = handoffTo ?? (role?.handoffTo ? [role.handoffTo] : []);
 
   return (
     <label
-      className="flex-1 min-w-0 flex items-center gap-1.5 px-1.5 h-7 rounded bg-zinc-900 border border-zinc-800 focus-within:border-indigo-500 transition"
-      title={role ? `${role.description} (Modelo sugerido: ${role.recommendedModel}, esfuerzo: ${role.recommendedEffort})` : 'Sin rol del protocolo'}
+      className="group relative flex-1 min-w-0 flex items-center gap-1.5 px-1.5 h-7 rounded bg-zinc-900 border border-zinc-800 focus-within:border-indigo-500 transition"
+      title={role ? undefined : 'Sin rol del protocolo'}
     >
       {role ? ROLE_ICONS[role.id] : <UserRound className="w-3 h-3 text-zinc-400 shrink-0" />}
       <select
@@ -43,6 +46,18 @@ export const ProtocolRoleSelector: React.FC<Props> = ({ selectedRole, onSelectRo
           </option>
         ))}
       </select>
+      {role && (
+        <div role="tooltip" className="hidden group-hover:block group-focus-within:block absolute left-0 top-full mt-1 z-30 w-64 p-2 rounded-lg border border-zinc-700 bg-zinc-900 shadow-xl text-[11px] space-y-1">
+          <div className="font-semibold text-zinc-100">{role.label}</div>
+          <p className="text-zinc-300">{role.description}</p>
+          <dl className="grid grid-cols-[auto_1fr] gap-x-2 text-zinc-400">
+            <dt>Modelo</dt><dd className="text-zinc-200">{role.recommendedModel}</dd>
+            <dt>Esfuerzo</dt><dd className="text-zinc-200">{role.recommendedEffort}</dd>
+            <dt>Acceso</dt><dd className="text-zinc-200">{role.readOnly ? 'Solo lectura' : 'Puede editar'}</dd>
+            <dt>Pasa a</dt><dd className="text-zinc-200">{next.length > 0 ? next.map((id) => PROTOCOL_ROLES[id]?.label ?? id).join(', ') : 'Nadie'}</dd>
+          </dl>
+        </div>
+      )}
     </label>
   );
 };

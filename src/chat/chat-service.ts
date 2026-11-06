@@ -1,4 +1,5 @@
-import { createCheckpoint, getCheckpointDiff, getCheckpointFiles } from '../host/git-checkpoint';
+import { createCheckpoint, getCheckpointDiff, getCheckpointFiles, listUntracked } from '../host/git-checkpoint';
+import { commitStage } from '../host/git-worktree';
 import { AgentEvent, AgentRun, TurnOutcome } from '../agents/agent-provider';
 import { composePrompt, loadExperience, loadProjectRules, missingHandoffFields } from '../agents/prompt-composer';
 import { ProviderRegistry } from '../agents/provider-registry';
@@ -7,7 +8,7 @@ import { agentName } from '../shared/agent-name';
 import { extractQuestionOptions } from '../shared/question-options';
 import { summarizeCosts } from '../shared/cost-summary';
 import { resolveSelection } from '../shared/model-selection';
-import { PROTOCOL_ROLES } from '../shared/protocol-roles';
+import { nextRoles, PROTOCOL_ROLES } from '../shared/protocol-roles';
 import {
   AccountProfile,
   AgentMessage,
@@ -39,6 +40,19 @@ export interface SendPromptOptions {
   planFirst?: boolean;
   /** Cuántas veces se le devolvieron al agente tests fallidos en esta cadena. */
   verifyAttempt?: number;
+}
+
+/** Traspaso retenido hasta que la persona lo apruebe; se guarda en disco para no perderlo al reiniciar. */
+export interface PendingHandoff {
+  message: AgentMessage;
+  targetId: string;
+  workspaceDir: string;
+  hops: number;
+}
+
+export interface PendingStore {
+  load(): PendingHandoff[];
+  save(items: PendingHandoff[]): void;
 }
 
 interface Queued {
@@ -93,28 +107,82 @@ export class ChatService {
   /** Corre los tests del proyecto tras el turno de un Desarrollador de equipo; sin definir, no verifica. */
   public verify?: (cwd: string) => Promise<{ ok: boolean; output: string } | undefined>;
   private slotsHeld = 0;
-  private readonly waiters: Array<() => void> = [];
+  private readonly waiters: Array<{ sessionId: string; wake: (granted: boolean) => void }> = [];
   /** Traspasos que esperan aprobación, con lo necesario para entregarlos. */
-  private readonly pendingHandoffs = new Map<string, { message: AgentMessage; targetId: string; workspaceDir: string; hops: number }>();
+  private readonly pendingHandoffs = new Map<string, PendingHandoff>();
 
   constructor(
     private readonly sessions: SessionStore,
     private readonly telemetry: TelemetryStore,
     private readonly providers: ProviderRegistry,
     private readonly post: (message: HostMessage) => void,
-    private readonly notify?: (text: string) => void
-  ) {}
+    private readonly notify?: (text: string) => void,
+    private readonly pendingStore?: PendingStore
+  ) {
+    for (const pending of pendingStore?.load() ?? []) {
+      if (sessions.get(pending.targetId)) this.pendingHandoffs.set(pending.message.id, pending);
+    }
+  }
 
-  private async acquireSlot(): Promise<void> {
+  private savePending(): void {
+    this.pendingStore?.save([...this.pendingHandoffs.values()]);
+  }
+
+  /** Aviso en VS Code y en el centro de notificaciones del panel. */
+  private emitNotice(sessionId: string, text: string): void {
+    this.notify?.(text);
+    this.post({ type: 'notice', notice: { id: newMessageId(), at: Date.now(), text, sessionId } });
+  }
+
+  /** Al abrir VS Code: avisa de los turnos que quedaron a medias (la conversación termina en un mensaje tuyo). */
+  public markInterrupted(): void {
+    for (const session of this.sessions.list()) {
+      const last = session.messages[session.messages.length - 1];
+      if (last?.role !== 'user' || this.isRunning(session.id)) continue;
+      this.addNote(session.id, 'Este turno se interrumpió al cerrar VS Code. Vuelve a enviar el mensaje para retomarlo.', true);
+      this.attention.add(session.id);
+    }
+    this.publishSessions();
+  }
+
+  /** Espera cupo; devuelve false si la persona quitó el turno de la cola. */
+  private async acquireSlot(sessionId: string): Promise<boolean> {
+    let queuedBefore = false;
     while (this.maxConcurrent > 0 && this.slotsHeld >= this.maxConcurrent) {
-      await new Promise<void>((resolve) => this.waiters.push(resolve));
+      const granted = await new Promise<boolean>((resolve) => {
+        const entry = { sessionId, wake: resolve };
+        // Quien despertó y perdió el cupo conserva su lugar al frente.
+        if (queuedBefore) this.waiters.unshift(entry);
+        else this.waiters.push(entry);
+        queuedBefore = true;
+        this.publishSessions();
+      });
+      if (!granted) return false;
     }
     this.slotsHeld += 1;
+    return true;
   }
 
   private releaseSlot(): void {
     this.slotsHeld -= 1;
-    this.waiters.shift()?.();
+    this.waiters.shift()?.wake(true);
+    this.publishSessions();
+  }
+
+  /** Quita de la cola un turno que aún espera cupo. */
+  public cancelWaiting(sessionId: string): void {
+    const index = this.waiters.findIndex((entry) => entry.sessionId === sessionId);
+    if (index === -1) return;
+    const [entry] = this.waiters.splice(index, 1);
+    entry.wake(false);
+  }
+
+  /** Pasa un turno en espera al primer lugar de la cola. */
+  public prioritizeWaiting(sessionId: string): void {
+    const index = this.waiters.findIndex((entry) => entry.sessionId === sessionId);
+    if (index <= 0) return;
+    this.waiters.unshift(...this.waiters.splice(index, 1));
+    this.publishSessions();
   }
 
   /** Entrega o descarta un traspaso que esperaba la aprobación de la persona. */
@@ -122,6 +190,7 @@ export class ChatService {
     const pending = this.pendingHandoffs.get(id);
     if (!pending) return;
     this.pendingHandoffs.delete(id);
+    this.savePending();
     const { message, targetId, workspaceDir, hops } = pending;
     if (!approve) {
       this.addNote(targetId, `Traspaso de ${message.from} rechazado.`);
@@ -160,6 +229,7 @@ export class ChatService {
   public discard(sessionId: string): void {
     this.queues.delete(sessionId);
     for (const [id, pending] of this.pendingHandoffs) if (pending.targetId === sessionId) this.pendingHandoffs.delete(id);
+    this.savePending();
     this.cancel(sessionId);
   }
 
@@ -197,7 +267,8 @@ export class ChatService {
         comms: this.comms,
         attentionSessionIds: [...this.attention],
         costs: summarizeCosts(this.sessions.list()),
-        pendingHandoffs: [...this.pendingHandoffs.values()].map((pending) => pending.message)
+        pendingHandoffs: [...this.pendingHandoffs.values()].map((pending) => pending.message),
+        waitingSessionIds: this.waiters.map((entry) => entry.sessionId)
       }
     });
   }
@@ -257,7 +328,11 @@ export class ChatService {
 
     this.preparingSessionIds.add(sessionId);
     this.publishSessions();
-    await this.acquireSlot();
+    if (!(await this.acquireSlot(sessionId))) {
+      this.preparingSessionIds.delete(sessionId);
+      this.addNote(sessionId, 'Turno quitado de la cola.');
+      return;
+    }
     const accounts = await this.providers.listAccounts();
     this.preparingSessionIds.delete(sessionId);
 
@@ -368,6 +443,8 @@ export class ChatService {
       }
     };
 
+    const readOnlyTurn = Boolean(options.planFirst) || this.isReadOnly(session, role);
+    const untrackedBefore = readOnlyTurn ? new Set(listUntracked(workspaceDir)) : undefined;
     const checkpointHash = createCheckpoint(workspaceDir);
     if (checkpointHash) reply.checkpointHash = checkpointHash;
     const startedAt = Date.now();
@@ -406,19 +483,36 @@ export class ChatService {
     this.finishTurn(session, reply, outcome);
     if (timedOut) this.addNote(sessionId, `Sin actividad durante ${Math.round(this.idleTimeoutMs / 60000)} min: el turno se canceló.`, true);
     if (usage.costUSD) reply.costUSD = usage.costUSD;
+    reply.durationMs = Date.now() - startedAt;
     if (checkpointHash) {
       reply.checkpointDiff = getCheckpointDiff(workspaceDir, checkpointHash);
       reply.checkpointFiles = getCheckpointFiles(workspaceDir, checkpointHash);
-      this.sessions.update(session.id, { messages: session.messages });
+    }
+    this.sessions.update(session.id, { messages: session.messages });
+    if (untrackedBefore) {
+      // Ninguna CLI garantiza el solo lectura (la terminal escribe): se detecta lo que cambió y se avisa.
+      const touched = [...(reply.checkpointFiles ?? []), ...listUntracked(workspaceDir).filter((file) => !untrackedBefore.has(file))];
+      if (touched.length > 0) {
+        this.addNote(
+          sessionId,
+          `El turno era de solo lectura pero cambió ${touched.length} archivo(s): ${touched.slice(0, 5).join(', ')}${touched.length > 5 ? '…' : ''}. Pueden incluir ediciones tuyas; revísalos en el panel de cambios del turno.`,
+          true
+        );
+      }
     }
     if (outcome.status === 'completed') {
       this.telemetry.recordTurn(target, { ...usage, durationMs: Date.now() - startedAt });
       if (role === 'desarrollador' && session.squad && this.verify && (await this.verifyBeforeHandoff(options, role))) return;
+      if (session.isolatedBranch) {
+        reply.stageCommit = commitStage(workspaceDir, `agent-hub: ${agentName(session)}`);
+        this.sessions.update(session.id, { messages: session.messages });
+      }
       this.routeAgentMessages(session, reply.content, options.hops ?? 0);
     }
     if (outcome.status !== 'cancelled' && session.id !== this.sessions.getActive().id) {
       this.attention.add(session.id);
-      this.notify?.(
+      this.emitNotice(
+        session.id,
         outcome.status === 'failed' ? `${agentName(session)} falló` : reply.questionOptions ? `${agentName(session)} te hace una pregunta` : `${agentName(session)} terminó`
       );
     }
@@ -482,12 +576,12 @@ export class ChatService {
   }
 
   /** Nombres de los compañeros de equipo; indefinido si el agente trabaja solo. */
-  private teammates(session: ConversationSession): { self: string; mates: string[]; next?: string } | undefined {
+  private teammates(session: ConversationSession): { self: string; mates: string[]; next?: string[] } | undefined {
     if (!session.squad) return undefined;
     const mates = this.sessions.list().filter((other) => other.squad === session.squad && other.id !== session.id);
-    const nextRole = session.protocolRole && PROTOCOL_ROLES[session.protocolRole].handoffTo;
-    const next = nextRole ? mates.find((mate) => mate.protocolRole === nextRole) : undefined;
-    return mates.length > 0 ? { self: agentName(session), mates: mates.map(agentName), next: next && agentName(next) } : undefined;
+    const nextRolesOfSession = nextRoles(session);
+    const next = mates.filter((mate) => mate.protocolRole && nextRolesOfSession.includes(mate.protocolRole)).map(agentName);
+    return mates.length > 0 ? { self: agentName(session), mates: mates.map(agentName), next } : undefined;
   }
 
   /** Entrega a cada compañero los `>> nombre: mensaje` que el agente escribió. */
@@ -505,7 +599,7 @@ export class ChatService {
         return;
       } else {
         const from = agentName(sender);
-        const isHandoff = sender.protocolRole && target.protocolRole === PROTOCOL_ROLES[sender.protocolRole].handoffTo;
+        const isHandoff = Boolean(target.protocolRole && nextRoles(sender).includes(target.protocolRole));
         const missing = isHandoff ? missingHandoffFields(body) : [];
         if (missing.length > 0) this.addNote(sender.id, `Traspaso a ${name} sin los campos: ${missing.join(' ')}`, true);
         if (isHandoff && sender.approveStages) {
@@ -516,7 +610,9 @@ export class ChatService {
             workspaceDir: target.projectPath ?? sender.projectPath ?? '',
             hops: hops + 1
           });
+          this.savePending();
           this.addNote(sender.id, `Traspaso a ${name} espera tu aprobación.`);
+          this.emitNotice(sender.id, `${from} espera tu aprobación para pasarle el trabajo a ${name}`);
           continue;
         }
         this.comms = [...this.comms, { id: newMessageId(), at: Date.now(), from, to: agentName(target), text: body.trim() }].slice(-MAX_COMMS);

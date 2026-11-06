@@ -22,6 +22,14 @@ import { findSecrets } from '../src/analysis/secret-scanner';
 import { findDestructiveStatements, findQueryIssues } from '../src/analysis/sql-review';
 import { ChatService } from '../src/chat/chat-service';
 import { readAttachment } from '../src/host/attachments';
+import { pullRequestCommand } from '../src/host/pull-request';
+import { ClaudeProvider } from '../src/agents/claude/claude-provider';
+import { commitStage, restoreStage, squadDiffFiles } from '../src/host/git-worktree';
+import { parseIssueRef, resolveRequirement } from '../src/host/issue-source';
+import { runProjectTests, verificationCommands } from '../src/host/test-runner';
+import { pruneExperience, selectExperience } from '../src/shared/experience';
+import { buildTeamReport } from '../src/shared/team-report';
+import { nextRoles } from '../src/shared/protocol-roles';
 import { createSquadWorktree, mainRepoOf, mergeSquadWorktree, removeSquadWorktree } from '../src/host/git-worktree';
 import { isInsideWorkspace } from '../src/host/safe-path';
 import { templateById } from '../src/shared/team-templates';
@@ -622,6 +630,132 @@ describe('ChatService', () => {
     assert.strictEqual(await run(0), 2);
   });
 
+  it('la cola global muestra quién espera y permite subir o quitar un turno', async () => {
+    const { chat, provider, sessions, session, posted } = setup(() => ({ status: 'completed' }));
+    provider.startTurn = (request: AgentTurnRequest) => {
+      provider.requests.push(request);
+      return { outcome: new Promise<TurnOutcome>((resolve) => setTimeout(() => resolve({ status: 'completed' }), 60)), cancel: () => undefined };
+    };
+    const second = sessions.create({});
+    const third = sessions.create({});
+    chat.maxConcurrent = 1;
+    const sends = [session.id, second.id, third.id].map((id) => chat.send({ sessionId: id, prompt: 'x', workspaceDir: tempDir() }));
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    const waiting = () => [...posted].reverse().map((m) => (m.type === 'state' ? m.patch.waitingSessionIds : undefined)).find(Boolean);
+    assert.deepStrictEqual(waiting(), [second.id, third.id]);
+    chat.prioritizeWaiting(third.id);
+    assert.deepStrictEqual(waiting(), [third.id, second.id]);
+    chat.cancelWaiting(second.id);
+    await Promise.all(sends);
+    assert.strictEqual(provider.requests.length, 2);
+    assert.ok(sessions.get(second.id)!.messages.some((m) => m.content.includes('quitado de la cola')));
+  });
+
+  it('un turno de solo lectura que modifica archivos lo avisa; uno con escritura no', async () => {
+    const dir = path.join(tempDir(), 'repo');
+    fs.mkdirSync(dir);
+    const git = (...args: string[]) => execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...args], { cwd: dir, stdio: 'ignore' });
+    git('init');
+    fs.writeFileSync(path.join(dir, 'a.txt'), 'uno');
+    git('add', '.');
+    git('commit', '-m', 'init');
+    const writes = (emit: (event: AgentEvent) => void) => { fs.writeFileSync(path.join(dir, 'a.txt'), 'dos'); fs.writeFileSync(path.join(dir, 'nuevo.txt'), 'x'); emit({ kind: 'text', text: 'listo' }); };
+
+    const readOnly = setup((emit) => { writes(emit); return { status: 'completed' }; });
+    readOnly.sessions.update(readOnly.session.id, { protocolRole: 'revisor' });
+    await readOnly.chat.send({ sessionId: readOnly.session.id, prompt: 'lee', workspaceDir: dir });
+    const warning = readOnly.sessions.get(readOnly.session.id)!.messages.find((m) => m.content.includes('solo lectura'));
+    assert.ok(warning && warning.content.includes('a.txt') && warning.content.includes('nuevo.txt'));
+    // Con el árbol limpio igual hay punto de partida (HEAD) y se listan los archivos cambiados.
+    assert.deepStrictEqual(readOnly.sessions.get(readOnly.session.id)!.messages[1].checkpointFiles, ['a.txt']);
+
+    git('checkout', '--', 'a.txt');
+    fs.rmSync(path.join(dir, 'nuevo.txt'));
+    const writable = setup((emit) => { writes(emit); return { status: 'completed' }; });
+    writable.sessions.update(writable.session.id, { protocolRole: 'desarrollador' });
+    await writable.chat.send({ sessionId: writable.session.id, prompt: 'edita', workspaceDir: dir });
+    assert.ok(!writable.sessions.get(writable.session.id)!.messages.some((m) => m.content.includes('solo lectura')));
+  });
+
+  it('el turno guarda su duración', async () => {
+    const { send, session } = setup((emit) => { emit({ kind: 'text', text: 'ok' }); return { status: 'completed' }; });
+    await send('x');
+    assert.ok(typeof session.messages[1].durationMs === 'number');
+  });
+
+  it('en una copia aparte cada turno deja un commit de etapa al que se puede volver', async () => {
+    const base = path.join(tempDir(), 'repo');
+    fs.mkdirSync(base);
+    const run = (cwd: string, ...args: string[]) => execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...args], { cwd, encoding: 'utf8' });
+    run(base, 'init');
+    fs.writeFileSync(path.join(base, 'a.txt'), 'uno');
+    run(base, 'add', '.');
+    run(base, 'commit', '-m', 'init');
+    const worktree = createSquadWorktree(base, 'etapas')!;
+    const { chat, sessions, session } = setup((emit) => { fs.writeFileSync(path.join(worktree.path, 'etapa1.txt'), '1'); emit({ kind: 'text', text: 'hecho' }); return { status: 'completed' }; });
+    sessions.update(session.id, { isolatedBranch: worktree.branch, projectPath: worktree.path });
+    await chat.send({ sessionId: session.id, prompt: 'x', workspaceDir: worktree.path });
+    const commit = sessions.get(session.id)!.messages[1].stageCommit!;
+    assert.match(commit, /^[0-9a-f]{40}$/);
+    assert.ok(run(worktree.path, 'log', '--format=%s', '-1').includes('agent-hub:'));
+    fs.writeFileSync(path.join(worktree.path, 'despues.txt'), '2');
+    assert.ok(restoreStage(worktree.path, commit));
+    assert.ok(fs.existsSync(path.join(worktree.path, 'etapa1.txt')));
+    assert.ok(!fs.existsSync(path.join(worktree.path, 'despues.txt')));
+  });
+
+  it('traspaso en paralelo: el Desarrollador avisa a dos compañeros y ambos reciben el trabajo', async () => {
+    const message = (name: string) => `>> ${name}: Hecho: a\nArchivos: b\nPendiente: c\nVerificación: d\n\n`;
+    let turns = 0;
+    const { chat, provider, sessions, session } = setup((emit) => {
+      // Solo el primer turno (el del Desarrollador) traspasa; los compañeros responden sin escribir a nadie.
+      emit({ kind: 'text', text: ++turns === 1 ? message('revisor-1') + message('documentador-1') : 'recibido' });
+      return { status: 'completed' };
+    });
+    sessions.update(session.id, { protocolRole: 'desarrollador', taskSlug: 'desarrollador-1', squad: 'P', handoffTo: ['revisor', 'documentador'] });
+    sessions.create({ protocolRole: 'revisor', taskSlug: 'revisor-1', squad: 'P' });
+    sessions.create({ protocolRole: 'documentador', taskSlug: 'documentador-1', squad: 'P' });
+    await chat.send({ sessionId: session.id, prompt: 'x', workspaceDir: tempDir() });
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    assert.ok(provider.requests[0].prompt.includes('"revisor-1" y a "documentador-1"'));
+    assert.strictEqual(provider.requests.length, 3);
+  });
+
+  it('markInterrupted avisa de un turno que quedó a medias y no repite el aviso', () => {
+    const { chat, sessions, session } = setup(() => ({ status: 'completed' }));
+    sessions.appendMessage(session.id, { id: 'u1', role: 'user', content: 'hazlo', profileId: 'p', modelName: 'Usuario', timestamp: Date.now() });
+    chat.markInterrupted();
+    chat.markInterrupted();
+    assert.strictEqual(sessions.get(session.id)!.messages.filter((m) => m.content.includes('se interrumpió')).length, 1);
+  });
+
+  it('los traspasos pendientes sobreviven a un reinicio', async () => {
+    const dir = tempDir();
+    const sessions = new SessionStore(dir);
+    let stored: any[] = [];
+    const store = { load: () => stored, save: (items: any[]) => { stored = items; } };
+    const script = (emit: (event: AgentEvent) => void) => { emit({ kind: 'text', text: '>> tester-1: Hecho: s\nArchivos: a\nPendiente: t\nVerificación: v\n\n' }); return { status: 'completed' as const }; };
+    const chat = new ChatService(sessions, new TelemetryStore(dir), new ProviderRegistry([new FakeProvider(script)]), () => undefined, undefined, store);
+    const sender = sessions.getActive();
+    sessions.update(sender.id, { protocolRole: 'arquitecto', taskSlug: 'arquitecto-1', squad: 'S', approveStages: true });
+    sessions.create({ protocolRole: 'tester', taskSlug: 'tester-1', squad: 'S' });
+    await chat.send({ sessionId: sender.id, prompt: 'x', workspaceDir: dir });
+    assert.strictEqual(stored.length, 1);
+    const posted: HostMessage[] = [];
+    const reopened = new ChatService(sessions, new TelemetryStore(dir), new ProviderRegistry([new FakeProvider(script)]), (m) => posted.push(m), undefined, store);
+    reopened.publishSessions();
+    const patch = posted.find((m) => m.type === 'state')!;
+    assert.ok(patch.type === 'state' && patch.patch.pendingHandoffs?.length === 1);
+  });
+
+  it('avisa por el centro de notificaciones cuando termina un agente que no estás viendo', async () => {
+    const { chat, sessions, session, posted } = setup((emit) => { emit({ kind: 'text', text: 'listo' }); return { status: 'completed' }; });
+    sessions.create({});
+    await chat.send({ sessionId: session.id, prompt: 'x', workspaceDir: tempDir() });
+    const notice = posted.find((m) => m.type === 'notice');
+    assert.ok(notice && notice.type === 'notice' && notice.notice.text.includes('terminó') && notice.notice.sessionId === session.id);
+  });
+
   it('guarda la respuesta y la conversación de la CLI en el host', async () => {
     const { session, send, posted, chat } = setup((emit) => {
       emit({ kind: 'resumeId', id: 'cli-1' });
@@ -944,9 +1078,9 @@ describe('Pipeline y permisos por rol', () => {
   });
 
   it('el prompt indica a quién pasar el trabajo solo si hay siguiente', () => {
-    const team = { self: 'tester-1', mates: ['desarrollador-1'], next: 'desarrollador-1' };
+    const team = { self: 'tester-1', mates: ['desarrollador-1'], next: ['desarrollador-1'] };
     assert.ok(composePrompt({ prompt: 'x', team }).includes('>> desarrollador-1:'));
-    assert.ok(!composePrompt({ prompt: 'x', team: { ...team, next: undefined } }).includes('pásale el trabajo'));
+    assert.ok(!composePrompt({ prompt: 'x', team: { ...team, next: [] } }).includes('pásale el trabajo'));
   });
 
   it('missingHandoffFields lista los campos que faltan en el traspaso', () => {
@@ -1365,5 +1499,199 @@ describe('Copias aparte, plantillas y archivo restaurable', () => {
     assert.ok(prompt.includes('m19-' + 'x'.repeat(3990)));
     assert.ok(prompt.includes('[…]'));
     assert.ok(prompt.length < 24 * 4000 / 2);
+  });
+});
+
+describe('Memoria, informe, issues, verificación por proyecto y copia aparte', () => {
+  const entry = (signal: string, lesson: string, extra = '') => `Señal: ${signal}\nLección: ${lesson}\nEvidencia: x${extra}`;
+
+  it('selectExperience descarta obsoletas y repetidas y no corta una entrada a la mitad', () => {
+    const content = ['Notas del proyecto', entry('a', 'Usa X'), entry('b', 'usa  x'), entry('c', 'Evita Y', '\nObsoleta: sí'), entry('d', 'Prefiere Z')].join('\n');
+    const picked = selectExperience(content, 2000);
+    assert.ok(picked.includes('Prefiere Z'));
+    assert.ok(!picked.includes('Evita Y'));
+    assert.strictEqual(picked.split('Señal:').length - 1, 2);
+    const tight = selectExperience(content, entry('d', 'Prefiere Z').length + 2);
+    assert.strictEqual(tight.split('Señal:').length - 1, 1);
+    assert.strictEqual(selectExperience('sin entradas '.repeat(300), 100).length, 100);
+  });
+
+  it('pruneExperience conserva el encabezado, quita obsoletas y repetidas y deja las más nuevas', () => {
+    const content = ['# Memoria', entry('a', 'Usa X'), entry('b', 'Usa X'), entry('c', 'Otra', '\nObsoleta: sí')].join('\n');
+    const pruned = pruneExperience(content);
+    assert.ok(pruned.startsWith('# Memoria'));
+    assert.strictEqual(pruned.split('Señal:').length - 1, 1);
+    assert.ok(pruned.includes('Señal: b'));
+  });
+
+  it('buildTeamReport resume roles, archivos, costo y duración', () => {
+    const member = (id: string, role: any, text: string): ConversationSession => ({
+      id, title: id, taskSlug: id, protocolRole: role, profileId: 'p', modelId: 'm', effort: 'low', createdAt: 0, updatedAt: 0, isolatedBranch: 'agent-hub/s',
+      messages: [{ id: id + 'a', role: 'assistant', content: text, profileId: 'p', modelName: 'm', timestamp: 0, costUSD: 0.5, durationMs: 65000, checkpointFiles: ['src/a.ts'] }]
+    });
+    const report = buildTeamReport([member('arquitecto-1', 'arquitecto', 'Diseñé la spec'), member('tester-1', 'tester', 'Escribí pruebas')]);
+    assert.ok(report.includes('| arquitecto | arquitecto-1 | 1 | $0.5000 | 1m 5s | 1 |'));
+    assert.ok(report.includes('**Total:** $1.0000 · 2m 10s'));
+    assert.ok(report.includes('`src/a.ts`') && report.includes('agent-hub/s'));
+  });
+
+  it('parseIssueRef y resolveRequirement convierten #N en el texto de la issue o del PR', async () => {
+    assert.deepStrictEqual(parseIssueRef('#12 con nota'), { number: '12', rest: 'con nota' });
+    assert.strictEqual(parseIssueRef('arregla #12'), undefined);
+    const issue = JSON.stringify({ title: 'Falla login', body: 'No entra', url: 'http://x/12' });
+    const text = await resolveRequirement('#12 urgente', '.', async () => issue);
+    assert.ok(text.startsWith('Issue #12: Falla login') && text.includes('No entra') && text.includes('urgente'));
+    const viaPr = await resolveRequirement('#7', '.', async (args) => { if (args[0] === 'issue') throw new Error('no es issue'); return issue; });
+    assert.ok(viaPr.startsWith('PR #7'));
+    await assert.rejects(resolveRequirement('#9', '.', async () => { throw new Error('sin gh'); }), /No se pudo leer #9/);
+    assert.strictEqual(await resolveRequirement('texto normal', '.', async () => { throw new Error('no debe llamarse'); }), 'texto normal');
+  });
+
+  it('la verificación usa la configuración del proyecto y se detiene en el primer fallo', async () => {
+    const dir = tempDir();
+    fs.mkdirSync(path.join(dir, '.agent-hub'));
+    const config = (verify: string[]) => fs.writeFileSync(path.join(dir, '.agent-hub', 'config.json'), JSON.stringify({ verify }));
+    config(['node -e "process.exit(0)"', 'node -e "console.log(\'roto\');process.exit(1)"', 'node -e "console.log(\'no llega\')"']);
+    const failed = (await runProjectTests(dir))!;
+    assert.strictEqual(failed.ok, false);
+    assert.ok(failed.output.includes('roto') && !failed.output.includes('no llega'));
+    config(['node -e "process.exit(0)"']);
+    assert.strictEqual((await runProjectTests(dir))!.ok, true);
+    assert.deepStrictEqual(verificationCommands(tempDir()), []);
+  });
+
+  it('pullRequestCommand usa el informe del equipo como cuerpo y no un borrador cualquiera', () => {
+    assert.strictEqual(pullRequestCommand('texto del borrador'), 'gh pr create --fill');
+    const command = pullRequestCommand('# Informe del equipo\n\ncontenido');
+    const file = /--body-file "(.+)"$/.exec(command)![1];
+    assert.strictEqual(fs.readFileSync(file, 'utf8'), '# Informe del equipo\n\ncontenido');
+    fs.rmSync(path.dirname(file), { recursive: true, force: true });
+  });
+
+  it('nextRoles prefiere lo fijado en el equipo y cae al rol; [] corta la cadena', () => {
+    assert.deepStrictEqual(nextRoles({ protocolRole: 'tester' }), ['desarrollador']);
+    assert.deepStrictEqual(nextRoles({ protocolRole: 'desarrollador', handoffTo: ['revisor', 'documentador'] }), ['revisor', 'documentador']);
+    assert.deepStrictEqual(nextRoles({ protocolRole: 'revisor', handoffTo: [] }), []);
+    assert.deepStrictEqual(nextRoles({}), []);
+    assert.deepStrictEqual(templateById('paralelo').handoffs?.desarrollador, ['revisor', 'documentador']);
+  });
+
+  it('squadDiffFiles lista lo acumulado desde la base, incluidos archivos nuevos y borrados', () => {
+    const base = path.join(tempDir(), 'repo');
+    fs.mkdirSync(base);
+    const run = (cwd: string, ...args: string[]) => execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...args], { cwd, encoding: 'utf8' });
+    run(base, 'init');
+    fs.writeFileSync(path.join(base, 'a.txt'), 'uno');
+    fs.writeFileSync(path.join(base, 'b.txt'), 'dos');
+    run(base, 'add', '.');
+    run(base, 'commit', '-m', 'init');
+    const worktree = createSquadWorktree(base, 'diff')!;
+    fs.writeFileSync(path.join(worktree.path, 'a.txt'), 'cambiado');
+    fs.rmSync(path.join(worktree.path, 'b.txt'));
+    fs.writeFileSync(path.join(worktree.path, 'c.txt'), 'nuevo');
+    assert.ok(commitStage(worktree.path, 'etapa'));
+    fs.writeFileSync(path.join(worktree.path, 'd.txt'), 'sin commit');
+    const files = squadDiffFiles(worktree.path, worktree.base);
+    assert.deepStrictEqual(files.map((f) => `${f.status}:${f.file}`).sort(), ['A:c.txt', 'A:d.txt', 'D:b.txt', 'M:a.txt']);
+    assert.ok(files.find((f) => f.file === 'a.txt')!.diff.includes('+cambiado'));
+  });
+
+  it('summarizeCosts suma la duración por agente solo cuando existe', () => {
+    const message = (extra: object) => ({ id: 'm', role: 'assistant' as const, content: 'x', profileId: 'p', modelName: 'm', timestamp: Date.UTC(2026, 10, 5, 12), ...extra });
+    const sessions: ConversationSession[] = [
+      { id: 'a', title: 'uno', taskSlug: 'uno', profileId: 'p', modelId: 'm', effort: 'low', createdAt: 0, updatedAt: 0, messages: [message({ costUSD: 1, durationMs: 1000 }), message({ costUSD: 1, durationMs: 2000 })] }
+    ];
+    assert.deepStrictEqual(summarizeCosts(sessions).agents, [{ name: 'uno', costUSD: 2, durationMs: 3000 }]);
+  });
+});
+
+describe('Punta a punta con una CLI simulada', () => {
+  const FAKE = path.join(process.cwd(), 'tests', 'fake-claude.js');
+
+  class E2EClaude extends ClaudeProvider {
+    public async discoverAccounts() { return [CLAUDE_ACCOUNT]; }
+  }
+
+  function setupE2E() {
+    const dir = tempDir();
+    const log = path.join(dir, 'argv.log');
+    process.env.FAKE_CLAUDE_LOG = log;
+    const pool = new CliProcessPool();
+    const provider = new E2EClaude(() => undefined, pool, { command: process.execPath, shell: false, prefixArgs: [FAKE] });
+    const sessions = new SessionStore(dir);
+    const chat = new ChatService(sessions, new TelemetryStore(dir), new ProviderRegistry([provider]), () => undefined);
+    const argvs = () => (fs.existsSync(log) ? fs.readFileSync(log, 'utf8').trim().split('\n').map((line) => JSON.parse(line) as string[]) : []);
+    return { dir, pool, sessions, chat, session: sessions.getActive(), argvs };
+  }
+
+  it('un turno real por el pool: texto, costo y conversación reanudable', async () => {
+    const { pool, sessions, chat, session, dir } = setupE2E();
+    try {
+      await chat.send({ sessionId: session.id, prompt: 'hola', workspaceDir: dir });
+      const messages = sessions.get(session.id)!.messages;
+      assert.ok(messages[1].content.includes('Hola desde la CLI simulada'));
+      assert.strictEqual(messages[1].costUSD, 0.01);
+      assert.strictEqual(sessions.get(session.id)!.cliSessionId, 'fake-session');
+      await chat.send({ sessionId: session.id, prompt: 'otra vez', workspaceDir: dir });
+      assert.strictEqual(sessions.get(session.id)!.messages.filter((m) => m.role === 'assistant').length, 2);
+    } finally {
+      pool.dispose();
+    }
+  });
+
+  it('un rol de solo lectura lanza la CLI sin herramientas de escritura y uno de escritura no', async () => {
+    const { pool, sessions, chat, session, dir, argvs } = setupE2E();
+    try {
+      sessions.update(session.id, { protocolRole: 'revisor' });
+      await chat.send({ sessionId: session.id, prompt: 'lee', workspaceDir: dir });
+      sessions.update(session.id, { protocolRole: 'desarrollador', cliSessionId: undefined });
+      await chat.send({ sessionId: session.id, prompt: 'edita', workspaceDir: dir });
+      const [readOnly, writable] = argvs();
+      assert.ok(readOnly.includes('--disallowedTools'));
+      assert.ok(!writable.includes('--disallowedTools'));
+    } finally {
+      pool.dispose();
+    }
+  });
+
+  it('si la CLI escribe en un turno de solo lectura, el hub lo detecta', async () => {
+    const { pool, sessions, chat, session } = setupE2E();
+    const repo = path.join(tempDir(), 'repo');
+    fs.mkdirSync(repo);
+    const git = (...args: string[]) => execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...args], { cwd: repo, stdio: 'ignore' });
+    git('init');
+    fs.writeFileSync(path.join(repo, 'a.txt'), 'uno');
+    git('add', '.');
+    git('commit', '-m', 'init');
+    try {
+      sessions.update(session.id, { protocolRole: 'revisor' });
+      await chat.send({ sessionId: session.id, prompt: 'ESCRIBIR nuevo.txt', workspaceDir: repo });
+      const warning = sessions.get(session.id)!.messages.find((m) => m.content.includes('solo lectura'));
+      assert.ok(warning && warning.content.includes('nuevo.txt'));
+    } finally {
+      pool.dispose();
+    }
+  });
+
+  it('un error de cuota de la CLI llega al chat como error visible', async () => {
+    const { pool, sessions, chat, session, dir } = setupE2E();
+    try {
+      await chat.send({ sessionId: session.id, prompt: 'CUOTA', workspaceDir: dir });
+      const note = sessions.get(session.id)!.messages.find((m) => m.role === 'system');
+      assert.ok(note && note.isError && /usage limit/i.test(note.content));
+    } finally {
+      pool.dispose();
+    }
+  });
+
+  it('una CLI que se cuelga se cancela por inactividad', async () => {
+    const { pool, sessions, chat, session, dir } = setupE2E();
+    try {
+      chat.idleTimeoutMs = 500;
+      await chat.send({ sessionId: session.id, prompt: 'COLGAR', workspaceDir: dir });
+      assert.ok(sessions.get(session.id)!.messages.some((m) => m.content.includes('Sin actividad')));
+    } finally {
+      pool.dispose();
+    }
   });
 });

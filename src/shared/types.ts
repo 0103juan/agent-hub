@@ -107,7 +107,7 @@ export interface CostSummary {
   /** Últimos días con gasto, de más viejo a más nuevo; `day` es YYYY-MM-DD. */
   days: Array<{ day: string; costUSD: number }>;
   /** Gasto total por agente, de mayor a menor. */
-  agents: Array<{ name: string; costUSD: number }>;
+  agents: Array<{ name: string; costUSD: number; durationMs?: number }>;
 }
 
 /** Sesión archivada, sin sus mensajes. */
@@ -116,6 +116,21 @@ export interface ArchivedSessionInfo {
   title: string;
   updatedAt: number;
   projectName?: string;
+}
+
+/** Aviso para el centro de notificaciones del panel. */
+export interface Notice {
+  id: string;
+  at: number;
+  text: string;
+  sessionId?: string;
+}
+
+export interface SquadDiffFile {
+  file: string;
+  /** A, M, D... según git. */
+  status: string;
+  diff: string;
 }
 
 export interface SearchHit {
@@ -145,6 +160,10 @@ export interface ChatMessage {
   checkpointDiff?: string;
   /** Archivos que el turno cambió respecto al checkpoint. */
   checkpointFiles?: string[];
+  /** Duración del turno en ms. */
+  durationMs?: number;
+  /** Commit de la copia aparte al terminar este turno; permite volver a ese punto. */
+  stageCommit?: string;
   /** Respuesta de un turno "plan primero": propone, no edita. */
   isPlan?: boolean;
   /** Fijado por la persona para encontrarlo rápido. */
@@ -212,6 +231,10 @@ export interface ConversationSession {
   permission?: SessionPermission;
   /** Los traspasos entre agentes del equipo esperan la aprobación de la persona. */
   approveStages?: boolean;
+  /** A quién pasa el trabajo en este equipo; manda sobre el `handoffTo` del rol. */
+  handoffTo?: ProtocolRole[];
+  /** Commit desde el que partió la copia aparte. */
+  isolatedBase?: string;
   /** Rama del `git worktree` aislado del equipo; `projectPath` apunta a esa copia. */
   isolatedBranch?: string;
   messages: ChatMessage[];

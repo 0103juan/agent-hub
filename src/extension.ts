@@ -1,4 +1,5 @@
 import { OllamaProvider } from './agents/ollama/ollama-provider';
+import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
@@ -7,7 +8,7 @@ import { CliProcessPool } from './agents/cli-process-pool';
 import { ClaudeProvider } from './agents/claude/claude-provider';
 import { CopilotProvider } from './agents/copilot/copilot-provider';
 import { ProviderRegistry } from './agents/provider-registry';
-import { ChatService } from './chat/chat-service';
+import { ChatService, PendingHandoff, PendingStore } from './chat/chat-service';
 import { addAccount } from './host/handlers/account-handlers';
 import { registerProposalProvider } from './host/handlers/editor-handlers';
 import { workspaceDirForSession } from './host/handlers/session-handlers';
@@ -18,6 +19,7 @@ import { HubViewProvider } from './host/hub-view-provider';
 import { currentEditor, openTerminal } from './host/workspace';
 import { MCPSyncer } from './mcp/mcp-syncer';
 import { ProtocolRole, ProviderType } from './shared/types';
+import { readJsonFile } from './storage/json-file';
 import { SessionStore } from './storage/session-store';
 import { TelemetryStore } from './storage/telemetry-store';
 
@@ -56,11 +58,16 @@ export function activate(context: vscode.ExtensionContext): void {
     path.join(storageDir, 'accounts-cache.json'),
     (accounts) => post({ type: 'state', patch: { accounts } })
   );
+  const pendingFile = path.join(storageDir, 'pending-handoffs.json');
+  const pendingStore: PendingStore = {
+    load: () => readJsonFile<PendingHandoff[]>(pendingFile, []),
+    save: (items) => fs.writeFileSync(pendingFile, JSON.stringify(items))
+  };
   const hub: HubContext = {
     sessions,
     telemetry,
     providers,
-    chat: new ChatService(sessions, telemetry, providers, post, (text) => void vscode.window.showInformationMessage(`AgentHub: ${text}`)),
+    chat: new ChatService(sessions, telemetry, providers, post, (text) => void vscode.window.showInformationMessage(`AgentHub: ${text}`), pendingStore),
     mcp: new MCPSyncer(),
     post,
     openBesidePanel: () => view.openBesidePanel()
@@ -72,6 +79,7 @@ export function activate(context: vscode.ExtensionContext): void {
     hub.chat.verify = settings.get<boolean>('verifyAfterDeveloper', true) ? runProjectTests : undefined;
   };
   applySettings();
+  hub.chat.markInterrupted();
   view.connect(hub);
 
   const statusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);

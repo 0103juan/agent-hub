@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { selectExperience } from '../shared/experience';
 import { PROTOCOL_ROLES } from '../shared/protocol-roles';
 import { ChatMessage, FileContextAttachment, ProtocolRole } from '../shared/types';
 
@@ -26,7 +27,7 @@ export interface PromptParts {
   /** Mensajes previos, solo cuando la CLI no puede reanudar la conversación. */
   history?: ChatMessage[];
   /** Compañeros del mismo equipo, para que el agente sepa a quién escribirle. */
-  team?: { self: string; mates: string[]; /** Compañero al que pasar el trabajo al terminar. */ next?: string };
+  team?: { self: string; mates: string[]; /** Compañero al que pasar el trabajo al terminar. */ next?: string[] };
   /** Reglas persistentes del repositorio (.agent-hub/rules.md, AGENTS.md, etc.) */
   projectRules?: string;
   /** Lecciones de tareas anteriores del proyecto (.agent-hub/experience.md). */
@@ -87,7 +88,7 @@ export function loadExperience(workspaceDir?: string): string | undefined {
   if (!workspaceDir) return undefined;
   try {
     const content = fs.readFileSync(path.join(workspaceDir, EXPERIENCE_FILE), 'utf8').trim();
-    return content ? content.slice(-MAX_EXPERIENCE_CHARS) : undefined;
+    return content ? selectExperience(content, MAX_EXPERIENCE_CHARS) || undefined : undefined;
   } catch {
     return undefined;
   }
@@ -120,7 +121,9 @@ export function composePrompt({ prompt, role, attachments = [], history = [], te
       `[EQUIPO]\nTe llamas "${team.self}" y trabajas con: ${team.mates.join(', ')}.\n` +
         'Para escribirle a un compañero pon en tu respuesta una línea `>> nombre: mensaje` (termina con una línea en blanco). ' +
         'Hazlo solo si necesitas algo de él, y no contestes a mensajes que no piden respuesta.' +
-        (team.next ? ` Cuando termines tu parte, pásale el trabajo a "${team.next}" con una línea \`>> ${team.next}: ...\` con estos campos, uno por línea: ${HANDOFF_FIELDS.join(' ')}` : '')
+        (team.next?.length
+          ? ` Cuando termines tu parte, pásale el trabajo a ${team.next.map((name) => `"${name}"`).join(' y a ')} con una línea \`>> ${team.next[0]}: ...\` por cada uno, con estos campos, uno por línea: ${HANDOFF_FIELDS.join(' ')}`
+          : '')
     );
   }
 

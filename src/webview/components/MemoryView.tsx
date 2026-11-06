@@ -42,6 +42,14 @@ export const MemoryView: React.FC<{ experience?: string }> = ({ experience }) =>
         </span>
         <button
           type="button"
+          onClick={() => postToHost({ command: 'pruneExperience' })}
+          title="Quita notas repetidas y las más viejas; el resultado se recarga aquí"
+          className="px-3 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 text-[11px] transition"
+        >
+          Podar duplicados y viejas
+        </button>
+        <button
+          type="button"
           disabled={draft === (experience ?? '')}
           onClick={() => postToHost({ command: 'saveExperience', content: draft })}
           className="px-3 py-1 rounded bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white text-[11px] font-medium transition"

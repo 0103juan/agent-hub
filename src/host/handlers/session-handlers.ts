@@ -2,7 +2,9 @@ import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { revertCheckpointFile } from '../git-checkpoint';
-import { createSquadWorktree, mainRepoOf, mergeSquadWorktree, removeSquadWorktree } from '../git-worktree';
+import { createSquadWorktree, mainRepoOf, mergeSquadWorktree, removeSquadWorktree, restoreStage, squadDiffFiles } from '../git-worktree';
+import { resolveRequirement } from '../issue-source';
+import { buildTeamReport } from '../../shared/team-report';
 import { recommendedFor, resolveSelection } from '../../shared/model-selection';
 import { searchSessions } from '../../shared/session-search';
 import { ProtocolRole } from '../../shared/types';
@@ -24,13 +26,13 @@ function squadLocation(hub: HubContext, name: string | undefined, folder: string
       true
     );
   }
-  return { projectPath: worktree?.path ?? base, isolatedBranch: worktree?.branch };
+  return { projectPath: worktree?.path ?? base, isolatedBranch: worktree?.branch, isolatedBase: worktree?.base };
 }
 
 export function sessionHandlers(hub: HubContext): HandlerMap<
   | 'createSession' | 'switchSession' | 'deleteSession' | 'moveSession' | 'renameProject' | 'deleteProject' | 'spawnAgents'
   | 'updateSession' | 'sendPrompt' | 'stopTurn' | 'prewarmSession' | 'removeQueued' | 'resumeQueue' | 'startPipeline' | 'failoverSession' | 'exportSession'
-  | 'compareModels' | 'revertFile' | 'searchSessions' | 'finishSquad' | 'crossReview' | 'forkSession' | 'generateCommit' | 'auditBranch'
+  | 'compareModels' | 'revertFile' | 'searchSessions' | 'finishSquad' | 'teamReport' | 'squadDiff' | 'restoreStage' | 'queueAction' | 'crossReview' | 'forkSession' | 'generateCommit' | 'auditBranch'
 > {
   return {
     createSession: ({ projectName, taskSlug, protocolRole }) => {
@@ -144,15 +146,18 @@ export function sessionHandlers(hub: HubContext): HandlerMap<
       await hub.chat.failover(sessionId, targetProvider);
     },
 
-    startPipeline: async ({ projectName, prompt, requireApproval, template, isolate }) => {
+    startPipeline: async ({ projectName, prompt: rawPrompt, requireApproval, template, isolate }) => {
       const current = hub.sessions.getActive();
       const folder = workspaceDir();
+      // `#123` trae la issue o el PR como requerimiento.
+      const prompt = await resolveRequirement(rawPrompt, folder ?? process.cwd());
       const name = projectName ?? (folder && path.basename(folder));
       const squad = `pipeline-${Date.now()}`;
       const accounts = await hub.providers.listAccounts();
       const account = accounts.find((a) => a.id === current.profileId) ?? accounts.find((a) => a.status === 'connected');
 
-      const pipelineRoles = templateById(template).roles;
+      const chosenTemplate = templateById(template);
+      const pipelineRoles = chosenTemplate.roles;
       const slug = prompt.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || `pipeline-${Date.now()}`;
       const specPath = `docs/specs/${slug}.md`;
       const location = squadLocation(hub, name, folder, squad, isolate);
@@ -167,6 +172,7 @@ export function sessionHandlers(hub: HubContext): HandlerMap<
           taskSlug: `${role}-1`,
           protocolRole: role,
           approveStages: requireApproval || undefined,
+          handoffTo: chosenTemplate.handoffs?.[role],
           squad
         });
       });
@@ -200,6 +206,34 @@ export function sessionHandlers(hub: HubContext): HandlerMap<
         prompt: pipelineInstruction,
         workspaceDir: workspaceDirForSession(hub, first.id)
       });
+    },
+
+    teamReport: ({ sessionId }) => {
+      const session = hub.sessions.get(sessionId);
+      if (!session) return;
+      const members = session.squad ? hub.sessions.list().filter((candidate) => candidate.squad === session.squad).reverse() : [session];
+      hub.post({ type: 'teamReport', squad: session.squad ?? session.id, markdown: buildTeamReport(members) });
+    },
+
+    squadDiff: ({ sessionId }) => {
+      const session = hub.sessions.get(sessionId);
+      if (!session?.squad || !session.isolatedBranch || !session.isolatedBase || !session.projectPath) return;
+      hub.post({ type: 'squadDiff', squad: session.squad, files: squadDiffFiles(session.projectPath, session.isolatedBase) });
+    },
+
+    restoreStage: ({ sessionId, messageId }) => {
+      const session = hub.sessions.get(sessionId);
+      const commit = session?.messages.find((message) => message.id === messageId)?.stageCommit;
+      // Solo en una copia aparte: un reset --hard nunca debe tocar la carpeta del usuario.
+      if (!session?.isolatedBranch || !session.projectPath || !commit) return;
+      for (const member of hub.sessions.list().filter((candidate) => candidate.squad === session.squad)) hub.chat.discard(member.id);
+      const ok = restoreStage(session.projectPath, commit);
+      hub.chat.addNote(sessionId, ok ? 'La copia aparte volvió a este punto (vale para todo el equipo).' : 'No se pudo volver a ese punto.', !ok);
+    },
+
+    queueAction: ({ sessionId, action }) => {
+      if (action === 'cancel') hub.chat.cancelWaiting(sessionId);
+      else hub.chat.prioritizeWaiting(sessionId);
     },
 
     finishSquad: ({ sessionId, action }) => {

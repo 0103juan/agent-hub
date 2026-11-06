@@ -41,7 +41,7 @@ export const CommandPalette: React.FC<Props> = ({ sessions, onSwitchSession, onS
         key: `r-${role.id}`,
         group: 'Roles',
         label: role.label,
-        hint: 'Aplicar a la sesión activa',
+        hint: `${role.recommendedModel} · ${role.recommendedEffort}${role.readOnly ? ' · solo lectura' : ''}${role.handoffTo ? ` → ${PROTOCOL_ROLES[role.handoffTo]?.label ?? role.handoffTo}` : ''}`,
         run: () => onSelectRole(role.id)
       }))
     ].filter((entry) => !needle || `${entry.label} ${entry.hint ?? ''}`.toLowerCase().includes(needle));
