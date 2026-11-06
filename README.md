@@ -1,136 +1,73 @@
-# AgentHub — Multi-Subscription & MCP Orchestrator for VS Code
+# AgentHub
 
-[![Node.js Tests](https://img.shields.io/badge/tests-27%20passed%20(16%20suites)-brightgreen.svg)](#-suite-de-pruebas-automatizadas)
-[![Zero API Keys](https://img.shields.io/badge/API%20Keys-%240.00%20Zero%20Token%20Costs-blue.svg)](#-arquitectura-cero-api-keys)
-[![VS Code Extension](https://img.shields.io/badge/VS%20Code-v0.1.0-blueviolet.svg)](#)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](#)
+Extensión de VS Code para conversar con varios modelos desde un solo panel, usando las suscripciones que ya tienes (Claude, Google Antigravity, GitHub Copilot) a través de sus CLIs, sin API keys.
 
-**AgentHub** es una extensión profesional y panel de control para Visual Studio Code diseñada para orquestar tus suscripciones de pago (**Claude Pro / Team**, **Google Antigravity / Gemini**, **VS Code Language Model API**) **sin pagar por API keys ni cobros por token**.
+## Qué hace
 
-Permite aprovechar al 100% las ventanas de contexto y cuotas ilimitadas/pro de tus herramientas CLI locales (`claude`, `agy.exe`, `gemini`, `code`), sincronizar servidores MCP automáticamente y aplicar un estricto protocolo de ingeniería de software por roles.
+- **Chat con streaming** y actividad del agente en vivo: herramientas usadas, errores y turnos detenidos quedan visibles.
+- **Cuenta, modelo y esfuerzo por conversación.** Los modelos salen de cada proveedor; Antigravity se consulta con `agy models`.
+- **Conversaciones que continúan.** Cada sesión reanuda su conversación en la CLI. Al cambiar de proveedor, el historial reciente viaja como contexto.
+- **Contexto adjunto:** selección activa, `@archivo` y cualquier archivo, con miniaturas para las imágenes. El texto pequeño va en el prompt; lo demás viaja por ruta para que el agente lo abra.
+- **Roles del protocolo de desarrollo:** explorador, arquitecto, tester, desarrollador, revisor, externo, documentador y diseñador gráfico. Este último usa la skill `disenador-grafico`, que `build-and-install.ps1` instala para Claude y Antigravity.
+- **Acciones:** ejecutar tests, revisar SQL, N+1, accesibilidad, variables de entorno y secretos, además de tareas que se le piden al agente sobre el código real.
+- **Pestañas:** Chat, MCPs, Métricas y Cuentas. El historial se abre como panel lateral desde el chat.
 
----
+## Requisitos
 
-## 🎯 Capacidades Principales
+- Node.js 18 o superior y VS Code 1.90 o superior.
+- `claude` (Claude Code) y/o `agy` en `~/.gemini/bin`, con sesión iniciada.
+- GitHub Copilot es opcional; se usa por la Language Model API de VS Code.
 
-### 1. 🔑 Arquitectura Cero API Keys (CLI Subscriptions)
-* **Claude Multi-Cuenta:** Alterna instantáneamente entre tu cuenta principal (`~/.claude`) y cuentas secundarias (`~/.claude-profile-2` con `CLAUDE_CONFIG_DIR`) para multiplicar tu cuota sin pagar excedentes.
-* **Google Antigravity / Gemini CLI:** Ejecución directa a través del binario local `agy.exe` autenticado con tu cuenta de Google.
-* **Control de Esfuerzo Dinámico (Reasoning Effort):** Ajusta entre `Bajo`, `Medio`, `Alto` y `Max` en tiempo real, sincronizando automáticamente con el modelo seleccionado (e.g. Gemini 3.8 Flash High vs Claude 3.7 Sonnet).
-
-### 2. 🛡️ Protocolo de Desarrollo por Roles
-Garantiza disciplina de ingeniería en cada prompt mediante prompts de sistema estructurados:
-* **Libre:** Chat interactivo sin restricciones.
-* **Explorador:** Análisis de arquitectura y lectura profunda sin modificar archivos.
-* **Arquitecto:** Diseño técnico, diagramas C4 y especificaciones `.agent-spec.md`.
-* **Tester:** Generación de suites de prueba, cobertura y TIA (Test Impact Analysis).
-* **Desarrollador:** Implementación de cambios atómicos y refactorizaciones limpias.
-* **Revisor:** Auditoría estricta de estilo, rendimiento y seguridad antes del merge.
-* **Externo:** Validación de contratos, dependencias y llamadas a servicios externos.
-* **Documentador:** Changelogs interactivos, ADRs y manuales operativos.
-
-### 3. ⚡ Barra de Herramientas DevOps & Protocolo
-Acciones rápidas con un solo clic directamente desde el chat:
-* **⚡ Test Stack:** Ejecuta automáticamente `verificar.sh`, `npm test`, `gradle test` o `pytest`.
-* **⚡ Tests de Impacto (TIA):** Detecta los archivos modificados en Git y corre únicamente los tests afectados.
-* **🌿 Worktrees Aislados:** Crea ramas de trabajo independientes sin ensuciar tu working tree principal.
-* **🔒 Escáner de Secretos:** Detección en diffs de claves de OpenAI, Anthropic, GitHub, Google y AWS.
-* **🛡️ Guardián de BD & Profiler SQL:** Bloquea sentencias destructivas (`DROP TABLE`, `TRUNCATE`) y audita `SELECT *` o búsquedas sin índice.
-* **🎭 Anonimizador PII (GDPR):** Ofusca emails, números de tarjetas de crédito y tokens JWT antes del envío.
-* **🐳 Docker Compose:** Control de contenedores (`up`, `down`, `logs`) integrado.
-* **🗺️ Diagramas Mermaid & C4:** Visualización gráfica de flujos y arquitectura.
-
-### 4. 🔄 MCP Switchboard & Auto-Sync
-* Detecta en tiempo real todos los servidores MCP instalados en tu sistema (Postman, Atlassian, Google Drive, PostgreSQL, Playwright, etc.).
-* Sincronización bidireccional automática entre perfiles de Claude y Google Antigravity.
-
----
-
-## 🧪 Suite de Pruebas Automatizadas
-
-El proyecto cuenta con un arnés de pruebas unitarias exhaustivas con el runner nativo de Node.js (`node:test` + `node:assert`):
+## Desarrollo
 
 ```bash
-npm test
+npm install
+npm test          # pruebas con node:test, sin tocar ~/.agent-hub
+npm run build
 ```
 
-### Resultados de la Suite (27/27 Pasados, 16 Suites, 0 Fallos):
-* **Suite 1: SessionStorage & Persistence Engine:** Creación de sesión, sincronización bidireccional de perfil/modelo/esfuerzo y acumulación de telemetría de tokens/turnos.
-* **Suite 2: Protocol Roles Specification:** Validación de los 7 roles y sus directivas de sistema.
-* **Suite 3: Seguridad & Escáner de Secretos:** Detección de claves de Anthropic, GitHub, Google y AWS en código fuente.
-* **Suite 4: Guardián de BD & Auditoría de Migraciones:** Detección y bloqueo de DDL destructivo.
-* **Suite 5: Profiler SQL:** Detección de anti-patrones SQL (`SELECT *`, `JOIN` sin `ON`, comodines iniciales).
-* **Suite 6: Anonimizador PII (GDPR Sanitizer):** Reemplazo seguro de información confidencial.
-* **Suite 7: Smart Load-Balancing & Cuota Switcher:** Sugerencia inteligente de conmutación a Gemini ante saturación de ventana 5h (>90%).
-* **Suite 8: Auto-Rollback Engine:** Reversión atómica de archivos sucios ante fallos de build o tests.
-* **Suite 9: Generador de Mock Data & Fixtures:** Detección de modelos ORM y generación de JSON fixtures y fábricas FactoryBoy.
-* **Suite 10: Modo Dry-Run & Verificación AST:** Verificación estricta de firmas públicas antes de aplicar cambios.
-* **Suite 11: Generador de Diagramas de Secuencia Mermaid:** Creación programática de diagramas autonumerados con participantes y respuestas.
-* **Suite 12: Detector de Consultas N+1 en ORMs:** Identificación de bucles con llamadas navegacionales a relaciones foráneas.
-* **Suite 13: Terminal Sandbox con Timeout Estricto:** Ejecución protegida contra comandos congelados con aborto automático.
-* **Suite 14: Exportador de Resumen PR Markdown:** Creación de `PULL_REQUEST.md` con checklist y telemetría de costos \$0.00.
-* **Suite 15: Auditor de Accesibilidad Web (WCAG 2.1):** Escaneo de atributos `alt`, roles interactivos y accesibilidad de teclado.
-* **Suite 16: Inspector de Variables de Entorno (.env.example):** Verificación de variables en código no documentadas en la plantilla.
+`build-and-install.ps1` compila y copia la extensión a la carpeta de VS Code. Después hay que ejecutar **Developer: Reload Window**. Con `F5` se abre un Extension Development Host.
 
----
-
-## 🚀 Instalación y Desarrollo Local
-
-### Requisitos
-* **Node.js** v18+ y **npm**
-* **Visual Studio Code** 1.85+
-* Herramientas CLI opcionales según tus suscripciones:
-  * `claude` (Claude Code CLI: `npm i -g @anthropic-ai/claude-code`)
-  * `agy` (Google Antigravity CLI)
-
-### Compilación y Ejecución
-1. Clona el repositorio e instala dependencias:
-   ```bash
-   git clone https://github.com/0103juan/agent-hub.git
-   cd agent-hub
-   npm install
-   ```
-
-2. Compila el frontend Webview y el backend de la extensión:
-   ```bash
-   npm run build
-   ```
-
-3. Presiona `F5` en VS Code para lanzar el entorno de depuración `[Extension Development Host]`.
-
-4. Haz clic en el ícono de **AgentHub** en la barra de actividades de VS Code.
-
----
-
-## 📁 Estructura del Código
+## Arquitectura
 
 ```text
-agent-hub/
-├── src/
-│   ├── extension.ts                   # Entry point de VS Code y Message Bridge
-│   ├── orchestrator/
-│   │   ├── cli-runner.ts             # Ejecución streaming (Claude, Antigravity, Gemini)
-│   │   ├── session-manager.ts        # Detección de cuentas, perfiles y CLI health
-│   │   ├── session-storage.ts        # Persistencia local JSON de sesiones y cuotas
-│   │   ├── mcp-syncer.ts             # Sincronización multi-directorio de MCPs
-│   │   └── protocol-roles.ts         # Definición de roles del protocolo de ingeniería
-│   └── webview/
-│       ├── App.tsx                   # Aplicación React principal
-│       ├── components/
-│       │   ├── ChatCanvas.tsx        # Área de chat, streaming, toolbars e inputs
-│       │   ├── Header.tsx            # Selector de perfiles, modelos y esfuerzo de razonamiento
-│       │   ├── TelemetryBar.tsx      # Métricas de cuota y ventana de uso en tiempo real
-│       │   └── MCPManager.tsx        # Dashboard de servidores MCP
-│       └── main.tsx                  # Bootstrap React Webview
-├── tests/
-│   └── exhaustive.test.ts            # Suite exhaustiva de pruebas unitarias
-├── package.json                      # Configuración de extensión y scripts de build
-├── vite.config.ts                    # Build pipeline del Webview (IIFE bundle)
-└── README.md
+src/
+├── extension.ts      Punto de composición: crea y conecta las dependencias
+├── shared/           Tipos, contrato de mensajes y selección de modelo (host y webview)
+├── agents/           Un AgentProvider por proveedor, con su parser de stream
+│   ├── claude/  antigravity/  copilot/
+│   ├── cli-process.ts      Proceso vivo, líneas, errores y cancelación
+│   ├── cli-process-pool.ts Reutiliza y limita los procesos
+│   └── prompt-composer.ts  Rol, adjuntos e historial
+├── chat/             ChatService: dueño de cada turno
+├── storage/          Sesiones y telemetría en ~/.agent-hub
+├── host/             Vistas y handlers de mensajes de la webview
+├── analysis/         Análisis locales sin dependencia de VS Code
+├── mcp/              Lista y sincronización de servidores MCP
+└── webview/          Interfaz React, renderiza el estado que publica el host
 ```
 
----
+- **Strategy:** `AgentProvider` aísla cada proveedor. Agregar uno es implementar la interfaz y registrarlo en `extension.ts`.
+- **Command:** cada mensaje de la webview tiene su handler, y el tipo `HandlerMap` obliga a cubrirlos todos.
+- **Inversión de dependencias:** `ChatService` y los almacenes reciben sus colaboradores, por eso se prueban sin VS Code ni CLIs.
+- **Una sola fuente de verdad:** la conversación vive en el host; la webview solo la pinta, así que recargar la ventana no pierde un turno.
 
-## 📄 Licencia
+## Rendimiento
+
+- Las CLIs corren con `--input-format stream-json`: el proceso sigue vivo entre turnos y se evita su arranque. Al enfocar el cuadro de mensaje se precalienta.
+- Se conserva un proceso inactivo durante 5 minutos, porque cada uno carga sus MCP (unos 1,2 GB medidos). Los límites están en `src/agents/cli-process-pool.ts`.
+- Las cuentas salen de `~/.agent-hub/accounts-cache.json` y se refrescan en segundo plano cada hora o con el botón de refrescar.
+- La escritura en disco se agrupa cada 400 ms y la vista solo recibe los mensajes de la sesión activa.
+
+## Permisos
+
+Los turnos corren con `--dangerously-skip-permissions`, porque en modo headless las CLIs no pueden preguntar. El agente puede leer, escribir y ejecutar comandos en el workspace sin confirmación.
+
+## Limitaciones conocidas
+
+- Antigravity tiene un solo inicio de sesión. Las carpetas `.gemini-*` no guardan credenciales: son etiquetas, y quitarlas no cierra ninguna sesión.
+- Copilot no reporta tokens; su uso es una estimación.
+
+## Licencia
 
 MIT © [Juan Cuervo](https://github.com/0103juan)

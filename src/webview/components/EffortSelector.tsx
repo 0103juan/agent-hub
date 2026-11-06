@@ -1,13 +1,15 @@
 import React from 'react';
-import { ReasoningEffort } from '../../orchestrator/types';
+import { ReasoningEffort } from '../../shared/types';
 import { Gauge } from 'lucide-react';
 
 interface Props {
   effort: ReasoningEffort;
+  /** Niveles del modelo activo; los demás se muestran deshabilitados. */
+  supportedEfforts: ReasoningEffort[];
   onChange: (effort: ReasoningEffort) => void;
 }
 
-export const EffortSelector: React.FC<Props> = ({ effort, onChange }) => {
+export const EffortSelector: React.FC<Props> = ({ effort, supportedEfforts, onChange }) => {
   const options: { id: ReasoningEffort; label: string }[] = [
     { id: 'low', label: 'Bajo' },
     { id: 'medium', label: 'Medio' },
@@ -16,18 +18,19 @@ export const EffortSelector: React.FC<Props> = ({ effort, onChange }) => {
   ];
 
   return (
-    <div className="flex items-center gap-1.5 text-[11px]">
-      <div className="flex items-center gap-1 text-zinc-400" title="Esfuerzo de razonamiento (Thinking / CoT)">
+    <div className="flex items-center gap-1.5 text-[11px] shrink-0">
+      <div className="flex items-center gap-1 text-zinc-400" title="Esfuerzo de razonamiento">
         <Gauge className="w-3 h-3 text-indigo-400" />
-        <span>Esfuerzo:</span>
+        <span className="hidden min-[480px]:inline">Esfuerzo:</span>
       </div>
-      <div className="flex bg-zinc-900 border border-zinc-800 rounded p-0.5">
+      <div role="group" aria-label="Esfuerzo de razonamiento" className="flex bg-zinc-900 border border-zinc-800 rounded p-px">
         {options.map((opt) => (
           <button
             key={opt.id}
             type="button"
+            disabled={!supportedEfforts.includes(opt.id)}
             onClick={() => onChange(opt.id)}
-            className={`px-2 py-0.5 rounded text-[10px] font-medium transition ${
+            className={`px-2 py-0.5 rounded text-[11px] font-medium transition disabled:opacity-30 disabled:pointer-events-none ${
               effort === opt.id
                 ? 'bg-indigo-600 text-white shadow-sm'
                 : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800'

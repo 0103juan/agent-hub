@@ -1,29 +1,11 @@
-declare function acquireVsCodeApi(): {
-  postMessage: (message: any) => void;
-  getState: () => any;
-  setState: (state: any) => void;
-};
+import { WebviewMessage } from '../shared/ipc';
 
-class VSCodeAPIWrapper {
-  private vscodeApi: any;
+declare function acquireVsCodeApi(): { postMessage(message: unknown): void };
 
-  constructor() {
-    if (typeof acquireVsCodeApi === 'function') {
-      this.vscodeApi = acquireVsCodeApi();
-    } else {
-      // Mock for browser testing
-      this.vscodeApi = {
-        postMessage: (msg: any) => console.log('Mock postMessage:', msg),
-        getState: () => ({}),
-        setState: (s: any) => console.log('Mock setState:', s)
-      };
-    }
-  }
+const api = typeof acquireVsCodeApi === 'function'
+  ? acquireVsCodeApi()
+  : { postMessage: (message: unknown) => console.log('postMessage', message) };
 
-  public postMessage(message: any) {
-    this.vscodeApi.postMessage(message);
-  }
+export function postToHost(message: WebviewMessage): void {
+  api.postMessage(message);
 }
-
-export const vscode = new VSCodeAPIWrapper();
-

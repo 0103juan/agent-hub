@@ -53,8 +53,8 @@
         "icon": "$(split-horizontal)"
       },
       {
-        "command": "agent-hub.loginClaudeAccount2",
-        "title": "AgentHub: Iniciar sesión en Claude (Cuenta 2)"
+        "command": "agent-hub.addAccount",
+        "title": "AgentHub: Vincular cuenta"
       },
       {
         "command": "agent-hub.syncMCPs",
@@ -71,6 +71,10 @@
       {
         "command": "agent-hub.auditSelection",
         "title": "AgentHub: Auditar Código (Rol Revisor)"
+      },
+      {
+        "command": "agent-hub.autoDebugTerminal",
+        "title": "AgentHub: Auto-Debug de Terminal Activa"
       }
     ],
     "menus": {
@@ -102,10 +106,10 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run build",
-    "build:extension": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --sourcemap",
+    "build:extension": "esbuild src/extension.ts --bundle --minify --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --sourcemap",
     "build:webview": "vite build",
     "build": "npm run build:extension && npm run build:webview",
-    "test": "esbuild tests/exhaustive.test.ts --bundle --platform=node --outfile=tests/dist.test.js && node --test tests/dist.test.js",
+    "test": "esbuild tests/agent-hub.test.ts --bundle --platform=node --external:vscode --outfile=tests/dist.test.js && node --test tests/dist.test.js",
     "watch:extension": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --sourcemap --watch",
     "watch:webview": "vite build --watch",
     "dev": "npm run build"

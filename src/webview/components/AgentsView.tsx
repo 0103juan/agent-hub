@@ -1,0 +1,236 @@
+import React, { useState } from 'react';
+import { ArrowRight, Brain, MessageSquare, Plus, Square, Terminal, Users, X, LayoutGrid, Network } from 'lucide-react';
+import { SquadCanvas } from './SquadCanvas';
+import { agentName } from '../../shared/agent-name';
+import { PROTOCOL_ROLES } from '../../shared/protocol-roles';
+import { ConversationSession, ProtocolRole } from '../../shared/types';
+import { HubState } from '../state/hub-state';
+import { postToHost } from '../vscode-api';
+
+interface Props {
+  state: HubState;
+  onOpenChat: (sessionId: string) => void;
+}
+
+const SELECT_CLASS =
+  'bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-zinc-200 text-[11px] focus:outline-none focus:border-indigo-500';
+
+const SpawnForm: React.FC<{ projects: string[] }> = ({ projects }) => {
+  const [project, setProject] = useState('');
+  const [roles, setRoles] = useState<Array<ProtocolRole | ''>>(['']);
+  const [prompt, setPrompt] = useState('');
+
+  const spawn = (event: React.FormEvent) => {
+    event.preventDefault();
+    postToHost({
+      command: 'spawnAgents',
+      projectName: project || undefined,
+      roles: roles.map((role) => role || undefined),
+      prompt
+    });
+    setPrompt('');
+  };
+
+  return (
+    <form onSubmit={spawn} className="p-2.5 bg-zinc-900 border border-zinc-800 rounded-lg space-y-2">
+      <div className="text-[11px] font-semibold text-zinc-200 flex items-center gap-1.5">
+        <Users className="w-3.5 h-3.5 text-indigo-400" />
+        Crear agentes en paralelo
+      </div>
+
+      <select aria-label="Proyecto" value={project} onChange={(e) => setProject(e.target.value)} className={`w-full ${SELECT_CLASS}`}>
+        <option value="">Carpeta abierta (por defecto)</option>
+        {projects.map((name) => (
+          <option key={name} value={name}>{name}</option>
+        ))}
+      </select>
+
+      <ul className="space-y-1">
+        {roles.map((role, index) => (
+          <li key={index} className="flex items-center gap-1.5">
+            <select
+              aria-label={`Rol del agente ${index + 1}`}
+              value={role}
+              onChange={(e) => setRoles(roles.map((current, i) => (i === index ? (e.target.value as ProtocolRole | '') : current)))}
+              className={`flex-1 min-w-0 ${SELECT_CLASS}`}
+            >
+              <option value="">Sin rol (libre)</option>
+              {Object.values(PROTOCOL_ROLES).map((config) => (
+                <option key={config.id} value={config.id}>{config.label}</option>
+              ))}
+            </select>
+            {roles.length > 1 && (
+              <button
+                type="button"
+                aria-label={`Quitar agente ${index + 1}`}
+                onClick={() => setRoles(roles.filter((_, i) => i !== index))}
+                className="text-zinc-400 hover:text-red-400 transition"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </li>
+        ))}
+      </ul>
+
+      <button
+        type="button"
+        onClick={() => setRoles([...roles, roles[roles.length - 1] ?? ''])}
+        className="flex items-center gap-1 text-[11px] text-zinc-300 hover:text-indigo-300 transition"
+      >
+        <Plus className="w-3 h-3" /> Otro agente
+      </button>
+
+      <textarea
+        value={prompt}
+        rows={2}
+        aria-label="Tarea inicial"
+        placeholder="Tarea inicial para todos (opcional). Se hablan con «>> nombre: mensaje»."
+        onChange={(e) => setPrompt(e.target.value)}
+        className="w-full bg-zinc-950 border border-zinc-700 rounded p-2 text-[11px] text-zinc-100 placeholder-zinc-400 focus:outline-none focus:border-indigo-500 resize-none"
+      />
+
+      <button type="submit" className="w-full py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded font-medium text-[11px] transition">
+        Iniciar {roles.length} {roles.length === 1 ? 'agente' : 'agentes'}
+      </button>
+    </form>
+  );
+};
+
+const AgentCard: React.FC<{ session: ConversationSession; state: HubState; onOpenChat: (id: string) => void }> = ({ session, state, onOpenChat }) => {
+  const running = state.runningSessionIds.includes(session.id);
+  const live = state.live[session.id];
+  const queued = state.queues[session.id]?.length ?? 0;
+  const role = session.protocolRole && PROTOCOL_ROLES[session.protocolRole]?.label;
+  const needsAttention = state.attentionSessionIds.includes(session.id);
+
+  return (
+    <li className={`p-2.5 bg-zinc-900 border rounded-lg space-y-1.5 text-[11px] ${needsAttention ? 'border-amber-500/70' : 'border-zinc-800'}`}>
+      <div className="flex items-center gap-1.5">
+        <span className={`w-2 h-2 rounded-full shrink-0 ${running ? 'bg-emerald-400 animate-pulse' : 'bg-zinc-600'}`} aria-hidden />
+        <span className="font-semibold text-zinc-100 truncate">{agentName(session)}</span>
+        {needsAttention && <span className="text-amber-400 font-semibold shrink-0">· Te espera</span>}
+        {role && <span className="text-purple-400 uppercase font-semibold shrink-0">{role}</span>}
+        <span className="ml-auto text-zinc-400 font-mono truncate">{session.modelId}</span>
+      </div>
+      <div className="text-zinc-400">
+        {running ? 'Trabajando' : 'En espera'}
+        {session.projectName && <> · {session.projectName}</>}
+        {queued > 0 && <span className="text-amber-400"> · {queued} en cola</span>}
+      </div>
+
+      {live?.thinking && (
+        <p className="flex gap-1.5 italic text-zinc-300 line-clamp-3">
+          <Brain className="w-3 h-3 mt-0.5 text-indigo-400 shrink-0" />
+          <span>{live.thinking}</span>
+        </p>
+      )}
+
+      {live && live.commands.length > 0 && (
+        <ul className="font-mono text-zinc-300 space-y-0.5">
+          {live.commands.map((command, index) => (
+            <li key={index} className="flex gap-1.5 truncate">
+              <Terminal className="w-3 h-3 mt-0.5 text-zinc-400 shrink-0" />
+              <span className="truncate">{command}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {live?.tail && <p className="text-zinc-400 line-clamp-2 break-words">{live.tail}</p>}
+
+      <div className="flex items-center gap-1.5 pt-0.5">
+        <button
+          type="button"
+          onClick={() => onOpenChat(session.id)}
+          className="flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 transition"
+        >
+          <MessageSquare className="w-3 h-3 text-indigo-400" /> Abrir
+        </button>
+        {running && (
+          <button
+            type="button"
+            onClick={() => postToHost({ command: 'stopTurn', sessionId: session.id })}
+            className="flex items-center gap-1 px-2 py-0.5 rounded bg-red-600 hover:bg-red-500 text-white transition"
+          >
+            <Square className="w-3 h-3 fill-current" /> Detener
+          </button>
+        )}
+      </div>
+    </li>
+  );
+};
+
+export const AgentsView: React.FC<Props> = ({ state, onOpenChat }) => {
+  const [viewMode, setViewMode] = useState<'cards' | 'canvas'>('cards');
+  const agents = state.sessions
+    .filter((session) => session.squad || state.runningSessionIds.includes(session.id) || state.queues[session.id]?.length)
+    .sort((a, b) => Number(state.runningSessionIds.includes(b.id)) - Number(state.runningSessionIds.includes(a.id)));
+  const projects = [...new Set(state.sessions.flatMap((session) => (session.projectName ? [session.projectName] : [])))];
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between gap-2 px-1">
+        <span className="text-xs font-bold text-zinc-200">Panel de Coordinación</span>
+        <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 p-0.5 rounded-md text-xs">
+          <button
+            type="button"
+            onClick={() => setViewMode('cards')}
+            className={`flex items-center gap-1 px-2 py-0.5 rounded transition ${viewMode === 'cards' ? 'bg-indigo-600 text-white font-medium shadow' : 'text-zinc-400 hover:text-zinc-200'}`}
+            title="Vista de lista"
+          >
+            <LayoutGrid className="w-3 h-3" />
+            <span>Lista</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode('canvas')}
+            className={`flex items-center gap-1 px-2 py-0.5 rounded transition ${viewMode === 'canvas' ? 'bg-indigo-600 text-white font-medium shadow' : 'text-zinc-400 hover:text-zinc-200'}`}
+            title="Vista de topología / grafo"
+          >
+            <Network className="w-3 h-3" />
+            <span>Topología</span>
+          </button>
+        </div>
+      </div>
+
+      {viewMode === 'canvas' ? (
+        <SquadCanvas agents={agents} state={state} onOpenChat={onOpenChat} />
+      ) : (
+        <>
+          <SpawnForm projects={projects} />
+
+      {agents.length === 0 ? (
+        <p className="text-center text-[11px] text-zinc-400 p-4">Aún no hay agentes activos ni en equipo.</p>
+      ) : (
+        <ul className="space-y-2" aria-label="Agentes">
+          {agents.map((session) => (
+            <AgentCard key={session.id} session={session} state={state} onOpenChat={onOpenChat} />
+          ))}
+        </ul>
+      )}
+
+        </>
+      )}
+
+      {viewMode === 'cards' && state.comms.length > 0 && (
+        <section aria-label="Comunicación entre agentes" className="space-y-1.5">
+          <h2 className="text-[11px] font-semibold text-zinc-200">Comunicación</h2>
+          <ul className="space-y-1.5">
+            {[...state.comms].reverse().map((message) => (
+              <li key={message.id} className="p-2 bg-zinc-900 border border-zinc-800 rounded-lg text-[11px]">
+                <div className="flex items-center gap-1 font-mono text-purple-400">
+                  <span>{message.from}</span>
+                  <ArrowRight className="w-3 h-3 text-zinc-400" />
+                  <span>{message.to}</span>
+                  <span className="ml-auto text-zinc-400">{new Date(message.at).toLocaleTimeString()}</span>
+                </div>
+                <p className="text-zinc-300 whitespace-pre-wrap break-words line-clamp-4">{message.text}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </div>
+  );
+};

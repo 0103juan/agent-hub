@@ -2,20 +2,39 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  button {
+    min-height: 24px;
+    min-width: 24px;
+  }
+
+  select {
+    background-color: var(--vscode-dropdown-background, #18181b);
+    color: var(--vscode-dropdown-foreground, #e4e4e7);
+  }
+}
+
 :root {
   color-scheme: dark;
 }
 
-body {
+html,
+body,
+#root {
+  height: 100%;
   margin: 0;
-  padding: 0;
-  background-color: var(--vscode-sideBar-background, #18181b);
-  color: var(--vscode-sideBar-foreground, #f4f4f5);
-  font-size: 13px;
-  line-height: 1.4;
 }
 
-/* Custom Scrollbars */
+body {
+  background-color: var(--vscode-sideBar-background, #09090b);
+  color: var(--vscode-editor-foreground, #f4f4f5);
+  font-family: var(--vscode-font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif);
+  font-size: 13px;
+  line-height: 1.4;
+  overflow: hidden;
+}
+
+/* Custom Scrollbars vinculadas a VS Code */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -31,3 +50,55 @@ body {
   background: var(--vscode-scrollbarSlider-hoverBackground, #52525b);
 }
 
+/* Animación Aurora Wave para Razonamiento / Thinking */
+@keyframes auroraWave {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.aurora-border {
+  background: linear-gradient(90deg, #6366f1, #a855f7, #06b6d4, #6366f1);
+  background-size: 300% 300%;
+  animation: auroraWave 3s ease infinite;
+}
+
+/* Animación de entrada fluida de mensajes */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-message-fade {
+  animation: fadeInUp 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Panel Glassmorphism para Control Strip */
+.glass-panel {
+  background: rgba(24, 24, 27, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(63, 63, 70, 0.4);
+}
+
+/* Syntax Highlighting Tokens */
+.syn-kw { color: #c084fc; font-weight: 600; } /* Púrpura para keywords */
+.syn-str { color: #86efac; } /* Verde para strings */
+.syn-com { color: #71717a; font-style: italic; } /* Gris para comentarios */
+.syn-num { color: #fde047; } /* Amarillo para números/booleanos */
+.syn-fn { color: #60a5fa; } /* Azul para funciones */
+.syn-type { color: #38bdf8; } /* Celeste para tipos */
+.syn-diff-add { background-color: rgba(16, 185, 129, 0.15); color: #6ee7b7; display: block; }
+.syn-diff-del { background-color: rgba(244, 63, 94, 0.15); color: #fda4af; display: block; }

@@ -17,6 +17,12 @@ Write-Host "📦 Syncing to VS Code extensions..." -ForegroundColor Cyan
 Copy-Item -Path "$src\dist\*"       -Destination "$dst\dist\"    -Recurse -Force
 Copy-Item -Path "$src\package.json" -Destination "$dst\package.json" -Force
 
+$skillTargets = @("$HOME\.claude\skills", "$HOME\.gemini\config\skills")
+foreach ($target in $skillTargets) {
+    New-Item -ItemType Directory -Force -Path $target | Out-Null
+    Copy-Item -Path "$src\resources\skills\*" -Destination $target -Recurse -Force
+}
+
 Write-Host ""
 Write-Host "✅ AgentHub instalado correctamente." -ForegroundColor Green
 Write-Host "   Recarga VS Code: Ctrl+Shift+P → Developer: Reload Window" -ForegroundColor Yellow

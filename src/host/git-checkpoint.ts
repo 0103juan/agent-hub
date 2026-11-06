@@ -1,0 +1,82 @@
+import { execFileSync } from 'child_process';
+import * as fs from 'fs';
+import * as path from 'path';
+
+/**
+ * Crea un checkpoint ligero usando `git stash create`.
+ * No modifica el árbol de trabajo ni ensucia la lista de stashes del usuario.
+ */
+export function createCheckpoint(workspaceDir: string): string | undefined {
+  if (!workspaceDir || !fs.existsSync(path.join(workspaceDir, '.git'))) return undefined;
+  try {
+    const hash = execFileSync('git', ['stash', 'create', `agenthub-turn-${Date.now()}`], {
+      cwd: workspaceDir,
+      encoding: 'utf8',
+      windowsHide: true,
+      stdio: ['ignore', 'pipe', 'ignore']
+    }).trim();
+    return hash || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Revierte los archivos al estado del checkpoint.
+ */
+export function rollbackCheckpoint(workspaceDir: string, checkpointHash: string): boolean {
+  if (!workspaceDir || !checkpointHash) return false;
+  try {
+    execFileSync('git', ['checkout', checkpointHash, '--', '.'], {
+      cwd: workspaceDir,
+      windowsHide: true,
+      stdio: 'ignore'
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Devuelve el resumen de diferencias respecto al checkpoint.
+ */
+export function getCheckpointDiff(workspaceDir: string, checkpointHash: string): string {
+  if (!workspaceDir || !checkpointHash) return '';
+  try {
+    return execFileSync('git', ['diff', '--stat', checkpointHash], {
+      cwd: workspaceDir,
+      encoding: 'utf8',
+      windowsHide: true
+    }).trim();
+  } catch {
+    return '';
+  }
+}
+
+/** Archivos con cambios respecto al checkpoint. */
+export function getCheckpointFiles(workspaceDir: string, checkpointHash: string): string[] {
+  if (!workspaceDir || !checkpointHash) return [];
+  try {
+    return execFileSync('git', ['diff', '--name-only', checkpointHash], {
+      cwd: workspaceDir,
+      encoding: 'utf8',
+      windowsHide: true
+    })
+      .split('\n')
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+/** Restaura un solo archivo al estado del checkpoint. */
+export function revertCheckpointFile(workspaceDir: string, checkpointHash: string, file: string): boolean {
+  if (!workspaceDir || !checkpointHash || !file) return false;
+  try {
+    execFileSync('git', ['checkout', checkpointHash, '--', file], { cwd: workspaceDir, windowsHide: true, stdio: 'ignore' });
+    return true;
+  } catch {
+    return false;
+  }
+}

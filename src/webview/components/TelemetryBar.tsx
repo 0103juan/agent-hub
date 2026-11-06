@@ -1,107 +1,88 @@
 import React from 'react';
-import { ModelAccountTelemetry } from '../../orchestrator/types';
-import { Activity, Clock, DollarSign, Brain, ArrowDownRight, ArrowUpRight, ShieldCheck } from 'lucide-react';
+import { ModelAccountTelemetry } from '../../shared/types';
+import { Activity, Clock, DollarSign, Brain, ArrowDownRight, ArrowUpRight, ChevronDown, ShieldCheck } from 'lucide-react';
 
-interface Props {
-  activeTelemetry: ModelAccountTelemetry | undefined;
-  accountName: string;
-  modelName: string;
+const NEAR_LIMIT_PERCENT = 85;
+
+const toPercent = (utilization?: number) =>
+  utilization === undefined ? null : Math.min(100, Math.round(utilization * 100));
+
+const formatTokens = (tokens = 0) => `${(tokens / 1000).toFixed(1)}k`;
+
+interface MeterProps {
+  icon: React.ReactNode;
+  label: string;
+  title: string;
+  percent: number | null;
+  barClass: string;
 }
 
-export const TelemetryBar: React.FC<Props> = ({ activeTelemetry, accountName, modelName }) => {
-  const weeklyPct = activeTelemetry?.weeklyUtilization !== undefined
-    ? Math.min(100, Math.round(activeTelemetry.weeklyUtilization * 100))
-    : null;
+const QuotaMeter: React.FC<MeterProps> = ({ icon, label, title, percent, barClass }) => (
+  <span className="flex-1 min-w-0 flex items-center gap-1" title={title}>
+    {icon}
+    <span className="text-zinc-400 shrink-0">{label}</span>
+    <span className="flex-1 min-w-3 h-1.5 mx-0.5 bg-zinc-800 rounded-full overflow-hidden">
+      <span
+        className={`block h-full rounded-full transition-all duration-500 ${(percent ?? 0) > NEAR_LIMIT_PERCENT ? 'bg-amber-500' : barClass}`}
+        style={{ width: `${percent ?? 0}%` }}
+      />
+    </span>
+    <span className="font-mono font-semibold text-zinc-200 shrink-0">{percent !== null ? `${percent}%` : 'N/A'}</span>
+  </span>
+);
 
-  const sessionPct = activeTelemetry?.fiveHourUtilization !== undefined
-    ? Math.min(100, Math.round(activeTelemetry.fiveHourUtilization * 100))
-    : null;
+export const TelemetryBar: React.FC<{ activeTelemetry: ModelAccountTelemetry | undefined }> = ({ activeTelemetry }) => (
+  <details className="group bg-zinc-900/90 border border-zinc-800 rounded-lg text-[11px]">
+    <summary
+      className="flex items-center gap-3 px-2.5 py-1.5 cursor-pointer select-none list-none [&::-webkit-details-marker]:hidden"
+      title="Ver turnos, tokens y costo"
+    >
+      <QuotaMeter
+        icon={<Activity className="w-3 h-3 text-indigo-400 shrink-0" />}
+        label="Semana"
+        title="Cuota semanal"
+        percent={toPercent(activeTelemetry?.weeklyUtilization)}
+        barClass="bg-indigo-500"
+      />
+      <QuotaMeter
+        icon={<Clock className="w-3 h-3 text-cyan-400 shrink-0" />}
+        label="5 h"
+        title="Ventana de 5 horas"
+        percent={toPercent(activeTelemetry?.fiveHourUtilization)}
+        barClass="bg-cyan-500"
+      />
+      <ChevronDown className="w-3 h-3 text-zinc-400 shrink-0 transition group-open:rotate-180" />
+    </summary>
 
-  return (
-    <div className="bg-zinc-900/90 border border-zinc-800 rounded-lg p-2.5 space-y-2">
-      {/* Active Model & Account Header Badge */}
-      <div className="flex items-center justify-between text-[11px] pb-1.5 border-b border-zinc-800/80">
-        <div className="flex items-center gap-1.5 truncate">
-          <span className="font-semibold text-zinc-200 truncate">{accountName}</span>
-          <span className="text-zinc-500">•</span>
-          <span className="font-mono text-indigo-300 text-[10px]">{modelName}</span>
-        </div>
-        <div className="flex items-center gap-1 text-[10px] text-zinc-400 font-mono">
-          <ShieldCheck className="w-3 h-3 text-emerald-400" />
-          <span>{activeTelemetry?.turnsCount || 0} turnos</span>
-        </div>
-      </div>
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-2.5 py-1.5 border-t border-zinc-800/80 text-zinc-300 font-mono">
+      <span className="flex items-center gap-0.5" title="Turnos con esta cuenta y modelo">
+        <ShieldCheck className="w-3 h-3 text-emerald-400" />
+        <span>{activeTelemetry?.turnsCount || 0} turnos</span>
+      </span>
 
-      {/* Rate limit bars for this account/model */}
-      <div className="grid grid-cols-2 gap-2 text-[11px]">
-        {/* Weekly utilization */}
-        <div className="space-y-1">
-          <div className="flex items-center justify-between text-zinc-400">
-            <span className="flex items-center gap-1">
-              <Activity className="w-3 h-3 text-indigo-400" />
-              <span>Cuota Semanal</span>
-            </span>
-            <span className="font-mono font-semibold text-zinc-200">
-              {weeklyPct !== null ? `${weeklyPct}%` : 'N/A'}
-            </span>
-          </div>
-          <div className="w-full bg-zinc-800 rounded-full h-1.5 overflow-hidden">
-            <div
-              className={`h-full rounded-full transition-all duration-500 ${(weeklyPct || 0) > 85 ? 'bg-amber-500' : 'bg-indigo-500'
-                }`}
-              style={{ width: `${weeklyPct || 0}%` }}
-            />
-          </div>
-        </div>
+      <span className="flex items-center gap-0.5" title="Tokens totales de entrada">
+        <ArrowDownRight className="w-3 h-3 text-emerald-400" />
+        <span>{formatTokens(activeTelemetry?.totalInputTokens)} in</span>
+      </span>
 
-        {/* 5-hour session utilization */}
-        <div className="space-y-1">
-          <div className="flex items-center justify-between text-zinc-400">
-            <span className="flex items-center gap-1">
-              <Clock className="w-3 h-3 text-cyan-400" />
-              <span>Ventana 5h</span>
-            </span>
-            <span className="font-mono font-semibold text-zinc-200">
-              {sessionPct !== null ? `${sessionPct}%` : '0%'}
-            </span>
-          </div>
-          <div className="w-full bg-zinc-800 rounded-full h-1.5 overflow-hidden">
-            <div
-              className="bg-cyan-500 h-full rounded-full transition-all duration-500"
-              style={{ width: `${sessionPct || 0}%` }}
-            />
-          </div>
-        </div>
-      </div>
+      <span className="flex items-center gap-0.5" title="Tokens totales de salida">
+        <ArrowUpRight className="w-3 h-3 text-blue-400" />
+        <span>{formatTokens(activeTelemetry?.totalOutputTokens)} out</span>
+      </span>
 
-      {/* Tokens & Cost Badges for this account/model */}
-      <div className="flex flex-wrap items-center justify-between gap-1.5 pt-1 text-[10px] text-zinc-400 font-mono">
-        <div className="flex items-center gap-2">
-          <span className="flex items-center gap-0.5 text-zinc-300" title="Tokens totales de entrada">
-            <ArrowDownRight className="w-3 h-3 text-emerald-400" />
-            <span>{((activeTelemetry?.totalInputTokens || 0) / 1000).toFixed(1)}k in</span>
-          </span>
+      {(activeTelemetry?.totalThinkingTokens || 0) > 0 && (
+        <span className="flex items-center gap-0.5 text-purple-300" title="Tokens de razonamiento">
+          <Brain className="w-3 h-3 text-purple-400" />
+          <span>{formatTokens(activeTelemetry?.totalThinkingTokens)} think</span>
+        </span>
+      )}
 
-          <span className="flex items-center gap-0.5 text-zinc-300" title="Tokens totales de salida">
-            <ArrowUpRight className="w-3 h-3 text-blue-400" />
-            <span>{((activeTelemetry?.totalOutputTokens || 0) / 1000).toFixed(1)}k out</span>
-          </span>
-
-          {(activeTelemetry?.totalThinkingTokens || 0) > 0 && (
-            <span className="flex items-center gap-0.5 text-purple-300" title="Tokens de razonamiento / pensamiento">
-              <Brain className="w-3 h-3 text-purple-400" />
-              <span>{((activeTelemetry?.totalThinkingTokens || 0) / 1000).toFixed(1)}k think</span>
-            </span>
-          )}
-        </div>
-
-        {(activeTelemetry?.cumulativeCostUSD || 0) > 0 && (
-          <span className="flex items-center gap-0.5 text-emerald-400 font-semibold" title="Costo acumulado estimado">
-            <DollarSign className="w-3 h-3" />
-            <span>${(activeTelemetry?.cumulativeCostUSD || 0).toFixed(4)}</span>
-          </span>
-        )}
-      </div>
+      {(activeTelemetry?.cumulativeCostUSD || 0) > 0 && (
+        <span className="flex items-center gap-0.5 text-emerald-400 font-semibold" title="Costo acumulado estimado">
+          <DollarSign className="w-3 h-3" />
+          <span>{(activeTelemetry?.cumulativeCostUSD || 0).toFixed(4)}</span>
+        </span>
+      )}
     </div>
-  );
-};
+  </details>
+);
