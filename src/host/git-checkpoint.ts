@@ -80,3 +80,15 @@ export function revertCheckpointFile(workspaceDir: string, checkpointHash: strin
     return false;
   }
 }
+
+const MAX_FILE_DIFF_CHARS = 20000;
+
+/** Diff de un archivo respecto al checkpoint, recortado para no saturar la webview. */
+export function getCheckpointFileDiff(workspaceDir: string, checkpointHash: string, file: string): string {
+  if (!workspaceDir || !checkpointHash || !file) return '';
+  try {
+    return execFileSync('git', ['diff', checkpointHash, '--', file], { cwd: workspaceDir, encoding: 'utf8', windowsHide: true }).slice(0, MAX_FILE_DIFF_CHARS);
+  } catch {
+    return '';
+  }
+}

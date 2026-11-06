@@ -11,6 +11,7 @@ import { ChatService } from './chat/chat-service';
 import { addAccount } from './host/handlers/account-handlers';
 import { registerProposalProvider } from './host/handlers/editor-handlers';
 import { workspaceDirForSession } from './host/handlers/session-handlers';
+import { runProjectTests } from './host/test-runner';
 import { workspaceDir } from './host/workspace';
 import { HubContext } from './host/hub-context';
 import { HubViewProvider } from './host/hub-view-provider';
@@ -64,11 +65,13 @@ export function activate(context: vscode.ExtensionContext): void {
     post,
     openBesidePanel: () => view.openBesidePanel()
   };
-  const applyIdleTimeout = () => {
-    const minutes = vscode.workspace.getConfiguration('agent-hub').get<number>('turnIdleTimeoutMinutes', 30);
-    hub.chat.idleTimeoutMs = Math.max(0, minutes) * 60_000;
+  const applySettings = () => {
+    const settings = vscode.workspace.getConfiguration('agent-hub');
+    hub.chat.idleTimeoutMs = Math.max(0, settings.get<number>('turnIdleTimeoutMinutes', 30)) * 60_000;
+    hub.chat.maxConcurrent = Math.max(0, settings.get<number>('maxConcurrentAgents', 3));
+    hub.chat.verify = settings.get<boolean>('verifyAfterDeveloper', true) ? runProjectTests : undefined;
   };
-  applyIdleTimeout();
+  applySettings();
   view.connect(hub);
 
   const statusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
@@ -86,7 +89,7 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     statusBar,
     vscode.workspace.onDidChangeConfiguration((event) => {
-      if (event.affectsConfiguration('agent-hub.turnIdleTimeoutMinutes')) applyIdleTimeout();
+      if (event.affectsConfiguration('agent-hub')) applySettings();
     }),
     vscode.commands.registerCommand('agent-hub.focusComposer', focusComposer),
     vscode.commands.registerCommand('agent-hub.newSession', async () => {

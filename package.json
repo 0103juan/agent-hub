@@ -107,6 +107,17 @@
           "default": 30,
           "minimum": 0,
           "description": "Minutos sin salida del agente antes de cancelar el turno. 0 lo desactiva."
+        },
+        "agent-hub.maxConcurrentAgents": {
+          "type": "number",
+          "default": 3,
+          "minimum": 0,
+          "description": "Cuántos agentes pueden trabajar a la vez; los demás esperan su turno. 0 es sin límite."
+        },
+        "agent-hub.verifyAfterDeveloper": {
+          "type": "boolean",
+          "default": true,
+          "description": "Al terminar un Desarrollador de equipo, corre los tests del proyecto y, si fallan, se los devuelve (hasta 2 veces) antes de pasar el trabajo."
         }
       }
     },

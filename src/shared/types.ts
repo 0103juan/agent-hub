@@ -110,6 +110,14 @@ export interface CostSummary {
   agents: Array<{ name: string; costUSD: number }>;
 }
 
+/** Sesión archivada, sin sus mensajes. */
+export interface ArchivedSessionInfo {
+  id: string;
+  title: string;
+  updatedAt: number;
+  projectName?: string;
+}
+
 export interface SearchHit {
   sessionId: string;
   title: string;
@@ -137,6 +145,10 @@ export interface ChatMessage {
   checkpointDiff?: string;
   /** Archivos que el turno cambió respecto al checkpoint. */
   checkpointFiles?: string[];
+  /** Respuesta de un turno "plan primero": propone, no edita. */
+  isPlan?: boolean;
+  /** Fijado por la persona para encontrarlo rápido. */
+  pinned?: boolean;
   /** Costo del turno en USD, si el proveedor lo informa. */
   costUSD?: number;
   questionOptions?: QuestionOptions;
@@ -198,6 +210,10 @@ export interface ConversationSession {
   /** Límite de gasto en USD; con equipo cuenta el gasto de todos sus agentes. */
   budgetUSD?: number;
   permission?: SessionPermission;
+  /** Los traspasos entre agentes del equipo esperan la aprobación de la persona. */
+  approveStages?: boolean;
+  /** Rama del `git worktree` aislado del equipo; `projectPath` apunta a esa copia. */
+  isolatedBranch?: string;
   messages: ChatMessage[];
   /** Total real; la vista solo recibe los mensajes de la sesión activa. */
   messageCount?: number;

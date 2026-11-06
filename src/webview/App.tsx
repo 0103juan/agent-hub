@@ -1,9 +1,14 @@
-import React, { useEffect, useReducer, useState } from 'react';
-import { BarChart3, Bot, MessageSquare, RefreshCw, SplitSquareVertical, Users, Wrench } from 'lucide-react';
+import React, { useCallback, useEffect, useReducer, useState } from 'react';
+import { BarChart3, Bot, Brain, Loader2, MessageSquare, Rows3, RefreshCw, Rows4, SplitSquareVertical, Users, Wrench } from 'lucide-react';
+import { agentName } from '../shared/agent-name';
+import { PROTOCOL_ROLES } from '../shared/protocol-roles';
 import { HostMessage } from '../shared/ipc';
 import { ProtocolRole } from '../shared/types';
 import { AccountsView } from './components/AccountsView';
 import { AgentsView } from './components/AgentsView';
+import { CommandPalette } from './components/CommandPalette';
+import { MemoryView } from './components/MemoryView';
+import { ROLE_COLORS } from './components/SquadCanvas';
 import { ChatView } from './components/chat/ChatView';
 import { MCPManagerView } from './components/MCPManagerView';
 import { SessionDrawer } from './components/SessionDrawer';
@@ -11,7 +16,9 @@ import { TelemetryDashboard } from './components/TelemetryDashboard';
 import { hubReducer, INITIAL_HUB_STATE } from './state/hub-state';
 import { postToHost } from './vscode-api';
 
-type Tab = 'chat' | 'agents' | 'mcps' | 'telemetry' | 'accounts';
+type Tab = 'chat' | 'agents' | 'memory' | 'mcps' | 'telemetry' | 'accounts';
+type Density = 'comfortable' | 'compact';
+const DENSITY_KEY = 'agent-hub.density';
 type DrawerMode = 'closed' | 'history' | 'newTask';
 
 export const App: React.FC = () => {
@@ -19,6 +26,24 @@ export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('chat');
   const [drawerMode, setDrawerMode] = useState<DrawerMode>('closed');
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isPaletteOpen, setIsPaletteOpen] = useState(false);
+  const [density, setDensity] = useState<Density>(() => (localStorage.getItem(DENSITY_KEY) === 'compact' ? 'compact' : 'comfortable'));
+  const toggleDensity = () => {
+    const next = density === 'compact' ? 'comfortable' : 'compact';
+    localStorage.setItem(DENSITY_KEY, next);
+    setDensity(next);
+  };
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        setIsPaletteOpen((open) => !open);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
 
   useEffect(() => {
     const onMessage = (event: MessageEvent<HostMessage>) => dispatch(event.data);
@@ -31,21 +56,33 @@ export const App: React.FC = () => {
 
   const session = state.sessions.find((candidate) => candidate.id === state.activeSessionId);
 
-  const switchSession = (sessionId: string) => postToHost({ command: 'switchSession', sessionId });
+  const switchSession = useCallback((sessionId: string) => postToHost({ command: 'switchSession', sessionId }), []);
+  const closePalette = useCallback(() => setIsPaletteOpen(false), []);
+  const activeSessionId = state.activeSessionId;
+  const selectRole = useCallback(
+    (protocolRole: ProtocolRole) => postToHost({ command: 'updateSession', sessionId: activeSessionId, patch: { protocolRole } }),
+    [activeSessionId]
+  );
+  const runAction = useCallback(
+    (actionId: string) => postToHost({ command: 'runAction', actionId, sessionId: activeSessionId, input: '' }),
+    [activeSessionId]
+  );
+  const runningSessions = state.sessions.filter((candidate) => state.runningSessionIds.includes(candidate.id));
   const deleteSession = (sessionId: string) => postToHost({ command: 'deleteSession', sessionId });
   const createSession = (projectName?: string, taskSlug?: string, protocolRole?: ProtocolRole) =>
     postToHost({ command: 'createSession', projectName, taskSlug, protocolRole });
 
   const tabs: Array<{ id: Tab; label: string; icon: React.ReactNode }> = [
     { id: 'chat', label: 'Chat', icon: <MessageSquare className="w-3.5 h-3.5" /> },
-    { id: 'agents', label: `Agentes (${state.runningSessionIds.length})${state.attentionSessionIds.length > 0 ? ` ●${state.attentionSessionIds.length}` : ''}`, icon: <Bot className="w-3.5 h-3.5" /> },
+    { id: 'agents', label: `Agentes (${state.runningSessionIds.length})${state.attentionSessionIds.length > 0 ? ` ●${state.attentionSessionIds.length}` : ''}${state.pendingHandoffs.length > 0 ? ` ⏸${state.pendingHandoffs.length}` : ''}`, icon: <Bot className="w-3.5 h-3.5" /> },
+    { id: 'memory', label: 'Memoria', icon: <Brain className="w-3.5 h-3.5" /> },
     { id: 'mcps', label: `MCPs (${state.mcps.length})`, icon: <Wrench className="w-3.5 h-3.5" /> },
     { id: 'telemetry', label: 'Métricas', icon: <BarChart3 className="w-3.5 h-3.5" /> },
     { id: 'accounts', label: `Cuentas (${state.accounts.length})`, icon: <Users className="w-3.5 h-3.5" /> }
   ];
 
   return (
-    <div className="flex flex-col h-screen bg-zinc-950 text-zinc-100 overflow-hidden relative">
+    <div data-density={density} className="flex flex-col h-screen bg-zinc-950 text-zinc-100 overflow-hidden relative">
       <div className="flex items-center justify-between px-3 py-2 border-b border-zinc-800 shrink-0">
         <div className="flex items-center gap-1.5 min-w-0">
           {tabs.map((tab) => {
@@ -70,6 +107,14 @@ export const App: React.FC = () => {
 
         <div className="flex items-center gap-1 shrink-0">
           <button
+            onClick={toggleDensity}
+            className="p-1.5 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition"
+            aria-label={`Densidad: ${density === 'compact' ? 'Compacto' : 'Cómodo'}. Cambiar`}
+            title={`Densidad: ${density === 'compact' ? 'Compacto' : 'Cómodo'} (clic para cambiar)`}
+          >
+            {density === 'compact' ? <Rows4 className="w-3.5 h-3.5" /> : <Rows3 className="w-3.5 h-3.5" />}
+          </button>
+          <button
             onClick={() => postToHost({ command: 'openBeside' })}
             className="p-1.5 rounded hover:bg-zinc-800 text-zinc-400 hover:text-indigo-300 transition"
             aria-label="Abrir en un panel a la derecha"
@@ -87,6 +132,29 @@ export const App: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {runningSessions.length > 0 && (
+        <div className="flex items-center gap-1.5 px-3 py-1.5 border-b border-zinc-800 overflow-x-auto shrink-0" aria-label="Agentes en curso">
+          {runningSessions.map((running) => {
+            const role = running.protocolRole;
+            return (
+              <button
+                key={running.id}
+                type="button"
+                onClick={() => {
+                  switchSession(running.id);
+                  setActiveTab('chat');
+                }}
+                title={`${agentName(running)}${role ? ` · ${PROTOCOL_ROLES[role]?.label ?? role}` : ''}`}
+                className={`flex items-center gap-1 px-2 py-0.5 rounded-full border text-[11px] shrink-0 transition hover:brightness-125 ${(role && ROLE_COLORS[role]) || 'border-zinc-700 bg-zinc-800/40 text-zinc-300'}`}
+              >
+                <Loader2 className="w-3 h-3 animate-spin" aria-hidden />
+                <span className="max-w-[120px] truncate">{agentName(running)}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       <div className={`flex-1 min-h-0 p-3 ${activeTab === 'chat' ? 'overflow-hidden' : 'overflow-y-auto'}`}>
         {activeTab === 'chat' && session && (
@@ -108,6 +176,8 @@ export const App: React.FC = () => {
             }}
           />
         )}
+
+        {activeTab === 'memory' && <MemoryView experience={state.experience} />}
 
         {activeTab === 'mcps' && (
           <MCPManagerView
@@ -146,6 +216,20 @@ export const App: React.FC = () => {
           startWithNewTask={drawerMode === 'newTask'}
           searchHits={state.searchHits}
           searchQuery={state.searchQuery}
+          archive={state.archive}
+        />
+      )}
+
+      {isPaletteOpen && (
+        <CommandPalette
+          sessions={state.sessions}
+          onSwitchSession={(sessionId) => {
+            switchSession(sessionId);
+            setActiveTab('chat');
+          }}
+          onSelectRole={selectRole}
+          onRunAction={runAction}
+          onClose={closePalette}
         />
       )}
     </div>

@@ -2,17 +2,35 @@ import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { revertCheckpointFile } from '../git-checkpoint';
+import { createSquadWorktree, mainRepoOf, mergeSquadWorktree, removeSquadWorktree } from '../git-worktree';
 import { recommendedFor, resolveSelection } from '../../shared/model-selection';
 import { searchSessions } from '../../shared/session-search';
 import { ProtocolRole } from '../../shared/types';
+import { PROTOCOL_ROLES } from '../../shared/protocol-roles';
+import { templateById } from '../../shared/team-templates';
 import { HubContext } from '../hub-context';
+import { isInsideWorkspace } from '../safe-path';
 import { workspaceDir } from '../workspace';
 import { HandlerMap } from './handler-types';
+
+/** Carpeta de un equipo: una copia aparte (git worktree) si se pide y se puede, si no la del proyecto. */
+function squadLocation(hub: HubContext, name: string | undefined, folder: string | undefined, squad: string, isolate: boolean | undefined) {
+  const base = (name && hub.sessions.projectPath(name)) || folder;
+  const worktree = isolate && base ? createSquadWorktree(base, squad) : undefined;
+  if (isolate && !worktree) {
+    hub.chat.addNote(
+      hub.sessions.getActive().id,
+      'No se pudo crear la copia aparte (se necesita un repositorio git con al menos un commit): el equipo trabaja en la carpeta del proyecto.',
+      true
+    );
+  }
+  return { projectPath: worktree?.path ?? base, isolatedBranch: worktree?.branch };
+}
 
 export function sessionHandlers(hub: HubContext): HandlerMap<
   | 'createSession' | 'switchSession' | 'deleteSession' | 'moveSession' | 'renameProject' | 'deleteProject' | 'spawnAgents'
   | 'updateSession' | 'sendPrompt' | 'stopTurn' | 'prewarmSession' | 'removeQueued' | 'resumeQueue' | 'startPipeline' | 'failoverSession' | 'exportSession'
-  | 'compareModels' | 'revertFile' | 'searchSessions' | 'crossReview' | 'forkSession' | 'generateCommit' | 'auditBranch'
+  | 'compareModels' | 'revertFile' | 'searchSessions' | 'finishSquad' | 'crossReview' | 'forkSession' | 'generateCommit' | 'auditBranch'
 > {
   return {
     createSession: ({ projectName, taskSlug, protocolRole }) => {
@@ -61,13 +79,14 @@ export function sessionHandlers(hub: HubContext): HandlerMap<
       hub.chat.publishSessions();
     },
 
-    spawnAgents: async ({ projectName, roles, prompt }) => {
+    spawnAgents: async ({ projectName, roles, prompt, isolate }) => {
       const current = hub.sessions.getActive();
       const account = (await hub.providers.listAccounts()).find((candidate) => candidate.id === current.profileId);
       const folder = workspaceDir();
       const name = projectName ?? (folder && path.basename(folder));
       const squad = `squad-${Date.now()}`;
       const seen: Record<string, number> = {};
+      const location = squadLocation(hub, name, folder, squad, isolate);
       const created = roles.map((role) => {
         const base = role ?? 'agente';
         seen[base] = (seen[base] ?? 0) + 1;
@@ -77,7 +96,7 @@ export function sessionHandlers(hub: HubContext): HandlerMap<
           effort: current.effort,
           ...(role && recommendedFor(role, account)),
           projectName: name,
-          projectPath: (name && hub.sessions.projectPath(name)) || folder,
+          ...location,
           taskSlug: `${base}-${seen[base]}`,
           protocolRole: role,
           squad
@@ -112,8 +131,8 @@ export function sessionHandlers(hub: HubContext): HandlerMap<
       hub.chat.publishSessions();
     },
 
-    sendPrompt: ({ sessionId, prompt, attachments }) =>
-      hub.chat.send({ sessionId, prompt, attachments, workspaceDir: workspaceDirForSession(hub, sessionId) }),
+    sendPrompt: ({ sessionId, prompt, attachments, planFirst }) =>
+      hub.chat.send({ sessionId, prompt, attachments, planFirst, workspaceDir: workspaceDirForSession(hub, sessionId) }),
 
     stopTurn: ({ sessionId }) => hub.chat.cancel(sessionId),
 
@@ -125,7 +144,7 @@ export function sessionHandlers(hub: HubContext): HandlerMap<
       await hub.chat.failover(sessionId, targetProvider);
     },
 
-    startPipeline: async ({ projectName, prompt, requireApproval }) => {
+    startPipeline: async ({ projectName, prompt, requireApproval, template, isolate }) => {
       const current = hub.sessions.getActive();
       const folder = workspaceDir();
       const name = projectName ?? (folder && path.basename(folder));
@@ -133,9 +152,10 @@ export function sessionHandlers(hub: HubContext): HandlerMap<
       const accounts = await hub.providers.listAccounts();
       const account = accounts.find((a) => a.id === current.profileId) ?? accounts.find((a) => a.status === 'connected');
 
-      const pipelineRoles: ProtocolRole[] = ['arquitecto', 'tester', 'desarrollador', 'revisor', 'documentador'];
-      const slug = prompt.trim().normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || `pipeline-${Date.now()}`;
+      const pipelineRoles = templateById(template).roles;
+      const slug = prompt.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || `pipeline-${Date.now()}`;
       const specPath = `docs/specs/${slug}.md`;
+      const location = squadLocation(hub, name, folder, squad, isolate);
       const created = pipelineRoles.map((role) => {
         return hub.sessions.create({
           profileId: current.profileId,
@@ -143,38 +163,68 @@ export function sessionHandlers(hub: HubContext): HandlerMap<
           effort: current.effort,
           ...(account && recommendedFor(role, account)),
           projectName: name,
-          projectPath: (name && hub.sessions.projectPath(name)) || folder,
+          ...location,
           taskSlug: `${role}-1`,
           protocolRole: role,
+          approveStages: requireApproval || undefined,
           squad
         });
       });
 
-      const [arquitectoSession] = created;
-      hub.sessions.setActive(arquitectoSession.id);
+      const [first] = created;
+      hub.sessions.setActive(first.id);
       hub.chat.publishSessions();
 
-      const pipelineInstruction = [
-        'Eres el Arquitecto liderando el Pipeline de Desarrollo Autónomo.',
-        `Diseña la solución detallada en ${specPath} con criterios de aceptación.`,
-        requireApproval
-          ? 'Al terminar, presenta un resumen y DETENTE: no escribas ninguna línea `>>` hasta que el usuario apruebe.'
-          : [
-              'Este pipeline es autónomo: no esperes aprobación. Al terminar, pásale el trabajo al tester con estas líneas (y una en blanco al final):',
-              '>> tester-1: Hecho: especificación lista',
-              `Archivos: ${specPath}`,
-              'Pendiente: escribir las pruebas automatizadas TDD',
-              'Verificación: criterios de aceptación en la especificación'
-            ].join('\n'),
-        '',
-        `Requerimiento:\n${prompt.trim()}`
-      ].join('\n');
+      const firstRole = pipelineRoles[0];
+      const next = pipelineRoles[1];
+      const leadInstruction =
+        firstRole === 'arquitecto'
+          ? [
+              'Eres el Arquitecto liderando el Pipeline de Desarrollo Autónomo.',
+              `Diseña la solución detallada en ${specPath} con criterios de aceptación.`,
+              next
+                ? [
+                    'Este pipeline es autónomo: no esperes aprobación. Al terminar, pásale el trabajo a tu compañero con estas líneas (y una en blanco al final):',
+                    `>> ${next}-1: Hecho: especificación lista`,
+                    `Archivos: ${specPath}`,
+                    `Pendiente: ${PROTOCOL_ROLES[next].description}`,
+                    'Verificación: criterios de aceptación en la especificación'
+                  ].join('\n')
+                : ''
+            ]
+          : [`Eres el ${PROTOCOL_ROLES[firstRole].label} que inicia este equipo. ${PROTOCOL_ROLES[firstRole].description}.`];
+      const pipelineInstruction = [...leadInstruction, '', `Requerimiento:\n${prompt.trim()}`].join('\n');
 
       void hub.chat.send({
-        sessionId: arquitectoSession.id,
+        sessionId: first.id,
         prompt: pipelineInstruction,
-        workspaceDir: workspaceDirForSession(hub, arquitectoSession.id)
+        workspaceDir: workspaceDirForSession(hub, first.id)
       });
+    },
+
+    finishSquad: ({ sessionId, action }) => {
+      const session = hub.sessions.get(sessionId);
+      if (!session?.squad || !session.isolatedBranch || !session.projectPath) return;
+      const worktree = session.projectPath;
+      const branch = session.isolatedBranch;
+      const repo = mainRepoOf(worktree);
+      if (!repo) {
+        hub.chat.addNote(sessionId, 'No se encontró el repositorio principal de esta copia.', true);
+        return;
+      }
+      const members = hub.sessions.list().filter((candidate) => candidate.squad === session.squad);
+      for (const member of members) hub.chat.discard(member.id);
+      if (action === 'merge') {
+        const result = mergeSquadWorktree(worktree, branch);
+        if (!result.ok) {
+          hub.chat.addNote(sessionId, `No se pudo fusionar ${branch}: ${result.message}`, true);
+          return;
+        }
+      } else {
+        removeSquadWorktree(worktree, branch);
+      }
+      for (const member of members) hub.sessions.update(member.id, { projectPath: repo, isolatedBranch: undefined });
+      hub.chat.addNote(sessionId, action === 'merge' ? `Equipo fusionado en la rama actual (${branch}).` : 'Copia aparte descartada.');
     },
 
     exportSession: async ({ sessionId }) => {
@@ -246,8 +296,7 @@ export function sessionHandlers(hub: HubContext): HandlerMap<
     revertFile: ({ sessionId, checkpointHash, file }) => {
       const dir = workspaceDirForSession(hub, sessionId);
       // El nombre llega de la webview: solo se acepta una ruta dentro del workspace.
-      const resolved = path.resolve(dir, file);
-      if (path.isAbsolute(file) || path.relative(dir, resolved).startsWith('..')) return;
+      if (!isInsideWorkspace(dir, file)) return;
       const ok = revertCheckpointFile(dir, checkpointHash, file);
       hub.chat.addNote(sessionId, ok ? `Archivo restaurado: ${file}` : `No se pudo restaurar ${file}.`, !ok);
     },

@@ -18,6 +18,7 @@ import {
   X
 } from 'lucide-react';
 import { PROTOCOL_ROLES } from '../../../shared/protocol-roles';
+import { TEAM_TEMPLATES } from '../../../shared/team-templates';
 import { filterActions } from '../../../shared/workspace-actions';
 import { FileContextAttachment, ProtocolRole, QueuedMessage } from '../../../shared/types';
 import { HubAction } from '../../state/hub-state';
@@ -27,6 +28,7 @@ import { AttachmentChips } from './AttachmentChips';
 
 const FILE_SEARCH_DELAY_MS = 150;
 const MAX_SLASH_ITEMS = 8;
+const TOKEN_WARN = 8000;
 
 interface SlashItem {
   key: string;
@@ -45,7 +47,7 @@ interface Props {
   isRunning: boolean;
   queue: QueuedMessage[];
   dispatch: React.Dispatch<HubAction>;
-  onSend: (prompt: string) => void;
+  onSend: (prompt: string, planFirst?: boolean) => void;
 }
 
 function savePastedFile(file: File): void {
@@ -64,6 +66,12 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [requireApproval, setRequireApproval] = useState(false);
+  const [template, setTemplate] = useState(TEAM_TEMPLATES[0].id);
+  const [isolate, setIsolate] = useState(true);
+  const [planFirst, setPlanFirst] = useState(false);
+  const estimatedTokens = Math.round(
+    (prompt.length + attachments.reduce((sum, attachment) => sum + (attachment.content?.length ?? 0), 0)) / 4
+  );
 
   const fileSearchTimer = useRef<ReturnType<typeof setTimeout>>();
   const recognitionRef = useRef<any>(null);
@@ -124,7 +132,7 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
   const runAction = (actionId: string) =>
     postToHost({ command: 'runAction', actionId, sessionId, input: prompt });
 
-  const startPipeline = (text: string) => postToHost({ command: 'startPipeline', prompt: text, requireApproval });
+  const startPipeline = (text: string) => postToHost({ command: 'startPipeline', prompt: text, requireApproval, template, isolate });
   const selectRole = (protocolRole: ProtocolRole) =>
     postToHost({ command: 'updateSession', sessionId, patch: { protocolRole } });
 
@@ -182,7 +190,8 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
       } catch {}
       setIsListening(false);
     }
-    onSend(prompt.trim());
+    onSend(prompt.trim(), planFirst || undefined);
+    setPlanFirst(false);
     setPrompt('');
     setIsSearchingFiles(false);
   };
@@ -335,9 +344,31 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
           <span className="hidden min-[420px]:inline">Pipeline TDD</span>
         </button>
 
-        <label className="flex items-center gap-1 text-[11px] text-zinc-400 shrink-0 cursor-pointer" title="El Arquitecto se detiene tras la especificación hasta que la apruebes">
+        <select
+          value={template}
+          onChange={(event) => setTemplate(event.target.value)}
+          aria-label="Plantilla de equipo"
+          title={TEAM_TEMPLATES.find((item) => item.id === template)?.description}
+          className="text-[11px] px-1 py-0.5 rounded bg-zinc-800/80 text-zinc-300 border border-zinc-700/60 focus:outline-none focus:border-indigo-500 shrink-0"
+        >
+          {TEAM_TEMPLATES.map((item) => (
+            <option key={item.id} value={item.id}>{item.label}</option>
+          ))}
+        </select>
+
+        <label className="flex items-center gap-1 text-[11px] text-zinc-400 shrink-0 cursor-pointer" title="El equipo trabaja en una rama y carpeta aparte; al terminar fusionas o descartas">
+          <input type="checkbox" checked={isolate} onChange={(event) => setIsolate(event.target.checked)} />
+          <span>Copia aparte</span>
+        </label>
+
+        <label className="flex items-center gap-1 text-[11px] text-zinc-400 shrink-0 cursor-pointer" title="Cada traspaso entre agentes espera tu aprobación antes de continuar">
           <input type="checkbox" checked={requireApproval} onChange={(event) => setRequireApproval(event.target.checked)} />
-          <span>Pedir aprobación</span>
+          <span>Aprobar cada traspaso</span>
+        </label>
+
+        <label className="flex items-center gap-1 text-[11px] text-zinc-400 shrink-0 cursor-pointer" title="El agente propone un plan sin editar nada; tú lo ejecutas después">
+          <input type="checkbox" checked={planFirst} onChange={(event) => setPlanFirst(event.target.checked)} />
+          <span>Plan primero</span>
         </label>
 
         <button
@@ -421,6 +452,11 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
             <kbd className="px-1 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono text-[11px] text-zinc-400">⏎ Enviar</kbd>
             <span className="mx-1">·</span>
             <kbd className="px-1 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono text-[11px] text-zinc-400">⇧⏎ Salto</kbd>
+            {estimatedTokens > 0 && (
+              <span className={`ml-2 font-mono ${estimatedTokens > TOKEN_WARN ? 'text-amber-400' : ''}`} title="Estimación: caracteres del borrador y adjuntos de texto / 4">
+                ~{estimatedTokens.toLocaleString()} tokens
+              </span>
+            )}
           </span>
 
           <span className="flex items-center gap-1.5">

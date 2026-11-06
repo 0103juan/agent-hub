@@ -1,4 +1,5 @@
 import { execFileSync } from 'child_process';
+import { detectTestCommand } from '../test-runner';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
@@ -35,15 +36,6 @@ function git(cwd: string, ...args: string[]): string {
 
 function exists(cwd: string, file: string): boolean {
   return fs.existsSync(path.join(cwd, file));
-}
-
-function detectTestCommand(cwd: string): string | undefined {
-  if (exists(cwd, 'verificar.sh')) return 'bash verificar.sh';
-  if (exists(cwd, 'gradlew')) return process.platform === 'win32' ? '.\\gradlew test' : './gradlew test';
-  if (exists(cwd, 'mvnw')) return process.platform === 'win32' ? '.\\mvnw test' : './mvnw test';
-  if (exists(cwd, 'package.json')) return 'npm test';
-  if (exists(cwd, 'pyproject.toml')) return 'uv run pytest';
-  return undefined;
 }
 
 function detectImpactedTestCommand(cwd: string): string | undefined {

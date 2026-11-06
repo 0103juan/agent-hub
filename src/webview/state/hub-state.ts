@@ -7,6 +7,7 @@ import {
   AgentMessage,
   FileContextAttachment,
   MCPServerInfo,
+  ArchivedSessionInfo,
   CostSummary,
   SearchHit,
   QueuedMessage,
@@ -28,6 +29,12 @@ export interface HubState {
   /** Resultado de buscar dentro de los mensajes de todas las sesiones. */
   searchHits: SearchHit[];
   searchQuery: string;
+  archive: ArchivedSessionInfo[];
+  /** Contenido de .agent-hub/experience.md; undefined hasta pedirlo. */
+  experience?: string;
+  /** Diff por archivo y turno, clave `${checkpointHash}:${file}`. */
+  fileDiffs: Record<string, string>;
+  pendingHandoffs: AgentMessage[];
   /** Sube cada vez que la extensión pide enfocar el composer. */
   focusComposerTick: number;
   live: Record<string, LiveStatus>;
@@ -57,6 +64,9 @@ export const INITIAL_HUB_STATE: HubState = {
   costs: { days: [], agents: [] },
   searchHits: [],
   searchQuery: '',
+  archive: [],
+  fileDiffs: {},
+  pendingHandoffs: [],
   focusComposerTick: 0,
   live: {},
   attachments: [],
@@ -111,6 +121,12 @@ export function hubReducer(state: HubState, action: HubAction): HubState {
       return { ...state, workspaceFiles: action.files };
     case 'searchResults':
       return { ...state, searchQuery: action.query, searchHits: action.hits };
+    case 'archive':
+      return { ...state, archive: action.items };
+    case 'experience':
+      return { ...state, experience: action.content };
+    case 'fileDiff':
+      return { ...state, fileDiffs: { ...state.fileDiffs, [`${action.checkpointHash}:${action.file}`]: action.diff } };
     case 'focusComposer':
       return { ...state, focusComposerTick: state.focusComposerTick + 1 };
     case 'composerText':

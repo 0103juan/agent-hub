@@ -1,8 +1,11 @@
 import React, { memo, useEffect, useRef, useState } from 'react';
-import { AlertCircle, Brain, Check, CheckCircle2, ChevronRight, Film, GitFork, Image as ImageIcon, Loader2, Music, RotateCcw, Search, ShieldCheck, Terminal, X } from 'lucide-react';
-import { ChatMessage, FileContextAttachment } from '../../../shared/types';
+import { AlertCircle, Brain, Check, CheckCircle2, ChevronRight, Film, GitFork, Image as ImageIcon, Loader2, Music, Pin, RotateCcw, Search, ShieldCheck, Terminal, X } from 'lucide-react';
+import { PROTOCOL_ROLES } from '../../../shared/protocol-roles';
+import { AccountProfile, ChatMessage, FileContextAttachment, LiveStatus, ProtocolRole, ProviderType } from '../../../shared/types';
 import { extractQuestionOptions, QuestionOptions } from '../../../shared/question-options';
 import { postToHost } from '../../vscode-api';
+import { ProviderBadge } from '../ProviderBadge';
+import { ROLE_COLORS } from '../SquadCanvas';
 import { Markdown } from './Markdown';
 
 const STICK_TO_BOTTOM_PX = 320;
@@ -272,7 +275,76 @@ const QuestionOptionsCard: React.FC<{
     </div>
   );
 };
-const MessageBubble = memo<{ message: ChatMessage; sessionId: string; onSendSuggestion: (prompt: string) => void }>(({ message, sessionId, onSendSuggestion }) => {
+/** Fase del turno según lo que ya llegó, con el tiempo transcurrido desde que empezó. */
+const TurnStatus: React.FC<{ message: ChatMessage; hasAnswer: boolean; live?: LiveStatus }> = ({ message, hasAnswer, live }) => {
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+  const phase = hasAnswer ? 'Escribiendo' : live?.commands.length || message.activity?.length ? 'Usando herramienta' : 'Pensando';
+  const seconds = Math.max(0, Math.floor((now - message.timestamp) / 1000));
+  return (
+    <span className="font-sans text-indigo-300">
+      {phase} · {Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, '0')}
+    </span>
+  );
+};
+
+const DiffLines: React.FC<{ diff: string }> = ({ diff }) => (
+  <pre className="mt-0.5 max-h-60 overflow-auto rounded bg-zinc-950 border border-zinc-800 p-1.5 text-[11px] font-mono leading-snug">
+    {diff.split('\n').map((line, index) => (
+      <span
+        key={index}
+        className={`block ${line.startsWith('+') && !line.startsWith('+++') ? 'text-emerald-300 bg-emerald-500/10' : line.startsWith('-') && !line.startsWith('---') ? 'text-rose-300 bg-rose-500/10' : 'text-zinc-400'}`}
+      >
+        {line || ' '}
+      </span>
+    ))}
+  </pre>
+);
+
+const ChangedFile: React.FC<{ sessionId: string; checkpointHash: string; file: string; diff?: string }> = ({ sessionId, checkpointHash, file, diff }) => {
+  const [open, setOpen] = useState(false);
+  const toggle = () => {
+    if (!open && diff === undefined) postToHost({ command: 'fileDiff', sessionId, checkpointHash, file });
+    setOpen(!open);
+  };
+  return (
+    <li className="text-[11px] font-mono text-zinc-300">
+      <div className="flex items-center gap-1.5">
+        <button type="button" onClick={toggle} aria-expanded={open} className="flex items-center gap-1 flex-1 min-w-0 text-left hover:text-zinc-100" title={`Ver los cambios de ${file}`}>
+          <ChevronRight className={`h-3 w-3 shrink-0 transition-transform ${open ? 'rotate-90' : ''}`} />
+          <span className="truncate">{file}</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => postToHost({ command: 'revertFile', sessionId, checkpointHash, file })}
+          className="flex items-center gap-1 text-amber-400 hover:text-amber-300 hover:underline shrink-0"
+          title={`Revertir solo ${file} al estado previo al turno`}
+        >
+          <RotateCcw className="w-3 h-3" />
+          <span>Revertir</span>
+        </button>
+      </div>
+      {open && (diff === undefined ? <div className="text-zinc-400 pl-4">Cargando diff…</div> : <DiffLines diff={diff} />)}
+    </li>
+  );
+};
+
+interface BubbleProps {
+  message: ChatMessage;
+  sessionId: string;
+  onSendSuggestion: (prompt: string) => void;
+  provider?: ProviderType;
+  role?: ProtocolRole;
+  fileDiffs: Record<string, string>;
+  /** Solo el mensaje en curso recibe el estado en vivo, para no repintar los demás. */
+  live?: LiveStatus;
+  isLast: boolean;
+}
+
+const MessageBubble = memo<BubbleProps>(({ message, sessionId, onSendSuggestion, provider, role, fileDiffs, live, isLast }) => {
   const isUser = message.role === 'user';
   const attachments = message.attachments ?? [];
   const turn = splitTurn(message);
@@ -280,18 +352,38 @@ const MessageBubble = memo<{ message: ChatMessage; sessionId: string; onSendSugg
 
   return (
     <div
+      id={`msg-${message.id}`}
       style={message.isStreaming ? undefined : OFFSCREEN_SKIP_STYLE}
-      className={`p-2.5 rounded-lg text-[13px] leading-relaxed border ${
+      className={`msg-bubble p-2.5 rounded-lg text-[13px] leading-relaxed border ${
         isUser ? 'bg-zinc-800/90 text-zinc-100 ml-4 animate-message-fade' : 'bg-zinc-900/90 text-zinc-200 mr-2 animate-message-fade'
       } ${message.isError ? 'border-red-500/40' : isUser ? 'border-zinc-700' : 'border-zinc-800'}`}
     >
       <div className="flex items-center justify-between text-[11px] text-zinc-400 mb-1 font-mono">
         <div className="flex items-center gap-1">
           {message.isError && <AlertCircle className="w-3 h-3 text-red-400" />}
+          {!isUser && provider && <ProviderBadge provider={provider} />}
           <span>{isUser ? 'Tú' : message.modelName}</span>
+          {!isUser && role && (
+            <span className={`px-1 rounded border uppercase text-[10px] ${ROLE_COLORS[role] ?? 'border-zinc-700 text-zinc-300'}`}>
+              {PROTOCOL_ROLES[role]?.label ?? role}
+            </span>
+          )}
+          {message.isPlan && <span className="px-1 rounded border border-indigo-500/50 bg-indigo-950/40 text-indigo-300 uppercase text-[10px]">Plan</span>}
+          {message.isStreaming && !isUser && <TurnStatus message={message} hasAnswer={Boolean(turn.answer)} live={live} />}
+          {message.pinned && <Pin className="w-3 h-3 text-amber-400 fill-amber-400" aria-label="Fijado" />}
         </div>
         {!message.isStreaming && (
           <div className="flex items-center gap-1 opacity-70 hover:opacity-100 transition">
+            <button
+              type="button"
+              onClick={() => postToHost({ command: 'pinMessage', sessionId, messageId: message.id })}
+              aria-pressed={Boolean(message.pinned)}
+              className="flex items-center text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700/60 transition cursor-pointer"
+              title={message.pinned ? 'Desfijar mensaje' : 'Fijar mensaje'}
+              aria-label={message.pinned ? 'Desfijar mensaje' : 'Fijar mensaje'}
+            >
+              <Pin className={`w-3 h-3 ${message.pinned ? 'text-amber-400 fill-amber-400' : 'text-zinc-400'}`} />
+            </button>
             {!isUser && turn.answer && (
               <button
                 type="button"
@@ -342,6 +434,16 @@ const MessageBubble = memo<{ message: ChatMessage; sessionId: string; onSendSugg
         )
       )}
 
+      {!isUser && !message.isStreaming && message.isPlan && isLast && (
+        <button
+          type="button"
+          onClick={() => onSendSuggestion('Plan aprobado: ejecútalo ahora.')}
+          className="mt-2 px-2.5 py-1 rounded bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-medium transition"
+        >
+          Ejecutar plan
+        </button>
+      )}
+
       {!isUser && !message.isStreaming && message.checkpointHash && (
         <div className="mt-2 pt-1.5 border-t border-zinc-800/80 flex items-center justify-between text-[11px] text-zinc-400">
           <span className="truncate max-w-[200px]" title={message.checkpointDiff || 'Punto de restauración disponible'}>
@@ -362,18 +464,13 @@ const MessageBubble = memo<{ message: ChatMessage; sessionId: string; onSendSugg
       {!isUser && !message.isStreaming && message.checkpointHash && message.checkpointFiles && message.checkpointFiles.length > 0 && (
         <ul className="mt-1 space-y-0.5" aria-label="Archivos cambiados en el turno">
           {message.checkpointFiles.map((file) => (
-            <li key={file} className="flex items-center gap-1.5 text-[11px] font-mono text-zinc-300">
-              <span className="truncate flex-1" title={file}>{file}</span>
-              <button
-                type="button"
-                onClick={() => postToHost({ command: 'revertFile', sessionId, checkpointHash: message.checkpointHash!, file })}
-                className="flex items-center gap-1 text-amber-400 hover:text-amber-300 hover:underline shrink-0"
-                title={`Revertir solo ${file} al estado previo al turno`}
-              >
-                <RotateCcw className="w-3 h-3" />
-                <span>Revertir</span>
-              </button>
-            </li>
+            <ChangedFile
+              key={file}
+              sessionId={sessionId}
+              checkpointHash={message.checkpointHash!}
+              file={file}
+              diff={fileDiffs[`${message.checkpointHash}:${file}`]}
+            />
           ))}
         </ul>
       )}
@@ -393,10 +490,14 @@ interface Props {
   sessionId: string;
   messages: ChatMessage[];
   accountName?: string;
+  accounts: AccountProfile[];
+  role?: ProtocolRole;
+  fileDiffs: Record<string, string>;
+  live?: LiveStatus;
   onSendSuggestion: (prompt: string) => void;
 }
 
-export const MessageList: React.FC<Props> = ({ sessionId, messages, accountName, onSendSuggestion }) => {
+export const MessageList: React.FC<Props> = ({ sessionId, messages, accountName, accounts, role, fileDiffs, live, onSendSuggestion }) => {
   const [searchQuery, setSearchQuery] = React.useState('');
   const [filterMode, setFilterMode] = React.useState<'all' | 'modified' | 'errors'>('all');
   const [isSearchOpen, setIsSearchOpen] = React.useState(false);
@@ -454,7 +555,7 @@ export const MessageList: React.FC<Props> = ({ sessionId, messages, accountName,
   };
 
   return (
-    <div ref={scrollRef} onScroll={trackFollowing} className="flex-1 overflow-y-auto space-y-3 p-1 min-h-0 relative">
+    <div ref={scrollRef} onScroll={trackFollowing} className="msg-list flex-1 overflow-y-auto space-y-3 p-1 min-h-0 relative">
       {isSearchOpen && (
         <div className="flex items-center gap-2 p-1.5 rounded-lg bg-zinc-900/95 border border-zinc-700 shadow-lg text-xs sticky top-0 z-20 glass-panel">
           <Search className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
@@ -531,7 +632,19 @@ export const MessageList: React.FC<Props> = ({ sessionId, messages, accountName,
               Mostrar {Math.min(hiddenCount, PAGE_SIZE)} anteriores ({hiddenCount} ocultos)
             </button>
           )}
-          {shownMessages.map((message) => <MessageBubble key={message.id} message={message} sessionId={sessionId} onSendSuggestion={onSendSuggestion} />)}
+          {shownMessages.map((message) => (
+            <MessageBubble
+              key={message.id}
+              message={message}
+              sessionId={sessionId}
+              onSendSuggestion={onSendSuggestion}
+              provider={accounts.find((account) => account.id === message.profileId)?.provider}
+              role={role}
+              fileDiffs={fileDiffs}
+              live={message === lastMessage ? live : undefined}
+              isLast={message === lastMessage}
+            />
+          ))}
         </>
       )}
     </div>

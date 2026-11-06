@@ -6,6 +6,7 @@ import { actionHandlers } from './handlers/action-handlers';
 import { contextHandlers } from './handlers/context-handlers';
 import { editorHandlers } from './handlers/editor-handlers';
 import { HandlerMap } from './handlers/handler-types';
+import { libraryHandlers } from './handlers/library-handlers';
 import { sessionHandlers } from './handlers/session-handlers';
 import { HubContext } from './hub-context';
 import { renderWebviewHtml } from './webview-html';
@@ -26,6 +27,7 @@ export class HubViewProvider implements vscode.WebviewViewProvider {
       ready: () => this.publishInitialState(hub),
       openBeside: () => this.openBesidePanel(),
       ...sessionHandlers(hub),
+      ...libraryHandlers(hub),
       ...accountHandlers(hub),
       ...contextHandlers(hub),
       ...editorHandlers(hub),

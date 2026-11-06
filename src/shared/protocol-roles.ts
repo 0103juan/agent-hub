@@ -8,6 +8,7 @@ export const PROTOCOL_ROLES: Record<ProtocolRole, ProtocolRoleConfig> = {
     recommendedModel: 'Claude Haiku 5.5',
     recommendedEffort: 'low',
     readOnly: true,
+    handoffTo: 'revisor',
     systemPrompt: `Eres el EXPLORADOR del protocolo de desarrollo.
 Tu misión es buscar, leer, inspeccionar el código, schemas, dependencias y logs.
 Sé rápido, sintético y no toques ni modifiques archivos. Reporta hallazgos concisos con rutas exactas y líneas.`

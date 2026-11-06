@@ -1,5 +1,5 @@
-import React, { memo, useCallback, useMemo, useRef } from 'react';
-import { ChevronDown, Cpu, Download, FolderGit2, Layers, Plus, Wallet } from 'lucide-react';
+import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
+import { CheckSquare, ChevronDown, Cpu, Download, FolderGit2, Layers, ListTree, Pin, Plus, Square, Wallet, X } from 'lucide-react';
 import { resolveSelection } from '../../../shared/model-selection';
 import { ConversationSession, ProtocolRole, ProviderType, QueuedMessage, ReasoningEffort, SessionPermission } from '../../../shared/types';
 import { HubAction, HubState } from '../../state/hub-state';
@@ -31,6 +31,86 @@ interface Props {
   onOpenHistory: () => void;
   onNewTask: () => void;
 }
+
+const ONBOARDING_KEY = 'agent-hub.onboardingDismissed';
+
+/** Primeros pasos: las casillas salen del estado, no se marcan a mano. */
+const Onboarding: React.FC<{ state: HubState }> = ({ state }) => {
+  const [dismissed, setDismissed] = useState(() => localStorage.getItem(ONBOARDING_KEY) === '1');
+  if (dismissed) return null;
+  const steps = [
+    { label: 'Conectar una cuenta', done: state.accounts.some((account) => account.status === 'connected') },
+    { label: 'Enviar un mensaje', done: state.sessions.some((s) => (s.messageCount ?? s.messages.length) > 0) },
+    { label: 'Lanzar un equipo de agentes', done: state.sessions.some((s) => s.squad) }
+  ];
+  return (
+    <div className="shrink-0 p-2 rounded-lg border border-zinc-800 bg-zinc-900/60 text-[11px]">
+      <div className="flex items-center justify-between mb-1">
+        <span className="font-semibold text-zinc-200">Primeros pasos</span>
+        <button
+          type="button"
+          aria-label="Descartar primeros pasos"
+          onClick={() => {
+            localStorage.setItem(ONBOARDING_KEY, '1');
+            setDismissed(true);
+          }}
+          className="text-zinc-400 hover:text-zinc-200"
+        >
+          <X className="w-3 h-3" />
+        </button>
+      </div>
+      <ul className="space-y-0.5">
+        {steps.map((step) => (
+          <li key={step.label} className={`flex items-center gap-1.5 ${step.done ? 'text-emerald-400' : 'text-zinc-400'}`}>
+            {step.done ? <CheckSquare className="w-3 h-3" /> : <Square className="w-3 h-3" />}
+            <span>{step.label}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+/** Menú con los mensajes del usuario y los fijados; llevar al mensaje es scroll a su ancla. */
+const ConversationIndex: React.FC<{ session: ConversationSession }> = ({ session }) => {
+  const [open, setOpen] = useState(false);
+  const entries = session.messages.filter((m) => m.role === 'user' || m.pinned);
+  const goTo = (messageId: string) => {
+    document.getElementById(`msg-${messageId}`)?.scrollIntoView({ block: 'center' });
+    setOpen(false);
+  };
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        aria-expanded={open}
+        className="p-1 rounded bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 border border-zinc-700/60 transition"
+        aria-label="Índice de la conversación"
+        title="Índice de la conversación"
+      >
+        <ListTree className="w-3 h-3 text-indigo-400" />
+      </button>
+      {open && (
+        <ul className="absolute right-0 top-full mt-1 z-30 w-64 max-h-64 overflow-y-auto rounded-lg border border-zinc-700 bg-zinc-900 p-1 shadow-xl">
+          {entries.length === 0 && <li className="p-1.5 text-[11px] text-zinc-400">Aún no hay mensajes.</li>}
+          {entries.map((m) => (
+            <li key={m.id}>
+              <button
+                type="button"
+                onClick={() => goTo(m.id)}
+                className="flex w-full items-center gap-1.5 text-left px-1.5 py-1 rounded text-[11px] text-zinc-300 hover:bg-zinc-800"
+              >
+                {m.pinned && <Pin className="w-3 h-3 text-amber-400 fill-amber-400 shrink-0" aria-label="Fijado" />}
+                <span className="truncate">{m.content.trim().split('\n')[0] || '(sin texto)'}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+};
 
 const formatTokens = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(1)}k` : `${n}`);
 
@@ -67,10 +147,10 @@ export const ChatView: React.FC<Props> = ({ state, session, dispatch, onOpenHist
   attachmentsRef.current = state.attachments;
 
   const sendPrompt = useCallback(
-    async (prompt: string) => {
+    async (prompt: string, planFirst?: boolean) => {
       dispatch({ type: 'clearAttachments' });
       const attachments = await withThumbnails(attachmentsRef.current);
-      postToHost({ command: 'sendPrompt', sessionId, prompt, attachments });
+      postToHost({ command: 'sendPrompt', sessionId, prompt, attachments, ...(planFirst ? { planFirst } : {}) });
     },
     [sessionId, dispatch]
   );
@@ -125,6 +205,7 @@ export const ChatView: React.FC<Props> = ({ state, session, dispatch, onOpenHist
             <option value="full">Completo</option>
             <option value="readonly">Solo lectura</option>
           </select>
+          <ConversationIndex session={session} />
           <button
             type="button"
             onClick={() => postToHost({ command: 'exportSession', sessionId })}
@@ -225,7 +306,19 @@ export const ChatView: React.FC<Props> = ({ state, session, dispatch, onOpenHist
 
       <Quota telemetry={telemetry} accounts={state.accounts} activeAccount={account} onFailover={failover} />
 
-      <MessageList key={sessionId} sessionId={sessionId} messages={session.messages} accountName={account?.name} onSendSuggestion={sendPrompt} />
+      {session.messages.length === 0 && <Onboarding state={state} />}
+
+      <MessageList
+        key={sessionId}
+        sessionId={sessionId}
+        messages={session.messages}
+        accountName={account?.name}
+        accounts={state.accounts}
+        role={session.protocolRole}
+        fileDiffs={state.fileDiffs}
+        live={state.live[sessionId]}
+        onSendSuggestion={sendPrompt}
+      />
 
       {account?.status !== 'connected' ? (
         <AccountNotice accounts={state.accounts} account={account} />

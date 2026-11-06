@@ -5,6 +5,9 @@ import { ChatMessage, FileContextAttachment, ProtocolRole } from '../shared/type
 
 const MAX_HISTORY_MESSAGES = 24;
 const MAX_HISTORY_MESSAGE_CHARS = 4000;
+/** Los mensajes más recientes van completos; los anteriores solo como recordatorio. */
+const RECENT_HISTORY_MESSAGES = 6;
+const OLD_HISTORY_MESSAGE_CHARS = 400;
 const MAX_RULES_CHARS = 8000;
 const MAX_EXPERIENCE_CHARS = 2000;
 export const EXPERIENCE_FILE = '.agent-hub/experience.md';
@@ -46,9 +49,11 @@ function formatHistory(history: ChatMessage[]): string {
   return history
     .filter((message) => message.role !== 'system' && message.content)
     .slice(-MAX_HISTORY_MESSAGES)
-    .map((message) => {
+    .map((message, index, kept) => {
       const speaker = message.role === 'user' ? 'Usuario' : 'Asistente';
-      return `${speaker}: ${message.content.slice(0, MAX_HISTORY_MESSAGE_CHARS)}`;
+      const isRecent = index >= kept.length - RECENT_HISTORY_MESSAGES;
+      const limit = isRecent ? MAX_HISTORY_MESSAGE_CHARS : OLD_HISTORY_MESSAGE_CHARS;
+      return `${speaker}: ${message.content.slice(0, limit)}${message.content.length > limit ? ' […]' : ''}`;
     })
     .join('\n\n');
 }

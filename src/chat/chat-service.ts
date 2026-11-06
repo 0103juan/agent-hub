@@ -35,6 +35,10 @@ export interface SendPromptOptions {
   hops?: number;
   /** Ya se reintentó con otra cuenta tras agotar la cuota; evita reintentar en bucle. */
   retried?: boolean;
+  /** El agente solo propone un plan, sin editar archivos. */
+  planFirst?: boolean;
+  /** Cuántas veces se le devolvieron al agente tests fallidos en esta cadena. */
+  verifyAttempt?: number;
 }
 
 interface Queued {
@@ -46,6 +50,9 @@ interface Queued {
 const TEXT_FLUSH_INTERVAL_MS = 33;
 const MAX_AGENT_HOPS = 6;
 const MAX_COMMS = 100;
+const MAX_VERIFY_RETRIES = 2;
+const PLAN_PREFIX =
+  'MODO PLAN: no edites ni crees archivos ni ejecutes cambios. Responde solo con un plan numerado: pasos, archivos que tocarías y riesgos. Espera la aprobación.\n\n';
 /** Errores con que las CLI avisan que la cuenta se quedó sin cuota. */
 const QUOTA_ERROR = /usage limit|rate limit|quota|limit reached|too many requests|429/i;
 const MAX_STORED_THINKING = 2000;
@@ -81,6 +88,14 @@ export class ChatService {
   private readonly attention = new Set<string>();
   /** Milisegundos sin salida del agente antes de cancelar el turno; 0 lo desactiva. */
   public idleTimeoutMs = 0;
+  /** Turnos que pueden correr a la vez; 0 es sin límite. Los demás esperan su turno. */
+  public maxConcurrent = 0;
+  /** Corre los tests del proyecto tras el turno de un Desarrollador de equipo; sin definir, no verifica. */
+  public verify?: (cwd: string) => Promise<{ ok: boolean; output: string } | undefined>;
+  private slotsHeld = 0;
+  private readonly waiters: Array<() => void> = [];
+  /** Traspasos que esperan aprobación, con lo necesario para entregarlos. */
+  private readonly pendingHandoffs = new Map<string, { message: AgentMessage; targetId: string; workspaceDir: string; hops: number }>();
 
   constructor(
     private readonly sessions: SessionStore,
@@ -89,6 +104,33 @@ export class ChatService {
     private readonly post: (message: HostMessage) => void,
     private readonly notify?: (text: string) => void
   ) {}
+
+  private async acquireSlot(): Promise<void> {
+    while (this.maxConcurrent > 0 && this.slotsHeld >= this.maxConcurrent) {
+      await new Promise<void>((resolve) => this.waiters.push(resolve));
+    }
+    this.slotsHeld += 1;
+  }
+
+  private releaseSlot(): void {
+    this.slotsHeld -= 1;
+    this.waiters.shift()?.();
+  }
+
+  /** Entrega o descarta un traspaso que esperaba la aprobación de la persona. */
+  public approveHandoff(id: string, approve: boolean): void {
+    const pending = this.pendingHandoffs.get(id);
+    if (!pending) return;
+    this.pendingHandoffs.delete(id);
+    const { message, targetId, workspaceDir, hops } = pending;
+    if (!approve) {
+      this.addNote(targetId, `Traspaso de ${message.from} rechazado.`);
+      return;
+    }
+    this.comms = [...this.comms, { ...message, at: Date.now() }].slice(-MAX_COMMS);
+    this.publishSessions();
+    void this.send({ sessionId: targetId, prompt: message.text, from: message.from, hops, workspaceDir });
+  }
 
   public markSeen(sessionId: string): void {
     if (this.attention.delete(sessionId)) this.publishSessions();
@@ -117,6 +159,7 @@ export class ChatService {
   /** Detiene el turno y olvida lo que esperaba en cola. */
   public discard(sessionId: string): void {
     this.queues.delete(sessionId);
+    for (const [id, pending] of this.pendingHandoffs) if (pending.targetId === sessionId) this.pendingHandoffs.delete(id);
     this.cancel(sessionId);
   }
 
@@ -153,7 +196,8 @@ export class ChatService {
         queues: Object.fromEntries([...this.queues].map(([id, queue]) => [id, queue.map((entry) => entry.item)])),
         comms: this.comms,
         attentionSessionIds: [...this.attention],
-        costs: summarizeCosts(this.sessions.list())
+        costs: summarizeCosts(this.sessions.list()),
+        pendingHandoffs: [...this.pendingHandoffs.values()].map((pending) => pending.message)
       }
     });
   }
@@ -213,11 +257,13 @@ export class ChatService {
 
     this.preparingSessionIds.add(sessionId);
     this.publishSessions();
+    await this.acquireSlot();
     const accounts = await this.providers.listAccounts();
     this.preparingSessionIds.delete(sessionId);
 
     const { account, model, effort } = resolveSelection(session, accounts);
     if (!account || !model) {
+      this.releaseSlot();
       this.addNote(sessionId, 'No hay ninguna cuenta disponible. Vincula una en Ajustes.', true);
       return;
     }
@@ -252,6 +298,7 @@ export class ChatService {
       modelName: model.label,
       timestamp: Date.now(),
       isStreaming: true,
+      isPlan: options.planFirst || undefined,
       activity: [],
       activityOffsets: []
     };
@@ -329,7 +376,7 @@ export class ChatService {
       run = this.providers.get(account.provider).startTurn(
         {
           account,
-          prompt: composePrompt({ prompt, role, attachments, history, team, projectRules: loadProjectRules(workspaceDir),
+          prompt: composePrompt({ prompt: options.planFirst ? PLAN_PREFIX + prompt : prompt, role, attachments, history, team, projectRules: loadProjectRules(workspaceDir),
             // Con conversación reanudada la CLI ya tiene esto del primer turno: no se paga de nuevo.
             experience: resumeId ? undefined : loadExperience(workspaceDir),
             canWrite: !resumeId && !(role && PROTOCOL_ROLES[role].readOnly)
@@ -338,7 +385,7 @@ export class ChatService {
           modelId: model.id,
           effort,
           resumeId,
-          readOnly: this.isReadOnly(session, role)
+          readOnly: options.planFirst || this.isReadOnly(session, role)
         },
         onEvent
       );
@@ -352,6 +399,7 @@ export class ChatService {
 
     clearTimeout(idleTimer);
     this.activeRuns.delete(sessionId);
+    this.releaseSlot();
     flushText();
     this.live.delete(sessionId);
     this.post({ type: 'live', sessionId });
@@ -365,6 +413,7 @@ export class ChatService {
     }
     if (outcome.status === 'completed') {
       this.telemetry.recordTurn(target, { ...usage, durationMs: Date.now() - startedAt });
+      if (role === 'desarrollador' && session.squad && this.verify && (await this.verifyBeforeHandoff(options, role))) return;
       this.routeAgentMessages(session, reply.content, options.hops ?? 0);
     }
     if (outcome.status !== 'cancelled' && session.id !== this.sessions.getActive().id) {
@@ -380,6 +429,44 @@ export class ChatService {
     } else if (outcome.status === 'failed' && !options.retried && QUOTA_ERROR.test(outcome.error)) {
       await this.retryWithOtherAccount(options, account.id, accounts);
     }
+  }
+
+  /**
+   * Corre los tests antes de pasar el trabajo. Si fallan y quedan intentos, se los devuelve al agente
+   * y devuelve true para que el traspaso espere al turno corregido.
+   */
+  private async verifyBeforeHandoff(options: SendPromptOptions, role: ProtocolRole): Promise<boolean> {
+    const { sessionId, workspaceDir } = options;
+    const attempt = options.verifyAttempt ?? 0;
+    this.preparingSessionIds.add(sessionId);
+    this.publishSessions();
+    let result: { ok: boolean; output: string } | undefined;
+    try {
+      result = await this.verify?.(workspaceDir);
+    } finally {
+      this.preparingSessionIds.delete(sessionId);
+    }
+    if (!result) return false;
+    if (result.ok) {
+      this.addNote(sessionId, 'Los tests pasan.');
+      return false;
+    }
+    if (attempt >= MAX_VERIFY_RETRIES) {
+      this.addNote(sessionId, 'Los tests siguen fallando; se traspasa igualmente.', true);
+      return false;
+    }
+    this.addNote(sessionId, `Los tests fallan (intento ${attempt + 1} de ${MAX_VERIFY_RETRIES + 1}): se los envío al agente.`, true);
+    this.post({ type: 'state', patch: { telemetry: this.telemetry.getRegistry() } });
+    await this.send({
+      sessionId,
+      prompt: `Los tests fallan tras tu cambio. Corrígelo.\n\n${result.output}`,
+      workspaceDir,
+      role,
+      from: 'AgentHub',
+      hops: options.hops,
+      verifyAttempt: attempt + 1
+    });
+    return true;
   }
 
   /** Cuota agotada: pasa a otra cuenta conectada del mismo proveedor y repite el mensaje una vez. */
@@ -421,6 +508,17 @@ export class ChatService {
         const isHandoff = sender.protocolRole && target.protocolRole === PROTOCOL_ROLES[sender.protocolRole].handoffTo;
         const missing = isHandoff ? missingHandoffFields(body) : [];
         if (missing.length > 0) this.addNote(sender.id, `Traspaso a ${name} sin los campos: ${missing.join(' ')}`, true);
+        if (isHandoff && sender.approveStages) {
+          const id = newMessageId();
+          this.pendingHandoffs.set(id, {
+            message: { id, at: Date.now(), from, to: agentName(target), text: body.trim() },
+            targetId: target.id,
+            workspaceDir: target.projectPath ?? sender.projectPath ?? '',
+            hops: hops + 1
+          });
+          this.addNote(sender.id, `Traspaso a ${name} espera tu aprobación.`);
+          continue;
+        }
         this.comms = [...this.comms, { id: newMessageId(), at: Date.now(), from, to: agentName(target), text: body.trim() }].slice(-MAX_COMMS);
         void this.send({
           sessionId: target.id,

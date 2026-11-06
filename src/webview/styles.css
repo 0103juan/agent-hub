@@ -102,3 +102,44 @@ body {
 .syn-type { color: #38bdf8; } /* Celeste para tipos */
 .syn-diff-add { background-color: rgba(16, 185, 129, 0.15); color: #6ee7b7; display: block; }
 .syn-diff-del { background-color: rgba(244, 63, 94, 0.15); color: #fda4af; display: block; }
+
+/* Densidad compacta: menos aire en mensajes y listas */
+[data-density='compact'] .msg-bubble {
+  padding: 0.375rem 0.5rem;
+}
+[data-density='compact'] .msg-list > * + * {
+  margin-top: 0.375rem !important;
+}
+[data-density='compact'] ul[aria-label='Agentes'] > * + * {
+  margin-top: 0.25rem !important;
+}
+
+/* Sin animaciones para quien pide menos movimiento; los spinners quedan estáticos */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+  .aurora-border {
+    background-position: 0% 50%;
+  }
+}
+
+/* Modo de alto contraste: bordes y foco siempre visibles */
+@media (forced-colors: active) {
+  button,
+  select,
+  input,
+  textarea,
+  .msg-bubble,
+  .glass-panel {
+    border: 1px solid CanvasText !important;
+  }
+  :focus-visible {
+    outline: 2px solid Highlight !important;
+    outline-offset: 2px;
+  }
+}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { ArrowRight, Brain, MessageSquare, Plus, Square, Terminal, Users, X, LayoutGrid, Network } from 'lucide-react';
-import { SquadCanvas } from './SquadCanvas';
+import { ArrowRight, Brain, MessageSquare, Plus, Square, Terminal, Users, X, LayoutGrid, Network, Columns3 } from 'lucide-react';
+import { PendingHandoffs, SquadCanvas } from './SquadCanvas';
 import { agentName } from '../../shared/agent-name';
 import { PROTOCOL_ROLES } from '../../shared/protocol-roles';
 import { ConversationSession, ProtocolRole } from '../../shared/types';
@@ -19,6 +19,7 @@ const SpawnForm: React.FC<{ projects: string[] }> = ({ projects }) => {
   const [project, setProject] = useState('');
   const [roles, setRoles] = useState<Array<ProtocolRole | ''>>(['']);
   const [prompt, setPrompt] = useState('');
+  const [isolate, setIsolate] = useState(true);
 
   const spawn = (event: React.FormEvent) => {
     event.preventDefault();
@@ -26,7 +27,8 @@ const SpawnForm: React.FC<{ projects: string[] }> = ({ projects }) => {
       command: 'spawnAgents',
       projectName: project || undefined,
       roles: roles.map((role) => role || undefined),
-      prompt
+      prompt,
+      isolate
     });
     setPrompt('');
   };
@@ -89,6 +91,11 @@ const SpawnForm: React.FC<{ projects: string[] }> = ({ projects }) => {
         onChange={(e) => setPrompt(e.target.value)}
         className="w-full bg-zinc-950 border border-zinc-700 rounded p-2 text-[11px] text-zinc-100 placeholder-zinc-400 focus:outline-none focus:border-indigo-500 resize-none"
       />
+
+      <label className="flex items-center gap-1 text-[11px] text-zinc-400 cursor-pointer" title="Los agentes trabajan en una rama y carpeta aparte; luego fusionas o descartas">
+        <input type="checkbox" checked={isolate} onChange={(event) => setIsolate(event.target.checked)} />
+        <span>Copia aparte</span>
+      </label>
 
       <button type="submit" className="w-full py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded font-medium text-[11px] transition">
         Iniciar {roles.length} {roles.length === 1 ? 'agente' : 'agentes'}
@@ -161,8 +168,44 @@ const AgentCard: React.FC<{ session: ConversationSession; state: HubState; onOpe
   );
 };
 
+const BOARD_COLUMNS = ['Esperando', 'Trabajando', 'Te espera', 'Hecho'] as const;
+
+const Board: React.FC<{ agents: ConversationSession[]; state: HubState; onOpenChat: (id: string) => void }> = ({ agents, state, onOpenChat }) => {
+  const columnOf = (session: ConversationSession): (typeof BOARD_COLUMNS)[number] =>
+    state.runningSessionIds.includes(session.id) ? 'Trabajando'
+      : state.attentionSessionIds.includes(session.id) ? 'Te espera'
+      : session.messages.some((m) => m.role === 'assistant') || (session.messageCount ?? 0) >= 2 ? 'Hecho'
+      : 'Esperando';
+
+  return (
+    <div className="grid grid-cols-2 min-[560px]:grid-cols-4 gap-2" aria-label="Tablero de agentes">
+      {BOARD_COLUMNS.map((column) => {
+        const cards = agents.filter((session) => columnOf(session) === column);
+        return (
+          <section key={column} aria-label={column} className="space-y-1.5 min-w-0">
+            <h3 className="text-[10px] uppercase font-semibold text-zinc-400 tracking-wider">{column} <span className="font-mono">{cards.length}</span></h3>
+            {cards.map((session) => (
+              <button
+                key={session.id}
+                type="button"
+                onClick={() => onOpenChat(session.id)}
+                className="w-full text-left p-2 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-600 transition text-[11px] min-w-0"
+              >
+                <span className="block font-semibold text-zinc-100 truncate">{agentName(session)}</span>
+                <span className="block text-zinc-400 truncate">
+                  {(session.protocolRole && PROTOCOL_ROLES[session.protocolRole]?.label) || 'Sin rol'}
+                </span>
+              </button>
+            ))}
+          </section>
+        );
+      })}
+    </div>
+  );
+};
+
 export const AgentsView: React.FC<Props> = ({ state, onOpenChat }) => {
-  const [viewMode, setViewMode] = useState<'cards' | 'canvas'>('cards');
+  const [viewMode, setViewMode] = useState<'cards' | 'canvas' | 'board'>('cards');
   const agents = state.sessions
     .filter((session) => session.squad || state.runningSessionIds.includes(session.id) || state.queues[session.id]?.length)
     .sort((a, b) => Number(state.runningSessionIds.includes(b.id)) - Number(state.runningSessionIds.includes(a.id)));
@@ -191,10 +234,23 @@ export const AgentsView: React.FC<Props> = ({ state, onOpenChat }) => {
             <Network className="w-3 h-3" />
             <span>Topología</span>
           </button>
+          <button
+            type="button"
+            onClick={() => setViewMode('board')}
+            className={`flex items-center gap-1 px-2 py-0.5 rounded transition ${viewMode === 'board' ? 'bg-indigo-600 text-white font-medium shadow' : 'text-zinc-400 hover:text-zinc-200'}`}
+            title="Tablero por estado"
+          >
+            <Columns3 className="w-3 h-3" />
+            <span>Tablero</span>
+          </button>
         </div>
       </div>
 
-      {viewMode === 'canvas' ? (
+      <PendingHandoffs handoffs={state.pendingHandoffs} />
+
+      {viewMode === 'board' ? (
+        <Board agents={agents} state={state} onOpenChat={onOpenChat} />
+      ) : viewMode === 'canvas' ? (
         <SquadCanvas agents={agents} state={state} onOpenChat={onOpenChat} />
       ) : (
         <>

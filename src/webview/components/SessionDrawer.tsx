@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ConversationSession, ProtocolRole, SearchHit } from '../../shared/types';
+import { ArchivedSessionInfo, ConversationSession, ProtocolRole, SearchHit } from '../../shared/types';
 import { postToHost } from '../vscode-api';
 import { PROTOCOL_ROLES } from '../../shared/protocol-roles';
 import {
@@ -32,6 +32,7 @@ interface Props {
   startWithNewTask?: boolean;
   searchHits: SearchHit[];
   searchQuery: string;
+  archive: ArchivedSessionInfo[];
 }
 
 const MESSAGE_SEARCH_MIN_CHARS = 2;
@@ -53,8 +54,10 @@ export const SessionDrawer: React.FC<Props> = ({
   onClose,
   startWithNewTask = false,
   searchHits,
-  searchQuery: hitsQuery
+  searchQuery: hitsQuery,
+  archive
 }) => {
+  const [showArchive, setShowArchive] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProjectFilter, setSelectedProjectFilter] = useState<string>('all');
   // Con muchos proyectos solo queda abierto el de la conversación activa.
@@ -571,6 +574,41 @@ export const SessionDrawer: React.FC<Props> = ({
                 </div>
               );
             })
+          )}
+        </div>
+
+        <div className="shrink-0 border-t border-zinc-800 pt-2">
+          <button
+            type="button"
+            onClick={() => {
+              if (!showArchive) postToHost({ command: 'listArchive' });
+              setShowArchive(!showArchive);
+            }}
+            aria-expanded={showArchive}
+            className="flex items-center gap-1 text-[11px] font-semibold text-zinc-400 hover:text-zinc-200 uppercase tracking-wide"
+          >
+            {showArchive ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+            Archivadas
+          </button>
+          {showArchive && (
+            <ul className="mt-1 max-h-40 overflow-y-auto space-y-1">
+              {archive.length === 0 && <li className="text-[11px] text-zinc-400 p-1">No hay conversaciones archivadas.</li>}
+              {archive.map((item) => (
+                <li key={item.id} className="flex items-center gap-2 p-1.5 rounded border border-zinc-800/60 text-[11px]">
+                  <span className="flex-1 min-w-0">
+                    <span className="block truncate font-medium text-zinc-200">{item.title || 'Conversación'}</span>
+                    <span className="block text-zinc-400">{new Date(item.updatedAt).toLocaleString()}</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => postToHost({ command: 'restoreSession', sessionId: item.id })}
+                    className="px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-indigo-300 border border-zinc-700 transition shrink-0"
+                  >
+                    Restaurar
+                  </button>
+                </li>
+              ))}
+            </ul>
           )}
         </div>
       </div>

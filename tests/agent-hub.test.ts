@@ -22,6 +22,9 @@ import { findSecrets } from '../src/analysis/secret-scanner';
 import { findDestructiveStatements, findQueryIssues } from '../src/analysis/sql-review';
 import { ChatService } from '../src/chat/chat-service';
 import { readAttachment } from '../src/host/attachments';
+import { createSquadWorktree, mainRepoOf, mergeSquadWorktree, removeSquadWorktree } from '../src/host/git-worktree';
+import { isInsideWorkspace } from '../src/host/safe-path';
+import { templateById } from '../src/shared/team-templates';
 import { summarizeCosts } from '../src/shared/cost-summary';
 import { searchSessions } from '../src/shared/session-search';
 import { HostMessage } from '../src/shared/ipc';
@@ -518,6 +521,105 @@ describe('ChatService', () => {
     const { send, provider } = setup(() => ({ status: 'failed', error: 'rate limit' }));
     await send('x');
     assert.strictEqual(provider.requests.length, 1);
+  });
+
+  it('plan primero: el turno es de solo lectura, marca la respuesta y no guarda el prefijo en tu mensaje', async () => {
+    const { chat, provider, sessions, session } = setup((emit) => { emit({ kind: 'text', text: '1. Paso uno' }); return { status: 'completed' }; });
+    await chat.send({ sessionId: session.id, prompt: 'hazlo', planFirst: true, workspaceDir: tempDir() });
+    assert.strictEqual(provider.requests[0].readOnly, true);
+    assert.ok(provider.requests[0].prompt.includes('MODO PLAN'));
+    const messages = sessions.get(session.id)!.messages;
+    assert.strictEqual(messages[0].content, 'hazlo');
+    assert.strictEqual(messages[1].isPlan, true);
+  });
+
+  it('con aprobación por etapa el traspaso espera y se entrega al aprobarlo', async () => {
+    const { chat, provider, sessions, session, posted } = setup((emit) => {
+      emit({ kind: 'text', text: '>> tester-1: Hecho: spec\nArchivos: a.md\nPendiente: tests\nVerificación: criterios\n\n' });
+      return { status: 'completed' };
+    });
+    sessions.update(session.id, { protocolRole: 'arquitecto', taskSlug: 'arquitecto-1', squad: 'S', approveStages: true });
+    sessions.create({ protocolRole: 'tester', taskSlug: 'tester-1', squad: 'S' });
+    await chat.send({ sessionId: session.id, prompt: 'x', workspaceDir: tempDir() });
+    assert.strictEqual(provider.requests.length, 1);
+    const pending = [...posted].reverse().find((m) => m.type === 'state' && m.patch.pendingHandoffs?.length)!;
+    assert.ok(pending.type === 'state');
+    const id = pending.patch.pendingHandoffs![0].id;
+    chat.approveHandoff(id, true);
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    assert.strictEqual(provider.requests.length, 2);
+    assert.ok(provider.requests[1].prompt.includes('Hecho: spec'));
+  });
+
+  it('rechazar un traspaso pendiente no entrega nada', async () => {
+    const { chat, provider, sessions, session, posted } = setup((emit) => {
+      emit({ kind: 'text', text: '>> tester-1: Hecho: spec\nArchivos: a.md\nPendiente: tests\nVerificación: criterios\n\n' });
+      return { status: 'completed' };
+    });
+    sessions.update(session.id, { protocolRole: 'arquitecto', taskSlug: 'arquitecto-1', squad: 'S', approveStages: true });
+    sessions.create({ protocolRole: 'tester', taskSlug: 'tester-1', squad: 'S' });
+    await chat.send({ sessionId: session.id, prompt: 'x', workspaceDir: tempDir() });
+    const pending = [...posted].reverse().find((m) => m.type === 'state' && m.patch.pendingHandoffs?.length)!;
+    assert.ok(pending.type === 'state');
+    chat.approveHandoff(pending.patch.pendingHandoffs![0].id, false);
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    assert.strictEqual(provider.requests.length, 1);
+  });
+
+  it('el Desarrollador de equipo recibe los tests fallidos hasta 2 veces y luego se traspasa', async () => {
+    const { chat, provider, sessions, session } = setup(() => ({ status: 'completed' }));
+    sessions.update(session.id, { protocolRole: 'desarrollador', squad: 'S' });
+    let runs = 0;
+    chat.verify = async () => { runs += 1; return { ok: false, output: 'boom' }; };
+    await chat.send({ sessionId: session.id, prompt: 'x', workspaceDir: tempDir() });
+    assert.strictEqual(provider.requests.length, 3);
+    assert.strictEqual(runs, 3);
+    assert.ok(provider.requests[1].prompt.includes('boom'));
+  });
+
+  it('si los tests pasan tras el primer arreglo no vuelve a insistir', async () => {
+    const { chat, provider, sessions, session } = setup(() => ({ status: 'completed' }));
+    sessions.update(session.id, { protocolRole: 'desarrollador', squad: 'S' });
+    let runs = 0;
+    chat.verify = async () => ({ ok: ++runs > 1, output: 'fallo' });
+    await chat.send({ sessionId: session.id, prompt: 'x', workspaceDir: tempDir() });
+    assert.strictEqual(provider.requests.length, 2);
+  });
+
+  it('sin equipo o sin ser Desarrollador no corre los tests', async () => {
+    const { chat, provider, session, sessions } = setup(() => ({ status: 'completed' }));
+    let runs = 0;
+    chat.verify = async () => { runs += 1; return { ok: false, output: 'x' }; };
+    await chat.send({ sessionId: session.id, prompt: 'x', workspaceDir: tempDir() });
+    sessions.update(session.id, { protocolRole: 'desarrollador' });
+    await chat.send({ sessionId: session.id, prompt: 'y', workspaceDir: tempDir() });
+    assert.strictEqual(runs, 0);
+    assert.strictEqual(provider.requests.length, 2);
+  });
+
+  it('maxConcurrent limita los turnos simultáneos', async () => {
+    const run = async (limit: number) => {
+      const { chat, provider, sessions, session } = setup(() => ({ status: 'completed' }));
+      let current = 0;
+      let peak = 0;
+      provider.startTurn = (request: AgentTurnRequest) => {
+        provider.requests.push(request);
+        current += 1;
+        peak = Math.max(peak, current);
+        const outcome = new Promise<TurnOutcome>((resolve) => setTimeout(() => { current -= 1; resolve({ status: 'completed' }); }, 30));
+        return { outcome, cancel: () => undefined };
+      };
+      const other = sessions.create({});
+      chat.maxConcurrent = limit;
+      await Promise.all([
+        chat.send({ sessionId: session.id, prompt: 'a', workspaceDir: tempDir() }),
+        chat.send({ sessionId: other.id, prompt: 'b', workspaceDir: tempDir() })
+      ]);
+      assert.strictEqual(provider.requests.length, 2);
+      return peak;
+    };
+    assert.strictEqual(await run(1), 1);
+    assert.strictEqual(await run(0), 2);
   });
 
   it('guarda la respuesta y la conversación de la CLI en el host', async () => {
@@ -1160,5 +1262,108 @@ describe('Búsqueda, costos y archivo de sesiones', () => {
     assert.ok(reopened.list().length >= 1);
     const archived = JSON.parse(fs.readFileSync(path.join(dir, 'archive.json'), 'utf8')) as ConversationSession[];
     assert.deepStrictEqual(archived.map((a) => a.id), [old.id]);
+  });
+});
+
+describe('Copias aparte, plantillas y archivo restaurable', () => {
+  const git = (cwd: string, ...args: string[]) =>
+    execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...args], { cwd, stdio: 'ignore' });
+  function repo(): string {
+    const dir = path.join(tempDir(), 'proyecto');
+    fs.mkdirSync(dir);
+    git(dir, 'init');
+    fs.writeFileSync(path.join(dir, 'a.txt'), 'uno');
+    git(dir, 'add', '.');
+    git(dir, 'commit', '-m', 'init');
+    return dir;
+  }
+
+  it('createSquadWorktree crea una rama y carpeta aparte; sin repo no hace nada', () => {
+    const dir = repo();
+    const worktree = createSquadWorktree(dir, 'squad-1')!;
+    assert.ok(fs.existsSync(path.join(worktree.path, 'a.txt')));
+    assert.strictEqual(worktree.branch, 'agent-hub/squad-1');
+    assert.strictEqual(fs.realpathSync(mainRepoOf(worktree.path)!), fs.realpathSync(dir));
+    assert.strictEqual(createSquadWorktree(tempDir(), 'x'), undefined);
+  });
+
+  it('mergeSquadWorktree lleva el trabajo al repo principal y limpia la copia', () => {
+    const dir = repo();
+    const worktree = createSquadWorktree(dir, 'squad-2')!;
+    fs.writeFileSync(path.join(worktree.path, 'nuevo.txt'), 'hecho por el equipo');
+    const result = mergeSquadWorktree(worktree.path, worktree.branch);
+    assert.ok(result.ok, result.message);
+    assert.strictEqual(fs.readFileSync(path.join(dir, 'nuevo.txt'), 'utf8'), 'hecho por el equipo');
+    assert.ok(!fs.existsSync(worktree.path));
+  });
+
+  it('mergeSquadWorktree con conflicto no cambia el repo principal y conserva la copia', () => {
+    const dir = repo();
+    const worktree = createSquadWorktree(dir, 'squad-3')!;
+    fs.writeFileSync(path.join(worktree.path, 'a.txt'), 'del equipo');
+    fs.writeFileSync(path.join(dir, 'a.txt'), 'del usuario');
+    git(dir, 'commit', '-am', 'cambio del usuario');
+    const result = mergeSquadWorktree(worktree.path, worktree.branch);
+    assert.strictEqual(result.ok, false);
+    assert.strictEqual(fs.readFileSync(path.join(dir, 'a.txt'), 'utf8'), 'del usuario');
+    assert.ok(fs.existsSync(worktree.path));
+  });
+
+  it('removeSquadWorktree descarta la copia y su rama', () => {
+    const dir = repo();
+    const worktree = createSquadWorktree(dir, 'squad-4')!;
+    removeSquadWorktree(worktree.path, worktree.branch);
+    assert.ok(!fs.existsSync(worktree.path));
+    assert.strictEqual(execFileSync('git', ['branch', '--list', worktree.branch], { cwd: dir, encoding: 'utf8' }).trim(), '');
+  });
+
+  it('templateById cae en la feature completa si el id no existe', () => {
+    assert.deepStrictEqual(templateById('bug').roles, ['depurador', 'desarrollador', 'revisor']);
+    assert.strictEqual(templateById('nada').id, 'feature');
+    for (const template of ['feature', 'bug', 'revision']) {
+      const roles = templateById(template).roles;
+      roles.slice(0, -1).forEach((role, index) => assert.strictEqual(PROTOCOL_ROLES[role].handoffTo, roles[index + 1], `${template}:${role}`));
+    }
+  });
+
+  it('isInsideWorkspace rechaza rutas absolutas y salidas de la carpeta', () => {
+    const dir = tempDir();
+    assert.ok(isInsideWorkspace(dir, 'src/a.ts'));
+    assert.ok(!isInsideWorkspace(dir, '../fuera.txt'));
+    assert.ok(!isInsideWorkspace(dir, path.resolve(dir, 'a.ts')));
+    assert.ok(!isInsideWorkspace(dir, ''));
+  });
+
+  it('projectPath ignora la copia aislada de un equipo', () => {
+    const sessions = new SessionStore(tempDir());
+    sessions.create({ projectName: 'p', projectPath: '/repo' });
+    sessions.create({ projectName: 'p', projectPath: '/repo-wt', isolatedBranch: 'agent-hub/s' });
+    assert.strictEqual(sessions.projectPath('p'), '/repo');
+  });
+
+  it('una sesión archivada se puede listar y restaurar, y no vuelve a archivarse al reabrir', () => {
+    const dir = tempDir();
+    const first = new SessionStore(dir);
+    const old = first.create({ taskSlug: 'vieja' });
+    first.get(old.id)!.updatedAt = Date.now() - 40 * 24 * 60 * 60 * 1000;
+    first.flush();
+    const reopened = new SessionStore(dir);
+    assert.deepStrictEqual(reopened.listArchive().map((item) => item.id), [old.id]);
+    assert.ok(reopened.restore(old.id));
+    assert.ok(reopened.get(old.id));
+    assert.deepStrictEqual(reopened.listArchive(), []);
+    assert.ok(!reopened.restore('no-existe'));
+    reopened.flush();
+    assert.ok(new SessionStore(dir).get(old.id));
+  });
+
+  it('el historial reenviado conserva completos los mensajes recientes y recorta los antiguos', () => {
+    const history = Array.from({ length: 20 }, (_, index) => ({
+      id: String(index), role: 'user' as const, content: `m${index}-` + 'x'.repeat(3990), profileId: 'p', modelName: 'm', timestamp: index
+    }));
+    const prompt = composePrompt({ prompt: 'hola', history });
+    assert.ok(prompt.includes('m19-' + 'x'.repeat(3990)));
+    assert.ok(prompt.includes('[…]'));
+    assert.ok(prompt.length < 24 * 4000 / 2);
   });
 });

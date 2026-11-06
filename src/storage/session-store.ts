@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { DEFAULT_MODEL_ID, DEFAULT_PROFILE_ID } from '../shared/model-selection';
-import { ChatMessage, ConversationSession, ProtocolRole, ReasoningEffort } from '../shared/types';
+import { ArchivedSessionInfo, ChatMessage, ConversationSession, ProtocolRole, ReasoningEffort } from '../shared/types';
 import { DebouncedJsonFile, readJsonFile } from './json-file';
 
 const DEFAULT_TITLE = 'Nueva conversación';
@@ -18,6 +18,8 @@ export interface NewSessionOptions {
   taskSlug?: string;
   protocolRole?: ProtocolRole;
   squad?: string;
+  approveStages?: boolean;
+  isolatedBranch?: string;
 }
 
 type StoredSession = Omit<ConversationSession, 'modelId'> & { modelId?: string; modelName?: string };
@@ -41,6 +43,7 @@ export class SessionStore {
   private readonly sessionsFile: DebouncedJsonFile;
   private readonly sessions = new Map<string, ConversationSession>();
   private activeSessionId: string;
+  private readonly archivePath: string;
 
   constructor(storageDir: string) {
     const filePath = path.join(storageDir, 'sessions.json');
@@ -49,7 +52,8 @@ export class SessionStore {
       const session = migrateSession(stored);
       this.sessions.set(session.id, session);
     }
-    this.archiveOld(path.join(storageDir, 'archive.json'), Date.now() - ARCHIVE_AFTER_MS);
+    this.archivePath = path.join(storageDir, 'archive.json');
+    this.archiveOld(this.archivePath, Date.now() - ARCHIVE_AFTER_MS);
     this.activeSessionId = this.list()[0]?.id ?? this.create({}).id;
   }
 
@@ -64,6 +68,24 @@ export class SessionStore {
     }
     for (const session of old) this.sessions.delete(session.id);
     this.persist();
+  }
+
+  public listArchive(): ArchivedSessionInfo[] {
+    return readJsonFile<StoredSession[]>(this.archivePath, [])
+      .map(({ id, title, updatedAt, projectName }) => ({ id, title, updatedAt, projectName }))
+      .sort((a, b) => b.updatedAt - a.updatedAt);
+  }
+
+  /** Devuelve una sesión archivada a la lista; se le renueva la fecha para que no se archive de nuevo al reabrir. */
+  public restore(sessionId: string): boolean {
+    const archived = readJsonFile<StoredSession[]>(this.archivePath, []);
+    const found = archived.find((session) => session.id === sessionId);
+    if (!found) return false;
+    fs.writeFileSync(this.archivePath, JSON.stringify(archived.filter((session) => session !== found)));
+    const session = migrateSession(found);
+    this.sessions.set(session.id, { ...session, updatedAt: Date.now() });
+    this.persist();
+    return true;
   }
 
   private persist(): void {
@@ -100,6 +122,8 @@ export class SessionStore {
       taskSlug: options.taskSlug,
       protocolRole: options.protocolRole,
       squad: options.squad,
+      approveStages: options.approveStages,
+      isolatedBranch: options.isolatedBranch,
       profileId: options.profileId ?? DEFAULT_PROFILE_ID,
       modelId: options.modelId ?? DEFAULT_MODEL_ID,
       effort: options.effort ?? 'medium',
@@ -140,7 +164,8 @@ export class SessionStore {
 
   /** Ruta del repo de un proyecto, tomada de cualquiera de sus conversaciones. */
   public projectPath(projectName: string): string | undefined {
-    return this.list().find((session) => session.projectName === projectName && session.projectPath)?.projectPath;
+    // Una copia aislada de un equipo no es la carpeta del proyecto.
+    return this.list().find((session) => session.projectName === projectName && session.projectPath && !session.isolatedBranch)?.projectPath;
   }
 
   public renameProject(from: string, to: string): void {

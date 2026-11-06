@@ -1,5 +1,6 @@
 import {
   AccountProfile,
+  ArchivedSessionInfo,
   AgentMessage,
   LiveStatus,
   QueuedMessage,
@@ -36,11 +37,11 @@ export type WebviewMessage =
   | { command: 'moveSession'; sessionId: string; projectName?: string }
   | { command: 'renameProject'; from: string; to: string }
   | { command: 'deleteProject'; projectName: string }
-  | { command: 'spawnAgents'; projectName?: string; roles: Array<ProtocolRole | undefined>; prompt: string }
+  | { command: 'spawnAgents'; projectName?: string; roles: Array<ProtocolRole | undefined>; prompt: string; isolate?: boolean }
   | { command: 'removeQueued'; sessionId: string; queuedId: string }
   | { command: 'resumeQueue'; sessionId: string }
   | { command: 'updateSession'; sessionId: string; patch: SessionPatch }
-  | { command: 'sendPrompt'; sessionId: string; prompt: string; attachments: FileContextAttachment[] }
+  | { command: 'sendPrompt'; sessionId: string; prompt: string; attachments: FileContextAttachment[]; planFirst?: boolean }
   | { command: 'stopTurn'; sessionId: string }
   | { command: 'prewarmSession'; sessionId: string }
   | { command: 'attachActiveEditor' }
@@ -52,9 +53,17 @@ export type WebviewMessage =
   | { command: 'attachGit' }
   | { command: 'saveCodeToFile'; filePath: string; code: string }
   | { command: 'rollbackTurn'; sessionId: string; checkpointHash: string }
-  | { command: 'startPipeline'; projectName?: string; prompt: string; requireApproval?: boolean }
+  | { command: 'startPipeline'; projectName?: string; prompt: string; requireApproval?: boolean; template?: string; isolate?: boolean }
   | { command: 'compareModels'; prompt: string }
   | { command: 'searchSessions'; query: string }
+  | { command: 'finishSquad'; sessionId: string; action: 'merge' | 'discard' }
+  | { command: 'approveHandoff'; id: string; approve: boolean }
+  | { command: 'listArchive' }
+  | { command: 'restoreSession'; sessionId: string }
+  | { command: 'readExperience' }
+  | { command: 'saveExperience'; content: string }
+  | { command: 'fileDiff'; sessionId: string; checkpointHash: string; file: string }
+  | { command: 'pinMessage'; sessionId: string; messageId: string }
   | { command: 'revertFile'; sessionId: string; checkpointHash: string; file: string }
   | { command: 'failoverSession'; sessionId: string; targetProvider: ProviderType }
   | { command: 'checkMcpHealth'; mcpId: string }
@@ -90,6 +99,8 @@ export interface HubStatePatch {
   /** Agentes que terminaron o preguntaron y la persona aún no vio. */
   attentionSessionIds?: string[];
   costs?: CostSummary;
+  /** Traspasos entre agentes esperando tu aprobación. */
+  pendingHandoffs?: AgentMessage[];
 }
 
 /** Mensajes extensión → webview. */
@@ -103,4 +114,7 @@ export type HostMessage =
   | { type: 'workspaceFiles'; files: string[] }
   | { type: 'composerText'; text: string }
   | { type: 'searchResults'; query: string; hits: SearchHit[] }
-  | { type: 'focusComposer' };
+  | { type: 'focusComposer' }
+  | { type: 'archive'; items: ArchivedSessionInfo[] }
+  | { type: 'experience'; content: string }
+  | { type: 'fileDiff'; checkpointHash: string; file: string; diff: string };
