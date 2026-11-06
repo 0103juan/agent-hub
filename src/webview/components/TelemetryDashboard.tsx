@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import { TelemetryRegistry, ModelAccountTelemetry } from '../../shared/types';
+import { CostSummary, TelemetryRegistry, ModelAccountTelemetry } from '../../shared/types';
 import { BarChart3, Activity, Brain, DollarSign, RotateCcw, Filter, Layers, AlertTriangle, X, Download } from 'lucide-react';
 import { ProviderBadge } from './ProviderBadge';
 
 interface Props {
   telemetryRegistry: TelemetryRegistry;
+  costs: CostSummary;
   onClearTelemetry: () => void;
 }
 
-export const TelemetryDashboard: React.FC<Props> = ({ telemetryRegistry, onClearTelemetry }) => {
+export const TelemetryDashboard: React.FC<Props> = ({ telemetryRegistry, costs, onClearTelemetry }) => {
   const [filterProvider, setFilterProvider] = useState<string>('all');
   const [showClearConfirm, setShowClearConfirm] = useState<boolean>(false);
 
@@ -25,6 +26,11 @@ export const TelemetryDashboard: React.FC<Props> = ({ telemetryRegistry, onClear
   const totalTokens = totalIn + totalOut + totalThink;
   const totalCost = entries.reduce((acc, curr) => acc + (curr.cumulativeCostUSD || 0), 0);
   const totalTurns = entries.reduce((acc, curr) => acc + (curr.turnsCount || 0), 0);
+
+  const recentDays = costs.days.slice(-14);
+  const maxDayCost = Math.max(...recentDays.map((d) => d.costUSD), 0);
+  const maxAgentCost = Math.max(...costs.agents.map((a) => a.costUSD), 0);
+  const usd = (value: number) => `$${value.toFixed(value < 1 ? 4 : 2)}`;
 
   const handleExportCSV = () => {
     if (entries.length === 0) return;
@@ -157,6 +163,44 @@ export const TelemetryDashboard: React.FC<Props> = ({ telemetryRegistry, onClear
             {entries.length} modelos activos
           </div>
         </div>
+      </div>
+
+      {/* Gasto por día y por agente */}
+      <div className="p-3 rounded-lg bg-zinc-900 border border-zinc-800 space-y-2.5">
+        <h3 className="text-xs font-bold text-zinc-100 flex items-center gap-1.5">
+          <DollarSign className="w-4 h-4 text-emerald-400 shrink-0" />
+          <span>Gasto</span>
+        </h3>
+        {recentDays.length === 0 && costs.agents.length === 0 ? (
+          <p className="text-[11px] text-zinc-400">Aún no hay gasto registrado. Aparecerá aquí cuando los agentes completen turnos con costo.</p>
+        ) : (
+          <>
+            <div className="space-y-1">
+              <div className="text-[11px] text-zinc-400">Por día (últimos {recentDays.length})</div>
+              {recentDays.map((d) => (
+                <div key={d.day} className="flex items-center gap-2 text-[11px] font-mono">
+                  <span className="w-20 shrink-0 text-zinc-400">{d.day}</span>
+                  <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
+                    <div className="h-full rounded-full bg-emerald-500" style={{ width: `${maxDayCost > 0 ? Math.max(2, (d.costUSD / maxDayCost) * 100) : 0}%` }} />
+                  </div>
+                  <span className="w-16 shrink-0 text-right text-zinc-200">{usd(d.costUSD)}</span>
+                </div>
+              ))}
+            </div>
+            <div className="space-y-1">
+              <div className="text-[11px] text-zinc-400">Por agente</div>
+              {costs.agents.map((a) => (
+                <div key={a.name} className="flex items-center gap-2 text-[11px] font-mono">
+                  <span className="w-24 shrink-0 truncate text-zinc-300" title={a.name}>{a.name}</span>
+                  <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
+                    <div className="h-full rounded-full bg-indigo-500" style={{ width: `${maxAgentCost > 0 ? Math.max(2, (a.costUSD / maxAgentCost) * 100) : 0}%` }} />
+                  </div>
+                  <span className="w-16 shrink-0 text-right text-zinc-200">{usd(a.costUSD)}</span>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
       {/* Provider Filter Tabs */}

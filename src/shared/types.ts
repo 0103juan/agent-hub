@@ -99,6 +99,24 @@ export interface QuestionOptions {
   selected?: string;
 }
 
+/** `readonly` quita al agente las herramientas de escritura (solo las respeta Claude). */
+export type SessionPermission = 'full' | 'readonly';
+
+/** Gasto agregado de todas las sesiones, para la pestaña Métricas. */
+export interface CostSummary {
+  /** Últimos días con gasto, de más viejo a más nuevo; `day` es YYYY-MM-DD. */
+  days: Array<{ day: string; costUSD: number }>;
+  /** Gasto total por agente, de mayor a menor. */
+  agents: Array<{ name: string; costUSD: number }>;
+}
+
+export interface SearchHit {
+  sessionId: string;
+  title: string;
+  /** Fragmento del mensaje que coincide. */
+  snippet: string;
+}
+
 export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant' | 'system';
@@ -179,6 +197,7 @@ export interface ConversationSession {
   effort: ReasoningEffort;
   /** Límite de gasto en USD; con equipo cuenta el gasto de todos sus agentes. */
   budgetUSD?: number;
+  permission?: SessionPermission;
   messages: ChatMessage[];
   /** Total real; la vista solo recibe los mensajes de la sesión activa. */
   messageCount?: number;

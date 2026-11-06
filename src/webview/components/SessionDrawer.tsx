@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { ConversationSession, ProtocolRole } from '../../shared/types';
+import { ConversationSession, ProtocolRole, SearchHit } from '../../shared/types';
+import { postToHost } from '../vscode-api';
 import { PROTOCOL_ROLES } from '../../shared/protocol-roles';
 import {
   Plus,
@@ -29,7 +30,12 @@ interface Props {
   onDeleteProject: (projectName: string) => void;
   onClose: () => void;
   startWithNewTask?: boolean;
+  searchHits: SearchHit[];
+  searchQuery: string;
 }
+
+const MESSAGE_SEARCH_MIN_CHARS = 2;
+const MESSAGE_SEARCH_DELAY_MS = 250;
 
 const UNASSIGNED = 'Sin proyecto';
 const NEW_PROJECT = '__nuevo__';
@@ -45,7 +51,9 @@ export const SessionDrawer: React.FC<Props> = ({
   onRenameProject,
   onDeleteProject,
   onClose,
-  startWithNewTask = false
+  startWithNewTask = false,
+  searchHits,
+  searchQuery: hitsQuery
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProjectFilter, setSelectedProjectFilter] = useState<string>('all');
@@ -76,6 +84,15 @@ export const SessionDrawer: React.FC<Props> = ({
     document.addEventListener('keydown', closeOnEscape);
     return () => document.removeEventListener('keydown', closeOnEscape);
   }, [onClose]);
+
+  // Busca dentro de los mensajes tras una pausa al teclear.
+  const trimmedQuery = searchQuery.trim();
+  useEffect(() => {
+    if (trimmedQuery.length < MESSAGE_SEARCH_MIN_CHARS) return;
+    const timer = setTimeout(() => postToHost({ command: 'searchSessions', query: trimmedQuery }), MESSAGE_SEARCH_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [trimmedQuery]);
+  const messageHits = trimmedQuery.length >= MESSAGE_SEARCH_MIN_CHARS && hitsQuery === trimmedQuery ? searchHits : [];
 
   // Extraer lista de proyectos únicos
   const availableProjects = Array.from(new Set(sessions.map((s) => s.projectName || UNASSIGNED)));
@@ -290,6 +307,26 @@ export const SessionDrawer: React.FC<Props> = ({
             </div>
           )}
         </div>
+
+        {messageHits.length > 0 && (
+          <div className="space-y-1 max-h-40 overflow-y-auto shrink-0">
+            <div className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wide">En mensajes</div>
+            {messageHits.map((hit, index) => (
+              <button
+                key={`${hit.sessionId}-${index}`}
+                type="button"
+                onClick={() => {
+                  onSelectSession(hit.sessionId);
+                  onClose();
+                }}
+                className="w-full text-left p-1.5 rounded hover:bg-zinc-800/50 border border-zinc-800/60"
+              >
+                <span className="block truncate text-[11px] font-medium text-zinc-200">{hit.title || 'Conversación'}</span>
+                <span className="block truncate text-[11px] text-zinc-400">{hit.snippet}</span>
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Sessions Grouped by Project */}
         <div className="flex-1 overflow-y-auto space-y-3 pr-1">

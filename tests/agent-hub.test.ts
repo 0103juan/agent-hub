@@ -22,6 +22,8 @@ import { findSecrets } from '../src/analysis/secret-scanner';
 import { findDestructiveStatements, findQueryIssues } from '../src/analysis/sql-review';
 import { ChatService } from '../src/chat/chat-service';
 import { readAttachment } from '../src/host/attachments';
+import { summarizeCosts } from '../src/shared/cost-summary';
+import { searchSessions } from '../src/shared/session-search';
 import { HostMessage } from '../src/shared/ipc';
 import { closestEffort, recommendedFor, resolveSelection } from '../src/shared/model-selection';
 import { PROTOCOL_ROLES } from '../src/shared/protocol-roles';
@@ -455,6 +457,54 @@ describe('ChatService', () => {
     const send = (prompt: string) => chat.send({ sessionId: session.id, prompt, workspaceDir: dir });
     return { sessions, telemetry, provider, posted, chat, session, send };
   }
+
+  it('una sesión de solo lectura pide al proveedor quitar las herramientas de escritura', async () => {
+    const { send, provider, sessions, session } = setup(() => ({ status: 'completed' }));
+    sessions.update(session.id, { permission: 'readonly' });
+    await send('lee');
+    assert.strictEqual(provider.requests[0].readOnly, true);
+  });
+
+  it('cancela el turno tras el tiempo sin actividad y lo avisa', async () => {
+    const dir = tempDir();
+    const sessions = new SessionStore(dir);
+    const hanging: AgentProvider = {
+      ...new FakeProvider(() => ({ status: 'completed' })),
+      type: 'claude',
+      discoverAccounts: async () => [CLAUDE_ACCOUNT],
+      startTurn: () => {
+        let cancel!: () => void;
+        const outcome = new Promise<TurnOutcome>((resolve) => { cancel = () => resolve({ status: 'cancelled' }); });
+        return { outcome, cancel };
+      }
+    };
+    const chat = new ChatService(sessions, new TelemetryStore(dir), new ProviderRegistry([hanging]), () => undefined);
+    chat.idleTimeoutMs = 30;
+    const session = sessions.getActive();
+    await chat.send({ sessionId: session.id, prompt: 'x', workspaceDir: dir });
+    assert.ok(session.messages.some((m) => m.role === 'system' && m.isError && m.content.includes('Sin actividad')));
+  });
+
+  it('con la cuota agotada reintenta una vez con otra cuenta del mismo proveedor', async () => {
+    const dir = tempDir();
+    const sessions = new SessionStore(dir);
+    const second: AccountProfile = { ...CLAUDE_ACCOUNT, id: 'claude-2', name: 'Claude 2' };
+    let calls = 0;
+    const provider = new FakeProvider(() => (++calls === 1 ? { status: 'failed', error: 'Claude usage limit reached' } : { status: 'completed' }));
+    provider.discoverAccounts = async () => [CLAUDE_ACCOUNT, second];
+    const chat = new ChatService(sessions, new TelemetryStore(dir), new ProviderRegistry([provider]), () => undefined);
+    const session = sessions.getActive();
+    await chat.send({ sessionId: session.id, prompt: 'x', workspaceDir: dir });
+    assert.strictEqual(calls, 2);
+    assert.strictEqual(provider.requests[1].account.id, 'claude-2');
+    assert.strictEqual(sessions.get(session.id)!.profileId, 'claude-2');
+  });
+
+  it('no reintenta si no hay otra cuenta del proveedor', async () => {
+    const { send, provider } = setup(() => ({ status: 'failed', error: 'rate limit' }));
+    await send('x');
+    assert.strictEqual(provider.requests.length, 1);
+  });
 
   it('guarda la respuesta y la conversación de la CLI en el host', async () => {
     const { session, send, posted, chat } = setup((emit) => {
@@ -1058,5 +1108,43 @@ describe('Nuevas características de AgentHub', () => {
     if (blocks[0].kind === 'list') {
       assert.ok(blocks[0].items[0].includes('file:///c:/Users/juan0/Documents/GitHub/portafolio/agent-hub'));
     }
+  });
+});
+
+describe('Búsqueda, costos y archivo de sesiones', () => {
+  const message = (content: string, extra: Partial<ConversationSession['messages'][number]> = {}) =>
+    ({ id: content, role: 'user' as const, content, profileId: 'p', modelName: 'm', timestamp: Date.UTC(2026, 10, 5, 12), ...extra });
+  const session = (id: string, title: string, messages: ConversationSession['messages']): ConversationSession =>
+    ({ id, title, taskSlug: title, profileId: 'p', modelId: 'm', effort: 'low', messages, createdAt: 0, updatedAt: 0 });
+
+  it('searchSessions ignora tildes y mayúsculas, devuelve un resultado por sesión y exige 2 letras', () => {
+    const sessions = [session('a', 'A', [message('Revisión de la CONEXIÓN a la base'), message('otra conexión')]), session('b', 'B', [message('nada')])];
+    const hits = searchSessions(sessions, 'conexion');
+    assert.deepStrictEqual(hits.map((h) => h.sessionId), ['a']);
+    assert.ok(hits[0].snippet.includes('CONEXIÓN'));
+    assert.deepStrictEqual(searchSessions(sessions, 'c'), []);
+  });
+
+  it('summarizeCosts agrega por día y por agente, de mayor a menor gasto', () => {
+    const summary = summarizeCosts([
+      session('a', 'uno', [message('x', { costUSD: 0.5 }), message('y', { costUSD: 0.25, timestamp: Date.UTC(2026, 10, 6, 12) })]),
+      session('b', 'dos', [message('z', { costUSD: 1 })])
+    ]);
+    assert.deepStrictEqual(summary.agents, [{ name: 'dos', costUSD: 1 }, { name: 'uno', costUSD: 0.75 }]);
+    assert.strictEqual(summary.days.length, 2);
+    assert.ok(Math.abs(summary.days[0].costUSD - 1.5) < 1e-9);
+  });
+
+  it('las sesiones sin actividad en 30 días pasan a archive.json y siempre queda una', () => {
+    const dir = tempDir();
+    const first = new SessionStore(dir);
+    const old = first.create({});
+    first.get(old.id)!.updatedAt = Date.now() - 40 * 24 * 60 * 60 * 1000;
+    first.flush();
+    const reopened = new SessionStore(dir);
+    assert.ok(!reopened.get(old.id));
+    assert.ok(reopened.list().length >= 1);
+    const archived = JSON.parse(fs.readFileSync(path.join(dir, 'archive.json'), 'utf8')) as ConversationSession[];
+    assert.deepStrictEqual(archived.map((a) => a.id), [old.id]);
   });
 });

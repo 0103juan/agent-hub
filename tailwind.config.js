@@ -10,13 +10,15 @@ const EDITOR_FG = 'var(--vscode-editor-foreground, #f4f4f5)';
 const themed = (base) => ({ opacityValue }) =>
   opacityValue === undefined ? base : `color-mix(in srgb, ${base} calc(${opacityValue} * 100%), transparent)`;
 
-// Porcentaje de texto mezclado sobre el fondo en cada escalón.
-const ZINC_FOREGROUND_PERCENT = { 900: 5, 850: 8, 800: 12, 750: 16, 700: 22, 600: 32, 500: 50, 400: 68, 300: 85, 200: 95 };
+// Porcentaje de texto mezclado sobre el fondo en cada escalón. 500-200 son escalones de texto: mezclan el
+// color del editor (más contrastado que `foreground` en temas claros) y suben 400/500 para llegar a 4.5:1.
+const ZINC_FOREGROUND_PERCENT = { 900: 5, 850: 8, 800: 12, 750: 16, 700: 22, 600: 32, 500: 64, 400: 70, 300: 85, 200: 95 };
+const TEXT_STEPS = new Set(['500', '400', '300', '200']);
 
 const zinc = Object.fromEntries(
   Object.entries(ZINC_FOREGROUND_PERCENT).map(([step, percent]) => [
     step,
-    themed(`color-mix(in srgb, ${FG} ${percent}%, ${BG})`)
+    themed(`color-mix(in srgb, ${TEXT_STEPS.has(step) ? EDITOR_FG : FG} ${percent}%, ${BG})`)
   ])
 );
 

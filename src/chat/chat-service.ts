@@ -5,9 +5,11 @@ import { ProviderRegistry } from '../agents/provider-registry';
 import { HostMessage } from '../shared/ipc';
 import { agentName } from '../shared/agent-name';
 import { extractQuestionOptions } from '../shared/question-options';
+import { summarizeCosts } from '../shared/cost-summary';
 import { resolveSelection } from '../shared/model-selection';
 import { PROTOCOL_ROLES } from '../shared/protocol-roles';
 import {
+  AccountProfile,
   AgentMessage,
   ChatMessage,
   ConversationSession,
@@ -31,6 +33,8 @@ export interface SendPromptOptions {
   from?: string;
   /** Cuántos mensajes entre agentes llevan encadenados; frena las conversaciones sin fin. */
   hops?: number;
+  /** Ya se reintentó con otra cuenta tras agotar la cuota; evita reintentar en bucle. */
+  retried?: boolean;
 }
 
 interface Queued {
@@ -42,6 +46,8 @@ interface Queued {
 const TEXT_FLUSH_INTERVAL_MS = 33;
 const MAX_AGENT_HOPS = 6;
 const MAX_COMMS = 100;
+/** Errores con que las CLI avisan que la cuenta se quedó sin cuota. */
+const QUOTA_ERROR = /usage limit|rate limit|quota|limit reached|too many requests|429/i;
 const MAX_STORED_THINKING = 2000;
 const LIVE_THINKING_CHARS = 400;
 const LIVE_TAIL_CHARS = 300;
@@ -73,6 +79,8 @@ export class ChatService {
   private comms: AgentMessage[] = [];
   /** Agentes que terminaron o preguntaron mientras la persona veía otro. */
   private readonly attention = new Set<string>();
+  /** Milisegundos sin salida del agente antes de cancelar el turno; 0 lo desactiva. */
+  public idleTimeoutMs = 0;
 
   constructor(
     private readonly sessions: SessionStore,
@@ -144,7 +152,8 @@ export class ChatService {
         runningSessionIds: this.runningSessionIds(),
         queues: Object.fromEntries([...this.queues].map(([id, queue]) => [id, queue.map((entry) => entry.item)])),
         comms: this.comms,
-        attentionSessionIds: [...this.attention]
+        attentionSessionIds: [...this.attention],
+        costs: summarizeCosts(this.sessions.list())
       }
     });
   }
@@ -256,7 +265,20 @@ export class ChatService {
       pendingText = '';
     };
 
+    let run: AgentRun | undefined;
+    let timedOut = false;
+    let idleTimer: NodeJS.Timeout | undefined;
+    const bumpIdle = () => {
+      clearTimeout(idleTimer);
+      if (this.idleTimeoutMs <= 0) return;
+      idleTimer = setTimeout(() => {
+        timedOut = true;
+        run?.cancel();
+      }, this.idleTimeoutMs);
+    };
+
     const onEvent = (event: AgentEvent) => {
+      bumpIdle();
       switch (event.kind) {
         case 'text':
           reply.content += event.text;
@@ -298,7 +320,7 @@ export class ChatService {
     const startedAt = Date.now();
     let outcome: TurnOutcome;
     try {
-      const run = this.providers.get(account.provider).startTurn(
+      run = this.providers.get(account.provider).startTurn(
         {
           account,
           prompt: composePrompt({ prompt, role, attachments, history, team, projectRules: loadProjectRules(workspaceDir),
@@ -310,10 +332,11 @@ export class ChatService {
           modelId: model.id,
           effort,
           resumeId,
-          readOnly: role ? PROTOCOL_ROLES[role].readOnly : undefined
+          readOnly: session.permission === 'readonly' || (role ? PROTOCOL_ROLES[role].readOnly : undefined)
         },
         onEvent
       );
+      bumpIdle();
       this.activeRuns.set(sessionId, run);
       this.publishSessions();
       outcome = await run.outcome;
@@ -321,11 +344,13 @@ export class ChatService {
       outcome = { status: 'failed', error: error instanceof Error ? error.message : String(error) };
     }
 
+    clearTimeout(idleTimer);
     this.activeRuns.delete(sessionId);
     flushText();
     this.live.delete(sessionId);
     this.post({ type: 'live', sessionId });
     this.finishTurn(session, reply, outcome);
+    if (timedOut) this.addNote(sessionId, `Sin actividad durante ${Math.round(this.idleTimeoutMs / 60000)} min: el turno se canceló.`, true);
     if (usage.costUSD) reply.costUSD = usage.costUSD;
     if (checkpointHash) {
       reply.checkpointDiff = getCheckpointDiff(workspaceDir, checkpointHash);
@@ -344,7 +369,23 @@ export class ChatService {
     }
     this.post({ type: 'state', patch: { telemetry: this.telemetry.getRegistry() } });
     this.publishSessions();
-    if (outcome.status === 'completed') await this.drain(sessionId);
+    if (outcome.status === 'completed') {
+      await this.drain(sessionId);
+    } else if (outcome.status === 'failed' && !options.retried && QUOTA_ERROR.test(outcome.error)) {
+      await this.retryWithOtherAccount(options, account.id, accounts);
+    }
+  }
+
+  /** Cuota agotada: pasa a otra cuenta conectada del mismo proveedor y repite el mensaje una vez. */
+  private async retryWithOtherAccount(options: SendPromptOptions, failedId: string, accounts: AccountProfile[]): Promise<void> {
+    const failed = accounts.find((candidate) => candidate.id === failedId);
+    const alternative = accounts.find(
+      (candidate) => candidate.status === 'connected' && candidate.id !== failedId && candidate.provider === failed?.provider
+    );
+    if (!alternative) return;
+    this.sessions.changeAccount(options.sessionId, alternative.id);
+    this.addNote(options.sessionId, `${failed?.name ?? 'La cuenta'} se quedó sin cuota: reintentando con ${alternative.name}.`);
+    await this.send({ ...options, retried: true });
   }
 
   /** Nombres de los compañeros de equipo; indefinido si el agente trabaja solo. */

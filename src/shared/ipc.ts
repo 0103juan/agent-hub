@@ -9,6 +9,9 @@ import {
   ProtocolRole,
   ProviderType,
   ReasoningEffort,
+  CostSummary,
+  SearchHit,
+  SessionPermission,
   TelemetryRegistry
 } from './types';
 
@@ -19,6 +22,7 @@ export interface SessionPatch {
   protocolRole?: ProtocolRole | null;
   /** null quita el límite. */
   budgetUSD?: number | null;
+  permission?: SessionPermission;
 }
 
 /** Mensajes webview → extensión. */
@@ -50,6 +54,7 @@ export type WebviewMessage =
   | { command: 'rollbackTurn'; sessionId: string; checkpointHash: string }
   | { command: 'startPipeline'; projectName?: string; prompt: string; requireApproval?: boolean }
   | { command: 'compareModels'; prompt: string }
+  | { command: 'searchSessions'; query: string }
   | { command: 'revertFile'; sessionId: string; checkpointHash: string; file: string }
   | { command: 'failoverSession'; sessionId: string; targetProvider: ProviderType }
   | { command: 'checkMcpHealth'; mcpId: string }
@@ -84,6 +89,7 @@ export interface HubStatePatch {
   comms?: AgentMessage[];
   /** Agentes que terminaron o preguntaron y la persona aún no vio. */
   attentionSessionIds?: string[];
+  costs?: CostSummary;
 }
 
 /** Mensajes extensión → webview. */
@@ -95,4 +101,6 @@ export type HostMessage =
   | { type: 'turnQuestion'; sessionId: string; messageId: string; question: string; options: string[] }
   | { type: 'attachmentAdded'; attachment: FileContextAttachment }
   | { type: 'workspaceFiles'; files: string[] }
-  | { type: 'composerText'; text: string };
+  | { type: 'composerText'; text: string }
+  | { type: 'searchResults'; query: string; hits: SearchHit[] }
+  | { type: 'focusComposer' };

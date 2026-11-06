@@ -75,8 +75,41 @@
       {
         "command": "agent-hub.autoDebugTerminal",
         "title": "AgentHub: Auto-Debug de Terminal Activa"
+      },
+      {
+        "command": "agent-hub.focusComposer",
+        "title": "AgentHub: Escribir un mensaje"
+      },
+      {
+        "command": "agent-hub.newSession",
+        "title": "AgentHub: Nueva sesión"
+      },
+      {
+        "command": "agent-hub.stopTurn",
+        "title": "AgentHub: Detener el turno del agente activo"
+      },
+      {
+        "command": "agent-hub.nextAgent",
+        "title": "AgentHub: Cambiar al siguiente agente"
       }
     ],
+    "keybindings": [
+      { "command": "agent-hub.focusComposer", "key": "ctrl+alt+i", "mac": "cmd+alt+i" },
+      { "command": "agent-hub.newSession", "key": "ctrl+alt+n", "mac": "cmd+alt+n" },
+      { "command": "agent-hub.stopTurn", "key": "ctrl+alt+.", "mac": "cmd+alt+." },
+      { "command": "agent-hub.nextAgent", "key": "ctrl+alt+pagedown", "mac": "cmd+alt+pagedown" }
+    ],
+    "configuration": {
+      "title": "AgentHub",
+      "properties": {
+        "agent-hub.turnIdleTimeoutMinutes": {
+          "type": "number",
+          "default": 10,
+          "minimum": 0,
+          "description": "Minutos sin salida del agente antes de cancelar el turno. 0 lo desactiva."
+        }
+      }
+    },
     "menus": {
       "editor/context": [
         {

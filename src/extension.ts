@@ -11,6 +11,7 @@ import { ChatService } from './chat/chat-service';
 import { addAccount } from './host/handlers/account-handlers';
 import { registerProposalProvider } from './host/handlers/editor-handlers';
 import { workspaceDirForSession } from './host/handlers/session-handlers';
+import { workspaceDir } from './host/workspace';
 import { HubContext } from './host/hub-context';
 import { HubViewProvider } from './host/hub-view-provider';
 import { currentEditor, openTerminal } from './host/workspace';
@@ -63,6 +64,11 @@ export function activate(context: vscode.ExtensionContext): void {
     post,
     openBesidePanel: () => view.openBesidePanel()
   };
+  const applyIdleTimeout = () => {
+    const minutes = vscode.workspace.getConfiguration('agent-hub').get<number>('turnIdleTimeoutMinutes', 10);
+    hub.chat.idleTimeoutMs = Math.max(0, minutes) * 60_000;
+  };
+  applyIdleTimeout();
   view.connect(hub);
 
   const statusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
@@ -71,8 +77,39 @@ export function activate(context: vscode.ExtensionContext): void {
   statusBar.tooltip = 'Abrir AgentHub a la derecha';
   statusBar.show();
 
+  /** Muestra el panel y deja el cursor en el composer. */
+  const focusComposer = async () => {
+    await vscode.commands.executeCommand('agent-hub.dashboardView.focus');
+    post({ type: 'focusComposer' });
+  };
+
   context.subscriptions.push(
     statusBar,
+    vscode.workspace.onDidChangeConfiguration((event) => {
+      if (event.affectsConfiguration('agent-hub.turnIdleTimeoutMinutes')) applyIdleTimeout();
+    }),
+    vscode.commands.registerCommand('agent-hub.focusComposer', focusComposer),
+    vscode.commands.registerCommand('agent-hub.newSession', async () => {
+      const current = hub.sessions.getActive();
+      const folder = workspaceDir();
+      hub.sessions.create({
+        profileId: current.profileId,
+        modelId: current.modelId,
+        effort: current.effort,
+        projectName: current.projectName,
+        projectPath: current.projectPath || folder
+      });
+      hub.chat.publishSessions();
+      await focusComposer();
+    }),
+    vscode.commands.registerCommand('agent-hub.stopTurn', () => hub.chat.cancel(hub.sessions.getActive().id)),
+    vscode.commands.registerCommand('agent-hub.nextAgent', () => {
+      const all = hub.sessions.list();
+      const next = all[(all.findIndex((candidate) => candidate.id === hub.sessions.getActive().id) + 1) % all.length];
+      hub.sessions.setActive(next.id);
+      hub.chat.markSeen(next.id);
+      hub.chat.publishSessions();
+    }),
     registerProposalProvider(),
     vscode.window.registerWebviewViewProvider('agent-hub.dashboardView', view, {
       webviewOptions: { retainContextWhenHidden: true }

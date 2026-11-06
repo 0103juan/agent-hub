@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronDown, Plus } from 'lucide-react';
+import { AlertTriangle, ChevronDown, LogIn, Plus } from 'lucide-react';
 import { ModelSelection } from '../../../shared/model-selection';
 import { AccountProfile } from '../../../shared/types';
 import { postToHost } from '../../vscode-api';
@@ -13,6 +13,30 @@ interface Props {
   accounts: AccountProfile[];
   selection: ModelSelection;
 }
+
+/** Aviso con el siguiente paso cuando no hay una cuenta conectada con la que chatear. */
+export const AccountNotice: React.FC<{ accounts: AccountProfile[]; account?: AccountProfile }> = ({ accounts, account }) => {
+  const anyConnected = accounts.some((a) => a.status === 'connected');
+  const [text, label, action] = !account
+    ? ['No hay cuentas vinculadas. Vincula una suscripción (y su CLI) para empezar a chatear.', 'Vincular Claude', () => postToHost({ command: 'addAccount', provider: 'claude' })] as const
+    : !anyConnected
+      ? [`Ninguna cuenta tiene sesión iniciada. Inicia sesión en ${account.name}; si el terminal dice que no encuentra el comando, instala su CLI primero.`, `Iniciar sesión en ${account.name}`, () => postToHost({ command: 'loginAccount', profileId: account.id })] as const
+      : [`${account.name} está desconectada. Inicia sesión de nuevo o elige otra cuenta en la barra de arriba.`, 'Iniciar sesión', () => postToHost({ command: 'loginAccount', profileId: account.id })] as const;
+  return (
+    <div role="alert" className="shrink-0 flex items-center gap-2 p-2.5 rounded-lg border border-amber-500/40 bg-zinc-900 text-xs text-zinc-300">
+      <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+      <span className="flex-1 min-w-0">{text}</span>
+      <button
+        type="button"
+        onClick={action}
+        className="flex items-center gap-1 text-[11px] px-2 py-1 rounded bg-indigo-600 hover:bg-indigo-500 text-white font-medium transition shrink-0"
+      >
+        {account ? <LogIn className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
+        <span>{label}</span>
+      </button>
+    </div>
+  );
+};
 
 type OpenModal = 'none' | 'accounts' | 'models' | 'add';
 

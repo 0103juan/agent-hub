@@ -6,6 +6,8 @@ import { postToHost } from '../../vscode-api';
 import { Markdown } from './Markdown';
 
 const STICK_TO_BOTTOM_PX = 320;
+const PAGE_SIZE = 40;
+const LONG_BLOCK_CHARS = 400;
 const QUICK_PROMPTS = ['Explicar arquitectura del proyecto', 'Revisar vulnerabilidades y seguridad', 'Generar tests unitarios para cambios'];
 
 const AttachmentPreview: React.FC<{ attachment: FileContextAttachment }> = ({ attachment }) => {
@@ -86,8 +88,8 @@ const TurnProcess: React.FC<{ message: ChatMessage; process: TurnItem[]; hasAnsw
     : [`${stepCount} ${stepCount === 1 ? 'paso' : 'pasos'}`, message.thinking && 'razonamiento'].filter(Boolean).join(' · ');
 
   return (
-    // Abierto mientras no hay respuesta, para seguir el trabajo; se pliega cuando llega.
-    <details open={!hasAnswer} className="group mb-2 rounded-md border border-zinc-800 bg-zinc-950/40 text-[12px] overflow-hidden">
+    // Abierto solo mientras trabaja y aún no hay respuesta; después queda plegado.
+    <details open={message.isStreaming && !hasAnswer} className="group mb-2 rounded-md border border-zinc-800 bg-zinc-950/40 text-[12px] overflow-hidden">
       {message.isStreaming && <div className="aurora-border h-0.5 w-full" />}
       <summary className="flex cursor-pointer select-none items-center gap-1.5 px-2 py-1 text-[11px] text-zinc-400 hover:text-zinc-200">
         {message.isStreaming ? <Loader2 className="h-3 w-3 shrink-0 animate-spin" /> : <ChevronRight className="h-3 w-3 shrink-0 transition-transform group-open:rotate-90" />}
@@ -96,10 +98,14 @@ const TurnProcess: React.FC<{ message: ChatMessage; process: TurnItem[]; hasAnsw
       </summary>
       <div className="space-y-1.5 border-t border-zinc-800 px-2 py-2">
         {message.thinking && (
-          <div className="flex gap-1.5 text-zinc-500">
-            <Brain className="mt-0.5 h-3 w-3 shrink-0" />
-            <p className="max-h-40 overflow-y-auto whitespace-pre-wrap break-words italic">{message.thinking}</p>
-          </div>
+          <details open={message.thinking.length <= LONG_BLOCK_CHARS} className="group/think text-zinc-500">
+            <summary className="flex cursor-pointer select-none items-center gap-1.5 hover:text-zinc-300">
+              <Brain className="h-3 w-3 shrink-0" />
+              <span>Razonamiento</span>
+              <ChevronRight className="h-3 w-3 shrink-0 transition-transform group-open/think:rotate-90" />
+            </summary>
+            <p className="mt-1 max-h-40 overflow-y-auto whitespace-pre-wrap break-words italic">{message.thinking}</p>
+          </details>
         )}
         <ol className="space-y-1 border-l border-zinc-800 pl-2.5">
           {process.map((item, index) =>
@@ -394,6 +400,7 @@ export const MessageList: React.FC<Props> = ({ sessionId, messages, accountName,
   const [searchQuery, setSearchQuery] = React.useState('');
   const [filterMode, setFilterMode] = React.useState<'all' | 'modified' | 'errors'>('all');
   const [isSearchOpen, setIsSearchOpen] = React.useState(false);
+  const [visibleCount, setVisibleCount] = React.useState(PAGE_SIZE);
   const wasStreamingRef = useRef(false);
   const lastMessage = messages[messages.length - 1];
 
@@ -422,6 +429,10 @@ export const MessageList: React.FC<Props> = ({ sessionId, messages, accountName,
     if (!searchQuery.trim()) return true;
     return m.content.toLowerCase().includes(searchQuery.toLowerCase());
   });
+
+  useEffect(() => setVisibleCount(PAGE_SIZE), [sessionId]);
+  const hiddenCount = Math.max(0, filteredMessages.length - visibleCount);
+  const shownMessages = hiddenCount > 0 ? filteredMessages.slice(hiddenCount) : filteredMessages;
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -507,7 +518,21 @@ export const MessageList: React.FC<Props> = ({ sessionId, messages, accountName,
           </div>
         </div>
       ) : (
-        filteredMessages.map((message) => <MessageBubble key={message.id} message={message} sessionId={sessionId} onSendSuggestion={onSendSuggestion} />)
+        <>
+          {hiddenCount > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                isFollowing.current = false;
+                setVisibleCount((count) => count + PAGE_SIZE);
+              }}
+              className="w-full text-[11px] py-1 rounded bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 transition"
+            >
+              Mostrar {Math.min(hiddenCount, PAGE_SIZE)} anteriores ({hiddenCount} ocultos)
+            </button>
+          )}
+          {shownMessages.map((message) => <MessageBubble key={message.id} message={message} sessionId={sessionId} onSendSuggestion={onSendSuggestion} />)}
+        </>
       )}
     </div>
   );

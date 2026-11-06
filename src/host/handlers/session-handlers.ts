@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { revertCheckpointFile } from '../git-checkpoint';
 import { recommendedFor, resolveSelection } from '../../shared/model-selection';
+import { searchSessions } from '../../shared/session-search';
 import { ProtocolRole } from '../../shared/types';
 import { HubContext } from '../hub-context';
 import { workspaceDir } from '../workspace';
@@ -11,7 +12,7 @@ import { HandlerMap } from './handler-types';
 export function sessionHandlers(hub: HubContext): HandlerMap<
   | 'createSession' | 'switchSession' | 'deleteSession' | 'moveSession' | 'renameProject' | 'deleteProject' | 'spawnAgents'
   | 'updateSession' | 'sendPrompt' | 'stopTurn' | 'prewarmSession' | 'removeQueued' | 'resumeQueue' | 'startPipeline' | 'failoverSession' | 'exportSession'
-  | 'compareModels' | 'revertFile' | 'crossReview' | 'forkSession' | 'generateCommit' | 'auditBranch'
+  | 'compareModels' | 'revertFile' | 'searchSessions' | 'crossReview' | 'forkSession' | 'generateCommit' | 'auditBranch'
 > {
   return {
     createSession: ({ projectName, taskSlug, protocolRole }) => {
@@ -98,7 +99,7 @@ export function sessionHandlers(hub: HubContext): HandlerMap<
       if (patch.profileId && patch.profileId !== session.profileId) {
         hub.sessions.changeAccount(sessionId, patch.profileId);
       }
-      const { profileId: _profileId, protocolRole, budgetUSD, ...settings } = patch;
+      const { profileId: _profileId, protocolRole, budgetUSD, ...settings } = patch; // `permission` viaja en settings
       hub.sessions.update(sessionId, {
         ...settings,
         ...(protocolRole !== undefined && { protocolRole: protocolRole ?? undefined }),
@@ -236,6 +237,10 @@ export function sessionHandlers(hub: HubContext): HandlerMap<
       hub.sessions.setActive(created[0].id);
       hub.chat.publishSessions();
       for (const session of created) void hub.chat.send({ sessionId: session.id, prompt: text, workspaceDir: workspaceDirForSession(hub, session.id) });
+    },
+
+    searchSessions: ({ query }) => {
+      hub.post({ type: 'searchResults', query, hits: searchSessions(hub.sessions.list(), query) });
     },
 
     revertFile: ({ sessionId, checkpointHash, file }) => {

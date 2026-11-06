@@ -124,6 +124,7 @@ export const App: React.FC = () => {
         {activeTab === 'telemetry' && (
           <TelemetryDashboard
             telemetryRegistry={state.telemetry}
+            costs={state.costs}
             onClearTelemetry={() => postToHost({ command: 'clearTelemetry' })}
           />
         )}
@@ -143,6 +144,8 @@ export const App: React.FC = () => {
           onDeleteProject={(projectName) => postToHost({ command: 'deleteProject', projectName })}
           onClose={() => setDrawerMode('closed')}
           startWithNewTask={drawerMode === 'newTask'}
+          searchHits={state.searchHits}
+          searchQuery={state.searchQuery}
         />
       )}
     </div>

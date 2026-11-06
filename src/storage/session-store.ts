@@ -1,3 +1,4 @@
+import * as fs from 'fs';
 import * as path from 'path';
 import { DEFAULT_MODEL_ID, DEFAULT_PROFILE_ID } from '../shared/model-selection';
 import { ChatMessage, ConversationSession, ProtocolRole, ReasoningEffort } from '../shared/types';
@@ -6,6 +7,7 @@ import { DebouncedJsonFile, readJsonFile } from './json-file';
 const DEFAULT_TITLE = 'Nueva conversación';
 const LEGACY_DEFAULT_TITLES = new Set([DEFAULT_TITLE, 'Nueva Conversación', 'Conversación Inicial']);
 const MAX_TITLE_LENGTH = 40;
+const ARCHIVE_AFTER_MS = 30 * 24 * 60 * 60 * 1000;
 
 export interface NewSessionOptions {
   profileId?: string;
@@ -47,7 +49,21 @@ export class SessionStore {
       const session = migrateSession(stored);
       this.sessions.set(session.id, session);
     }
+    this.archiveOld(path.join(storageDir, 'archive.json'), Date.now() - ARCHIVE_AFTER_MS);
     this.activeSessionId = this.list()[0]?.id ?? this.create({}).id;
+  }
+
+  /** Mueve a un archivo aparte las sesiones sin actividad desde `cutoff`; siempre deja al menos una. */
+  private archiveOld(archivePath: string, cutoff: number): void {
+    const old = this.list().filter((session) => session.updatedAt < cutoff);
+    if (old.length === 0 || old.length === this.sessions.size) return;
+    try {
+      fs.writeFileSync(archivePath, JSON.stringify([...readJsonFile<StoredSession[]>(archivePath, []), ...old]));
+    } catch {
+      return; // sin copia segura no se borra nada
+    }
+    for (const session of old) this.sessions.delete(session.id);
+    this.persist();
   }
 
   private persist(): void {

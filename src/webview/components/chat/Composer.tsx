@@ -39,6 +39,7 @@ interface Props {
   attachments: FileContextAttachment[];
   workspaceFiles: string[];
   composerText?: string;
+  focusTick?: number;
   sessionId: string;
   accountName?: string;
   isRunning: boolean;
@@ -57,7 +58,7 @@ function savePastedFile(file: File): void {
   reader.readAsDataURL(file);
 }
 
-export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, composerText, sessionId, accountName, isRunning, queue, dispatch, onSend }) => {
+export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, composerText, focusTick = 0, sessionId, accountName, isRunning, queue, dispatch, onSend }) => {
   const [prompt, setPrompt] = useState('');
   const [isSearchingFiles, setIsSearchingFiles] = useState(false);
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
@@ -66,6 +67,11 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
 
   const fileSearchTimer = useRef<ReturnType<typeof setTimeout>>();
   const recognitionRef = useRef<any>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (focusTick > 0) textareaRef.current?.focus();
+  }, [focusTick]);
 
   useEffect(() => {
     if (composerText === undefined) return;
@@ -392,6 +398,7 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
         className="relative rounded-xl border border-zinc-700/80 bg-zinc-900/90 focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500/30 transition shadow-sm overflow-hidden"
       >
         <textarea
+          ref={textareaRef}
           value={prompt}
           rows={2}
           aria-label="Mensaje"

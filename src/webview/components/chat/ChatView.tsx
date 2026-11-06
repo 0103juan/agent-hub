@@ -1,7 +1,7 @@
 import React, { memo, useCallback, useMemo, useRef } from 'react';
 import { ChevronDown, Cpu, Download, FolderGit2, Layers, Plus, Wallet } from 'lucide-react';
 import { resolveSelection } from '../../../shared/model-selection';
-import { ConversationSession, ProtocolRole, ProviderType, QueuedMessage, ReasoningEffort } from '../../../shared/types';
+import { ConversationSession, ProtocolRole, ProviderType, QueuedMessage, ReasoningEffort, SessionPermission } from '../../../shared/types';
 import { HubAction, HubState } from '../../state/hub-state';
 import { postToHost } from '../../vscode-api';
 import { EffortSelector } from '../EffortSelector';
@@ -10,7 +10,7 @@ import { TelemetryBar } from '../TelemetryBar';
 import { withThumbnails } from '../../state/thumbnails';
 import { Composer } from './Composer';
 import { MessageList } from './MessageList';
-import { ModelAccountBar } from './ModelAccountBar';
+import { AccountNotice, ModelAccountBar } from './ModelAccountBar';
 import { QuotaNotice } from './QuotaNotice';
 
 // El stream cambia la sesión muchas veces por segundo; estas piezas no dependen de él.
@@ -113,6 +113,18 @@ export const ChatView: React.FC<Props> = ({ state, session, dispatch, onOpenHist
         </button>
 
         <div className="flex items-center gap-1 shrink-0">
+          <select
+            value={session.permission ?? 'full'}
+            onChange={(event) =>
+              postToHost({ command: 'updateSession', sessionId, patch: { permission: event.target.value as SessionPermission } })
+            }
+            aria-label="Permisos del agente"
+            title="Solo lectura quita al agente las herramientas de escritura. Solo Claude lo hace cumplir; los demás proveedores lo ignoran."
+            className="text-[11px] px-1 py-0.5 rounded bg-zinc-800/80 text-zinc-300 border border-zinc-700/60 focus:outline-none focus:border-indigo-500"
+          >
+            <option value="full">Completo</option>
+            <option value="readonly">Solo lectura</option>
+          </select>
           <button
             type="button"
             onClick={() => postToHost({ command: 'exportSession', sessionId })}
@@ -215,7 +227,11 @@ export const ChatView: React.FC<Props> = ({ state, session, dispatch, onOpenHist
 
       <MessageList key={sessionId} sessionId={sessionId} messages={session.messages} accountName={account?.name} onSendSuggestion={sendPrompt} />
 
+      {account?.status !== 'connected' ? (
+        <AccountNotice accounts={state.accounts} account={account} />
+      ) : (
       <Editor
+        focusTick={state.focusComposerTick}
         attachments={state.attachments}
         workspaceFiles={state.workspaceFiles}
         composerText={state.composerText}
@@ -226,6 +242,7 @@ export const ChatView: React.FC<Props> = ({ state, session, dispatch, onOpenHist
         dispatch={dispatch}
         onSend={sendPrompt}
       />
+      )}
     </div>
   );
 };

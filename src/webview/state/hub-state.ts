@@ -7,6 +7,8 @@ import {
   AgentMessage,
   FileContextAttachment,
   MCPServerInfo,
+  CostSummary,
+  SearchHit,
   QueuedMessage,
   TelemetryRegistry
 } from '../../shared/types';
@@ -22,6 +24,12 @@ export interface HubState {
   queues: Record<string, QueuedMessage[]>;
   comms: AgentMessage[];
   attentionSessionIds: string[];
+  costs: CostSummary;
+  /** Resultado de buscar dentro de los mensajes de todas las sesiones. */
+  searchHits: SearchHit[];
+  searchQuery: string;
+  /** Sube cada vez que la extensión pide enfocar el composer. */
+  focusComposerTick: number;
   live: Record<string, LiveStatus>;
   attachments: FileContextAttachment[];
   workspaceFiles: string[];
@@ -46,6 +54,10 @@ export const INITIAL_HUB_STATE: HubState = {
   queues: {},
   comms: [],
   attentionSessionIds: [],
+  costs: { days: [], agents: [] },
+  searchHits: [],
+  searchQuery: '',
+  focusComposerTick: 0,
   live: {},
   attachments: [],
   workspaceFiles: []
@@ -97,6 +109,10 @@ export function hubReducer(state: HubState, action: HubAction): HubState {
       return { ...state, attachments: [...state.attachments, action.attachment] };
     case 'workspaceFiles':
       return { ...state, workspaceFiles: action.files };
+    case 'searchResults':
+      return { ...state, searchQuery: action.query, searchHits: action.hits };
+    case 'focusComposer':
+      return { ...state, focusComposerTick: state.focusComposerTick + 1 };
     case 'composerText':
       return { ...state, composerText: action.text };
     case 'removeAttachment':
