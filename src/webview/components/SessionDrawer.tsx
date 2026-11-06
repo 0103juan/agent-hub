@@ -33,6 +33,7 @@ interface Props {
 
 const UNASSIGNED = 'Sin proyecto';
 const NEW_PROJECT = '__nuevo__';
+const MANY_PROJECTS = 4;
 
 export const SessionDrawer: React.FC<Props> = ({
   sessions,
@@ -48,7 +49,14 @@ export const SessionDrawer: React.FC<Props> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProjectFilter, setSelectedProjectFilter] = useState<string>('all');
-  const [collapsedProjects, setCollapsedProjects] = useState<Record<string, boolean>>({});
+  // Con muchos proyectos solo queda abierto el de la conversación activa.
+  const [collapsedProjects, setCollapsedProjects] = useState<Record<string, boolean>>(() => {
+    const names = new Set(sessions.map((s) => s.projectName || UNASSIGNED));
+    if (names.size <= MANY_PROJECTS) return {};
+    const active = sessions.find((s) => s.id === activeSessionId)?.projectName || UNASSIGNED;
+    return Object.fromEntries([...names].filter((name) => name !== active).map((name) => [name, true]));
+  });
+  const [addingTo, setAddingTo] = useState<{ project: string; slug: string } | null>(null);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [pendingDeleteProject, setPendingDeleteProject] = useState<string | null>(null);
   const [renaming, setRenaming] = useState<{ from: string; to: string } | null>(null);
@@ -95,6 +103,22 @@ export const SessionDrawer: React.FC<Props> = ({
     if (!groupedByProject[proj]) groupedByProject[proj] = [];
     groupedByProject[proj].push(s);
   }
+
+  const latest = (list: ConversationSession[]) => Math.max(...list.map((s) => s.updatedAt ?? 0));
+  const orderedProjects = Object.entries(groupedByProject).sort(([a, listA], [b, listB]) =>
+    a === UNASSIGNED ? 1 : b === UNASSIGNED ? -1 : latest(listB) - latest(listA)
+  );
+  const searching = searchQuery !== '';
+  const allCollapsed = orderedProjects.every(([name]) => collapsedProjects[name]);
+  const setAllCollapsed = (collapsed: boolean) =>
+    setCollapsedProjects(Object.fromEntries(availableProjects.map((name) => [name, collapsed])));
+
+  const submitInlineTask = () => {
+    if (!addingTo) return;
+    onCreateSession(addingTo.project === UNASSIGNED ? undefined : addingTo.project, addingTo.slug.trim() || undefined);
+    setAddingTo(null);
+    onClose();
+  };
 
   const toggleProjectCollapse = (proj: string) => {
     setCollapsedProjects((prev) => ({ ...prev, [proj]: !prev[proj] }));
@@ -230,8 +254,16 @@ export const SessionDrawer: React.FC<Props> = ({
           </div>
 
           {availableProjects.length > 1 && (
-            <div className="flex flex-wrap items-center gap-1 py-0.5 text-[11px]">
-              <span className="text-zinc-400 mr-0.5 shrink-0">Filtrar:</span>
+            <div className="flex items-center gap-1 py-0.5 text-[11px] overflow-x-auto whitespace-nowrap pb-1">
+              <button
+                type="button"
+                onClick={() => setAllCollapsed(!allCollapsed)}
+                title={allCollapsed ? 'Expandir todos los proyectos' : 'Colapsar todos los proyectos'}
+                aria-label={allCollapsed ? 'Expandir todos' : 'Colapsar todos'}
+                className="p-0.5 rounded text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 shrink-0"
+              >
+                {allCollapsed ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+              </button>
               <button
                 onClick={() => setSelectedProjectFilter('all')}
                 className={`px-1.5 py-0.5 rounded transition shrink-0 ${
@@ -266,8 +298,8 @@ export const SessionDrawer: React.FC<Props> = ({
               No hay sesiones que coincidan con la búsqueda.
             </div>
           ) : (
-            Object.entries(groupedByProject).map(([projectName, pSessions]) => {
-              const isCollapsed = collapsedProjects[projectName];
+            orderedProjects.map(([projectName, pSessions]) => {
+              const isCollapsed = collapsedProjects[projectName] && !searching;
               return (
                 <div
                   key={projectName}
@@ -329,7 +361,8 @@ export const SessionDrawer: React.FC<Props> = ({
                         title={projectName === UNASSIGNED ? 'Nueva tarea' : `Nueva tarea en ${projectName}`}
                         onClick={(e) => {
                           e.stopPropagation();
-                          onCreateSession(projectName === UNASSIGNED ? undefined : projectName);
+                          setCollapsedProjects((prev) => ({ ...prev, [projectName]: false }));
+                          setAddingTo({ project: projectName, slug: '' });
                         }}
                         className="text-zinc-400 hover:text-emerald-400 transition shrink-0 p-0.5 rounded hover:bg-zinc-800"
                       >
@@ -383,6 +416,25 @@ export const SessionDrawer: React.FC<Props> = ({
                       )
                     )}
                   </div>
+
+                  {addingTo?.project === projectName && (
+                    <input
+                      autoFocus
+                      aria-label={`Nombre de la nueva tarea en ${projectName}`}
+                      placeholder="Nombre de la tarea (Enter para crear)"
+                      value={addingTo.slug}
+                      onChange={(e) => setAddingTo({ project: projectName, slug: e.target.value })}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') submitInlineTask();
+                        else if (e.key === 'Escape') {
+                          e.stopPropagation();
+                          setAddingTo(null);
+                        }
+                      }}
+                      onBlur={() => setAddingTo(null)}
+                      className="w-[calc(100%-1rem)] ml-2 bg-zinc-900 border border-emerald-500 rounded px-2 py-1 text-zinc-200 text-[11px] focus:outline-none"
+                    />
+                  )}
 
                   {/* Tasks / Sessions in this Project */}
                   {!isCollapsed && (

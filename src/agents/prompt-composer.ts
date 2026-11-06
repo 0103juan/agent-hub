@@ -6,6 +6,15 @@ import { ChatMessage, FileContextAttachment, ProtocolRole } from '../shared/type
 const MAX_HISTORY_MESSAGES = 24;
 const MAX_HISTORY_MESSAGE_CHARS = 4000;
 const MAX_RULES_CHARS = 8000;
+const MAX_EXPERIENCE_CHARS = 2000;
+export const EXPERIENCE_FILE = '.agent-hub/experience.md';
+
+/** Campos que un agente entrega al compañero siguiente del pipeline. */
+export const HANDOFF_FIELDS = ['Hecho:', 'Archivos:', 'Pendiente:', 'Verificación:'];
+
+export function missingHandoffFields(body: string): string[] {
+  return HANDOFF_FIELDS.filter((field) => !body.includes(field));
+}
 
 export interface PromptParts {
   prompt: string;
@@ -17,6 +26,10 @@ export interface PromptParts {
   team?: { self: string; mates: string[]; /** Compañero al que pasar el trabajo al terminar. */ next?: string };
   /** Reglas persistentes del repositorio (.agent-hub/rules.md, AGENTS.md, etc.) */
   projectRules?: string;
+  /** Lecciones de tareas anteriores del proyecto (.agent-hub/experience.md). */
+  experience?: string;
+  /** El rol puede escribir: solo entonces se le pide registrar lecciones. */
+  canWrite?: boolean;
 }
 
 const ATTACHMENT_KIND_LABELS = { image: 'Imagen', audio: 'Audio', video: 'Video', file: 'Archivo' };
@@ -64,11 +77,32 @@ export function loadProjectRules(workspaceDir?: string): string | undefined {
   return undefined;
 }
 
-export function composePrompt({ prompt, role, attachments = [], history = [], team, projectRules }: PromptParts): string {
+/** Lecciones guardadas del proyecto; si exceden el tope se conservan las más recientes. */
+export function loadExperience(workspaceDir?: string): string | undefined {
+  if (!workspaceDir) return undefined;
+  try {
+    const content = fs.readFileSync(path.join(workspaceDir, EXPERIENCE_FILE), 'utf8').trim();
+    return content ? content.slice(-MAX_EXPERIENCE_CHARS) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+export function composePrompt({ prompt, role, attachments = [], history = [], team, projectRules, experience, canWrite }: PromptParts): string {
   const sections: string[] = [];
 
   if (projectRules && projectRules.trim()) {
     sections.push(`[REGLAS DEL PROYECTO]\n${projectRules.trim()}`);
+  }
+
+  if (experience?.trim()) {
+    sections.push(`[EXPERIENCIA DEL PROYECTO]\n${experience.trim()}`);
+  }
+  if (canWrite) {
+    sections.push(
+      `[LECCIONES]\nSi aprendiste algo no obvio que ayude en tareas futuras de este proyecto, añade al final de ${EXPERIENCE_FILE} ` +
+        'una entrada de 3 líneas: `Señal:` (cuándo aplica), `Lección:` y `Evidencia:` (archivo o comando que lo demuestra). Si no hay nada, no escribas.'
+    );
   }
 
   if (role) {
@@ -81,7 +115,7 @@ export function composePrompt({ prompt, role, attachments = [], history = [], te
       `[EQUIPO]\nTe llamas "${team.self}" y trabajas con: ${team.mates.join(', ')}.\n` +
         'Para escribirle a un compañero pon en tu respuesta una línea `>> nombre: mensaje` (termina con una línea en blanco). ' +
         'Hazlo solo si necesitas algo de él, y no contestes a mensajes que no piden respuesta.' +
-        (team.next ? ` Cuando termines tu parte, pásale el trabajo a "${team.next}" con una línea \`>> ${team.next}: ...\` que diga qué hiciste y qué le toca.` : '')
+        (team.next ? ` Cuando termines tu parte, pásale el trabajo a "${team.next}" con una línea \`>> ${team.next}: ...\` con estos campos, uno por línea: ${HANDOFF_FIELDS.join(' ')}` : '')
     );
   }
 

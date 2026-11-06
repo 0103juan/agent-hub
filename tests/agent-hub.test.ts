@@ -13,7 +13,7 @@ import { AntigravityStreamParser } from '../src/agents/antigravity/antigravity-s
 import { ClaudeStreamParser } from '../src/agents/claude/claude-stream-parser';
 import { assertSafeCliValue, CliProcess, StreamParser } from '../src/agents/cli-process';
 import { CliProcessPool, PooledCliSpec } from '../src/agents/cli-process-pool';
-import { composePrompt, loadProjectRules } from '../src/agents/prompt-composer';
+import { composePrompt, loadExperience, loadProjectRules, missingHandoffFields } from '../src/agents/prompt-composer';
 import { ProviderRegistry } from '../src/agents/provider-registry';
 import { describeToolCall } from '../src/agents/tool-activity';
 import { auditAccessibilityWCAG, auditEnvSync, detectNPlusOneQueries } from '../src/analysis/code-audits';
@@ -781,6 +781,24 @@ describe('Pipeline y permisos por rol', () => {
     const team = { self: 'tester-1', mates: ['desarrollador-1'], next: 'desarrollador-1' };
     assert.ok(composePrompt({ prompt: 'x', team }).includes('>> desarrollador-1:'));
     assert.ok(!composePrompt({ prompt: 'x', team: { ...team, next: undefined } }).includes('pásale el trabajo'));
+  });
+
+  it('missingHandoffFields lista los campos que faltan en el traspaso', () => {
+    assert.deepStrictEqual(missingHandoffFields('Hecho: x\nArchivos: a\nPendiente: y\nVerificación: z'), []);
+    assert.deepStrictEqual(missingHandoffFields('Hecho: x'), ['Archivos:', 'Pendiente:', 'Verificación:']);
+  });
+
+  it('la experiencia del proyecto se carga con tope y solo pide lecciones a quien puede escribir', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ah-exp-'));
+    assert.strictEqual(loadExperience(dir), undefined);
+    fs.mkdirSync(path.join(dir, '.agent-hub'));
+    fs.writeFileSync(path.join(dir, '.agent-hub', 'experience.md'), 'viejo'.repeat(1000) + 'RECIENTE');
+    const loaded = loadExperience(dir)!;
+    assert.ok(loaded.length <= 2000 && loaded.endsWith('RECIENTE'));
+    assert.ok(composePrompt({ prompt: 'x', experience: loaded }).includes('[EXPERIENCIA DEL PROYECTO]'));
+    assert.ok(composePrompt({ prompt: 'x', canWrite: true }).includes('[LECCIONES]'));
+    assert.ok(!composePrompt({ prompt: 'x', canWrite: false }).includes('[LECCIONES]'));
+    fs.rmSync(dir, { recursive: true, force: true });
   });
 
   it('revertCheckpointFile restaura un solo archivo y getCheckpointFiles lo lista', () => {

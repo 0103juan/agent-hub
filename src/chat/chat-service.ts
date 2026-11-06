@@ -1,6 +1,6 @@
 import { createCheckpoint, getCheckpointDiff, getCheckpointFiles } from '../host/git-checkpoint';
 import { AgentEvent, AgentRun, TurnOutcome } from '../agents/agent-provider';
-import { composePrompt, loadProjectRules } from '../agents/prompt-composer';
+import { composePrompt, loadExperience, loadProjectRules, missingHandoffFields } from '../agents/prompt-composer';
 import { ProviderRegistry } from '../agents/provider-registry';
 import { HostMessage } from '../shared/ipc';
 import { agentName } from '../shared/agent-name';
@@ -301,7 +301,11 @@ export class ChatService {
       const run = this.providers.get(account.provider).startTurn(
         {
           account,
-          prompt: composePrompt({ prompt, role, attachments, history, team, projectRules: loadProjectRules(workspaceDir) }),
+          prompt: composePrompt({ prompt, role, attachments, history, team, projectRules: loadProjectRules(workspaceDir),
+            // Con conversación reanudada la CLI ya tiene esto del primer turno: no se paga de nuevo.
+            experience: resumeId ? undefined : loadExperience(workspaceDir),
+            canWrite: !resumeId && !(role && PROTOCOL_ROLES[role].readOnly)
+          }),
           workspaceDir,
           modelId: model.id,
           effort,
@@ -367,6 +371,9 @@ export class ChatService {
         return;
       } else {
         const from = agentName(sender);
+        const isHandoff = sender.protocolRole && target.protocolRole === PROTOCOL_ROLES[sender.protocolRole].handoffTo;
+        const missing = isHandoff ? missingHandoffFields(body) : [];
+        if (missing.length > 0) this.addNote(sender.id, `Traspaso a ${name} sin los campos: ${missing.join(' ')}`, true);
         this.comms = [...this.comms, { id: newMessageId(), at: Date.now(), from, to: agentName(target), text: body.trim() }].slice(-MAX_COMMS);
         void this.send({
           sessionId: target.id,

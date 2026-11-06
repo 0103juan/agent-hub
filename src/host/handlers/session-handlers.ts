@@ -153,22 +153,21 @@ export function sessionHandlers(hub: HubContext): HandlerMap<
       hub.sessions.setActive(arquitectoSession.id);
       hub.chat.publishSessions();
 
-      const pipelineInstruction =
-        `Eres el Arquitecto liderando el Pipeline de Desarrollo Autónomo.
-` +
-        `Diseña la solución detallada en ${specPath} con criterios de aceptación.
-` +
-        (requireApproval
-          ? `Al terminar, presenta un resumen y DETENTE: no escribas ninguna línea \`>>\` hasta que el usuario apruebe.
-
-`
-          : `Este pipeline es autónomo: no esperes aprobación. Al terminar, pásale el trabajo al tester con la línea:
-` +
-            `>> tester-1: Especificación lista en ${specPath}. Escribe las pruebas automatizadas TDD.
-
-`) +
-        `Requerimiento:
-${prompt.trim()}`;
+      const pipelineInstruction = [
+        'Eres el Arquitecto liderando el Pipeline de Desarrollo Autónomo.',
+        `Diseña la solución detallada en ${specPath} con criterios de aceptación.`,
+        requireApproval
+          ? 'Al terminar, presenta un resumen y DETENTE: no escribas ninguna línea `>>` hasta que el usuario apruebe.'
+          : [
+              'Este pipeline es autónomo: no esperes aprobación. Al terminar, pásale el trabajo al tester con estas líneas (y una en blanco al final):',
+              '>> tester-1: Hecho: especificación lista',
+              `Archivos: ${specPath}`,
+              'Pendiente: escribir las pruebas automatizadas TDD',
+              'Verificación: criterios de aceptación en la especificación'
+            ].join('\n'),
+        '',
+        `Requerimiento:\n${prompt.trim()}`
+      ].join('\n');
 
       void hub.chat.send({
         sessionId: arquitectoSession.id,
