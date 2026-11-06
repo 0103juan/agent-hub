@@ -65,7 +65,7 @@ export function activate(context: vscode.ExtensionContext): void {
     openBesidePanel: () => view.openBesidePanel()
   };
   const applyIdleTimeout = () => {
-    const minutes = vscode.workspace.getConfiguration('agent-hub').get<number>('turnIdleTimeoutMinutes', 10);
+    const minutes = vscode.workspace.getConfiguration('agent-hub').get<number>('turnIdleTimeoutMinutes', 30);
     hub.chat.idleTimeoutMs = Math.max(0, minutes) * 60_000;
   };
   applyIdleTimeout();

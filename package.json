@@ -104,7 +104,7 @@
       "properties": {
         "agent-hub.turnIdleTimeoutMinutes": {
           "type": "number",
-          "default": 10,
+          "default": 30,
           "minimum": 0,
           "description": "Minutos sin salida del agente antes de cancelar el turno. 0 lo desactiva."
         }

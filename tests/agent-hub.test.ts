@@ -465,6 +465,20 @@ describe('ChatService', () => {
     assert.strictEqual(provider.requests[0].readOnly, true);
   });
 
+  it('precalienta con la misma restricción de solo lectura que usará el turno', async () => {
+    const dir = tempDir();
+    const targets: Array<boolean | undefined> = [];
+    const { chat, sessions, session, provider } = setup(() => ({ status: 'completed' }));
+    provider.prewarm = ((target: { readOnly?: boolean }) => targets.push(target.readOnly)) as typeof provider.prewarm;
+    sessions.update(session.id, { protocolRole: 'revisor' });
+    await chat.prewarm(session.id, dir);
+    sessions.update(session.id, { protocolRole: 'desarrollador', permission: 'readonly' });
+    await chat.prewarm(session.id, dir);
+    sessions.update(session.id, { permission: 'full' });
+    await chat.prewarm(session.id, dir);
+    assert.deepStrictEqual(targets, [true, true, false]);
+  });
+
   it('cancela el turno tras el tiempo sin actividad y lo avisa', async () => {
     const dir = tempDir();
     const sessions = new SessionStore(dir);

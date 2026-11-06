@@ -169,8 +169,14 @@ export class ChatService {
       workspaceDir,
       modelId: model.id,
       effort,
-      resumeId: session.cliSessionId
+      resumeId: session.cliSessionId,
+      readOnly: this.isReadOnly(session, session.protocolRole)
     });
+  }
+
+  /** Misma regla al precalentar y al enviar: si difiere, la CLI precalentada no se reutiliza. */
+  private isReadOnly(session: ConversationSession, role: ProtocolRole | undefined): boolean {
+    return session.permission === 'readonly' || Boolean(role && PROTOCOL_ROLES[role].readOnly);
   }
 
   /** Mensaje informativo local: no pasa por ningún modelo. */
@@ -332,7 +338,7 @@ export class ChatService {
           modelId: model.id,
           effort,
           resumeId,
-          readOnly: session.permission === 'readonly' || (role ? PROTOCOL_ROLES[role].readOnly : undefined)
+          readOnly: this.isReadOnly(session, role)
         },
         onEvent
       );
