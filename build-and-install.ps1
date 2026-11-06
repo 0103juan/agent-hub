@@ -1,21 +1,43 @@
 #!/usr/bin/env pwsh
-# AgentHub - Build and Install Script
-# Run this after any code change to rebuild + deploy to VS Code extensions folder
+# AgentHub - compila y deja la extensión lista en VS Code.
+# La carpeta instalada es un enlace (junction) a este repo: después de la primera vez,
+# cada `npm run build` actualiza la extensión al instante y VS Code avisa para recargar.
+
+param([switch]$SkipBuild)
 
 $src = $PSScriptRoot
 $dst = "$HOME\.vscode\extensions\personal.agent-hub-0.1.0"
 
-Write-Host "🔨 Building AgentHub..." -ForegroundColor Cyan
-Set-Location $src
-npm run build
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "❌ Build failed. Aborting sync." -ForegroundColor Red
-    exit 1
+if (-not $SkipBuild) {
+    Write-Host "🔨 Building AgentHub..." -ForegroundColor Cyan
+    Set-Location $src
+    npm run build
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "❌ Build failed. Aborting." -ForegroundColor Red
+        exit 1
+    }
 }
 
-Write-Host "📦 Syncing to VS Code extensions..." -ForegroundColor Cyan
-Copy-Item -Path "$src\dist\*"       -Destination "$dst\dist\"    -Recurse -Force
-Copy-Item -Path "$src\package.json" -Destination "$dst\package.json" -Force
+$item = Get-Item $dst -Force -ErrorAction SilentlyContinue
+if ($item -and $item.LinkType -eq 'Junction' -and ($item.Target -contains $src -or $item.Target -eq $src)) {
+    Write-Host "🔗 La extensión ya apunta a $src" -ForegroundColor Cyan
+} else {
+    if ($item) {
+        # Una copia vieja se guarda fuera de la carpeta de extensiones: VS Code cargaría cualquier carpeta vecina.
+        $backupRoot = "$HOME\.agent-hub\backup"
+        New-Item -ItemType Directory -Force -Path $backupRoot | Out-Null
+        $backup = Join-Path $backupRoot ("personal.agent-hub-" + (Get-Date -Format 'yyyyMMdd-HHmmss'))
+        Write-Host "📦 Guardando la copia anterior en $backup" -ForegroundColor Cyan
+        try {
+            Move-Item -Path $dst -Destination $backup -ErrorAction Stop
+        } catch {
+            Write-Host "❌ No se pudo mover la copia anterior (¿VS Code la tiene abierta?). Cierra VS Code y repite." -ForegroundColor Red
+            exit 1
+        }
+    }
+    New-Item -ItemType Junction -Path $dst -Target $src | Out-Null
+    Write-Host "🔗 $dst -> $src" -ForegroundColor Cyan
+}
 
 $skillTargets = @("$HOME\.claude\skills", "$HOME\.gemini\config\skills")
 foreach ($target in $skillTargets) {
@@ -24,6 +46,5 @@ foreach ($target in $skillTargets) {
 }
 
 Write-Host ""
-Write-Host "✅ AgentHub instalado correctamente." -ForegroundColor Green
+Write-Host "✅ AgentHub instalado." -ForegroundColor Green
 Write-Host "   Recarga VS Code: Ctrl+Shift+P → Developer: Reload Window" -ForegroundColor Yellow
-

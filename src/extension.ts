@@ -12,6 +12,7 @@ import { ChatService, PendingHandoff, PendingStore } from './chat/chat-service';
 import { addAccount } from './host/handlers/account-handlers';
 import { registerProposalProvider } from './host/handlers/editor-handlers';
 import { workspaceDirForSession } from './host/handlers/session-handlers';
+import { buildFiles, newestBuildMs } from './host/build-info';
 import { runProjectTests } from './host/test-runner';
 import { workspaceDir } from './host/workspace';
 import { HubContext } from './host/hub-context';
@@ -82,6 +83,23 @@ export function activate(context: vscode.ExtensionContext): void {
   hub.chat.markInterrupted();
   view.connect(hub);
 
+  // Tras un build en disco, la extensión y el panel que corren son versiones anteriores hasta recargar.
+  const distDir = path.join(context.extensionPath, 'dist');
+  const loadedBuildMs = newestBuildMs(distDir);
+  let warnedAboutBuild = false;
+  const watchedBuildFiles = buildFiles(distDir);
+  for (const file of watchedBuildFiles) {
+    fs.watchFile(file, { interval: 3000, persistent: false }, (current) => {
+      if (warnedAboutBuild || current.mtimeMs <= loadedBuildMs) return;
+      warnedAboutBuild = true;
+      const text = 'Hay una compilación nueva de AgentHub: recarga la ventana para usarla.';
+      post({ type: 'notice', notice: { id: `build-${Date.now()}`, at: Date.now(), text } });
+      void vscode.window.showInformationMessage(text, 'Recargar ventana').then((choice) => {
+        if (choice) void vscode.commands.executeCommand('workbench.action.reloadWindow');
+      });
+    });
+  }
+
   const statusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
   statusBar.command = 'agent-hub.openBeside';
   statusBar.text = '$(circuit-board) AgentHub';
@@ -95,6 +113,7 @@ export function activate(context: vscode.ExtensionContext): void {
   };
 
   context.subscriptions.push(
+    { dispose: () => watchedBuildFiles.forEach((file) => fs.unwatchFile(file)) },
     statusBar,
     vscode.workspace.onDidChangeConfiguration((event) => {
       if (event.affectsConfiguration('agent-hub')) applySettings();

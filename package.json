@@ -153,6 +153,7 @@
     "build:extension": "esbuild src/extension.ts --bundle --minify --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --sourcemap",
     "build:webview": "vite build",
     "build": "npm run build:extension && npm run build:webview",
+    "install:local": "pwsh -NoProfile -File build-and-install.ps1",
     "test": "esbuild tests/agent-hub.test.ts --bundle --platform=node --external:vscode --outfile=tests/dist.test.js && node --test tests/dist.test.js",
     "watch:extension": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --sourcemap --watch",
     "watch:webview": "vite build --watch",

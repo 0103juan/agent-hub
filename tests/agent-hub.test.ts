@@ -22,6 +22,7 @@ import { findSecrets } from '../src/analysis/secret-scanner';
 import { findDestructiveStatements, findQueryIssues } from '../src/analysis/sql-review';
 import { ChatService } from '../src/chat/chat-service';
 import { readAttachment } from '../src/host/attachments';
+import { buildFiles, formatBuildStamp, newestBuildMs } from '../src/host/build-info';
 import { pullRequestCommand } from '../src/host/pull-request';
 import { ClaudeProvider } from '../src/agents/claude/claude-provider';
 import { commitStage, restoreStage, squadDiffFiles } from '../src/host/git-worktree';
@@ -1558,6 +1559,19 @@ describe('Memoria, informe, issues, verificación por proyecto y copia aparte', 
     config(['node -e "process.exit(0)"']);
     assert.strictEqual((await runProjectTests(dir))!.ok, true);
     assert.deepStrictEqual(verificationCommands(tempDir()), []);
+  });
+
+  it('newestBuildMs toma la compilación más nueva y formatBuildStamp la muestra en hora local', () => {
+    const dist = tempDir();
+    assert.strictEqual(newestBuildMs(dist), 0);
+    const [extension, webview] = buildFiles(dist);
+    fs.mkdirSync(path.dirname(webview), { recursive: true });
+    fs.writeFileSync(extension, '');
+    fs.writeFileSync(webview, '');
+    fs.utimesSync(extension, new Date(2026, 10, 3, 11, 55), new Date(2026, 10, 3, 11, 55));
+    fs.utimesSync(webview, new Date(2026, 10, 6, 2, 53), new Date(2026, 10, 6, 2, 53));
+    assert.strictEqual(formatBuildStamp(newestBuildMs(dist)), '2026-11-06 02:53');
+    assert.strictEqual(formatBuildStamp(0), '');
   });
 
   it('pullRequestCommand usa el informe del equipo como cuerpo y no un borrador cualquiera', () => {

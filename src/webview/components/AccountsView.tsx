@@ -65,6 +65,10 @@ export const AccountsView: React.FC<Props> = ({ accounts, session }) => {
       })}
 
       {isAdding && <AddAccountModal onClose={() => setIsAdding(false)} />}
+
+      <p className="pt-1 text-[10px] text-zinc-500" title="Fecha de la compilación que cargó este panel. Si es vieja, recarga la ventana.">
+        Compilación: {document.querySelector<HTMLMetaElement>('meta[name="agent-hub-build"]')?.content || 'desconocida'}
+      </p>
     </div>
   );
 };

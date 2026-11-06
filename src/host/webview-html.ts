@@ -1,9 +1,12 @@
 import { randomBytes } from 'crypto';
+import * as path from 'path';
 import * as vscode from 'vscode';
+import { formatBuildStamp, newestBuildMs } from './build-info';
 
 export function renderWebviewHtml(webview: vscode.Webview, extensionUri: vscode.Uri): string {
   const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'assets', 'index.js'));
   const nonce = randomBytes(16).toString('hex');
+  const buildStamp = formatBuildStamp(newestBuildMs(path.join(extensionUri.fsPath, 'dist')));
   // El webview no puede llamar a asWebviewUri: recibe las bases para resolver imágenes locales.
   const filesBase = webview.asWebviewUri(vscode.Uri.file('/')).toString();
   const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
@@ -25,6 +28,7 @@ export function renderWebviewHtml(webview: vscode.Webview, extensionUri: vscode.
     <meta http-equiv="Content-Security-Policy" content="${csp}" />
     <meta name="agent-hub-files" content="${filesBase}" />
     <meta name="agent-hub-workspace" content="${workspaceBase}" />
+    <meta name="agent-hub-build" content="${buildStamp}" />
     <title>AgentHub</title>
   </head>
   <body>
