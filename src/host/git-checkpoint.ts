@@ -34,7 +34,7 @@ function headCommit(workspaceDir: string): string | undefined {
 export function listUntracked(workspaceDir: string): string[] {
   if (!workspaceDir || !fs.existsSync(path.join(workspaceDir, '.git'))) return [];
   try {
-    return execFileSync('git', ['ls-files', '--others', '--exclude-standard'], { cwd: workspaceDir, encoding: 'utf8', windowsHide: true })
+    return execFileSync('git', ['ls-files', '--others', '--exclude-standard'], { cwd: workspaceDir, encoding: 'utf8', windowsHide: true, maxBuffer: 64 * 1024 * 1024 })
       .split('\n')
       .filter(Boolean);
   } catch {
@@ -108,7 +108,7 @@ const MAX_FILE_DIFF_CHARS = 20000;
 export function getCheckpointFileDiff(workspaceDir: string, checkpointHash: string, file: string): string {
   if (!workspaceDir || !checkpointHash || !file) return '';
   try {
-    return execFileSync('git', ['diff', checkpointHash, '--', file], { cwd: workspaceDir, encoding: 'utf8', windowsHide: true }).slice(0, MAX_FILE_DIFF_CHARS);
+    return execFileSync('git', ['diff', checkpointHash, '--', file], { cwd: workspaceDir, encoding: 'utf8', windowsHide: true, maxBuffer: 64 * 1024 * 1024 }).slice(0, MAX_FILE_DIFF_CHARS);
   } catch {
     return '';
   }

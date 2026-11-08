@@ -1,4 +1,4 @@
-import { createCheckpoint, rollbackCheckpoint, getCheckpointDiff, getCheckpointFiles, revertCheckpointFile } from '../src/host/git-checkpoint';
+import { createCheckpoint, rollbackCheckpoint, getCheckpointDiff, getCheckpointFiles, getCheckpointFileDiff, revertCheckpointFile } from '../src/host/git-checkpoint';
 import { OllamaProvider } from '../src/agents/ollama/ollama-provider';
 import { after, describe, it } from 'node:test';
 import * as assert from 'node:assert';
@@ -1753,6 +1753,25 @@ describe('actionHandlers.scan-secrets', () => {
       assert.match(notes[0], /Posibles secretos/);
     } finally {
       fs.rmSync(repo, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('getCheckpointFileDiff', () => {
+  it('devuelve el diff recortado aunque el archivo cambie más de 1 MB', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'file-diff-'));
+    try {
+      const git = (...a: string[]) => execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...a], { cwd: dir, stdio: 'ignore' });
+      git('init', '-q');
+      fs.writeFileSync(path.join(dir, 'a.txt'), 'x\n');
+      git('add', 'a.txt');
+      git('commit', '-q', '-m', 'a');
+      const hash = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: dir, encoding: 'utf8' }).trim();
+      fs.writeFileSync(path.join(dir, 'a.txt'), 'y'.repeat(2 * 1024 * 1024) + '\n');
+      const diff = getCheckpointFileDiff(dir, hash, 'a.txt');
+      assert.ok(diff.length > 0 && diff.length <= 20000);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
     }
   });
 });
