@@ -10,12 +10,12 @@ export class MCPSyncer {
   private claude1JsonPath: string;
   private agyBinaryPath: string;
 
-  constructor() {
-    this.homeDir = os.homedir();
+  constructor(homeDir: string = os.homedir(), agyBinaryPath?: string) {
+    this.homeDir = homeDir;
     this.claude1JsonPath = path.join(this.homeDir, '.claude.json');
     const binaryName = process.platform === 'win32' ? 'agy.exe' : 'agy';
     const defaultPath = path.join(this.homeDir, '.gemini', 'bin', binaryName);
-    this.agyBinaryPath = fs.existsSync(defaultPath) ? defaultPath : binaryName;
+    this.agyBinaryPath = agyBinaryPath ?? (fs.existsSync(defaultPath) ? defaultPath : binaryName);
   }
 
   public async checkHealth(server: MCPServerInfo): Promise<boolean> {
@@ -254,7 +254,9 @@ export class MCPSyncer {
           if (fs.existsSync(subConfig)) {
             try {
               parsed = JSON.parse(fs.readFileSync(subConfig, 'utf8'));
-            } catch {}
+            } catch {
+              continue; // dañado: no lo pisamos con solo los MCP, se perdería el resto de su configuración
+            }
           }
           parsed.mcpServers = { ...(parsed.mcpServers || {}), ...claudeServers };
           fs.writeFileSync(subConfig, JSON.stringify(parsed, null, 2), 'utf8');

@@ -1803,3 +1803,24 @@ describe('PRE_PUSH_HOOK', () => {
     }
   });
 });
+
+describe('MCPSyncer.syncMCPs', () => {
+  it('copia los MCP a las demás cuentas sin pisar un claude.json dañado', async () => {
+    const { MCPSyncer } = await import('../src/mcp/mcp-syncer');
+    const home = fs.mkdtempSync(path.join(os.tmpdir(), 'mcp-sync-'));
+    try {
+      fs.writeFileSync(path.join(home, '.claude.json'), JSON.stringify({ mcpServers: { demo: { command: 'x' } } }));
+      fs.mkdirSync(path.join(home, '.claude-ok'));
+      fs.writeFileSync(path.join(home, '.claude-ok', 'claude.json'), JSON.stringify({ theme: 'dark' }));
+      fs.mkdirSync(path.join(home, '.claude-roto'));
+      fs.writeFileSync(path.join(home, '.claude-roto', 'claude.json'), '{ no es json');
+      const res = await new MCPSyncer(home, path.join(home, 'no-existe-agy')).syncMCPs();
+      assert.strictEqual(res.success, true);
+      const ok = JSON.parse(fs.readFileSync(path.join(home, '.claude-ok', 'claude.json'), 'utf8'));
+      assert.deepStrictEqual([ok.theme, ok.mcpServers.demo.command], ['dark', 'x']);
+      assert.strictEqual(fs.readFileSync(path.join(home, '.claude-roto', 'claude.json'), 'utf8'), '{ no es json');
+    } finally {
+      fs.rmSync(home, { recursive: true, force: true });
+    }
+  });
+});
