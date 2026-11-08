@@ -1775,3 +1775,31 @@ describe('getCheckpointFileDiff', () => {
     }
   });
 });
+
+describe('PRE_PUSH_HOOK', () => {
+  it('bloquea un secreto en una rama nueva y deja pasar un push limpio', async () => {
+    const { PRE_PUSH_HOOK } = await import('../src/host/handlers/action-handlers');
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'pre-push-'));
+    try {
+      const remote = path.join(dir, 'remote.git');
+      const repo = path.join(dir, 'repo');
+      execFileSync('git', ['init', '-q', '--bare', remote]);
+      execFileSync('git', ['init', '-q', repo]);
+      const git = (...a: string[]) => execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...a], { cwd: repo, stdio: 'pipe' });
+      git('remote', 'add', 'origin', remote);
+      fs.writeFileSync(path.join(repo, '.git', 'hooks', 'pre-push'), PRE_PUSH_HOOK, { mode: 0o755 });
+      fs.writeFileSync(path.join(repo, 'a.txt'), 'ok\n');
+      git('add', '.');
+      git('commit', '-q', '-m', 'a');
+      git('push', '-q', 'origin', 'HEAD:main'); // rama nueva y limpia
+      git('checkout', '-q', '-b', 'feature');
+      fs.writeFileSync(path.join(repo, 'k.txt'), 'ghp_' + 'a'.repeat(36) + '\n');
+      git('add', '.');
+      git('commit', '-q', '-m', 'k');
+      assert.throws(() => git('push', '-q', 'origin', 'feature')); // rama nueva con secreto
+      assert.throws(() => git('push', '-q', 'origin', 'feature:main')); // rama existente con secreto
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});

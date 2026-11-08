@@ -21,14 +21,20 @@ interface ActionRun {
   cwd: string;
 }
 
-const PRE_PUSH_HOOK = `#!/usr/bin/env bash
-# AgentHub: bloquea pushes con tokens expuestos.
-SECRETS_FOUND=$(git diff @{upstream}..HEAD 2>/dev/null | grep -iE "(sk-ant-[a-zA-Z0-9_-]{20,}|ghp_[a-zA-Z0-9]{20,}|AIza[0-9A-Za-z_-]{35}|BEGIN (RSA )?PRIVATE KEY)" || true)
-if [ -n "$SECRETS_FOUND" ]; then
-  echo "[AgentHub] Push abortado, posibles secretos:"
-  echo "$SECRETS_FOUND"
-  exit 1
-fi
+export const PRE_PUSH_HOOK = `#!/usr/bin/env bash
+# AgentHub: bloquea pushes con tokens expuestos en las líneas que se agregan.
+# Git entrega por stdin "ref_local sha_local ref_remota sha_remota"; en una rama nueva la sha remota es todo ceros.
+PATTERN="(sk-ant-[a-zA-Z0-9_-]{20,}|ghp_[a-zA-Z0-9]{20,}|AIza[0-9A-Za-z_-]{35}|BEGIN (RSA )?PRIVATE KEY)"
+while read -r _ local_sha _ remote_sha; do
+  case "$local_sha" in *[!0]*) ;; *) continue ;; esac
+  case "$remote_sha" in *[!0]*) range="$remote_sha..$local_sha" ;; *) range="$local_sha --not --remotes" ;; esac
+  SECRETS_FOUND=$(git log -p --format= $range 2>/dev/null | grep -E "^\\+" | grep -iE "$PATTERN" || true)
+  if [ -n "$SECRETS_FOUND" ]; then
+    echo "[AgentHub] Push abortado, posibles secretos:"
+    echo "$SECRETS_FOUND"
+    exit 1
+  fi
+done
 `;
 
 function git(cwd: string, ...args: string[]): string {
