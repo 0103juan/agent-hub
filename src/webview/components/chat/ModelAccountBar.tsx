@@ -12,6 +12,7 @@ interface Props {
   sessionId: string;
   accounts: AccountProfile[];
   selection: ModelSelection;
+  compact?: boolean;
 }
 
 /** Aviso con el siguiente paso cuando no hay una cuenta conectada con la que chatear. */
@@ -40,10 +41,77 @@ export const AccountNotice: React.FC<{ accounts: AccountProfile[]; account?: Acc
 
 type OpenModal = 'none' | 'accounts' | 'models' | 'add';
 
-export const ModelAccountBar: React.FC<Props> = ({ sessionId, accounts, selection }) => {
+export const ModelAccountBar: React.FC<Props> = ({ sessionId, accounts, selection, compact = false }) => {
   const [openModal, setOpenModal] = useState<OpenModal>('none');
   const { account, model } = selection;
   const close = () => setOpenModal('none');
+
+  if (compact) {
+    return (
+      <div className="flex items-center gap-1 min-w-0">
+        <button
+          type="button"
+          onClick={() => setOpenModal('accounts')}
+          className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-zinc-850 hover:bg-zinc-800 border border-zinc-750 transition text-left shrink-0 cursor-pointer"
+          title={account ? `Cambiar cuenta (actual: ${account.name})` : 'Seleccionar cuenta'}
+        >
+          {account && <ProviderBadge provider={account.provider} />}
+          <span className="font-medium text-zinc-200 truncate max-w-[100px] text-[11px]">
+            {account?.name ?? 'Cuenta'}
+          </span>
+          <ChevronDown className="w-2.5 h-2.5 text-zinc-400 shrink-0" />
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setOpenModal('models')}
+          className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-indigo-950/40 hover:bg-indigo-950/60 border border-indigo-700/50 text-left transition shrink-0 cursor-pointer group"
+          title={model ? `Cambiar modelo (actual: ${model.label})` : 'Abrir catálogo de modelos'}
+        >
+          {model && <ModelFamilyIcon family={familyOf(model.id)} />}
+          <span className="font-semibold text-zinc-100 truncate max-w-[130px] text-[11px] group-hover:text-white">
+            {model?.label ?? 'Modelo'}
+          </span>
+          <ChevronDown className="w-2.5 h-2.5 text-zinc-400 group-hover:text-indigo-300 shrink-0" />
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setOpenModal('add')}
+          className="p-1 rounded bg-zinc-850 hover:bg-zinc-800 border border-zinc-750 text-zinc-400 hover:text-indigo-300 shrink-0 cursor-pointer hidden min-[480px]:inline-flex"
+          title="Vincular nueva cuenta"
+          aria-label="Vincular nueva cuenta"
+        >
+          <Plus className="w-2.5 h-2.5" />
+        </button>
+
+        {openModal === 'models' && (
+          <ModelCatalogModal
+            accounts={accounts}
+            selection={selection}
+            onClose={close}
+            onSelect={(profileId, modelId) => {
+              postToHost({ command: 'updateSession', sessionId, patch: { profileId, modelId } });
+              close();
+            }}
+          />
+        )}
+        {openModal === 'accounts' && (
+          <AccountPickerModal
+            accounts={accounts}
+            activeAccountId={account?.id}
+            onClose={close}
+            onAddAccount={() => setOpenModal('add')}
+            onSelect={(profileId) => {
+              postToHost({ command: 'updateSession', sessionId, patch: { profileId } });
+              close();
+            }}
+          />
+        )}
+        {openModal === 'add' && <AddAccountModal onClose={close} />}
+      </div>
+    );
+  }
 
   return (
     <div className="relative">

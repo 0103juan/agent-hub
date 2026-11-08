@@ -3,6 +3,7 @@ import {
   AlertTriangle,
   Bot,
   ChevronDown,
+  ChevronUp,
   Clock,
   FolderUp,
   GitBranch,
@@ -12,7 +13,9 @@ import {
   MicOff,
   Paperclip,
   Play,
+  Repeat,
   Send,
+  SlidersHorizontal,
   Square,
   Workflow,
   Wrench,
@@ -21,7 +24,7 @@ import {
 import { PROTOCOL_ROLES } from '../../../shared/protocol-roles';
 import { TEAM_TEMPLATES } from '../../../shared/team-templates';
 import { filterActions } from '../../../shared/workspace-actions';
-import { FileContextAttachment, ProtocolRole, QueuedMessage } from '../../../shared/types';
+import { DEFAULT_LOOP_INSTRUCTION, FileContextAttachment, ProtocolRole, QueuedMessage } from '../../../shared/types';
 import { HubAction } from '../../state/hub-state';
 import { postToHost } from '../../vscode-api';
 import { ActionPalette } from './ActionPalette';
@@ -74,6 +77,15 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
   const [template, setTemplate] = useState(TEAM_TEMPLATES[0].id);
   const [isolate, setIsolate] = useState(true);
   const [planFirst, setPlanFirst] = useState(false);
+  const [toolsExpanded, setToolsExpanded] = useState(() => localStorage.getItem('agent-hub.composerToolsExpanded') === '1');
+  const toggleTools = () => {
+    setToolsExpanded((prev) => {
+      const next = !prev;
+      localStorage.setItem('agent-hub.composerToolsExpanded', next ? '1' : '0');
+      return next;
+    });
+  };
+  const activeOptionsCount = (isolate ? 1 : 0) + (requireApproval ? 1 : 0) + (planFirst ? 1 : 0);
   const estimatedTokens = Math.round(
     (prompt.length + attachments.reduce((sum, attachment) => sum + (attachment.content?.length ?? 0), 0)) / 4
   );
@@ -81,6 +93,16 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
   const fileSearchTimer = useRef<ReturnType<typeof setTimeout>>();
   const recognitionRef = useRef<any>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const [isDragging, setIsDragging] = useState(false);
+
+  useEffect(() => {
+    const handleFocusComposer = () => {
+      textareaRef.current?.focus();
+    };
+    window.addEventListener('agenthub:focus-composer', handleFocusComposer);
+    return () => window.removeEventListener('agenthub:focus-composer', handleFocusComposer);
+  }, []);
 
   useEffect(() => {
     if (focusTick > 0) textareaRef.current?.focus();
@@ -144,12 +166,12 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
   // `/` al inicio del borrador y sin espacio todavía: sugiere roles, acciones y comandos del equipo.
   const slashQuery = /^\/(\S*)$/.exec(prompt)?.[1]?.toLowerCase();
   const slashItems: SlashItem[] = slashQuery === undefined ? [] : [
-    ...(['pipeline', 'comparar'] as const)
+    ...(['loop', 'pipeline', 'comparar'] as const)
       .filter((name) => name.startsWith(slashQuery))
       .map((name) => ({
         key: name,
         label: `/${name}`,
-        hint: name === 'pipeline' ? 'Equipo completo con el texto que sigue' : 'Mismo prompt en varias cuentas',
+        hint: name === 'loop' ? 'Bucle iterativo continuo hasta que termine la sesión o lo detengas' : name === 'pipeline' ? 'Equipo completo con el texto que sigue' : 'Mismo prompt en varias cuentas',
         run: () => setPrompt(`/${name} `)
       })),
     ...Object.values(PROTOCOL_ROLES)
@@ -169,6 +191,15 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
   ].slice(0, MAX_SLASH_ITEMS);
 
   const runSlashCommand = (text: string): boolean => {
+    const loopMatch = /^\/loop(?:\s+([\s\S]*))?$/i.exec(text);
+    if (loopMatch) {
+      postToHost({
+        command: 'startLoop',
+        sessionId,
+        instruction: (loopMatch[1] || '').trim() || DEFAULT_LOOP_INSTRUCTION
+      });
+      return true;
+    }
     const command = /^\/(pipeline|comparar)\s+([\s\S]+)/.exec(text);
     if (command) {
       if (command[1] === 'pipeline') startPipeline(command[2].trim());
@@ -317,148 +348,198 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
         </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-1 min-[420px]:gap-1.5 px-0.5 relative z-20">
-        <button
-          type="button"
-          onClick={() => postToHost({ command: 'attachActiveEditor' })}
-          className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-300 hover:text-indigo-300 bg-zinc-800/80 hover:bg-zinc-700/80 px-2 min-[420px]:px-2.5 py-1 rounded-md border border-zinc-700/60 transition shrink-0"
-          title="Adjuntar selección o archivo actual del editor"
-        >
-          <Paperclip className="w-3.5 h-3.5 text-indigo-400" />
-          <span className="min-[420px]:hidden">Contexto</span>
-          <span className="hidden min-[420px]:inline">Adjuntar contexto</span>
-        </button>
+      {/* Barra de herramientas compacta del compositor */}
+      <div className="flex flex-wrap items-center justify-between gap-1 px-0.5 relative z-20 text-[11px]">
+        {/* Grupo de adjuntos y contexto */}
+        <div className="flex items-center gap-1 min-w-0 overflow-x-auto">
+          <button
+            type="button"
+            onClick={() => postToHost({ command: 'attachActiveEditor' })}
+            className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-zinc-800/90 hover:bg-zinc-750 text-zinc-300 hover:text-indigo-300 border border-zinc-700/70 transition shrink-0 font-medium"
+            title="Adjuntar selección o archivo actual del editor"
+          >
+            <Paperclip className="w-3 h-3 text-indigo-400" />
+            <span>Contexto</span>
+          </button>
 
-        <button
-          type="button"
-          onClick={() => postToHost({ command: 'attachFiles' })}
-          className="flex items-center gap-1.5 text-[11px] font-medium text-pink-300 hover:text-pink-200 bg-pink-950/40 hover:bg-pink-900/50 px-2 min-[420px]:px-2.5 py-1 rounded-md border border-pink-700/50 transition shrink-0"
-          title="Adjuntar cualquier archivo"
-        >
-          <FolderUp className="w-3.5 h-3.5 text-pink-400" />
-          <span>Archivos</span>
-        </button>
+          <button
+            type="button"
+            onClick={() => postToHost({ command: 'attachFiles' })}
+            className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-pink-950/40 hover:bg-pink-900/50 text-pink-300 hover:text-pink-200 border border-pink-700/50 transition shrink-0 font-medium"
+            title="Adjuntar cualquier archivo del proyecto"
+          >
+            <FolderUp className="w-3 h-3 text-pink-400" />
+            <span>Archivos</span>
+          </button>
 
-        <button
-          type="button"
-          onClick={() => postToHost({ command: 'attachProblems' })}
-          className="flex items-center gap-1 text-[11px] font-medium text-amber-300 hover:text-amber-200 bg-amber-950/30 hover:bg-amber-900/40 px-2 py-1 rounded-md border border-amber-700/40 transition shrink-0"
-          title="Adjuntar los errores y avisos del editor (Problemas)"
-        >
-          <AlertTriangle className="w-3.5 h-3.5" />
-          <span className="hidden min-[420px]:inline">Problemas</span>
-        </button>
+          <button
+            type="button"
+            onClick={() => postToHost({ command: 'attachGit' })}
+            className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-zinc-800/90 hover:bg-zinc-750 text-zinc-300 hover:text-indigo-300 border border-zinc-700/70 transition shrink-0 font-medium"
+            title="Adjuntar el diff de git actual"
+          >
+            <GitCompare className="w-3 h-3 text-indigo-400" />
+            <span className="hidden min-[400px]:inline">Diff</span>
+          </button>
 
-        <button
-          type="button"
-          onClick={() => postToHost({ command: 'attachGit' })}
-          className="flex items-center gap-1 text-[11px] font-medium text-zinc-300 hover:text-indigo-300 bg-zinc-800/80 hover:bg-zinc-700/80 px-2 py-1 rounded-md border border-zinc-700/60 transition shrink-0"
-          title="Adjuntar el diff de git actual"
-        >
-          <GitCompare className="w-3.5 h-3.5 text-indigo-400" />
-          <span className="hidden min-[420px]:inline">Diff git</span>
-        </button>
+          <button
+            type="button"
+            onClick={() => postToHost({ command: 'attachProblems' })}
+            className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-950/30 hover:bg-amber-900/40 text-amber-300 hover:text-amber-200 border border-amber-700/40 transition shrink-0 font-medium"
+            title="Adjuntar los errores y avisos del editor (Problemas)"
+          >
+            <AlertTriangle className="w-3 h-3" />
+            <span className="hidden min-[440px]:inline">Problemas</span>
+          </button>
+        </div>
 
-        <button
-          type="button"
-          onClick={() => {
-            if (!prompt.trim()) {
-              postToHost({ command: 'runAction', actionId: 'tests', sessionId, input: '' });
-              return;
-            }
-            startPipeline(prompt.trim());
-            setPrompt('');
-          }}
-          className="flex items-center gap-1 text-[11px] font-medium px-2 min-[420px]:px-2.5 py-1 rounded-md bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 transition shrink-0"
-          title="Ejecutar Pipeline Autónomo TDD (Arquitecto -> Tester -> Desarrollador -> Revisor)"
-        >
-          <Workflow className="w-3.5 h-3.5 text-purple-400" />
-          <span className="hidden min-[420px]:inline">Pipeline TDD</span>
-        </button>
+        {/* Grupo de acciones rápidas y despliegue de flujos */}
+        <div className="flex items-center gap-1 shrink-0 ml-auto">
+          <button
+            type="button"
+            onClick={() => runAction('tests')}
+            className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 transition font-medium"
+            title="Ejecutar los tests del proyecto"
+          >
+            <Play className="w-2.5 h-2.5 fill-current" />
+            <span>Test</span>
+          </button>
 
-        <select
-          value={template}
-          onChange={(event) => setTemplate(event.target.value)}
-          aria-label="Plantilla de equipo"
-          title={TEAM_TEMPLATES.find((item) => item.id === template)?.description}
-          className="text-[11px] px-1 py-0.5 rounded bg-zinc-800/80 text-zinc-300 border border-zinc-700/60 focus:outline-none focus:border-indigo-500 shrink-0"
-        >
-          {TEAM_TEMPLATES.map((item) => (
-            <option key={item.id} value={item.id}>{item.label}</option>
-          ))}
-        </select>
+          <button
+            type="button"
+            onClick={() => postToHost({ command: 'generateCommit', sessionId })}
+            className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/30 transition font-medium"
+            title="Generar mensaje Conventional Commits a partir de git diff"
+          >
+            <GitCommit className="w-3 h-3 text-blue-400" />
+            <span className="hidden min-[440px]:inline">Commit</span>
+          </button>
 
-        <label className="flex items-center gap-1 text-[11px] text-zinc-400 shrink-0 cursor-pointer" title="El equipo trabaja en una rama y carpeta aparte; al terminar fusionas o descartas">
-          <input type="checkbox" checked={isolate} onChange={(event) => setIsolate(event.target.checked)} />
-          <span>Copia aparte</span>
-        </label>
+          <button
+            type="button"
+            onClick={toggleTools}
+            className={`flex items-center gap-1 px-2 py-0.5 rounded-md border font-medium transition cursor-pointer ${
+              toolsExpanded
+                ? 'bg-purple-950/60 text-purple-200 border-purple-500/50 shadow-xs'
+                : 'bg-zinc-800/90 hover:bg-zinc-750 text-zinc-300 border-zinc-700/70'
+            }`}
+            aria-expanded={toolsExpanded}
+            title={toolsExpanded ? 'Plegar herramientas de flujo y automatización' : 'Desplegar flujos de trabajo (Pipeline TDD, Worktree, Aprobación de traspasos)'}
+          >
+            <Workflow className="w-3 h-3 text-purple-400" />
+            <span>Flujos</span>
+            {activeOptionsCount > 0 && (
+              <span className="w-4 h-4 rounded-full bg-purple-600 text-white text-[9px] flex items-center justify-center font-bold">
+                {activeOptionsCount}
+              </span>
+            )}
+            {toolsExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+          </button>
 
-        <label className="flex items-center gap-1 text-[11px] text-zinc-400 shrink-0 cursor-pointer" title="Cada traspaso entre agentes espera tu aprobación antes de continuar">
-          <input type="checkbox" checked={requireApproval} onChange={(event) => setRequireApproval(event.target.checked)} />
-          <span>Aprobar cada traspaso</span>
-        </label>
-
-        <label className="flex items-center gap-1 text-[11px] text-zinc-400 shrink-0 cursor-pointer" title="El agente propone un plan sin editar nada; tú lo ejecutas después">
-          <input type="checkbox" checked={planFirst} onChange={(event) => setPlanFirst(event.target.checked)} />
-          <span>Plan primero</span>
-        </label>
-
-        <button
-          type="button"
-          onClick={() => postToHost({ command: 'generateCommit', sessionId })}
-          className="flex items-center gap-1 text-[11px] font-medium px-2 min-[420px]:px-2.5 py-1 rounded-md bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/30 transition shrink-0"
-          title="Generar mensaje Conventional Commits a partir de git diff"
-        >
-          <GitCommit className="w-3.5 h-3.5 text-blue-400" />
-          <span className="hidden min-[420px]:inline">Commit</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => postToHost({ command: 'auditBranch', sessionId })}
-          className="flex items-center gap-1 text-[11px] font-medium px-2 min-[420px]:px-2.5 py-1 rounded-md bg-teal-500/10 hover:bg-teal-500/20 text-teal-300 border border-teal-500/30 transition shrink-0"
-          title="Auditar rama completa contra main (git diff main...HEAD)"
-        >
-          <GitBranch className="w-3.5 h-3.5 text-teal-400" />
-          <span className="hidden min-[420px]:inline">Auditar rama</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => runAction('tests')}
-          className="flex items-center gap-1 text-[11px] font-medium px-2 min-[420px]:px-2.5 py-1 rounded-md bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 transition shrink-0"
-          aria-label="Ejecutar los tests"
-          title="Ejecutar los tests del proyecto"
-        >
-          <Play className="w-3 h-3 fill-current" />
-          <span className="hidden min-[420px]:inline">Test</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setIsPaletteOpen(true)}
-          className="flex items-center gap-1 text-[11px] font-medium px-2 min-[420px]:px-2.5 py-1 rounded-md transition shrink-0 border bg-zinc-800/80 hover:bg-zinc-700/80 text-zinc-300 border-zinc-700/60"
-          title="Buscar y ejecutar acciones"
-        >
-          <Wrench className="w-3 h-3 text-indigo-400" />
-          <span>Acciones</span>
-          <ChevronDown className="w-3 h-3" />
-        </button>
-
-        <span className="ml-auto text-[11px] text-zinc-400 font-mono shrink-0 hidden md:inline-block">@ para agentes y archivos</span>
+          <button
+            type="button"
+            onClick={() => setIsPaletteOpen(true)}
+            className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-zinc-800/90 hover:bg-zinc-750 text-zinc-300 border border-zinc-700/70 transition font-medium"
+            title="Buscar y ejecutar acciones del workspace"
+          >
+            <Wrench className="w-3 h-3 text-indigo-400" />
+            <span className="hidden min-[480px]:inline">Acciones</span>
+          </button>
+        </div>
       </div>
+
+      {/* Bandeja Desplegable de Automatización y Opciones de Flujo */}
+      {toolsExpanded && (
+        <div className="p-2.5 rounded-xl bg-zinc-900/95 border border-purple-500/30 shadow-lg space-y-2 text-xs animate-message-fade">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-800 pb-2">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  if (!prompt.trim()) {
+                    postToHost({ command: 'runAction', actionId: 'tests', sessionId, input: '' });
+                    return;
+                  }
+                  startPipeline(prompt.trim());
+                  setPrompt('');
+                }}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-purple-600 hover:bg-purple-500 text-white font-medium transition shadow-sm"
+                title="Ejecutar Pipeline Autónomo TDD (Arquitecto -> Tester -> Desarrollador -> Revisor)"
+              >
+                <Workflow className="w-3.5 h-3.5" />
+                <span>Ejecutar Pipeline TDD</span>
+              </button>
+
+              <select
+                value={template}
+                onChange={(event) => setTemplate(event.target.value)}
+                aria-label="Plantilla de equipo"
+                title={TEAM_TEMPLATES.find((item) => item.id === template)?.description}
+                className="text-[11px] px-2 py-1 rounded bg-zinc-800 text-zinc-200 border border-zinc-700 focus:outline-none focus:border-purple-500"
+              >
+                {TEAM_TEMPLATES.map((item) => (
+                  <option key={item.id} value={item.id}>{item.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => postToHost({ command: 'auditBranch', sessionId })}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-teal-500/10 hover:bg-teal-500/20 text-teal-300 border border-teal-500/30 transition font-medium"
+              title="Auditar rama completa contra main (git diff main...HEAD)"
+            >
+              <GitBranch className="w-3.5 h-3.5 text-teal-400" />
+              <span>Auditar rama vs main</span>
+            </button>
+          </div>
+
+          {/* Opciones de aislamiento y supervisión */}
+          <div className="flex flex-wrap items-center gap-4 text-[11px] text-zinc-300 pt-0.5">
+            <label className="flex items-center gap-1.5 cursor-pointer hover:text-white transition" title="El equipo trabaja en una rama y carpeta aparte (git worktree); al terminar fusionas o descartas">
+              <input type="checkbox" checked={isolate} onChange={(event) => setIsolate(event.target.checked)} className="rounded border-zinc-700 text-purple-600 focus:ring-purple-500" />
+              <span className="font-medium">Copia aparte (Worktree aislado)</span>
+            </label>
+
+            <label className="flex items-center gap-1.5 cursor-pointer hover:text-white transition" title="Cada traspaso entre agentes del equipo espera tu aprobación explícita antes de continuar">
+              <input type="checkbox" checked={requireApproval} onChange={(event) => setRequireApproval(event.target.checked)} className="rounded border-zinc-700 text-purple-600 focus:ring-purple-500" />
+              <span>Aprobar cada traspaso</span>
+            </label>
+
+            <label className="flex items-center gap-1.5 cursor-pointer hover:text-white transition" title="El agente propone un plan detallado sin editar archivos; tú lo ejecutas después">
+              <input type="checkbox" checked={planFirst} onChange={(event) => setPlanFirst(event.target.checked)} className="rounded border-zinc-700 text-purple-600 focus:ring-purple-500" />
+              <span>Plan primero (solo lectura inicial)</span>
+            </label>
+          </div>
+        </div>
+      )}
 
       <form
         onSubmit={(event) => {
           event.preventDefault();
           submit();
         }}
-        onDragOver={(event) => event.preventDefault()}
+        onDragOver={(event) => {
+          event.preventDefault();
+          setIsDragging(true);
+        }}
+        onDragLeave={() => setIsDragging(false)}
         onDrop={(event) => {
           event.preventDefault();
-          Array.from(event.dataTransfer.files).forEach(savePastedFile);
+          setIsDragging(false);
+          const files = Array.from(event.dataTransfer.files);
+          files.forEach((file) => {
+            const nativePath = (file as any).path;
+            if (nativePath) {
+              postToHost({ command: 'attachFile', file: nativePath });
+            } else {
+              savePastedFile(file);
+            }
+          });
         }}
-        className="relative rounded-xl border border-zinc-700/80 bg-zinc-900/90 focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500/30 transition shadow-sm overflow-hidden"
+        className={`relative rounded-xl border bg-zinc-900/90 focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500/30 transition shadow-sm overflow-hidden ${
+          isDragging ? 'border-dashed border-indigo-400 bg-indigo-950/30 ring-2 ring-indigo-500/40' : 'border-zinc-700/80'
+        }`}
       >
         <textarea
           ref={textareaRef}
@@ -492,6 +573,28 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
           </span>
 
           <span className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => {
+                if (prompt.startsWith('/loop ')) {
+                  setPrompt(prompt.slice(6));
+                } else if (prompt.startsWith('/loop')) {
+                  setPrompt('');
+                } else {
+                  setPrompt('/loop ' + prompt);
+                }
+              }}
+              className={`flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium border transition cursor-pointer ${
+                prompt.startsWith('/loop')
+                  ? 'bg-purple-600/30 text-purple-300 border-purple-500/60 shadow-xs'
+                  : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border-zinc-700/60'
+              }`}
+              title="Alternar Modo Loop continuo (/loop)"
+            >
+              <Repeat className="w-3.5 h-3.5 text-purple-400" />
+              <span className="hidden min-[450px]:inline">Loop</span>
+            </button>
+
             <button
               type="button"
               onClick={toggleVoiceDictation}

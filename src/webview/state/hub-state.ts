@@ -152,5 +152,8 @@ export function hubReducer(state: HubState, action: HubAction): HubState {
       return { ...state, attachments: [] };
     case 'composerTextConsumed':
       return { ...state, composerText: undefined };
+    default:
+      // Cualquier otro `message` de la ventana no debe vaciar el estado.
+      return state;
   }
 }

@@ -1,10 +1,11 @@
 import React, { memo, useEffect, useRef, useState } from 'react';
-import { AlertCircle, Brain, Check, CheckCircle2, ChevronRight, Film, GitFork, Image as ImageIcon, Loader2, Music, Pin, RotateCcw, Search, ShieldCheck, Terminal, X } from 'lucide-react';
+import { AlertCircle, Brain, Check, CheckCircle2, ChevronDown, ChevronRight, Copy, FileCode, Film, GitFork, Image as ImageIcon, Layers, Loader2, Music, Pin, RotateCcw, Search, ShieldCheck, Sparkles, Terminal, UserRound, X } from 'lucide-react';
 import { PROTOCOL_ROLES } from '../../../shared/protocol-roles';
 import { AccountProfile, ChatMessage, FileContextAttachment, LiveStatus, ProtocolRole, ProviderType } from '../../../shared/types';
-import { extractQuestionOptions, QuestionOptions } from '../../../shared/question-options';
+import { extractQuestionOptions, isQuestionPrompt, QuestionOptions } from '../../../shared/question-options';
 import { postToHost } from '../../vscode-api';
 import { ProviderBadge } from '../ProviderBadge';
+import { AgentHubIcon } from '../AgentHubLogo';
 import { ROLE_COLORS } from '../SquadCanvas';
 import { DiffLines } from './DiffLines';
 import { Markdown } from './Markdown';
@@ -83,6 +84,17 @@ export function splitTurn(message: Pick<ChatMessage, 'content' | 'activity' | 'a
   return { process, answer: message.content.slice(start).trim() };
 }
 
+function stepIcon(label: string): React.ReactNode {
+  const l = label.toLowerCase();
+  if (l.includes('search') || l.includes('buscar') || l.includes('find') || l.includes('grep')) {
+    return <Search className="h-3 w-3 text-cyan-400 shrink-0" />;
+  }
+  if (l.includes('file') || l.includes('read') || l.includes('edit') || l.includes('write') || l.includes('archivo') || l.includes('patch')) {
+    return <FileCode className="h-3 w-3 text-emerald-400 shrink-0" />;
+  }
+  return <Terminal className="h-3 w-3 text-indigo-400 shrink-0" />;
+}
+
 const TurnProcess: React.FC<{ message: ChatMessage; process: TurnItem[]; hasAnswer: boolean }> = ({ message, process, hasAnswer }) => {
   if (process.length === 0 && !message.thinking) return null;
   const stepCount = process.filter((item) => item.kind === 'step').length;
@@ -93,33 +105,35 @@ const TurnProcess: React.FC<{ message: ChatMessage; process: TurnItem[]; hasAnsw
 
   return (
     // Abierto solo mientras trabaja y aún no hay respuesta; después queda plegado.
-    <details open={message.isStreaming && !hasAnswer} className="group mb-2 rounded-md border border-zinc-800 bg-zinc-950/40 text-[12px] overflow-hidden">
+    <details open={message.isStreaming && !hasAnswer} className="group mb-2.5 rounded-lg border border-zinc-800 bg-zinc-950/60 text-[12px] overflow-hidden shadow-xs">
       {message.isStreaming && <div className="aurora-border h-0.5 w-full" />}
-      <summary className="flex cursor-pointer select-none items-center gap-1.5 px-2 py-1 text-[11px] text-zinc-400 hover:text-zinc-200">
-        {message.isStreaming ? <Loader2 className="h-3 w-3 shrink-0 animate-spin" /> : <ChevronRight className="h-3 w-3 shrink-0 transition-transform group-open:rotate-90" />}
-        <span className="font-medium text-zinc-300">Proceso</span>
-        <span className="truncate">· {summary}</span>
+      <summary className="flex cursor-pointer select-none items-center gap-1.5 px-2.5 py-1.5 text-[11px] text-zinc-400 hover:text-zinc-200 transition">
+        {message.isStreaming ? <Loader2 className="h-3.5 w-3.5 shrink-0 text-indigo-400 animate-spin" /> : <ChevronRight className="h-3.5 w-3.5 shrink-0 transition-transform group-open:rotate-90 text-zinc-500" />}
+        <span className="font-semibold text-zinc-200">Proceso de ejecución</span>
+        <span className="truncate text-zinc-400">· {summary}</span>
       </summary>
-      <div className="space-y-1.5 border-t border-zinc-800 px-2 py-2">
+      <div className="space-y-2 border-t border-zinc-800/80 px-2.5 py-2">
         {message.thinking && (
-          <details open={message.thinking.length <= LONG_BLOCK_CHARS} className="group/think text-zinc-500">
-            <summary className="flex cursor-pointer select-none items-center gap-1.5 hover:text-zinc-300">
+          <details open={message.thinking.length <= LONG_BLOCK_CHARS} className="group/think text-zinc-400 border-l-2 border-purple-500/50 pl-2">
+            <summary className="flex cursor-pointer select-none items-center gap-1.5 hover:text-zinc-200 text-purple-300 font-medium">
               <Brain className="h-3 w-3 shrink-0" />
-              <span>Razonamiento</span>
-              <ChevronRight className="h-3 w-3 shrink-0 transition-transform group-open/think:rotate-90" />
+              <span>Razonamiento interno</span>
+              <ChevronRight className="h-3 w-3 shrink-0 transition-transform group-open/think:rotate-90 text-zinc-500" />
             </summary>
-            <p className="mt-1 max-h-40 overflow-y-auto whitespace-pre-wrap break-words italic">{message.thinking}</p>
+            <p className="mt-1 max-h-48 overflow-y-auto whitespace-pre-wrap break-words italic text-zinc-400 font-mono text-[11px] leading-relaxed bg-zinc-900/60 p-2 rounded border border-zinc-800">
+              {message.thinking}
+            </p>
           </details>
         )}
-        <ol className="space-y-1 border-l border-zinc-800 pl-2.5">
+        <ol className="space-y-1.5 border-l border-zinc-800 pl-3">
           {process.map((item, index) =>
             item.kind === 'step' ? (
-              <li key={index} className="flex items-center gap-1.5 font-mono text-[11px] text-zinc-500">
-                <Terminal className="h-3 w-3 shrink-0" />
+              <li key={index} className="flex items-center gap-1.5 font-mono text-[11px] text-zinc-400">
+                {stepIcon(item.label)}
                 <span className="truncate" title={item.label}>{item.label}</span>
               </li>
             ) : (
-              <li key={index} className="text-zinc-400">
+              <li key={index} className="text-zinc-300 text-xs">
                 <Markdown text={item.text} />
               </li>
             )
@@ -178,10 +192,25 @@ const QuestionOptionsCard: React.FC<{
     setShowOtherInput(false);
   };
 
+  useEffect(() => {
+    if (disabled || selected) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      const num = parseInt(e.key, 10);
+      if (!isNaN(num) && num >= 1 && num <= questionOptions.options.length) {
+        e.preventDefault();
+        const chosen = questionOptions.options[num - 1].replace(/\s*\((?:recommended|recomendado)\)\s*/gi, '').trim();
+        handleSelect(chosen);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [disabled, selected, questionOptions.options]);
+
   return (
     <div className="mt-3 p-3 rounded-xl border border-indigo-500/30 bg-zinc-950/80 shadow-md space-y-2.5">
       <div className="flex items-center gap-2 text-xs font-semibold text-zinc-200">
-        <CheckCircle2 className="w-4 h-4 text-indigo-400 shrink-0" />
+        <Sparkles className="w-4 h-4 text-indigo-400 shrink-0" />
         <span className="truncate">{questionOptions.question}</span>
       </div>
 
@@ -221,12 +250,11 @@ const QuestionOptionsCard: React.FC<{
           );
         })}
 
-        {!selected && (
+        {!selected && !disabled && (
           <div>
             {!showOtherInput ? (
               <button
                 type="button"
-                disabled={disabled}
                 onClick={() => setShowOtherInput(true)}
                 className="w-full text-left p-2 rounded-lg text-xs flex items-center gap-2 border border-dashed border-zinc-700 hover:border-zinc-500 bg-zinc-900/40 hover:bg-zinc-800/60 text-zinc-400 hover:text-zinc-200 transition"
               >
@@ -292,33 +320,6 @@ const TurnStatus: React.FC<{ message: ChatMessage; hasAnswer: boolean; live?: Li
   );
 };
 
-const ChangedFile: React.FC<{ sessionId: string; checkpointHash: string; file: string; diff?: string }> = ({ sessionId, checkpointHash, file, diff }) => {
-  const [open, setOpen] = useState(false);
-  const toggle = () => {
-    if (!open && diff === undefined) postToHost({ command: 'fileDiff', sessionId, checkpointHash, file });
-    setOpen(!open);
-  };
-  return (
-    <li className="text-[11px] font-mono text-zinc-300">
-      <div className="flex items-center gap-1.5">
-        <button type="button" onClick={toggle} aria-expanded={open} className="flex items-center gap-1 flex-1 min-w-0 text-left hover:text-zinc-100" title={`Ver los cambios de ${file}`}>
-          <ChevronRight className={`h-3 w-3 shrink-0 transition-transform ${open ? 'rotate-90' : ''}`} />
-          <span className="truncate">{file}</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => postToHost({ command: 'revertFile', sessionId, checkpointHash, file })}
-          className="flex items-center gap-1 text-amber-400 hover:text-amber-300 hover:underline shrink-0"
-          title={`Revertir solo ${file} al estado previo al turno`}
-        >
-          <RotateCcw className="w-3 h-3" />
-          <span>Revertir</span>
-        </button>
-      </div>
-      {open && (diff === undefined ? <div className="text-zinc-400 pl-4">Cargando diff…</div> : <DiffLines diff={diff} />)}
-    </li>
-  );
-};
 
 /** Vuelve la copia aparte del equipo al commit de esta etapa; pide confirmación en línea. */
 const RestoreStage: React.FC<{ sessionId: string; messageId: string }> = ({ sessionId, messageId }) => {
@@ -406,27 +407,50 @@ const MessageBubble = memo<BubbleProps>(({ message, sessionId, onSendSuggestion,
   const isUser = message.role === 'user';
   const attachments = message.attachments ?? [];
   const turn = splitTurn(message);
-  const questionOptions = message.questionOptions ?? (!message.isStreaming ? extractQuestionOptions(turn.answer || message.content) : undefined);
+  const rawQuestion = message.questionOptions ?? (!message.isStreaming ? extractQuestionOptions(turn.answer || message.content) : undefined);
+  const questionOptions = rawQuestion && isQuestionPrompt(rawQuestion.question) && rawQuestion.options.length >= 2 ? rawQuestion : undefined;
+  const [copied, setCopied] = useState(false);
+  const [activeDiffFile, setActiveDiffFile] = useState<string | null>(null);
+
+  const copyMessageText = async () => {
+    try {
+      const textToCopy = isUser ? message.content : (turn.answer || message.content);
+      await navigator.clipboard.writeText(textToCopy);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {}
+  };
 
   return (
     <div
       id={`msg-${message.id}`}
       style={message.isStreaming ? undefined : OFFSCREEN_SKIP_STYLE}
-      className={`msg-bubble p-2.5 rounded-lg text-[13px] leading-relaxed border ${
-        isUser ? 'bg-zinc-800/90 text-zinc-100 ml-4 animate-message-fade' : 'bg-zinc-900/90 text-zinc-200 mr-2 animate-message-fade'
-      } ${message.isError ? 'border-red-500/40' : isUser ? 'border-zinc-700' : 'border-zinc-800'}`}
+      className={`msg-bubble p-3 rounded-xl text-[13px] leading-relaxed border transition-all ${
+        isUser
+          ? 'bg-gradient-to-br from-indigo-950/35 via-zinc-900/95 to-zinc-900 text-zinc-100 ml-4 border-indigo-500/30 shadow-xs animate-message-fade'
+          : 'bg-zinc-900/90 hover:bg-zinc-900 text-zinc-200 mr-2 border-zinc-800/80 shadow-xs animate-message-fade'
+      } ${message.isError ? '!border-red-500/50' : ''}`}
     >
-      <div className="flex items-center justify-between text-[11px] text-zinc-400 mb-1 font-mono">
-        <div className="flex items-center gap-1">
-          {message.isError && <AlertCircle className="w-3 h-3 text-red-400" />}
-          {!isUser && provider && <ProviderBadge provider={provider} />}
-          <span>{isUser ? 'Tú' : message.modelName}</span>
+      <div className="flex items-center justify-between text-[11px] text-zinc-400 mb-1.5 font-mono">
+        <div className="flex items-center gap-1.5">
+          {message.isError && <AlertCircle className="w-3.5 h-3.5 text-red-400" />}
+          {isUser ? (
+            <div className="flex items-center gap-1 text-indigo-300 font-semibold">
+              <UserRound className="w-3.5 h-3.5" />
+              <span>Tú</span>
+            </div>
+          ) : (
+            <>
+              {provider && <ProviderBadge provider={provider} />}
+              <span className="font-medium text-zinc-200">{message.modelName}</span>
+            </>
+          )}
           {!isUser && role && (
-            <span className={`px-1 rounded border uppercase text-[10px] ${ROLE_COLORS[role] ?? 'border-zinc-700 text-zinc-300'}`}>
+            <span className={`px-1.5 py-0.2 rounded border uppercase text-[10px] font-semibold ${ROLE_COLORS[role] ?? 'border-zinc-700 text-zinc-300'}`}>
               {PROTOCOL_ROLES[role]?.label ?? role}
             </span>
           )}
-          {message.isPlan && <span className="px-1 rounded border border-indigo-500/50 bg-indigo-950/40 text-indigo-300 uppercase text-[10px]">Plan</span>}
+          {message.isPlan && <span className="px-1.5 py-0.2 rounded border border-indigo-500/50 bg-indigo-950/50 text-indigo-300 uppercase text-[10px] font-semibold">Plan</span>}
           {message.isStreaming && !isUser && <TurnStatus message={message} hasAnswer={Boolean(turn.answer)} live={live} />}
           {message.pinned && <Pin className="w-3 h-3 text-amber-400 fill-amber-400" aria-label="Fijado" />}
         </div>
@@ -434,9 +458,19 @@ const MessageBubble = memo<BubbleProps>(({ message, sessionId, onSendSuggestion,
           <div className="flex items-center gap-1 opacity-70 hover:opacity-100 transition">
             <button
               type="button"
+              onClick={copyMessageText}
+              className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 hover:bg-zinc-750 text-zinc-300 border border-zinc-700/60 transition cursor-pointer"
+              title="Copiar texto del mensaje al portapapeles"
+              aria-label="Copiar texto del mensaje"
+            >
+              {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-zinc-400" />}
+              <span className={copied ? 'text-emerald-400' : undefined}>{copied ? 'Copiado' : 'Copiar'}</span>
+            </button>
+            <button
+              type="button"
               onClick={() => postToHost({ command: 'pinMessage', sessionId, messageId: message.id })}
               aria-pressed={Boolean(message.pinned)}
-              className="flex items-center text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700/60 transition cursor-pointer"
+              className="flex items-center text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 hover:bg-zinc-750 text-zinc-300 border border-zinc-700/60 transition cursor-pointer"
               title={message.pinned ? 'Desfijar mensaje' : 'Fijar mensaje'}
               aria-label={message.pinned ? 'Desfijar mensaje' : 'Fijar mensaje'}
             >
@@ -446,7 +480,7 @@ const MessageBubble = memo<BubbleProps>(({ message, sessionId, onSendSuggestion,
               <button
                 type="button"
                 onClick={() => postToHost({ command: 'crossReview', sessionId, messageId: message.id })}
-                className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-indigo-300 border border-zinc-700/60 transition cursor-pointer"
+                className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 hover:bg-zinc-750 text-indigo-300 border border-zinc-700/60 transition cursor-pointer"
                 title="Auditoría Imparcial: pedir una segunda opinión técnica a otro modelo conectado"
               >
                 <ShieldCheck className="w-3 h-3 text-indigo-400" />
@@ -456,7 +490,7 @@ const MessageBubble = memo<BubbleProps>(({ message, sessionId, onSendSuggestion,
             <button
               type="button"
               onClick={() => postToHost({ command: 'forkSession', sessionId, messageId: message.id })}
-              className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700/60 transition cursor-pointer"
+              className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 hover:bg-zinc-750 text-zinc-300 border border-zinc-700/60 transition cursor-pointer"
               title="Bifurcar conversación desde este punto (Time-Travel branching)"
             >
               <GitFork className="w-3 h-3 text-amber-400" />
@@ -478,7 +512,7 @@ const MessageBubble = memo<BubbleProps>(({ message, sessionId, onSendSuggestion,
           {!isUser && questionOptions && (
             <QuestionOptionsCard
               questionOptions={questionOptions}
-              disabled={Boolean(message.isStreaming)}
+              disabled={!isLast || Boolean(message.isStreaming)}
               onSelectOption={(chosen) => onSendSuggestion(chosen)}
             />
           )}
@@ -526,17 +560,69 @@ const MessageBubble = memo<BubbleProps>(({ message, sessionId, onSendSuggestion,
       )}
 
       {!isUser && !message.isStreaming && message.checkpointHash && message.checkpointFiles && message.checkpointFiles.length > 0 && (
-        <ul className="mt-1 space-y-0.5" aria-label="Archivos cambiados en el turno">
-          {message.checkpointFiles.map((file) => (
-            <ChangedFile
-              key={file}
-              sessionId={sessionId}
-              checkpointHash={message.checkpointHash!}
-              file={file}
-              diff={fileDiffs[`${message.checkpointHash}:${file}`]}
-            />
-          ))}
-        </ul>
+        <div className="mt-2 pt-1.5 border-t border-zinc-800/80 space-y-1">
+          <div className="text-[10px] text-zinc-400 font-mono font-medium flex items-center justify-between">
+            <span>Archivos modificados ({message.checkpointFiles.length}):</span>
+            <span className="text-zinc-500 text-[9px]">desplazamiento horizontal ➔</span>
+          </div>
+          <div className="flex items-center gap-1.5 overflow-x-auto py-1 px-0.5 scrollbar-thin">
+            {message.checkpointFiles.map((file) => {
+              const isSelected = activeDiffFile === file;
+              return (
+                <div
+                  key={file}
+                  className={`shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-md border text-[11px] font-mono transition ${
+                    isSelected
+                      ? 'bg-indigo-950/60 border-indigo-500/60 text-indigo-200'
+                      : 'bg-zinc-850 hover:bg-zinc-800 border-zinc-750 text-zinc-300'
+                  }`}
+                >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!isSelected && fileDiffs[`${message.checkpointHash}:${file}`] === undefined) {
+                        postToHost({ command: 'fileDiff', sessionId, checkpointHash: message.checkpointHash!, file });
+                      }
+                      setActiveDiffFile(isSelected ? null : file);
+                    }}
+                    className="flex items-center gap-1 hover:text-white"
+                    title={`Ver diff de ${file}`}
+                  >
+                    <FileCode className="w-3 h-3 text-emerald-400 shrink-0" />
+                    <span className="truncate max-w-[200px]">{file}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => postToHost({ command: 'revertFile', sessionId, checkpointHash: message.checkpointHash!, file })}
+                    className="text-amber-400 hover:text-amber-300 hover:underline shrink-0 text-[10px] ml-1 pl-1 border-l border-zinc-750"
+                    title={`Revertir solo ${file} al estado previo al turno`}
+                  >
+                    <RotateCcw className="w-2.5 h-2.5" />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+          {activeDiffFile && (
+            <div className="mt-1 p-2 rounded-lg bg-zinc-950 border border-zinc-800">
+              <div className="text-[10px] font-mono text-zinc-400 mb-1 flex items-center justify-between">
+                <span>Diff de <strong className="text-zinc-200">{activeDiffFile}</strong>:</span>
+                <button
+                  type="button"
+                  onClick={() => setActiveDiffFile(null)}
+                  className="text-zinc-400 hover:text-zinc-200 text-[10px] hover:underline"
+                >
+                  Cerrar diff
+                </button>
+              </div>
+              {fileDiffs[`${message.checkpointHash}:${activeDiffFile}`] === undefined ? (
+                <div className="text-zinc-400 pl-2 text-xs">Cargando diff…</div>
+              ) : (
+                <DiffLines diff={fileDiffs[`${message.checkpointHash}:${activeDiffFile}`]} />
+              )}
+            </div>
+          )}
+        </div>
       )}
 
       {attachments.length > 0 && (
@@ -613,9 +699,24 @@ export const MessageList: React.FC<Props> = ({ sessionId, messages, accountName,
     return () => cancelAnimationFrame(frame);
   }, [messages.length, lastMessage?.content, lastMessage?.activity?.length, lastMessage?.role]);
 
+  const [showScrollBottom, setShowScrollBottom] = useState(false);
+
   const trackFollowing = () => {
     const element = scrollRef.current;
-    if (element) isFollowing.current = element.scrollHeight - element.scrollTop - element.clientHeight < STICK_TO_BOTTOM_PX;
+    if (element) {
+      const isNearBottom = element.scrollHeight - element.scrollTop - element.clientHeight < STICK_TO_BOTTOM_PX;
+      isFollowing.current = isNearBottom;
+      setShowScrollBottom(!isNearBottom);
+    }
+  };
+
+  const scrollToBottom = () => {
+    const element = scrollRef.current;
+    if (element) {
+      element.scrollTo({ top: element.scrollHeight, behavior: 'smooth' });
+      isFollowing.current = true;
+      setShowScrollBottom(false);
+    }
   };
 
   return (
@@ -665,21 +766,41 @@ export const MessageList: React.FC<Props> = ({ sessionId, messages, accountName,
       )}
 
       {messages.length === 0 ? (
-        <div className="h-full flex flex-col items-center justify-center text-center p-4 text-zinc-400 space-y-2">
-          <Terminal className="w-6 h-6 text-zinc-400" />
-          <p className="text-xs">
-            Ejecuta instrucciones en <span className="text-zinc-300 font-medium">{accountName ?? 'el modelo seleccionado'}</span> utilizando tu suscripción directa.
-          </p>
-          <div className="flex flex-wrap gap-1 justify-center pt-2">
-            {QUICK_PROMPTS.map((prompt) => (
-              <button
-                key={prompt}
-                onClick={() => onSendSuggestion(prompt)}
-                className="text-[11px] px-2 py-1 rounded bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 transition"
-              >
-                {prompt}
-              </button>
-            ))}
+        <div className="h-full flex flex-col items-center justify-center text-center p-6 text-zinc-400 space-y-3.5">
+          <div className="relative group">
+            <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-indigo-500/30 to-cyan-500/30 blur-md group-hover:blur-lg transition" />
+            <div className="relative p-2.5 rounded-2xl bg-zinc-900 border border-zinc-750 shadow-xl flex items-center justify-center">
+              <AgentHubIcon size={38} />
+            </div>
+          </div>
+          <div className="max-w-md space-y-1">
+            <h3 className="text-sm font-semibold text-zinc-100 flex items-center justify-center gap-1.5">
+              <span>Agent<span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-cyan-400 bg-clip-text text-transparent">Hub</span></span>
+              <span className="text-zinc-600">·</span>
+              <span className="text-indigo-300 font-medium">{accountName ?? 'Modo Autónomo'}</span>
+            </h3>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Suscripción directa conectada. Haz una pregunta, adjunta archivos con @ o ejecuta una acción rápida:
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2 justify-center max-w-lg pt-1">
+            {QUICK_PROMPTS.map((prompt, idx) => {
+              const icon = idx === 0
+                ? <Layers className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                : idx === 1
+                  ? <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  : <CheckCircle2 className="w-3.5 h-3.5 text-amber-400 shrink-0" />;
+              return (
+                <button
+                  key={prompt}
+                  onClick={() => onSendSuggestion(prompt)}
+                  className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-zinc-900/90 hover:bg-zinc-800 text-zinc-200 border border-zinc-800 hover:border-indigo-500/50 shadow-sm transition-all hover:scale-[1.02] cursor-pointer"
+                >
+                  {icon}
+                  <span>{prompt}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
       ) : (
@@ -718,6 +839,20 @@ export const MessageList: React.FC<Props> = ({ sessionId, messages, accountName,
             )
           )}
         </>
+      )}
+
+      {showScrollBottom && (
+        <button
+          type="button"
+          onClick={scrollToBottom}
+          className="sticky bottom-2 mx-auto z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-medium shadow-xl border border-indigo-400/30 transition-all hover:scale-105 cursor-pointer animate-float-bounce"
+        >
+          <ChevronDown className="w-3.5 h-3.5" />
+          <span>Ir al último mensaje</span>
+          {lastMessage?.isStreaming && (
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse ml-0.5" />
+          )}
+        </button>
       )}
     </div>
   );

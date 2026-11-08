@@ -1,6 +1,6 @@
 import {
   BookOpen, Box, Container, Database, Eye, EyeOff, FileCheck, FileCode2, FileSpreadsheet, Gauge, Ghost,
-  GitBranch, GitFork, GitPullRequest, HeartPulse, History, KeyRound, Lock, LucideIcon, Network, Play, Radio, RotateCcw,
+  GitBranch, GitCommit, GitCompare, GitFork, GitPullRequest, HeartPulse, History, KeyRound, Lock, LucideIcon, Network, Play, Radio, RotateCcw,
   Scale, Shield, ShieldCheck, Smartphone, Trash2, Zap
 } from 'lucide-react';
 
@@ -15,6 +15,8 @@ export const ACTION_ICONS: Record<string, { icon: LucideIcon; color: string }> =
   'worktree': { icon: GitBranch, color: 'text-amber-400' },
   'pull-request': { icon: GitPullRequest, color: 'text-purple-400' },
   'pre-push-hook': { icon: ShieldCheck, color: 'text-emerald-400' },
+  'semantic-commit': { icon: GitCommit, color: 'text-blue-400' },
+  'audit-branch': { icon: GitCompare, color: 'text-amber-400' },
   'rollback': { icon: RotateCcw, color: 'text-rose-400' },
   'scan-secrets': { icon: Lock, color: 'text-rose-400' },
   'review-sql': { icon: Database, color: 'text-cyan-400' },

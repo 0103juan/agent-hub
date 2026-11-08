@@ -1,6 +1,7 @@
 import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
-import { CheckSquare, ChevronDown, Cpu, Download, FolderGit2, Layers, ListTree, Pin, Plus, Square, Wallet, X } from 'lucide-react';
+import { CheckSquare, ChevronDown, ChevronUp, Cpu, Download, FolderGit2, Layers, ListTree, Pin, Plus, Repeat, SlidersHorizontal, Square, Wallet, X } from 'lucide-react';
 import { agentName } from '../../../shared/agent-name';
+import { PROTOCOL_ROLES } from '../../../shared/protocol-roles';
 import { resolveSelection } from '../../../shared/model-selection';
 import { ConversationSession, ProtocolRole, ProviderType, QueuedMessage, ReasoningEffort, SessionPermission } from '../../../shared/types';
 import { HubAction, HubState } from '../../state/hub-state';
@@ -8,6 +9,8 @@ import { ACCENTS, getAccent, setAccent } from '../../state/accent';
 import { postToHost } from '../../vscode-api';
 import { EffortSelector } from '../EffortSelector';
 import { ProtocolRoleSelector } from '../ProtocolRoleSelector';
+import { ProviderBadge } from '../ProviderBadge';
+import { ROLE_COLORS } from '../SquadCanvas';
 import { TelemetryBar } from '../TelemetryBar';
 import { withThumbnails } from '../../state/thumbnails';
 import { Composer } from './Composer';
@@ -205,6 +208,16 @@ export const ChatView: React.FC<Props> = ({ state, session, focusMode, dispatch,
   const [, setAccentTick] = useState(0);
   const accent = getAccent(session.projectName);
 
+  const [deckExpanded, setDeckExpanded] = useState(() => localStorage.getItem('agent-hub.sessionDeckExpanded') === '1');
+  const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
+  const toggleDeck = useCallback(() => {
+    setDeckExpanded((prev) => {
+      const next = !prev;
+      localStorage.setItem('agent-hub.sessionDeckExpanded', next ? '1' : '0');
+      return next;
+    });
+  }, []);
+
   const contextBudget = useMemo(() => {
     const modelName = model?.label.toLowerCase() ?? '';
     let limit = 128_000;
@@ -266,15 +279,63 @@ export const ChatView: React.FC<Props> = ({ state, session, focusMode, dispatch,
             <option value="readonly">Solo lectura</option>
           </select>
           <ConversationIndex session={session} />
-          <button
-            type="button"
-            onClick={() => postToHost({ command: 'exportSession', sessionId })}
-            className="p-1 rounded bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 border border-zinc-700/60 transition"
-            aria-label="Exportar conversación a Markdown"
-            title="Exportar conversación a Markdown"
-          >
-            <Download className="w-3 h-3 text-indigo-400" />
-          </button>
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
+              className="p-1 rounded bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 border border-zinc-700/60 transition cursor-pointer"
+              aria-label="Exportar conversación"
+              title="Exportar conversación (Markdown, HTML, JSON)"
+            >
+              <Download className="w-3 h-3 text-indigo-400" />
+            </button>
+            {isExportMenuOpen && (
+              <div className="absolute right-0 top-full mt-1 w-52 bg-zinc-900 border border-zinc-750 rounded-lg shadow-2xl py-1 z-30 text-xs animate-in fade-in zoom-in-95 duration-100">
+                <button
+                  type="button"
+                  onClick={() => {
+                    postToHost({ command: 'exportSession', sessionId, format: 'markdown' });
+                    setIsExportMenuOpen(false);
+                  }}
+                  className="w-full px-3 py-1.5 text-left hover:bg-zinc-800 text-zinc-200 flex items-center gap-2 cursor-pointer transition"
+                >
+                  <span className="text-sm">📝</span>
+                  <div>
+                    <div className="font-medium text-[11px]">Markdown (.md)</div>
+                    <div className="text-[10px] text-zinc-400">Documento estándar</div>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    postToHost({ command: 'exportSession', sessionId, format: 'html' });
+                    setIsExportMenuOpen(false);
+                  }}
+                  className="w-full px-3 py-1.5 text-left hover:bg-zinc-800 text-zinc-200 flex items-center gap-2 cursor-pointer transition"
+                >
+                  <span className="text-sm">🌐</span>
+                  <div>
+                    <div className="font-medium text-indigo-300 text-[11px]">Reporte HTML (.html)</div>
+                    <div className="text-[10px] text-zinc-400">Autónomo con tema oscuro</div>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    postToHost({ command: 'exportSession', sessionId, format: 'json' });
+                    setIsExportMenuOpen(false);
+                  }}
+                  className="w-full px-3 py-1.5 text-left hover:bg-zinc-800 text-zinc-200 flex items-center gap-2 cursor-pointer transition"
+                >
+                  <span className="text-sm">📊</span>
+                  <div>
+                    <div className="font-medium text-[11px]">Transcripción JSON (.json)</div>
+                    <div className="text-[10px] text-zinc-400">Datos y métricas completos</div>
+                  </div>
+                </button>
+              </div>
+            )}
+          </div>
           <button
             type="button"
             onClick={onOpenHistory}
@@ -298,77 +359,226 @@ export const ChatView: React.FC<Props> = ({ state, session, focusMode, dispatch,
         </div>
       </div>
 
-      {!focusMode && (<>
-      <div className="shrink-0">
-        <AccountBar sessionId={sessionId} accounts={state.accounts} selection={selection} />
-      </div>
-
-      <div className="flex items-center gap-2 px-1 shrink-0">
-        <Effort effort={effort ?? sessionEffort} supportedEfforts={model?.efforts ?? NO_EFFORTS} onChange={selectEffort} />
-        <Roles selectedRole={session.protocolRole} onSelectRole={selectRole} handoffTo={session.handoffTo} />
-      </div>
-
-      <div className="shrink-0">
-        <Usage activeTelemetry={telemetry} />
-      </div>
-
-      <div className="flex items-center justify-between px-2 py-1 text-[11px] text-zinc-400 bg-zinc-900/60 rounded border border-zinc-800/80 shrink-0">
-        <div className="flex items-center gap-1.5 min-w-0">
-          <Cpu className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-          <span className="text-zinc-400 text-[11px]">Contexto:</span>
-          <span className="font-mono text-zinc-200 font-medium text-[11px]">{formatTokens(contextBudget.usedTokens)}</span>
-          <span className="text-zinc-500 font-mono text-[10px]">/ {formatTokens(contextBudget.limit)}</span>
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <div className="w-20 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-            <div
-              className={`h-full rounded-full transition-all duration-300 ${
-                contextBudget.percentage > 85 ? 'bg-red-500' : contextBudget.percentage > 60 ? 'bg-amber-400' : 'bg-emerald-400'
-              }`}
-              style={{ width: `${contextBudget.percentage}%` }}
-            />
-          </div>
-          <span className="font-mono text-[10px] text-zinc-400 w-8 text-right">{contextBudget.percentage}%</span>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between gap-2 px-2 py-1 text-[11px] text-zinc-400 bg-zinc-900/60 rounded border border-zinc-800/80 shrink-0">
-        <div className="flex items-center gap-1.5 min-w-0">
-          <Wallet className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-          <span>Gasto:</span>
-          <span className="font-mono text-zinc-200 font-medium">${spentUSD.toFixed(4)}</span>
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
-          {session.budgetUSD ? (
-            <div className="w-16 h-1.5 bg-zinc-800 rounded-full overflow-hidden" title={`${budgetPercent}% del límite`}>
-              <div
-                className={`h-full rounded-full ${budgetPercent >= 100 ? 'bg-red-500' : budgetPercent > 75 ? 'bg-amber-400' : 'bg-emerald-400'}`}
-                style={{ width: `${budgetPercent}%` }}
+      {!focusMode && (
+        <div className="shrink-0 space-y-2">
+          {/* Barra de control compacta y desplegable */}
+          <div className="flex items-center justify-between gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900/90 border border-zinc-800 text-xs shadow-xs">
+            {/* Selector interactivo de Cuenta, Modelo y Rol arriba en la sección compacta */}
+            <div className="flex items-center gap-1.5 min-w-0">
+              <AccountBar
+                sessionId={sessionId}
+                accounts={state.accounts}
+                selection={selection}
+                compact={true}
+              />
+              <Roles
+                selectedRole={session.protocolRole}
+                onSelectRole={selectRole}
+                handoffTo={session.handoffTo}
+                compact={true}
               />
             </div>
-          ) : null}
-          <label className="flex items-center gap-1">
-            <span>Límite $</span>
-            <input
-              key={session.budgetUSD ?? 'none'}
-              type="number"
-              min="0"
-              step="0.5"
-              defaultValue={session.budgetUSD ?? ''}
-              placeholder="sin límite"
-              aria-label="Límite de gasto en USD"
-              onBlur={(event) => setBudget(event.target.value)}
-              onKeyDown={(event) => event.key === 'Enter' && event.currentTarget.blur()}
-              className="w-16 bg-zinc-900 border border-zinc-700 rounded px-1 font-mono text-zinc-200 focus:outline-none focus:border-indigo-500"
-            />
-          </label>
+
+            {/* Métricas clave y botón desplegar */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              {/* Medidor de contexto compacto con barra visual */}
+              <div
+                className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-zinc-850 border border-zinc-750 text-[11px]"
+                title={`Contexto: ${formatTokens(contextBudget.usedTokens)} de ${formatTokens(contextBudget.limit)} tokens (${contextBudget.percentage}%)\nHistorial: ${formatTokens(contextBudget.historyTokens)} | Adjuntos: ${formatTokens(contextBudget.attachmentTokens)}`}
+              >
+                <Cpu className="w-3 h-3 text-indigo-400 shrink-0" />
+                <div className="w-10 h-1 bg-zinc-700 rounded-full overflow-hidden hidden min-[360px]:block">
+                  <div
+                    className={`h-full rounded-full transition-all duration-300 ${
+                      contextBudget.percentage > 85 ? 'bg-red-500' : contextBudget.percentage > 60 ? 'bg-amber-400' : 'bg-emerald-400'
+                    }`}
+                    style={{ width: `${contextBudget.percentage}%` }}
+                  />
+                </div>
+                <span className={`font-mono text-[10px] font-medium ${
+                  contextBudget.percentage > 85 ? 'text-red-400' : contextBudget.percentage > 60 ? 'text-amber-400' : 'text-zinc-300'
+                }`}>
+                  {contextBudget.percentage}%
+                </span>
+              </div>
+
+              {/* Gasto compacto */}
+              <div
+                className="flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-850 border border-zinc-750 text-[11px] font-mono text-zinc-300"
+                title={`Gasto acumulado: $${spentUSD.toFixed(4)}${session.budgetUSD ? ` / Límite $${session.budgetUSD}` : ''}`}
+              >
+                <Wallet className="w-3 h-3 text-emerald-400 shrink-0" />
+                <span className="font-semibold text-emerald-400">${spentUSD.toFixed(spentUSD >= 1 ? 2 : 4)}</span>
+              </div>
+
+              {/* Botón Desplegar / Plegar */}
+              <button
+                type="button"
+                onClick={toggleDeck}
+                className={`flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium transition cursor-pointer border ${
+                  deckExpanded
+                    ? 'bg-indigo-600 text-white border-indigo-500 shadow-xs'
+                    : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700'
+                }`}
+                aria-expanded={deckExpanded}
+                aria-label={deckExpanded ? 'Plegar panel de controles' : 'Desplegar panel de controles'}
+                title={deckExpanded ? 'Plegar controles detallados' : 'Desplegar controles detallados (esfuerzo, rol, métricas y límites)'}
+              >
+                <SlidersHorizontal className="w-3 h-3 text-indigo-400 group-hover:text-white" />
+                <span className="hidden min-[440px]:inline">{deckExpanded ? 'Plegar' : 'Desplegar'}</span>
+                {deckExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+              </button>
+            </div>
+          </div>
+
+          {/* Panel Desplegado / Expandido con organización modular */}
+          {deckExpanded && (
+            <div className="p-2.5 rounded-xl bg-zinc-900/95 border border-zinc-800 shadow-xl space-y-2.5 animate-message-fade">
+              {/* Fila 1: Esfuerzo de razonamiento, Rol de protocolo y Permisos */}
+              <div className="flex flex-wrap items-center justify-between gap-2 p-1.5 rounded-lg bg-zinc-950/60 border border-zinc-800/80">
+                <div className="flex items-center gap-2">
+                  <Effort effort={effort ?? sessionEffort} supportedEfforts={model?.efforts ?? NO_EFFORTS} onChange={selectEffort} />
+                  <Roles selectedRole={session.protocolRole} onSelectRole={selectRole} handoffTo={session.handoffTo} />
+                </div>
+                <div className="flex items-center gap-1.5 ml-auto text-[11px]">
+                  <span className="text-zinc-400 font-medium">Permisos:</span>
+                  <select
+                    value={session.permission ?? 'full'}
+                    onChange={(event) =>
+                      postToHost({ command: 'updateSession', sessionId, patch: { permission: event.target.value as SessionPermission } })
+                    }
+                    aria-label="Permisos de sesión"
+                    className="text-[11px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-200 border border-zinc-700 focus:outline-none focus:border-indigo-500"
+                  >
+                    <option value="full">Completo (Lectura y Escritura)</option>
+                    <option value="readonly">Solo lectura</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Fila 3: Tarjetas de Métricas de Contexto y Límite de Gasto en Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px]">
+                {/* Tarjeta Contexto */}
+                <div className="p-2 rounded-lg bg-zinc-950/60 border border-zinc-800/80 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-1 font-medium text-zinc-300">
+                      <Cpu className="w-3.5 h-3.5 text-indigo-400" />
+                      Ventana de Contexto
+                    </span>
+                    <span className="font-mono text-zinc-400 text-[10px]">
+                      <strong className="text-zinc-200">{formatTokens(contextBudget.usedTokens)}</strong> / {formatTokens(contextBudget.limit)} ({contextBudget.percentage}%)
+                    </span>
+                  </div>
+                  <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-300 ${
+                        contextBudget.percentage > 85 ? 'bg-red-500' : contextBudget.percentage > 60 ? 'bg-amber-400' : 'bg-emerald-400'
+                      }`}
+                      style={{ width: `${contextBudget.percentage}%` }}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between text-[10px] text-zinc-400 font-mono pt-0.5">
+                    <span>Historial: {formatTokens(contextBudget.historyTokens)}</span>
+                    <span>Adjuntos: {formatTokens(contextBudget.attachmentTokens)}</span>
+                    <span>Sistema: {formatTokens(contextBudget.systemTokens)}</span>
+                  </div>
+                </div>
+
+                {/* Tarjeta Presupuesto y Gasto */}
+                <div className="p-2 rounded-lg bg-zinc-950/60 border border-zinc-800/80 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-1 font-medium text-zinc-300">
+                      <Wallet className="w-3.5 h-3.5 text-emerald-400" />
+                      Gasto de la Sesión
+                    </span>
+                    <span className="font-mono text-emerald-400 font-semibold">${spentUSD.toFixed(4)}</span>
+                  </div>
+                  {session.budgetUSD ? (
+                    <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden" title={`${budgetPercent}% del límite`}>
+                      <div
+                        className={`h-full rounded-full ${budgetPercent >= 100 ? 'bg-red-500' : budgetPercent > 75 ? 'bg-amber-400' : 'bg-emerald-400'}`}
+                        style={{ width: `${budgetPercent}%` }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-full h-1.5 bg-zinc-800/50 rounded-full" />
+                  )}
+                  <div className="flex items-center justify-between text-[10px] text-zinc-400 font-mono pt-0.5">
+                    <span>{session.budgetUSD ? `${budgetPercent}% consumido` : 'Sin límite asignado'}</span>
+                    <label className="flex items-center gap-1">
+                      <span>Límite $:</span>
+                      <input
+                        key={session.budgetUSD ?? 'none'}
+                        type="number"
+                        min="0"
+                        step="0.5"
+                        defaultValue={session.budgetUSD ?? ''}
+                        placeholder="sin límite"
+                        aria-label="Límite de gasto en USD"
+                        onBlur={(event) => setBudget(event.target.value)}
+                        onKeyDown={(event) => event.key === 'Enter' && event.currentTarget.blur()}
+                        className="w-16 bg-zinc-900 border border-zinc-700 rounded px-1 text-right text-zinc-200 focus:outline-none focus:border-indigo-500"
+                      />
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Fila 4: Telemetría de cuenta (semana, 5h, tokens in/out) */}
+              <Usage activeTelemetry={telemetry} />
+
+              {/* Fila 5: Quota Notice si aplica */}
+              <Quota telemetry={telemetry} accounts={state.accounts} activeAccount={account} onFailover={failover} />
+
+              {/* Fila 6: Onboarding si aún no hay mensajes */}
+              {session.messages.length === 0 && <Onboarding state={state} />}
+            </div>
+          )}
         </div>
-      </div>
+      )}
 
-      <Quota telemetry={telemetry} accounts={state.accounts} activeAccount={account} onFailover={failover} />
-
-      {session.messages.length === 0 && <Onboarding state={state} />}
-      </>)}
+      {session.loopConfig?.active && (
+        <div className="bg-gradient-to-r from-purple-950/70 via-indigo-950/70 to-purple-950/70 border-b border-purple-500/40 px-3.5 py-2 flex items-center justify-between gap-3 text-xs shadow-inner shrink-0">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="flex h-2.5 w-2.5 relative shrink-0">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-purple-500"></span>
+            </span>
+            <div className="flex items-baseline gap-1.5 min-w-0">
+              <span className="font-semibold text-purple-300 shrink-0">
+                Modo Loop (Iteración {session.loopConfig.iteration}{session.loopConfig.maxIterations ? `/${session.loopConfig.maxIterations}` : ''}):
+              </span>
+              <span className="text-zinc-200 truncate font-mono text-[11px]" title={session.loopConfig.instruction}>
+                "{session.loopConfig.instruction}"
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              type="button"
+              onClick={() => postToHost({ command: 'finishLoop', sessionId })}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded font-medium text-[11px] transition shadow-sm cursor-pointer ${
+                session.loopConfig.stopAfterCurrent
+                  ? 'bg-amber-500/20 text-amber-200 border border-amber-500/50 hover:bg-amber-500/30'
+                  : 'bg-purple-600/80 hover:bg-purple-500 text-white'
+              }`}
+              title={session.loopConfig.stopAfterCurrent ? 'Clic para seguir iterando' : 'Deja terminar la iteración en curso y no lanza la siguiente'}
+            >
+              <Pin className="w-3 h-3" />
+              <span>{session.loopConfig.stopAfterCurrent ? 'Para al terminar · Deshacer' : 'Parar al terminar'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => postToHost({ command: 'stopLoop', sessionId })}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-red-600/90 hover:bg-red-500 text-white font-medium text-[11px] transition shadow-sm cursor-pointer"
+              title="Corta el turno en curso y detiene el bucle"
+            >
+              <Square className="w-3 h-3 fill-current" />
+              <span>Detener ya</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       <MessageList
         key={sessionId}

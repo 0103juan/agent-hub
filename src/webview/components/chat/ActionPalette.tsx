@@ -70,7 +70,7 @@ export const ActionPalette: React.FC<Props> = ({ onRun, onClose }) => {
               <h4 className="text-[11px] font-semibold text-zinc-400 px-1 pb-1">{actionGroup}</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
                 {actions.map((action) => {
-                  const { icon: Icon, color } = ACTION_ICONS[action.id];
+                  const { icon: Icon, color } = ACTION_ICONS[action.id] ?? { icon: Wrench, color: 'text-zinc-400' };
                   return (
                     <button
                       key={action.id}

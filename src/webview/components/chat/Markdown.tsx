@@ -1,7 +1,10 @@
 import { renderSyntaxCode } from './syntax-highlighter';
 import React, { memo, useState } from 'react';
 import { Check, Code, Copy, CornerDownLeft, ExternalLink, Eye, FileCode, FileText, GitCompare, Save, Sliders, X } from 'lucide-react';
-import { postToHost } from '../../vscode-api';
+import { isStandaloneBrowser, postToHost } from '../../vscode-api';
+
+// La CSP del webview de VS Code (solo scripts con nonce) la heredan los iframes: Mermaid no puede cargar ahí.
+const CAN_RENDER_MERMAID = isStandaloneBrowser();
 
 type Align = 'left' | 'center' | 'right' | undefined;
 
@@ -385,11 +388,11 @@ function renderInline(text: string): React.ReactNode[] {
 
 const CodeBlock: React.FC<{ language: string; code: string; withActions: boolean }> = ({ language, code, withActions }) => {
   const [wasCopied, setWasCopied] = useState(false);
-  const [previewMode, setPreviewMode] = useState(false);
+  const [previewMode, setPreviewMode] = useState(language === 'mermaid' && CAN_RENDER_MERMAID);
   const [viewport, setViewport] = useState<'desktop' | 'mobile'>('desktop');
   const [savePath, setSavePath] = useState<string>();
 
-  const isVisual = language === 'html' || language === 'svg';
+  const isVisual = language === 'html' || language === 'svg' || (language === 'mermaid' && CAN_RENDER_MERMAID);
 
   const copy = async () => {
     await navigator.clipboard.writeText(code);
@@ -512,6 +515,19 @@ const CodeBlock: React.FC<{ language: string; code: string; withActions: boolean
         </div>
       )}
 
+      {previewMode && language === 'mermaid' && (
+        <div className="p-2 bg-zinc-950 flex flex-col items-center border-b border-zinc-800">
+          <iframe
+            sandbox="allow-scripts"
+            srcDoc={`<!DOCTYPE html><html><head><meta charset="utf-8"><script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+mermaid.initialize({ startOnLoad: true, theme: 'dark', themeVariables: { darkMode: true, background: '#09090b', primaryColor: '#4f46e5', primaryTextColor: '#f4f4f5' } });
+</script><style>body { margin: 0; padding: 16px; background: #09090b; color: #f4f4f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: auto; font-family: system-ui, sans-serif; }</style></head><body><pre class="mermaid">${code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre></body></html>`}
+            className="w-full h-80 border border-zinc-800 rounded bg-zinc-950"
+          />
+        </div>
+      )}
+
       {!previewMode && language === 'svg' && code.includes('</svg>') && (
         <img
           src={`data:image/svg+xml;charset=utf-8,${encodeURIComponent(code)}`}
@@ -557,6 +573,31 @@ const MarkdownTable: React.FC<{ block: Extract<Block, { kind: 'table' }> }> = ({
   </div>
 );
 
+function isItemFileLink(text: string): boolean {
+  if (!text) return false;
+  const trimmed = text.trim();
+  // Formato markdown link: [label](href) o [`label`](href) (opcionalmente con texto corto tras el link)
+  const link = trimmed.match(/^\[((?:`[^`]+`|[^\]])+)\]\(([^)]+)\)(.*)$/);
+  if (link) {
+    const rawLabel = link[1].replace(/^`|`$/g, '').trim();
+    const href = link[2].trim();
+    const rest = link[3].trim();
+    if (parseFileLinkTarget(rawLabel, href) !== null) {
+      return rest.length <= 40;
+    }
+    if (/\.(ts|tsx|js|jsx|json|ya?ml|html|css|py|java|go|rs|md|txt|sql|env|c|cpp|h|hpp|sh)$/i.test(rawLabel) ||
+        /\.(ts|tsx|js|jsx|json|ya?ml|html|css|py|java|go|rs|md|txt|sql|env|c|cpp|h|hpp|sh)$/i.test(href)) {
+      return rest.length <= 40;
+    }
+  }
+  // Formato código solo: `archivo.ext`
+  const code = trimmed.match(/^`([^`]+)`(.*)$/);
+  if (code && /\.(ts|tsx|js|jsx|json|ya?ml|html|css|py|java|go|rs|md|txt|sql|env|c|cpp|h|hpp|sh)$/i.test(code[1])) {
+    return code[2].trim().length <= 40;
+  }
+  return false;
+}
+
 export const Markdown = memo<{ text: string; withCodeActions?: boolean }>(({ text, withCodeActions = false }) => (
   <div className="space-y-1.5 break-words">
     {parseMarkdownBlocks(text).map((block, index) => {
@@ -566,6 +607,26 @@ export const Markdown = memo<{ text: string; withCodeActions?: boolean }>(({ tex
         case 'heading':
           return <div key={index} role="heading" aria-level={block.level} className={`pt-1 ${HEADING_CLASSES[block.level]}`}>{renderInline(block.text)}</div>;
         case 'list': {
+          const rawItems = block.itemDetails && block.itemDetails.length > 0
+            ? block.itemDetails
+            : block.items.map((item, i) => ({ text: item, ordered: block.ordered, level: 0, num: i + 1 }));
+
+          const isFileList = rawItems.length > 0 && rawItems.every((item) => isItemFileLink(item.text));
+
+          if (isFileList) {
+            return (
+              <div key={index} className="my-2 p-1.5 rounded-lg bg-zinc-900/70 border border-zinc-800 shadow-xs">
+                <div className="flex items-center gap-1.5 overflow-x-auto py-1 px-1 scrollbar-thin">
+                  {rawItems.map((item, itemIndex) => (
+                    <div key={itemIndex} className="shrink-0">
+                      {renderInline(item.text)}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          }
+
           if (!block.itemDetails || block.itemDetails.length === 0) {
             const List = block.ordered ? 'ol' : 'ul';
             return (
