@@ -32,7 +32,7 @@ fi
 `;
 
 function git(cwd: string, ...args: string[]): string {
-  return execFileSync('git', args, { cwd, encoding: 'utf8', windowsHide: true });
+  return execFileSync('git', args, { cwd, encoding: 'utf8', windowsHide: true, maxBuffer: 64 * 1024 * 1024 }); // el tope por defecto (1 MB) rompía diffs grandes
 }
 
 function exists(cwd: string, file: string): boolean {

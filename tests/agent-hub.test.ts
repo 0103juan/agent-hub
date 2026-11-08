@@ -1735,3 +1735,24 @@ describe('contextHandlers.attachGit', () => {
     }
   });
 });
+
+describe('actionHandlers.scan-secrets', () => {
+  it('encuentra un secreto en un diff de más de 1 MB', async () => {
+    const { actionHandlers } = await import('../src/host/handlers/action-handlers');
+    const repo = fs.mkdtempSync(path.join(os.tmpdir(), 'scan-secrets-'));
+    try {
+      const git = (...a: string[]) => execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...a], { cwd: repo, stdio: 'ignore' });
+      git('init', '-q');
+      fs.writeFileSync(path.join(repo, 'a.txt'), 'x\n');
+      git('add', 'a.txt');
+      git('commit', '-q', '-m', 'a');
+      fs.writeFileSync(path.join(repo, 'a.txt'), 'y'.repeat(2 * 1024 * 1024) + '\nghp_' + 'a'.repeat(36) + '\n');
+      const notes: string[] = [];
+      const hub: any = { sessions: { get: () => ({ projectPath: repo }) }, chat: { addNote: (_s: string, text: string) => notes.push(text) } };
+      await actionHandlers(hub).runAction({ actionId: 'scan-secrets', sessionId: 's', input: '' } as any);
+      assert.match(notes[0], /Posibles secretos/);
+    } finally {
+      fs.rmSync(repo, { recursive: true, force: true });
+    }
+  });
+});
