@@ -9,6 +9,12 @@ export function readJsonFile<T>(filePath: string, fallback: T): T {
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
       console.error(`AgentHub: no se pudo leer ${filePath}`, error);
+      // Se aparta en vez de dejar que la próxima escritura lo pise con el valor vacío.
+      if (error instanceof SyntaxError) {
+        try {
+          fs.renameSync(filePath, `${filePath}.corrupt-${Date.now()}`);
+        } catch {}
+      }
     }
     return fallback;
   }
@@ -18,7 +24,14 @@ export function readJsonFile<T>(filePath: string, fallback: T): T {
 export function writeJsonFile(filePath: string, value: unknown): void {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   const tempPath = `${filePath}.tmp`;
-  fs.writeFileSync(tempPath, JSON.stringify(value, null, 2), 'utf8');
+  // Sin fsync, un apagado brusco puede dejar el archivo renombrado pero lleno de ceros.
+  const fd = fs.openSync(tempPath, 'w');
+  try {
+    fs.writeFileSync(fd, JSON.stringify(value, null, 2), 'utf8');
+    fs.fsyncSync(fd);
+  } finally {
+    fs.closeSync(fd);
+  }
   fs.renameSync(tempPath, filePath);
 }
 
