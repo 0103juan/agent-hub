@@ -11,6 +11,7 @@ import { HandlerMap } from './handler-types';
 const PASTED_FILES_DIR = path.join(os.homedir(), '.agent-hub', 'media_cache');
 const SEARCH_EXCLUDES = '{**/node_modules/**,**/.git/**,**/dist/**}';
 const MAX_SEARCH_RESULTS = 15;
+const GIT_OPTS = { encoding: 'utf8', windowsHide: true, maxBuffer: 64 * 1024 * 1024 } as const; // el tope por defecto (1 MB) hacía fallar `git diff` en cambios grandes
 
 export function contextHandlers(hub: HubContext): HandlerMap<
   'attachActiveEditor' | 'attachFiles' | 'savePastedFile' | 'searchFiles' | 'attachFile' | 'attachProblems' | 'attachGit'
@@ -97,9 +98,9 @@ export function contextHandlers(hub: HubContext): HandlerMap<
         return;
       }
       try {
-        const status = execFileSync('git', ['status', '-s'], { cwd: root, encoding: 'utf8', windowsHide: true }).trim();
-        const diffStat = execFileSync('git', ['diff', '--stat'], { cwd: root, encoding: 'utf8', windowsHide: true }).trim();
-        const diff = execFileSync('git', ['diff'], { cwd: root, encoding: 'utf8', windowsHide: true }).slice(0, 4000);
+        const status = execFileSync('git', ['status', '-s'], { cwd: root, ...GIT_OPTS }).trim();
+        const diffStat = execFileSync('git', ['diff', '--stat'], { cwd: root, ...GIT_OPTS }).trim();
+        const diff = execFileSync('git', ['diff'], { cwd: root, ...GIT_OPTS }).slice(0, 4000);
         if (!status && !diff) {
           void vscode.window.showInformationMessage('El repositorio no tiene cambios pendientes.');
           return;

@@ -4,6 +4,7 @@ import { after, describe, it } from 'node:test';
 import * as assert from 'node:assert';
 import { execFileSync } from 'child_process';
 import * as fs from 'fs';
+import * as vscode from 'vscode';
 import * as os from 'os';
 import * as path from 'path';
 
@@ -1706,6 +1707,31 @@ describe('Punta a punta con una CLI simulada', () => {
       assert.ok(sessions.get(session.id)!.messages.some((m) => m.content.includes('Sin actividad')));
     } finally {
       pool.dispose();
+    }
+  });
+});
+
+describe('contextHandlers.attachGit', () => {
+  it('adjunta el diff aunque supere 1 MB', async () => {
+    const { contextHandlers } = await import('../src/host/handlers/context-handlers');
+    const repo = fs.mkdtempSync(path.join(os.tmpdir(), 'attach-git-'));
+    const folders = (vscode.workspace as any).workspaceFolders;
+    try {
+      const git = (...a: string[]) => execFileSync('git', a, { cwd: repo, stdio: 'ignore' });
+      git('init', '-q');
+      git('-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-q', '--allow-empty', '-m', 'x');
+      fs.writeFileSync(path.join(repo, 'a.txt'), 'x\n');
+      git('add', 'a.txt');
+      git('-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-q', '-m', 'a');
+      fs.writeFileSync(path.join(repo, 'a.txt'), 'y'.repeat(2 * 1024 * 1024) + '\n');
+      (vscode.workspace as any).workspaceFolders = [{ uri: { fsPath: repo } }];
+      const posted: any[] = [];
+      contextHandlers({ post: (m: any) => posted.push(m) } as any).attachGit({} as any);
+      assert.strictEqual(posted.length, 1);
+      assert.match(posted[0].attachment.content, /a\.txt/);
+    } finally {
+      (vscode.workspace as any).workspaceFolders = folders;
+      fs.rmSync(repo, { recursive: true, force: true });
     }
   });
 });
