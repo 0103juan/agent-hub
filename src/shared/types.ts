@@ -199,6 +199,19 @@ export interface AgentMessage {
 
 export type ProtocolRole = 'explorador' | 'arquitecto' | 'tester' | 'desarrollador' | 'revisor' | 'externo' | 'documentador' | 'disenador' | 'coordinador' | 'depurador';
 
+/** Ciclo por defecto de `/loop` sin texto. */
+export const DEFAULT_LOOP_INSTRUCTION = 'Analiza la app, propón mejoras concretas, impleméntalas, compila, corrige los errores y vuelve a analizar.';
+
+export interface LoopConfig {
+  active: boolean;
+  instruction: string;
+  iteration: number;
+  maxIterations?: number;
+  startedAt?: number;
+  /** La persona pidió parar cuando termine la iteración en curso, sin cortarla. */
+  stopAfterCurrent?: boolean;
+}
+
 export interface ProtocolRoleConfig {
   id: ProtocolRole;
   label: string;
@@ -237,6 +250,8 @@ export interface ConversationSession {
   isolatedBase?: string;
   /** Rama del `git worktree` aislado del equipo; `projectPath` apunta a esa copia. */
   isolatedBranch?: string;
+  /** Configuración del bucle continuo iterativo (Modo Loop). */
+  loopConfig?: LoopConfig;
   messages: ChatMessage[];
   /** Total real; la vista solo recibe los mensajes de la sesión activa. */
   messageCount?: number;

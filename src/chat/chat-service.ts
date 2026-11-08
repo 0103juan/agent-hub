@@ -16,6 +16,8 @@ import {
   ConversationSession,
   FileContextAttachment,
   LiveStatus,
+  DEFAULT_LOOP_INSTRUCTION,
+  LoopConfig,
   ProtocolRole,
   QueuedMessage,
   QuestionOptions,
@@ -40,6 +42,8 @@ export interface SendPromptOptions {
   planFirst?: boolean;
   /** Cuántas veces se le devolvieron al agente tests fallidos en esta cadena. */
   verifyAttempt?: number;
+  /** Modo meta autónomo (/goal): itera arreglando fallos hasta que pasen los tests o se agoten los intentos. */
+  goalMode?: boolean;
 }
 
 /** Traspaso retenido hasta que la persona lo apruebe; se guarda en disco para no perderlo al reiniciar. */
@@ -67,6 +71,8 @@ const MAX_COMMS = 100;
 const MAX_VERIFY_RETRIES = 2;
 const PLAN_PREFIX =
   'MODO PLAN: no edites ni crees archivos ni ejecutes cambios. Responde solo con un plan numerado: pasos, archivos que tocarías y riesgos. Espera la aprobación.\n\n';
+const GOAL_PREFIX =
+  'MODO META AUTÓNOMO (/goal): Resuelve el objetivo solicitado y asegúrate de que el código funcione y los tests pasen. Se ejecutarán pruebas de verificación al terminar tu turno.\n\n';
 /** Errores con que las CLI avisan que la cuenta se quedó sin cuota. */
 const QUOTA_ERROR = /usage limit|rate limit|quota|limit reached|too many requests|429/i;
 const MAX_STORED_THINKING = 2000;
@@ -222,6 +228,10 @@ export class ChatService {
   }
 
   public cancel(sessionId: string): void {
+    const session = this.sessions.get(sessionId);
+    if (session?.loopConfig?.active) {
+      this.sessions.update(sessionId, { loopConfig: { ...session.loopConfig, active: false } });
+    }
     this.activeRuns.get(sessionId)?.cancel();
   }
 
@@ -241,13 +251,57 @@ export class ChatService {
 
   /** Tras detener un turno la cola queda en espera; esto la retoma. */
   public async resumeQueue(sessionId: string): Promise<void> {
-    if (!this.isRunning(sessionId)) await this.drain(sessionId);
+    if (!this.isRunning(sessionId)) await this.drain(sessionId, this.sessions.get(sessionId)?.projectPath ?? process.cwd());
   }
 
-  private async drain(sessionId: string): Promise<void> {
+  private async drain(sessionId: string, workspaceDir: string): Promise<void> {
     const next = this.queues.get(sessionId)?.shift();
-    if (next) await this.send(next.options);
-    else this.publishSessions();
+    if (next) {
+      await this.send(next.options);
+      return;
+    }
+
+    // Si el modo loop está activo, evaluamos y disparamos la siguiente iteración
+    const session = this.sessions.get(sessionId);
+    if (session?.loopConfig?.active) {
+      if (session.loopConfig.stopAfterCurrent) {
+        this.sessions.update(sessionId, { loopConfig: { ...session.loopConfig, active: false, stopAfterCurrent: false } });
+        this.addNote(sessionId, `🏁 [Modo Loop] Terminado tras la iteración ${session.loopConfig.iteration}, como pediste.`);
+        return;
+      }
+      if (session.budgetUSD !== undefined && this.spentUSD(session) >= session.budgetUSD) {
+        this.sessions.update(sessionId, { loopConfig: { ...session.loopConfig, active: false } });
+        this.addNote(sessionId, `🛑 [Modo Loop] Detenido automáticamente: Límite de gasto ($${session.budgetUSD.toFixed(2)}) alcanzado.`);
+        this.publishSessions();
+        return;
+      }
+
+      if (session.loopConfig.maxIterations && session.loopConfig.iteration >= session.loopConfig.maxIterations) {
+        this.sessions.update(sessionId, { loopConfig: { ...session.loopConfig, active: false } });
+        this.addNote(sessionId, `🏁 [Modo Loop] Completado: Se alcanzó el número máximo de iteraciones (${session.loopConfig.maxIterations}).`);
+        this.publishSessions();
+        return;
+      }
+
+      const nextIteration = session.loopConfig.iteration + 1;
+      const updatedLoop: LoopConfig = { ...session.loopConfig, iteration: nextIteration };
+      this.sessions.update(sessionId, { loopConfig: updatedLoop });
+      this.addNote(sessionId, `🔄 [Modo Loop] Iniciando iteración ${nextIteration}...`);
+      this.publishSessions();
+
+      const nextPrompt = `[MODO LOOP CONTINUO - Iteración ${nextIteration}]\nInstrucción activa: "${session.loopConfig.instruction}"\nRevisa el progreso acumulado en los turnos anteriores, evalúa el estado del proyecto, continúa con el siguiente paso o mejora de forma concreta y verifica que todo funcione correctamente.`;
+
+      await this.send({
+        sessionId,
+        prompt: nextPrompt,
+        workspaceDir,
+        role: session.protocolRole,
+        from: 'AgentHub (Loop)'
+      });
+      return;
+    }
+
+    this.publishSessions();
   }
 
   /** Solo viajan los mensajes de la sesión activa: el historial completo puede pesar megas. */
@@ -321,9 +375,38 @@ export class ChatService {
     }
 
     this.attention.delete(sessionId);
+    const trimmed = prompt.trim();
+    if (trimmed === '/stop' || trimmed === '/cancel' || trimmed === '/stoploop') {
+      if (session.loopConfig?.active) {
+        this.sessions.update(sessionId, { loopConfig: { ...session.loopConfig, active: false } });
+        this.addNote(sessionId, '⏹️ [Modo Loop] Bucle detenido por comando.');
+        this.publishSessions();
+        return;
+      }
+    }
+
     if (session.budgetUSD !== undefined && this.spentUSD(session) >= session.budgetUSD) {
+      if (session.loopConfig?.active) {
+        this.sessions.update(sessionId, { loopConfig: { ...session.loopConfig, active: false } });
+      }
       this.addNote(sessionId, `Límite de gasto alcanzado ($${session.budgetUSD.toFixed(2)}). Súbelo para seguir.`, true);
+      this.publishSessions();
       return;
+    }
+
+    let activePrompt = prompt;
+    const loopMatch = prompt.match(/^\/loop(?:\s+([\s\S]*))?$/i);
+    if (loopMatch) {
+      const instruction = (loopMatch[1] || '').trim() || DEFAULT_LOOP_INSTRUCTION;
+      const loopConfig: LoopConfig = {
+        active: true,
+        instruction,
+        iteration: 1,
+        startedAt: Date.now()
+      };
+      this.sessions.update(sessionId, { loopConfig });
+      activePrompt = `[MODO LOOP ACTIVO - Iteración 1]\nInstrucción en bucle: "${instruction}"\nInicia la ejecución de la instrucción. Este modo iterará de forma continua turno tras turno hasta que el usuario lo detenga o la sesión termine. Realiza progresos concretos, evalúa el estado del código y verifica cada cambio.`;
+      this.publishSessions();
     }
 
     this.preparingSessionIds.add(sessionId);
@@ -346,6 +429,7 @@ export class ChatService {
     if (account.id !== session.profileId) this.sessions.changeAccount(sessionId, account.id);
     const resumeId = session.cliSessionId;
     const role = options.role ?? session.protocolRole;
+    const isGoal = Boolean(options.goalMode || activePrompt.trim().startsWith('/goal '));
     const history = resumeId ? [] : [...session.messages];
     const team = this.teammates(session);
     const target: TelemetryTarget = {
@@ -358,7 +442,7 @@ export class ChatService {
     this.sessions.appendMessage(sessionId, {
       id: newMessageId(),
       role: 'user',
-      content: prompt,
+      content: activePrompt,
       profileId: account.id,
       modelName: options.from ?? 'Usuario',
       timestamp: Date.now(),
@@ -453,7 +537,7 @@ export class ChatService {
       run = this.providers.get(account.provider).startTurn(
         {
           account,
-          prompt: composePrompt({ prompt: options.planFirst ? PLAN_PREFIX + prompt : prompt, role, attachments, history, team, projectRules: loadProjectRules(workspaceDir),
+          prompt: composePrompt({ prompt: options.planFirst ? PLAN_PREFIX + activePrompt : (isGoal ? GOAL_PREFIX + activePrompt : activePrompt), role, attachments, history, team, projectRules: loadProjectRules(workspaceDir),
             // Con conversación reanudada la CLI ya tiene esto del primer turno: no se paga de nuevo.
             experience: resumeId ? undefined : loadExperience(workspaceDir),
             canWrite: !resumeId && !(role && PROTOCOL_ROLES[role].readOnly)
@@ -480,9 +564,9 @@ export class ChatService {
     flushText();
     this.live.delete(sessionId);
     this.post({ type: 'live', sessionId });
+    if (usage.costUSD) reply.costUSD = usage.costUSD;
     this.finishTurn(session, reply, outcome);
     if (timedOut) this.addNote(sessionId, `Sin actividad durante ${Math.round(this.idleTimeoutMs / 60000)} min: el turno se canceló.`, true);
-    if (usage.costUSD) reply.costUSD = usage.costUSD;
     reply.durationMs = Date.now() - startedAt;
     if (checkpointHash) {
       reply.checkpointDiff = getCheckpointDiff(workspaceDir, checkpointHash);
@@ -503,6 +587,7 @@ export class ChatService {
     if (outcome.status === 'completed') {
       this.telemetry.recordTurn(target, { ...usage, durationMs: Date.now() - startedAt });
       if (role === 'desarrollador' && session.squad && this.verify && (await this.verifyBeforeHandoff(options, role))) return;
+      if (isGoal && this.verify && (await this.verifyGoalLoop(options))) return;
       if (session.isolatedBranch) {
         reply.stageCommit = commitStage(workspaceDir, `agent-hub: ${agentName(session)}`);
         this.sessions.update(session.id, { messages: session.messages });
@@ -519,9 +604,16 @@ export class ChatService {
     this.post({ type: 'state', patch: { telemetry: this.telemetry.getRegistry() } });
     this.publishSessions();
     if (outcome.status === 'completed') {
-      await this.drain(sessionId);
-    } else if (outcome.status === 'failed' && !options.retried && QUOTA_ERROR.test(outcome.error)) {
-      await this.retryWithOtherAccount(options, account.id, accounts);
+      await this.drain(sessionId, workspaceDir);
+    } else if (outcome.status === 'failed') {
+      const fresh = this.sessions.get(sessionId) ?? session;
+      if (fresh.loopConfig?.active) {
+        this.sessions.update(sessionId, { loopConfig: { ...fresh.loopConfig, active: false } });
+        this.addNote(sessionId, '🛑 [Modo Loop] Bucle detenido: el turno falló.', true);
+      }
+      if (!options.retried && QUOTA_ERROR.test(outcome.error)) {
+        await this.retryWithOtherAccount(options, account.id, accounts);
+      }
     }
   }
 
@@ -558,6 +650,45 @@ export class ChatService {
       role,
       from: 'AgentHub',
       hops: options.hops,
+      verifyAttempt: attempt + 1
+    });
+    return true;
+  }
+
+  /**
+   * En modo meta autónomo (/goal), ejecuta los tests del proyecto.
+   * Si fallan, reinyecta automáticamente el error al agente hasta 3 iteraciones.
+   */
+  private async verifyGoalLoop(options: SendPromptOptions): Promise<boolean> {
+    const { sessionId, workspaceDir } = options;
+    const attempt = options.verifyAttempt ?? 0;
+    this.preparingSessionIds.add(sessionId);
+    this.publishSessions();
+    let result: { ok: boolean; output: string } | undefined;
+    try {
+      result = await this.verify?.(workspaceDir);
+    } finally {
+      this.preparingSessionIds.delete(sessionId);
+    }
+    if (!result) return false;
+    if (result.ok) {
+      this.addNote(sessionId, '🎯 [Modo Meta] ¡Objetivo completado! Todos los tests pasaron exitosamente.');
+      return false;
+    }
+    if (attempt >= MAX_VERIFY_RETRIES) {
+      this.addNote(sessionId, `⚠️ [Modo Meta] Los tests siguen fallando tras ${attempt + 1} intentos autónomos. Se detiene el bucle para revisión humana.`, true);
+      return false;
+    }
+    this.addNote(sessionId, `🔄 [Modo Meta] Los tests fallaron (intento ${attempt + 1} de ${MAX_VERIFY_RETRIES + 1}). Enviando salida de tests al agente para autocorrección...`, true);
+    this.post({ type: 'state', patch: { telemetry: this.telemetry.getRegistry() } });
+    await this.send({
+      sessionId,
+      prompt: `[MODO META - AUTOCORRECCIÓN DE TESTS (Intento ${attempt + 2}/${MAX_VERIFY_RETRIES + 1})]\nLos tests del proyecto han fallado. Analiza el error y modifica el código para resolverlo:\n\n${result.output}`,
+      workspaceDir,
+      role: options.role,
+      from: 'AgentHub (Goal Loop)',
+      hops: options.hops,
+      goalMode: true,
       verifyAttempt: attempt + 1
     });
     return true;
@@ -647,7 +778,8 @@ export class ChatService {
       const detected = extractQuestionOptions(reply.content);
       if (detected) reply.questionOptions = detected;
     }
-    const messages = reply.content || reply.activity?.length
+    // El costo se conserva aunque la respuesta venga vacía: si no, el límite de gasto no lo ve.
+    const messages = reply.content || reply.activity?.length || reply.costUSD
       ? session.messages
       : session.messages.filter((message) => message !== reply);
     this.sessions.update(session.id, { messages });

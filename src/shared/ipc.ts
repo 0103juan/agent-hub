@@ -13,6 +13,7 @@ import {
   ProviderType,
   ReasoningEffort,
   CostSummary,
+  LoopConfig,
   SearchHit,
   SessionPermission,
   TelemetryRegistry
@@ -26,6 +27,7 @@ export interface SessionPatch {
   /** null quita el límite. */
   budgetUSD?: number | null;
   permission?: SessionPermission;
+  loopConfig?: LoopConfig | null;
 }
 
 /** Mensajes webview → extensión. */
@@ -33,6 +35,9 @@ export type WebviewMessage =
   | { command: 'ready' }
   | { command: 'refreshAccounts' }
   | { command: 'openBeside' }
+  | { command: 'openMain' }
+  | { command: 'popOutWindow' }
+  | { command: 'openExternalBrowser' }
   | { command: 'createSession'; projectName?: string; taskSlug?: string; protocolRole?: ProtocolRole }
   | { command: 'switchSession'; sessionId: string }
   | { command: 'deleteSession'; sessionId: string }
@@ -74,7 +79,7 @@ export type WebviewMessage =
   | { command: 'revertFile'; sessionId: string; checkpointHash: string; file: string }
   | { command: 'failoverSession'; sessionId: string; targetProvider: ProviderType }
   | { command: 'checkMcpHealth'; mcpId: string }
-  | { command: 'exportSession'; sessionId: string }
+  | { command: 'exportSession'; sessionId: string; format?: 'markdown' | 'html' | 'json' }
   | { command: 'crossReview'; sessionId: string; messageId: string }
   | { command: 'forkSession'; sessionId: string; messageId: string }
   | { command: 'generateCommit'; sessionId: string }
@@ -90,7 +95,28 @@ export type WebviewMessage =
   | { command: 'togglePortfolioMcp'; mcpName: string; enable: boolean }
   | { command: 'syncMcps' }
   | { command: 'clearTelemetry' }
-  | { command: 'runAction'; actionId: string; sessionId: string; input: string };
+  | { command: 'previewFile'; file: string; line?: number }
+  | { command: 'setWorkspaceDir'; dir: string }
+  | { command: 'chooseWorkspaceDir' }
+  | { command: 'getWorkspaceOverview' }
+  | { command: 'openFolderInExplorer'; dir?: string }
+  | { command: 'runTerminalCommand'; commandLine: string }
+  | { command: 'stopTerminalCommand' }
+  | { command: 'gitDiffFile'; file: string }
+  | { command: 'gitRevertFile'; file: string }
+  | { command: 'gitCommitQuick'; message: string }
+  | { command: 'searchContent'; query: string }
+  | { command: 'getGitBranches' }
+  | { command: 'checkoutBranch'; branch: string }
+  | { command: 'createBranch'; branch: string }
+  | { command: 'deleteBranch'; branch: string }
+  | { command: 'runSecurityAudit' }
+  | { command: 'loadScratchpad' }
+  | { command: 'saveScratchpad'; content: string }
+  | { command: 'runAction'; actionId: string; sessionId: string; input: string }
+  | { command: 'startLoop'; sessionId: string; instruction: string; maxIterations?: number }
+  | { command: 'stopLoop'; sessionId: string }
+  | { command: 'finishLoop'; sessionId: string };
 
 export type WebviewCommand = WebviewMessage['command'];
 
@@ -129,4 +155,28 @@ export type HostMessage =
   | { type: 'teamReport'; squad: string; markdown: string }
   | { type: 'squadDiff'; squad: string; files: SquadDiffFile[] }
   | { type: 'experience'; content: string }
+  | { type: 'filePreview'; file: string; content: string; line?: number }
+  | {
+      type: 'workspaceOverview';
+      workspaceDir: string;
+      recentWorkspaces: string[];
+      gitFiles: Array<{ path: string; status: 'M' | 'A' | 'D' | '?' | 'R' }>;
+      projectTree: Array<{ path: string; name: string; isDir: boolean }>;
+    }
+  | { type: 'terminalOutput'; output: string; exitCode?: number; command?: string }
+  | { type: 'gitDiffResult'; file: string; original: string; modified: string; rawDiff: string }
+  | { type: 'contentSearchResults'; query: string; results: Array<{ file: string; line: number; text: string }> }
+  | {
+      type: 'gitBranches';
+      currentBranch: string;
+      branches: string[];
+      squadBranches: string[];
+    }
+  | {
+      type: 'securityAuditResult';
+      secretIssues: Array<{ file: string; line: number; type: string; snippet: string }>;
+      undocumentedEnvVars: string[];
+      sqlIssues: Array<{ file: string; line: number; issue: string }>;
+    }
+  | { type: 'scratchpadContent'; content: string }
   | { type: 'fileDiff'; checkpointHash: string; file: string; diff: string };

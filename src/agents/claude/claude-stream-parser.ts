@@ -63,13 +63,16 @@ export class ClaudeStreamParser implements StreamParser {
     for (const block of message?.content ?? []) {
       if (block.type === 'tool_use') {
         events.push({ kind: 'activity', label: describeToolCall(block.name, block.input) });
-        if ((block.name === 'ask_question' || block.name === 'AskUserQuestion') && block.input?.questions) {
-          const first = block.input.questions[0];
-          if (first && Array.isArray(first.options) && first.options.length > 0) {
+        const isQuestionTool = block.name === 'ask_question' || block.name === 'AskUserQuestion' || block.name === 'AskFollowupQuestion' || block.name === 'ask_followup_question';
+        if (isQuestionTool && block.input) {
+          const first = block.input.questions?.[0] ?? block.input;
+          const questionText = first.question || block.input.question || 'Selecciona una opción:';
+          const rawOptions = first.options || block.input.options;
+          if (Array.isArray(rawOptions) && rawOptions.length > 0) {
             events.push({
               kind: 'question',
-              question: first.question ?? 'Selecciona una opción:',
-              options: first.options.slice(0, 5)
+              question: questionText,
+              options: rawOptions.slice(0, 5).map((opt: any) => (typeof opt === 'string' ? opt : opt.label || JSON.stringify(opt)))
             });
           }
         }

@@ -45,13 +45,17 @@ export class AntigravityStreamParser implements StreamParser {
     const events: AgentEvent[] = [];
     if (step.step_type === 'tool' && step.state === 'ACTIVE') {
       events.push({ kind: 'activity', label: describeToolCall(step.tool_name, step.tool_info?.parameters) });
-      if (step.tool_name === 'ask_question' && step.tool_info?.parameters?.questions) {
-        const first = step.tool_info.parameters.questions[0];
-        if (first && Array.isArray(first.options) && first.options.length > 0) {
+      const isQuestionTool = step.tool_name === 'ask_question' || step.tool_name === 'ask_user';
+      if (isQuestionTool && step.tool_info?.parameters) {
+        const params = step.tool_info.parameters;
+        const first = params.questions?.[0] ?? params;
+        const questionText = first.question || params.question || 'Selecciona una opción:';
+        const rawOptions = first.options || params.options;
+        if (Array.isArray(rawOptions) && rawOptions.length > 0) {
           events.push({
             kind: 'question',
-            question: first.question ?? 'Selecciona una opción:',
-            options: first.options.slice(0, 5)
+            question: questionText,
+            options: rawOptions.slice(0, 5).map((opt: any) => (typeof opt === 'string' ? opt : opt.label || JSON.stringify(opt)))
           });
         }
       }

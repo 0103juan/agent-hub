@@ -25,7 +25,7 @@ export interface NewSessionOptions {
 
 type StoredSession = Omit<ConversationSession, 'modelId'> & { modelId?: string; modelName?: string };
 
-/** Normaliza sesiones antiguas y turnos que quedaron a medias al cerrar VS Code. */
+/** Normaliza sesiones antiguas, turnos a medias y loops que quedaron activos al cerrar. */
 export function migrateSession(stored: StoredSession): ConversationSession {
   const { modelName, ...session } = stored;
   const rawModel = session.modelId ?? modelName ?? DEFAULT_MODEL_ID;
@@ -34,8 +34,9 @@ export function migrateSession(stored: StoredSession): ConversationSession {
     ...session,
     modelId: isDisplayName ? DEFAULT_MODEL_ID : rawModel.replace(/-(low|medium|high)$/, ''),
     profileId: session.profileId === 'google-workspace' ? 'google-main' : session.profileId,
+    loopConfig: session.loopConfig && { ...session.loopConfig, active: false },
     messages: session.messages
-      .filter((message) => message.content || message.role !== 'assistant')
+      .filter((message) => message.content || message.role !== 'assistant' || message.costUSD)
       .map((message) => ({ ...message, isStreaming: false }))
   };
 }

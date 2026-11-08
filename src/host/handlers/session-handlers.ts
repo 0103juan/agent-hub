@@ -7,7 +7,7 @@ import { resolveRequirement } from '../issue-source';
 import { buildTeamReport } from '../../shared/team-report';
 import { recommendedFor, resolveSelection } from '../../shared/model-selection';
 import { searchSessions } from '../../shared/session-search';
-import { ProtocolRole } from '../../shared/types';
+import { DEFAULT_LOOP_INSTRUCTION, LoopConfig, ProtocolRole } from '../../shared/types';
 import { PROTOCOL_ROLES } from '../../shared/protocol-roles';
 import { templateById } from '../../shared/team-templates';
 import { HubContext } from '../hub-context';
@@ -32,9 +32,18 @@ function squadLocation(hub: HubContext, name: string | undefined, folder: string
 export function sessionHandlers(hub: HubContext): HandlerMap<
   | 'createSession' | 'switchSession' | 'deleteSession' | 'moveSession' | 'renameProject' | 'deleteProject' | 'spawnAgents'
   | 'updateSession' | 'sendPrompt' | 'stopTurn' | 'prewarmSession' | 'removeQueued' | 'resumeQueue' | 'startPipeline' | 'failoverSession' | 'exportSession'
-  | 'compareModels' | 'revertFile' | 'searchSessions' | 'finishSquad' | 'teamReport' | 'squadDiff' | 'restoreStage' | 'queueAction' | 'crossReview' | 'forkSession' | 'generateCommit' | 'auditBranch'
+  | 'compareModels' | 'revertFile' | 'searchSessions' | 'finishSquad' | 'teamReport' | 'squadDiff' | 'restoreStage' | 'queueAction' | 'crossReview' | 'forkSession' | 'generateCommit' | 'auditBranch' | 'setWorkspaceDir'
+  | 'startLoop' | 'stopLoop' | 'finishLoop'
 > {
   return {
+    setWorkspaceDir: ({ dir }: { dir: string }) => {
+      const active = hub.sessions.getActive();
+      if (active) {
+        hub.sessions.update(active.id, { projectPath: dir, projectName: path.basename(dir) });
+        hub.chat.publishSessions();
+      }
+    },
+
     createSession: ({ projectName, taskSlug, protocolRole }) => {
       const current = hub.sessions.getActive();
       const folder = workspaceDir();
@@ -120,11 +129,12 @@ export function sessionHandlers(hub: HubContext): HandlerMap<
       if (patch.profileId && patch.profileId !== session.profileId) {
         hub.sessions.changeAccount(sessionId, patch.profileId);
       }
-      const { profileId: _profileId, protocolRole, budgetUSD, ...settings } = patch; // `permission` viaja en settings
+      const { profileId: _profileId, protocolRole, budgetUSD, loopConfig, ...settings } = patch; // `permission` viaja en settings
       hub.sessions.update(sessionId, {
         ...settings,
         ...(protocolRole !== undefined && { protocolRole: protocolRole ?? undefined }),
-        ...(budgetUSD !== undefined && { budgetUSD: budgetUSD ?? undefined })
+        ...(budgetUSD !== undefined && { budgetUSD: budgetUSD ?? undefined }),
+        ...(loopConfig !== undefined && { loopConfig: loopConfig ?? undefined })
       });
 
       // Al cambiar de cuenta, el modelo debe ser uno que esa cuenta ofrezca.
@@ -136,7 +146,61 @@ export function sessionHandlers(hub: HubContext): HandlerMap<
     sendPrompt: ({ sessionId, prompt, attachments, planFirst }) =>
       hub.chat.send({ sessionId, prompt, attachments, planFirst, workspaceDir: workspaceDirForSession(hub, sessionId) }),
 
-    stopTurn: ({ sessionId }) => hub.chat.cancel(sessionId),
+    stopTurn: ({ sessionId }) => {
+      const session = hub.sessions.get(sessionId);
+      if (session?.loopConfig?.active) {
+        hub.sessions.update(sessionId, { loopConfig: { ...session.loopConfig, active: false } });
+        hub.chat.addNote(sessionId, '⏹️ [Modo Loop] Bucle detenido al cancelar el turno.');
+      }
+      hub.chat.cancel(sessionId);
+    },
+
+    startLoop: ({ sessionId, instruction, maxIterations }) => {
+      const session = hub.sessions.get(sessionId);
+      if (!session) return;
+      const cleanInstruction = instruction.trim() || DEFAULT_LOOP_INSTRUCTION;
+      const loopConfig: LoopConfig = {
+        active: true,
+        instruction: cleanInstruction,
+        iteration: 1,
+        maxIterations,
+        startedAt: Date.now()
+      };
+      hub.sessions.update(sessionId, { loopConfig });
+      hub.chat.publishSessions();
+      hub.chat.addNote(sessionId, `🔄 [Modo Loop] Bucle continuo activado (Iteración 1). Instrucción: "${cleanInstruction}"`);
+      void hub.chat.send({
+        sessionId,
+        prompt: `[MODO LOOP ACTIVO - Iteración 1]\nInstrucción en bucle: "${cleanInstruction}"\nInicia la ejecución de la instrucción. Este modo iterará de forma autónoma turno tras turno hasta que el usuario lo detenga o la sesión termine. Realiza progresos concretos y verifica cada cambio.`,
+        workspaceDir: workspaceDirForSession(hub, sessionId),
+        role: session.protocolRole,
+        from: 'AgentHub (Loop)'
+      });
+    },
+
+    stopLoop: ({ sessionId }) => {
+      const session = hub.sessions.get(sessionId);
+      if (!session) return;
+      if (session.loopConfig) {
+        hub.sessions.update(sessionId, { loopConfig: { ...session.loopConfig, active: false } });
+      }
+      hub.chat.addNote(sessionId, '⏹️ [Modo Loop] Bucle detenido por el usuario.');
+      hub.chat.cancel(sessionId);
+      hub.chat.publishSessions();
+    },
+
+    /** Parar al acabar la iteración en curso; un segundo clic lo deshace. */
+    finishLoop: ({ sessionId }) => {
+      const loop = hub.sessions.get(sessionId)?.loopConfig;
+      if (!loop?.active) return;
+      if (!hub.chat.isRunning(sessionId)) {
+        hub.sessions.update(sessionId, { loopConfig: { ...loop, active: false, stopAfterCurrent: false } });
+        hub.chat.addNote(sessionId, '🏁 [Modo Loop] Detenido.');
+        return;
+      }
+      hub.sessions.update(sessionId, { loopConfig: { ...loop, stopAfterCurrent: !loop.stopAfterCurrent } });
+      hub.chat.publishSessions();
+    },
 
     removeQueued: ({ sessionId, queuedId }) => hub.chat.removeQueued(sessionId, queuedId),
 
@@ -261,35 +325,124 @@ export function sessionHandlers(hub: HubContext): HandlerMap<
       hub.chat.addNote(sessionId, action === 'merge' ? `Equipo fusionado en la rama actual (${branch}).` : 'Copia aparte descartada.');
     },
 
-    exportSession: async ({ sessionId }) => {
+    exportSession: async ({ sessionId, format = 'markdown' }: { sessionId: string; format?: 'markdown' | 'html' | 'json' }) => {
       const session = hub.sessions.get(sessionId);
       if (!session) return;
-      const lines = [
-        `# ${session.title || 'Conversación AgentHub'}`,
-        `**Proyecto:** ${session.projectName || 'General'} | **Modelo:** ${session.modelId} | **Fecha:** ${new Date(session.createdAt).toLocaleString()}`,
-        '',
-        '---',
-        ''
-      ];
-      for (const msg of session.messages) {
-        const sender = msg.role === 'user' ? '👤 **Usuario**' : `🤖 **${msg.modelName}**`;
-        lines.push(`### ${sender}`);
-        if (msg.thinking) {
-          lines.push(`> *Razonamiento:* ${msg.thinking.replace(/\n/g, '\n> ')}`);
+      const baseSlug = (session.title || 'conversacion')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9_-]+/g, '-')
+        .replace(/^-|-$/g, '') || 'conversacion';
+      const root = workspaceDirForSession(hub, sessionId);
+
+      let fileName = `${baseSlug}.md`;
+      let content = '';
+      let filters: Record<string, string[]> = { Markdown: ['md'] };
+
+      if (format === 'json') {
+        fileName = `${baseSlug}.json`;
+        content = JSON.stringify(session, null, 2);
+        filters = { JSON: ['json'] };
+      } else if (format === 'html') {
+        fileName = `${baseSlug}.html`;
+        filters = { HTML: ['html', 'htm'] };
+        const msgHtml = session.messages.map((m) => {
+          const isUser = m.role === 'user';
+          const avatar = isUser ? '👤' : '🤖';
+          const name = isUser ? 'Usuario' : (m.modelName || 'AgentHub');
+          const dateStr = new Date(m.timestamp).toLocaleTimeString();
+          const thinkingHtml = m.thinking ? `<details style="margin: 8px 0; padding: 8px 12px; background: rgba(99,102,241,0.08); border-left: 3px solid #6366f1; border-radius: 4px;"><summary style="cursor: pointer; font-size: 11px; font-weight: 600; color: #a5b4fc;">Razonamiento del modelo</summary><div style="font-size: 12px; color: #cbd5e1; margin-top: 6px; white-space: pre-wrap;">${m.thinking.replace(/</g, '&lt;')}</div></details>` : '';
+          const bodyHtml = m.content.replace(/</g, '&lt;').replace(/\n/g, '<br/>');
+          return `
+            <div style="margin-bottom: 20px; display: flex; flex-direction: column; gap: 4px; ${isUser ? 'align-items: flex-end;' : 'align-items: flex-start;'}">
+              <div style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: #94a3b8; font-family: monospace;">
+                <span>${avatar}</span><strong>${name}</strong><span>${dateStr}</span>
+              </div>
+              <div style="max-width: 85%; padding: 12px 16px; border-radius: 10px; font-size: 13px; line-height: 1.6; ${isUser ? 'background: #312e81; color: #f8fafc;' : 'background: #18181b; border: 1px solid #27272a; color: #f4f4f5;'}">
+                ${thinkingHtml}
+                <div>${bodyHtml}</div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        content = `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>${session.title || 'Conversación AgentHub'}</title>
+  <style>
+    body { margin: 0; padding: 24px 16px; background: #09090b; color: #f4f4f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; display: flex; justify-content: center; }
+    .container { width: 100%; max-width: 860px; }
+    .header { padding-bottom: 16px; margin-bottom: 24px; border-bottom: 1px solid #27272a; }
+    .header h1 { font-size: 20px; font-weight: 700; margin: 0 0 8px 0; color: #fff; }
+    .meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 11px; color: #a1a1aa; font-family: monospace; }
+    .badge { padding: 2px 8px; border-radius: 6px; background: #27272a; border: 1px solid #3f3f46; }
+    pre { background: #121215; padding: 12px; border-radius: 6px; overflow-x: auto; border: 1px solid #27272a; font-family: monospace; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>${session.title || 'Conversación AgentHub'}</h1>
+      <div class="meta">
+        <span class="badge">📁 ${session.projectName || 'General'}</span>
+        <span class="badge">🤖 ${session.modelId}</span>
+        <span class="badge">🕒 ${new Date(session.createdAt).toLocaleString()}</span>
+        <span class="badge">💬 ${session.messages.length} mensajes</span>
+      </div>
+    </div>
+    <div class="chat">
+      ${msgHtml}
+    </div>
+  </div>
+</body>
+</html>`;
+      } else {
+        const lines = [
+          `# ${session.title || 'Conversación AgentHub'}`,
+          `**Proyecto:** ${session.projectName || 'General'} | **Modelo:** ${session.modelId} | **Fecha:** ${new Date(session.createdAt).toLocaleString()}`,
+          '',
+          '---',
+          ''
+        ];
+        for (const msg of session.messages) {
+          const sender = msg.role === 'user' ? '👤 **Usuario**' : `🤖 **${msg.modelName}**`;
+          lines.push(`### ${sender}`);
+          if (msg.thinking) {
+            lines.push(`> *Razonamiento:* ${msg.thinking.replace(/\n/g, '\n> ')}`);
+            lines.push('');
+          }
+          lines.push(msg.content);
           lines.push('');
         }
-        lines.push(msg.content);
-        lines.push('');
+        content = lines.join('\n');
       }
-      const defaultName = (session.title || 'conversacion').toLowerCase().replace(/[^a-z0-9_-]+/g, '-') + '.md';
-      const targetUri = await vscode.window.showSaveDialog({
-        defaultUri: vscode.Uri.file(path.join(workspaceDir() || os.homedir(), defaultName)),
-        filters: { Markdown: ['md'] }
+
+      let targetUri: any;
+      try {
+        targetUri = await vscode.window.showSaveDialog({
+          defaultUri: vscode.Uri.file(path.join(root, fileName)),
+          filters
+        });
+      } catch {}
+      // Sin diálogo el shim ya devuelve la ruta por defecto: `undefined` es que la persona canceló.
+      if (!targetUri) return;
+
+      await vscode.workspace.fs.writeFile(targetUri, Buffer.from(content, 'utf8'));
+      const savedName = path.basename(targetUri.fsPath);
+      void vscode.window.showInformationMessage(`Conversación guardada en ${savedName}`);
+      hub.post({
+        type: 'notice',
+        notice: {
+          id: `export-${Date.now()}`,
+          sessionId,
+          text: `Conversación guardada en ${savedName}`,
+          at: Date.now()
+        }
       });
-      if (targetUri) {
-        await vscode.workspace.fs.writeFile(targetUri, Buffer.from(lines.join('\n'), 'utf8'));
-        void vscode.window.showInformationMessage(`Conversación guardada en ${path.basename(targetUri.fsPath)}`);
-      }
     },
 
     compareModels: async ({ prompt }) => {
