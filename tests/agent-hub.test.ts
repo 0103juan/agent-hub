@@ -1,3 +1,4 @@
+import { readJsonFile } from '../src/storage/json-file';
 import { createCheckpoint, rollbackCheckpoint, getCheckpointDiff, getCheckpointFiles, getCheckpointFileDiff, revertCheckpointFile } from '../src/host/git-checkpoint';
 import { OllamaProvider } from '../src/agents/ollama/ollama-provider';
 import { after, describe, it } from 'node:test';
@@ -29,6 +30,10 @@ import { ClaudeProvider } from '../src/agents/claude/claude-provider';
 import { commitStage, restoreStage, squadDiffFiles } from '../src/host/git-worktree';
 import { parseIssueRef, resolveRequirement } from '../src/host/issue-source';
 import { runProjectTests, verificationCommands } from '../src/host/test-runner';
+import { HubServer } from '../src/server/hub-server';
+import { isFromHost } from '../src/webview/vscode-api';
+import { editorHandlers } from '../src/host/handlers/editor-handlers';
+import { sessionHandlers } from '../src/host/handlers/session-handlers';
 import { pruneExperience, selectExperience } from '../src/shared/experience';
 import { buildTeamReport } from '../src/shared/team-report';
 import { nextRoles } from '../src/shared/protocol-roles';
@@ -43,11 +48,14 @@ import { PROTOCOL_ROLES } from '../src/shared/protocol-roles';
 import { AccountProfile, ConversationSession } from '../src/shared/types';
 import { extractQuestionOptions } from '../src/shared/question-options';
 import { filterActions, WORKSPACE_ACTIONS } from '../src/shared/workspace-actions';
+import { ACTION_ICONS } from '../src/webview/components/chat/action-icons';
 import { migrateSession, SessionStore } from '../src/storage/session-store';
 import { TelemetryStore } from '../src/storage/telemetry-store';
 import { parseMarkdownBlocks, resolveImageSrc } from '../src/webview/components/chat/Markdown';
 import { splitTurn } from '../src/webview/components/chat/MessageList';
 import { hubReducer, INITIAL_HUB_STATE } from '../src/webview/state/hub-state';
+import { HubServer } from '../src/server/hub-server';
+import * as http from 'http';
 
 const tempDirs: string[] = [];
 function tempDir(): string {
@@ -409,6 +417,17 @@ describe('Persistencia', () => {
     assert.deepStrictEqual(session.messages.map((m) => [m.id, m.isStreaming]), [['n', false]]);
   });
 
+  it('al cargar apaga los loops activos y conserva el costo de respuestas vacías', () => {
+    const session = migrateSession({
+      id: 's', title: 't', effort: 'low', profileId: 'p', modelId: 'm', createdAt: 1, updatedAt: 1,
+      loopConfig: { active: true, instruction: 'x', iteration: 4 },
+      messages: [{ id: 'c', role: 'assistant', content: '', profileId: 'p', modelName: 'm', timestamp: 1, costUSD: 0.5 }]
+    });
+    assert.strictEqual(session.loopConfig?.active, false);
+    assert.strictEqual(session.loopConfig?.iteration, 4);
+    assert.deepStrictEqual(session.messages.map((m) => m.id), ['c']);
+  });
+
   it('agrupa las escrituras seguidas en una sola', () => {
     const dir = tempDir();
     const store = new SessionStore(dir);
@@ -576,6 +595,111 @@ describe('ChatService', () => {
     assert.strictEqual(provider.requests.length, 1);
   });
 
+  it('inicia modo loop continuo con /loop y ejecuta iteraciones automáticas hasta maxIterations', async () => {
+    let turnCount = 0;
+    const { chat, sessions, session } = setup((emit) => {
+      turnCount++;
+      emit({ kind: 'text', text: `Avance iteración ${turnCount}` });
+      return { status: 'completed' };
+    });
+    sessions.update(session.id, {
+      loopConfig: {
+        active: true,
+        instruction: 'Mejora continua del módulo',
+        iteration: 1,
+        maxIterations: 3
+      }
+    });
+
+    await chat.send({ sessionId: session.id, prompt: 'Iniciando loop', workspaceDir: tempDir() });
+
+    assert.strictEqual(turnCount, 3);
+    const updated = sessions.get(session.id)!;
+    assert.strictEqual(updated.loopConfig?.active, false);
+    assert.strictEqual(updated.loopConfig?.iteration, 3);
+  });
+
+  it('el comando /loop activa el bucle continuo en la sesión', async () => {
+    let turns = 0;
+    const { chat, sessions, session } = setup(() => {
+      turns++;
+      if (turns === 1) {
+        sessions.update(session.id, { loopConfig: { ...sessions.get(session.id)!.loopConfig!, maxIterations: 1 } });
+      }
+      return { status: 'completed' };
+    });
+
+    await chat.send({ sessionId: session.id, prompt: '/loop refactoriza el auth', workspaceDir: tempDir() });
+    const s = sessions.get(session.id)!;
+    assert.strictEqual(s.loopConfig?.instruction, 'refactoriza el auth');
+  });
+
+  it('un turno fallido detiene el bucle y las iteraciones usan la carpeta del primer turno', async () => {
+    const dirs: string[] = [];
+    let turns = 0;
+    const { chat, sessions, session, provider } = setup(() => (++turns < 3 ? { status: 'completed' } : { status: 'failed', error: 'crash' }));
+    sessions.update(session.id, { loopConfig: { active: true, instruction: 'x', iteration: 1 } });
+    const dir = tempDir();
+    await chat.send({ sessionId: session.id, prompt: 'x', workspaceDir: dir });
+    for (const request of provider.requests) dirs.push(request.workspaceDir);
+    assert.strictEqual(turns, 3);
+    assert.strictEqual(sessions.get(session.id)!.loopConfig?.active, false);
+    assert.ok(dirs.every((d) => d === dir));
+  });
+
+  it('parar al terminar deja acabar la iteración en curso y no lanza la siguiente', async () => {
+    let turns = 0;
+    const { chat, sessions, session } = setup((emit) => {
+      turns++;
+      const loop = sessions.get(session.id)!.loopConfig!;
+      sessions.update(session.id, { loopConfig: { ...loop, stopAfterCurrent: true } });
+      emit({ kind: 'text', text: 'iteración completa' });
+      return { status: 'completed' };
+    });
+    sessions.update(session.id, { loopConfig: { active: true, instruction: 'x', iteration: 1 } });
+    await chat.send({ sessionId: session.id, prompt: 'x', workspaceDir: tempDir() });
+    const updated = sessions.get(session.id)!;
+    assert.strictEqual(turns, 1);
+    assert.strictEqual(updated.loopConfig?.active, false);
+    assert.ok(updated.messages.some((m) => m.content === 'iteración completa'));
+    assert.ok(updated.messages.some((m) => m.content.includes('Terminado tras la iteración 1')));
+  });
+
+  it('detiene el bucle continuo inmediatamente al cancelar o enviar /stop', async () => {
+    const { chat, sessions, session } = setup(() => ({ status: 'completed' }));
+    sessions.update(session.id, {
+      loopConfig: {
+        active: true,
+        instruction: 'bucle infinito',
+        iteration: 1
+      }
+    });
+
+    await chat.send({ sessionId: session.id, prompt: '/stop', workspaceDir: tempDir() });
+    assert.strictEqual(sessions.get(session.id)!.loopConfig?.active, false);
+  });
+
+  it('detiene el bucle continuo cuando se supera el presupuesto asignado', async () => {
+    let turns = 0;
+    const { chat, sessions, session } = setup((emit) => {
+      turns++;
+      emit({ kind: 'usage', usage: { costUSD: 1.50 } });
+      return { status: 'completed' };
+    });
+    sessions.update(session.id, {
+      budgetUSD: 1.00,
+      loopConfig: {
+        active: true,
+        instruction: 'tarea costosa',
+        iteration: 1
+      }
+    });
+
+    await chat.send({ sessionId: session.id, prompt: 'comienza', workspaceDir: tempDir() });
+    assert.strictEqual(turns, 1);
+    assert.strictEqual(sessions.get(session.id)!.loopConfig?.active, false);
+  });
+
   it('el Desarrollador de equipo recibe los tests fallidos hasta 2 veces y luego se traspasa', async () => {
     const { chat, provider, sessions, session } = setup(() => ({ status: 'completed' }));
     sessions.update(session.id, { protocolRole: 'desarrollador', squad: 'S' });
@@ -605,6 +729,18 @@ describe('ChatService', () => {
     await chat.send({ sessionId: session.id, prompt: 'y', workspaceDir: tempDir() });
     assert.strictEqual(runs, 0);
     assert.strictEqual(provider.requests.length, 2);
+  });
+
+  it('modo autónomo /goal itera hasta que los tests pasen o se agoten los intentos', async () => {
+    const { chat, provider, session } = setup(() => ({ status: 'completed' }));
+    let runs = 0;
+    chat.verify = async () => ({ ok: ++runs > 1, output: 'error en tests' });
+    await chat.send({ sessionId: session.id, prompt: '/goal Arreglar función de autenticación', workspaceDir: tempDir() });
+    assert.strictEqual(provider.requests.length, 2);
+    assert.strictEqual(runs, 2);
+    assert.ok(provider.requests[1].prompt.includes('error en tests'));
+    const notes = session.messages.filter((m) => m.role === 'system');
+    assert.ok(notes.some((n) => n.content.includes('Objetivo completado')));
   });
 
   it('maxConcurrent limita los turnos simultáneos', async () => {
@@ -1051,6 +1187,10 @@ describe('Acciones del espacio de trabajo', () => {
     assert.strictEqual(new Set(ids).size, ids.length);
   });
 
+  it('todas tienen icono en la paleta', () => {
+    assert.deepStrictEqual(WORKSPACE_ACTIONS.filter((action) => !ACTION_ICONS[action.id]).map((action) => action.id), []);
+  });
+
   it('resume las llamadas a herramientas en una línea', () => {
     assert.strictEqual(describeToolCall('run_command', { CommandLine: 'git\n  status' }), 'run_command: git status');
     assert.strictEqual(describeToolCall('todo', {}), 'todo');
@@ -1289,6 +1429,14 @@ describe('Nuevas características de AgentHub', () => {
     assert.strictEqual(result.question, '¿Qué arquitectura prefieres?');
     assert.strictEqual(result.options.length, 5);
     assert.strictEqual(result.options[0], 'Clean Architecture');
+  });
+
+  it('extractQuestionOptions descarta listas informativas de más de 5 elementos o sin pregunta', () => {
+    const text10 = '### 2. Las 10 Mejoras Visuales Implementadas\n1. Uno\n2. Dos\n3. Tres\n4. Cuatro\n5. Cinco\n6. Seis\n7. Siete\n8. Ocho\n9. Nueve\n10. Diez';
+    assert.strictEqual(extractQuestionOptions(text10), undefined);
+
+    const textNoQuestion = 'Pasos a seguir:\n1. Compilar\n2. Probar\n3. Desplegar';
+    assert.strictEqual(extractQuestionOptions(textNoQuestion), undefined);
   });
 
   it('ClaudeStreamParser emite evento de pregunta cuando la herramienta es ask_question', () => {
@@ -1709,6 +1857,329 @@ describe('Punta a punta con una CLI simulada', () => {
       pool.dispose();
     }
   });
+
+  it('HubServer arranca en localhost, responde estado y recibe mensajes por HTTP', async () => {
+    const received: any[] = [];
+    const server = new HubServer({
+      port: 3990,
+      staticDir: tempDir(),
+      onMessage: (msg) => { received.push(msg); }
+    });
+    const port = await server.start();
+    try {
+      const res = await fetch(`http://localhost:${port}/api/status`);
+      assert.strictEqual(res.status, 200);
+      const data = await res.json() as any;
+      assert.strictEqual(data.status, 'running');
+
+      const postRes = await fetch(`http://localhost:${port}/api/message`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command: 'ready' })
+      });
+      assert.strictEqual(postRes.status, 200);
+      assert.strictEqual(received.length, 1);
+      assert.strictEqual(received[0].command, 'ready');
+    } finally {
+      await server.stop();
+    }
+  });
+
+  it('package.json describe solo la app de escritorio: sin extensión de VS Code y con script de actualización', () => {
+    const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '../package.json'), 'utf8'));
+    assert.strictEqual(pkg.main, 'dist/electron/main.js');
+    assert.ok(pkg.bin && pkg.bin['agent-hub']);
+    assert.strictEqual(pkg.contributes, undefined);
+    assert.strictEqual(pkg.scripts['build:extension'], undefined);
+    assert.ok(pkg.scripts['update']);
+    assert.ok(fs.existsSync(path.join(__dirname, '../actualizar.ps1')));
+  });
+
+  it('extractQuestionOptions descarta resúmenes de compilación y listas de archivos', () => {
+    const textBuild = '### Verificación\n- Build: [`npm run build`](...) compila con éxito los 3 destinos sin errores ni advertencias:\n1. `dist/extension.js` (Extensión VS Code)\n2. `dist/standalone.js` (Daemon Standalone CLI)\n3. `dist/webview/assets/index.js` (SPA Web / React)';
+    assert.strictEqual(extractQuestionOptions(textBuild), undefined);
+  });
+
+  it('package.json declara los comandos y scripts de escritorio de Fase 3', () => {
+    const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '../package.json'), 'utf8'));
+    assert.ok(pkg.scripts['desktop']);
+    assert.ok(pkg.scripts['app']);
+    assert.ok(fs.existsSync(path.join(__dirname, '../src-tauri/tauri.conf.json')));
+  });
+
+  it('editorHandlers maneja previewFile y emite el contenido al webview', async () => {
+    const dir = tempDir();
+    const testFile = path.join(dir, 'example.txt');
+    fs.writeFileSync(testFile, 'linea uno\nlinea dos');
+
+    const emitted: any[] = [];
+    const mockHub: any = {
+      post: (msg: any) => emitted.push(msg)
+    };
+
+    const handlers = editorHandlers(mockHub);
+    await handlers.previewFile({ file: testFile, line: 2 });
+    assert.strictEqual(emitted.length, 1);
+    assert.strictEqual(emitted[0].type, 'filePreview');
+    assert.strictEqual(emitted[0].content, 'linea uno\nlinea dos');
+    assert.strictEqual(emitted[0].line, 2);
+  });
+
+  it('declara la configuración de empaquetado nativo Windows .exe y autoinicio', () => {
+    const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '../package.json'), 'utf8'));
+    assert.ok(pkg.scripts['build:electron']);
+    assert.ok(pkg.scripts['package:win']);
+    assert.ok(pkg.build);
+    assert.strictEqual(pkg.build.productName, 'AgentHub');
+    assert.strictEqual(pkg.build.appId, 'com.agenthub.desktop');
+    assert.ok(pkg.build.win);
+    assert.ok(pkg.build.nsis);
+    assert.strictEqual(pkg.build.nsis.runAfterFinish, true);
+    assert.ok(fs.existsSync(path.join(__dirname, '../src/electron/main.ts')));
+  });
+
+  it('editorHandlers ejecuta comandos de terminal en streaming', async () => {
+    const emitted: any[] = [];
+    const mockHub: any = { post: (msg: any) => emitted.push(msg) };
+    const handlers = editorHandlers(mockHub);
+
+    await handlers.runTerminalCommand({ commandLine: 'node -e "console.log(\'hola-agenthub\')"' });
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    assert.ok(emitted.some((m) => m.type === 'terminalOutput' && m.output.includes('hola-agenthub')));
+  });
+
+  it('editorHandlers obtiene diff y contenido modificado con gitDiffFile', async () => {
+    const dir = tempDir();
+    const emitted: any[] = [];
+    const mockHub: any = { post: (msg: any) => emitted.push(msg) };
+    const handlers = editorHandlers(mockHub);
+
+    const testFile = path.join(dir, 'test-diff.txt');
+    fs.writeFileSync(testFile, 'contenido nuevo');
+    await handlers.gitDiffFile({ file: testFile });
+    const diffMsg = emitted.find((m) => m.type === 'gitDiffResult');
+    assert.ok(diffMsg);
+    assert.strictEqual(diffMsg.modified, 'contenido nuevo');
+  });
+
+  it('editorHandlers busca en el contenido de archivos del proyecto con searchContent', async () => {
+    const emitted: any[] = [];
+    const mockHub: any = { post: (msg: any) => emitted.push(msg) };
+    const handlers = editorHandlers(mockHub);
+
+    await handlers.searchContent({ query: 'AgentHub' });
+    const resultMsg = emitted.find((m) => m.type === 'contentSearchResults');
+    assert.ok(resultMsg);
+    assert.ok(resultMsg.results.length > 0);
+    assert.ok(resultMsg.results.some((r: any) => r.text.includes('AgentHub')));
+  });
+
+  it('sessionHandlers exporta conversaciones en HTML independiente y JSON', async () => {
+    const dir = tempDir();
+    const session = {
+      id: 'sess-exp',
+      title: 'Conversación de Prueba',
+      createdAt: Date.now(),
+      modelId: 'claude-3-5',
+      projectName: 'TestProject',
+      projectPath: dir,
+      messages: [
+        { id: 'm1', role: 'user', content: '¿Qué es AgentHub?', timestamp: Date.now() },
+        { id: 'm2', role: 'assistant', content: 'AgentHub es un orquestador.', modelName: 'Claude', timestamp: Date.now(), thinking: 'Pensando...' }
+      ]
+    };
+    const emitted: any[] = [];
+    const mockHub: any = {
+      sessions: { get: () => session },
+      post: (msg: any) => emitted.push(msg)
+    };
+
+    const handlers = sessionHandlers(mockHub);
+    await handlers.exportSession({ sessionId: 'sess-exp', format: 'html' });
+    const htmlFile = path.join(dir, 'conversacion-de-prueba.html');
+    assert.ok(fs.existsSync(htmlFile));
+    const htmlContent = fs.readFileSync(htmlFile, 'utf8');
+    assert.ok(htmlContent.includes('Conversación de Prueba'));
+    assert.ok(htmlContent.includes('Razonamiento del modelo'));
+    assert.ok(htmlContent.includes('AgentHub es un orquestador.'));
+
+    await handlers.exportSession({ sessionId: 'sess-exp', format: 'json' });
+    const jsonFile = path.join(dir, 'conversacion-de-prueba.json');
+    assert.ok(fs.existsSync(jsonFile));
+    const jsonContent = JSON.parse(fs.readFileSync(jsonFile, 'utf8'));
+    assert.strictEqual(jsonContent.title, 'Conversación de Prueba');
+    assert.strictEqual(jsonContent.messages.length, 2);
+  });
+
+  it('editorHandlers lista ramas git y clasifica ramas de squad', async () => {
+    const emitted: any[] = [];
+    const mockHub: any = { post: (msg: any) => emitted.push(msg) };
+    const handlers = editorHandlers(mockHub);
+
+    await handlers.getGitBranches();
+    const branchMsg = emitted.find((m) => m.type === 'gitBranches');
+    assert.ok(branchMsg);
+    assert.ok(typeof branchMsg.currentBranch === 'string');
+    assert.ok(Array.isArray(branchMsg.branches));
+  });
+
+  it('editorHandlers pasa a git rutas, búsquedas y mensajes sin interpretarlos en una shell', async () => {
+    const dir = tempDir();
+    // El shim fija la carpeta con el cwd al cargar: se sustituye solo durante este test.
+    const workspace = vscode.workspace as any;
+    const previous = workspace.workspaceFolders;
+    const run = (...args: string[]) => execFileSync('git', args, { cwd: dir, stdio: 'ignore' });
+    run('init', '-q');
+    run('config', 'user.email', 't@t');
+    run('config', 'user.name', 't');
+    fs.writeFileSync(path.join(dir, 'a.txt'), 'say "hola" $(whoami) & ok\n');
+    const outside = path.join(path.dirname(dir), `fuera-${Date.now()}.txt`);
+    fs.writeFileSync(outside, 'no borrar');
+    const emitted: any[] = [];
+    const handlers = editorHandlers({ post: (msg: any) => emitted.push(msg) } as any);
+    try {
+      workspace.workspaceFolders = [{ uri: { fsPath: dir } }];
+      await handlers.searchContent({ query: '"hola" $(whoami) &' });
+      assert.strictEqual(emitted.find((m) => m.type === 'contentSearchResults').results[0]?.file, 'a.txt');
+      await handlers.gitCommitQuick({ message: 'feat: "x" $(whoami) & y' });
+      assert.strictEqual(execFileSync('git', ['log', '-1', '--format=%s'], { cwd: dir, encoding: 'utf8' }).trim(), 'feat: "x" $(whoami) & y');
+      await handlers.gitRevertFile({ file: outside });
+      assert.ok(fs.existsSync(outside));
+      await handlers.deleteBranch({ branch: '--help' });
+      assert.ok(emitted.some((m) => m.type === 'notice' && m.notice.text.includes('no válido')));
+    } finally {
+      workspace.workspaceFolders = previous;
+      fs.rmSync(outside, { force: true });
+    }
+  });
+
+  it('la terminal ejecuta un comando a la vez y Detener mata uno que no termina solo', async () => {
+    const emitted: any[] = [];
+    const handlers = editorHandlers({ post: (msg: any) => emitted.push(msg) } as any);
+    const finished = () => emitted.some((m) => m.type === 'terminalOutput' && m.exitCode !== undefined);
+    await handlers.runTerminalCommand({ commandLine: 'node -e "setInterval(() => {}, 1000)"' });
+    await handlers.runTerminalCommand({ commandLine: 'node -v' });
+    assert.ok(emitted.some((m) => m.output?.includes('Ya hay un comando en ejecución')));
+    handlers.stopTerminalCommand();
+    for (let i = 0; i < 50 && !finished(); i++) await new Promise((resolve) => setTimeout(resolve, 100));
+    assert.ok(finished(), 'el proceso debía terminar tras Detener');
+  });
+
+  it('editorHandlers ejecuta auditoría de seguridad y detecta secretos o envs', async () => {
+    const emitted: any[] = [];
+    const mockHub: any = { post: (msg: any) => emitted.push(msg) };
+    const handlers = editorHandlers(mockHub);
+
+    await handlers.runSecurityAudit();
+    const auditMsg = emitted.find((m) => m.type === 'securityAuditResult');
+    assert.ok(auditMsg);
+    assert.ok(Array.isArray(auditMsg.secretIssues));
+    assert.ok(Array.isArray(auditMsg.undocumentedEnvVars));
+    assert.ok(Array.isArray(auditMsg.sqlIssues));
+  });
+
+  it('editorHandlers carga y guarda notas en scratchpad.md', async () => {
+    const emitted: any[] = [];
+    const mockHub: any = { post: (msg: any) => emitted.push(msg) };
+    const handlers = editorHandlers(mockHub);
+    // En una carpeta temporal: si no, el test pisa el borrador real del repo.
+    const workspace = vscode.workspace as any;
+    const previous = workspace.workspaceFolders;
+    workspace.workspaceFolders = [{ uri: { fsPath: tempDir() } }];
+    try {
+      await handlers.saveScratchpad({ content: '# Nota Test' });
+      await handlers.loadScratchpad();
+    } finally {
+      workspace.workspaceFolders = previous;
+    }
+    const scratchpadMsg = emitted.find((m) => m.type === 'scratchpadContent');
+    assert.ok(scratchpadMsg);
+    assert.ok(scratchpadMsg.content.includes('# Nota Test'));
+  });
+});
+
+describe('Mensajes de la vista', () => {
+  it('acepta al host (misma ventana, marcos ancestros) y rechaza iframes descendientes de la vista previa', () => {
+    const top: any = {};
+    top.parent = top;
+    const wrapper: any = { parent: top };
+    const win: any = { parent: wrapper };
+    const preview: any = { parent: win };
+    const nested: any = { parent: preview };
+    assert.strictEqual(isFromHost(win, win), true);
+    assert.strictEqual(isFromHost(wrapper, win), true);
+    assert.strictEqual(isFromHost(top, win), true);
+    assert.strictEqual(isFromHost(null, win), true);
+    assert.strictEqual(isFromHost(preview, win), false);
+    assert.strictEqual(isFromHost(nested, win), false);
+  });
+});
+
+describe('Servidor local', () => {
+  const request = (port: number, options: http.RequestOptions, body?: string) =>
+    new Promise<{ status: number; body: string }>((resolve, reject) => {
+      const req = http.request({ host: '127.0.0.1', port, ...options }, (res) => {
+        let data = '';
+        res.on('data', (chunk) => (data += chunk));
+        res.on('end', () => resolve({ status: res.statusCode ?? 0, body: data }));
+      });
+      req.on('error', reject);
+      req.end(body);
+    });
+
+  it('solo acepta mensajes de la propia interfaz y no sirve archivos fuera de su carpeta', async () => {
+    const staticDir = tempDir();
+    fs.writeFileSync(path.join(staticDir, 'index.html'), 'INDEX');
+    const received: any[] = [];
+    const server = new HubServer({ port: 39710, staticDir, onMessage: (message) => { received.push(message); } });
+    const port = await server.start();
+    const host = `localhost:${port}`;
+    const post = (headers: http.OutgoingHttpHeaders) =>
+      request(port, { method: 'POST', path: '/api/message', headers: { 'Content-Type': 'text/plain', ...headers } }, JSON.stringify({ command: 'ready' }));
+    try {
+      assert.strictEqual((await post({ Host: host, Origin: `http://${host}` })).status, 200);
+      assert.strictEqual((await post({ Host: host, Origin: 'https://evil.example' })).status, 403);
+      assert.strictEqual((await post({ Host: `evil.example:${port}` })).status, 403);
+      assert.strictEqual(received.length, 1);
+      const traversal = await request(port, { path: '/..%2f..%2f..%2fWindows%2fwin.ini', headers: { Host: host } });
+      assert.strictEqual(traversal.body, 'INDEX');
+      assert.strictEqual((await request(port, { path: '/%E0%A4%A', headers: { Host: host } })).body, 'INDEX');
+    } finally {
+      await server.stop();
+    }
+  });
+});
+
+describe('readJsonFile', () => {
+  it('aparta un archivo dañado en vez de dejar que se pise', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'agent-hub-json-'));
+    const file = path.join(dir, 'sessions.json');
+    fs.writeFileSync(file, Buffer.alloc(64));
+    assert.deepStrictEqual(readJsonFile(file, []), []);
+    assert.strictEqual(fs.existsSync(file), false);
+    assert.strictEqual(fs.readdirSync(dir).filter((name) => name.startsWith('sessions.json.corrupt-')).length, 1);
+  });
+});
+
+describe('MCPSyncer.syncMCPs', () => {
+  it('copia los MCP a las demás cuentas sin pisar un claude.json dañado', async () => {
+    const { MCPSyncer } = await import('../src/mcp/mcp-syncer');
+    const home = fs.mkdtempSync(path.join(os.tmpdir(), 'mcp-sync-'));
+    try {
+      fs.writeFileSync(path.join(home, '.claude.json'), JSON.stringify({ mcpServers: { demo: { command: 'x' } } }));
+      fs.mkdirSync(path.join(home, '.claude-ok'));
+      fs.writeFileSync(path.join(home, '.claude-ok', 'claude.json'), JSON.stringify({ theme: 'dark' }));
+      fs.mkdirSync(path.join(home, '.claude-roto'));
+      fs.writeFileSync(path.join(home, '.claude-roto', 'claude.json'), '{ no es json');
+      const res = await new MCPSyncer(home, path.join(home, 'no-existe-agy')).syncMCPs();
+      assert.strictEqual(res.success, true);
+      const ok = JSON.parse(fs.readFileSync(path.join(home, '.claude-ok', 'claude.json'), 'utf8'));
+      assert.deepStrictEqual([ok.theme, ok.mcpServers.demo.command], ['dark', 'x']);
+      assert.strictEqual(fs.readFileSync(path.join(home, '.claude-roto', 'claude.json'), 'utf8'), '{ no es json');
+    } finally {
+      fs.rmSync(home, { recursive: true, force: true });
+    }
+  });
 });
 
 describe('contextHandlers.attachGit', () => {
@@ -1757,25 +2228,6 @@ describe('actionHandlers.scan-secrets', () => {
   });
 });
 
-describe('getCheckpointFileDiff', () => {
-  it('devuelve el diff recortado aunque el archivo cambie más de 1 MB', () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'file-diff-'));
-    try {
-      const git = (...a: string[]) => execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...a], { cwd: dir, stdio: 'ignore' });
-      git('init', '-q');
-      fs.writeFileSync(path.join(dir, 'a.txt'), 'x\n');
-      git('add', 'a.txt');
-      git('commit', '-q', '-m', 'a');
-      const hash = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: dir, encoding: 'utf8' }).trim();
-      fs.writeFileSync(path.join(dir, 'a.txt'), 'y'.repeat(2 * 1024 * 1024) + '\n');
-      const diff = getCheckpointFileDiff(dir, hash, 'a.txt');
-      assert.ok(diff.length > 0 && diff.length <= 20000);
-    } finally {
-      fs.rmSync(dir, { recursive: true, force: true });
-    }
-  });
-});
-
 describe('PRE_PUSH_HOOK', () => {
   it('bloquea un secreto en una rama nueva y deja pasar un push limpio', async () => {
     const { PRE_PUSH_HOOK } = await import('../src/host/handlers/action-handlers');
@@ -1804,23 +2256,21 @@ describe('PRE_PUSH_HOOK', () => {
   });
 });
 
-describe('MCPSyncer.syncMCPs', () => {
-  it('copia los MCP a las demás cuentas sin pisar un claude.json dañado', async () => {
-    const { MCPSyncer } = await import('../src/mcp/mcp-syncer');
-    const home = fs.mkdtempSync(path.join(os.tmpdir(), 'mcp-sync-'));
+describe('getCheckpointFileDiff', () => {
+  it('devuelve el diff recortado aunque el archivo cambie más de 1 MB', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'file-diff-'));
     try {
-      fs.writeFileSync(path.join(home, '.claude.json'), JSON.stringify({ mcpServers: { demo: { command: 'x' } } }));
-      fs.mkdirSync(path.join(home, '.claude-ok'));
-      fs.writeFileSync(path.join(home, '.claude-ok', 'claude.json'), JSON.stringify({ theme: 'dark' }));
-      fs.mkdirSync(path.join(home, '.claude-roto'));
-      fs.writeFileSync(path.join(home, '.claude-roto', 'claude.json'), '{ no es json');
-      const res = await new MCPSyncer(home, path.join(home, 'no-existe-agy')).syncMCPs();
-      assert.strictEqual(res.success, true);
-      const ok = JSON.parse(fs.readFileSync(path.join(home, '.claude-ok', 'claude.json'), 'utf8'));
-      assert.deepStrictEqual([ok.theme, ok.mcpServers.demo.command], ['dark', 'x']);
-      assert.strictEqual(fs.readFileSync(path.join(home, '.claude-roto', 'claude.json'), 'utf8'), '{ no es json');
+      const git = (...a: string[]) => execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...a], { cwd: dir, stdio: 'ignore' });
+      git('init', '-q');
+      fs.writeFileSync(path.join(dir, 'a.txt'), 'x\n');
+      git('add', 'a.txt');
+      git('commit', '-q', '-m', 'a');
+      const hash = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: dir, encoding: 'utf8' }).trim();
+      fs.writeFileSync(path.join(dir, 'a.txt'), 'y'.repeat(2 * 1024 * 1024) + '\n');
+      const diff = getCheckpointFileDiff(dir, hash, 'a.txt');
+      assert.ok(diff.length > 0 && diff.length <= 20000);
     } finally {
-      fs.rmSync(home, { recursive: true, force: true });
+      fs.rmSync(dir, { recursive: true, force: true });
     }
   });
 });
