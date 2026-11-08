@@ -14,4 +14,6 @@ export interface HubContext {
   mcp: MCPSyncer;
   post(message: HostMessage): void;
   openBesidePanel(): void;
+  openMainPanel(): void;
+  popOutWindow(): Promise<void>;
 }

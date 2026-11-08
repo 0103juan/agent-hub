@@ -1,0 +1,42 @@
+{
+  "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/dev/crates/tauri-cli/schema.json",
+  "build": {
+    "beforeDevCommand": "npm run build:webview",
+    "beforeBuildCommand": "npm run build:webview",
+    "devPath": "http://127.0.0.1:3710",
+    "distDir": "../dist/webview"
+  },
+  "package": {
+    "productName": "AgentHub",
+    "version": "0.1.0"
+  },
+  "tauri": {
+    "allowlist": {
+      "all": false,
+      "shell": {
+        "all": false,
+        "open": true
+      }
+    },
+    "bundle": {
+      "active": true,
+      "targets": "all",
+      "identifier": "com.agenthub.desktop",
+      "icon": [
+        "icons/icon.png"
+      ]
+    },
+    "security": {
+      "csp": null
+    },
+    "windows": [
+      {
+        "title": "AgentHub Control Center",
+        "width": 1280,
+        "height": 850,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ]
+  }
+}

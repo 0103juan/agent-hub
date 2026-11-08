@@ -1,8 +1,11 @@
 node_modules/
 dist/
+dist_package/
+.playwright-mcp/
 tests/dist.test.js
 *.vsix
 .DS_Store
 Thumbs.db
 *.log
 
+graphify-out/

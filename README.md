@@ -1,6 +1,6 @@
 # AgentHub
 
-Extensión de VS Code para conversar con varios modelos desde un solo panel, usando las suscripciones que ya tienes (Claude, Google Antigravity, GitHub Copilot) a través de sus CLIs, sin API keys.
+Aplicación de escritorio (Electron) para conversar con varios modelos desde un solo panel, usando las suscripciones que ya tienes (Claude, Google Antigravity, GitHub Copilot) a través de sus CLIs, sin API keys.
 
 ## Qué hace
 
@@ -14,9 +14,8 @@ Extensión de VS Code para conversar con varios modelos desde un solo panel, usa
 
 ## Requisitos
 
-- Node.js 18 o superior y VS Code 1.90 o superior.
+- Node.js 18 o superior.
 - `claude` (Claude Code) y/o `agy` en `~/.gemini/bin`, con sesión iniciada.
-- GitHub Copilot es opcional; se usa por la Language Model API de VS Code.
 
 ## Desarrollo
 
@@ -24,15 +23,17 @@ Extensión de VS Code para conversar con varios modelos desde un solo panel, usa
 npm install
 npm test          # pruebas con node:test, sin tocar ~/.agent-hub
 npm run build
+npm run update    # compila, cierra la app instalada y la vuelve a abrir
 ```
 
-`build-and-install.ps1` compila y copia la extensión a la carpeta de VS Code. Después hay que ejecutar **Developer: Reload Window**. Con `F5` se abre un Extension Development Host.
+La app instalada (`%LOCALAPPDATA%\Programs\AgentHub`) lee su carpeta `dist` por un junction a este repo, así que no hace falta reinstalar: `npm run update` la deja al día. Se instala una sola vez con `npm run package:win`. Si solo cambió la interfaz, `npm run build:webview` y recargar la ventana bastan. No hay extensión de VS Code: se retiró en favor de la app.
 
 ## Arquitectura
 
 ```text
 src/
-├── extension.ts      Punto de composición: crea y conecta las dependencias
+├── electron/         Ventana, bandeja y atajos de la app de escritorio
+├── server/           Servidor local (HTTP/SSE) y punto de composición (`standalone.ts`)
 ├── shared/           Tipos, contrato de mensajes y selección de modelo (host y webview)
 ├── agents/           Un AgentProvider por proveedor, con su parser de stream
 │   ├── claude/  antigravity/  copilot/
@@ -41,13 +42,13 @@ src/
 │   └── prompt-composer.ts  Rol, adjuntos e historial
 ├── chat/             ChatService: dueño de cada turno
 ├── storage/          Sesiones y telemetría en ~/.agent-hub
-├── host/             Vistas y handlers de mensajes de la webview
+├── host/             Handlers de mensajes de la webview
 ├── analysis/         Análisis locales sin dependencia de VS Code
 ├── mcp/              Lista y sincronización de servidores MCP
 └── webview/          Interfaz React, renderiza el estado que publica el host
 ```
 
-- **Strategy:** `AgentProvider` aísla cada proveedor. Agregar uno es implementar la interfaz y registrarlo en `extension.ts`.
+- **Strategy:** `AgentProvider` aísla cada proveedor. Agregar uno es implementar la interfaz y registrarlo en `server/standalone.ts`.
 - **Command:** cada mensaje de la webview tiene su handler, y el tipo `HandlerMap` obliga a cubrirlos todos.
 - **Inversión de dependencias:** `ChatService` y los almacenes reciben sus colaboradores, por eso se prueban sin VS Code ni CLIs.
 - **Una sola fuente de verdad:** la conversación vive en el host; la webview solo la pinta, así que recargar la ventana no pierde un turno.
