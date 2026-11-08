@@ -4,6 +4,7 @@ import * as path from 'path';
 import * as os from 'os';
 import * as vscode from 'vscode';
 import { MCPServerInfo } from '../shared/types';
+import { writeJsonFile } from '../storage/json-file';
 
 export class MCPSyncer {
   private homeDir: string;
@@ -203,7 +204,7 @@ export class MCPSyncer {
         } else {
           delete config.mcpServers[server.name];
         }
-        fs.writeFileSync(this.claude1JsonPath, JSON.stringify(config, null, 2), 'utf8');
+        writeJsonFile(this.claude1JsonPath, config);
       }
 
       // 2. Agregar a agy
@@ -259,7 +260,7 @@ export class MCPSyncer {
             }
           }
           parsed.mcpServers = { ...(parsed.mcpServers || {}), ...claudeServers };
-          fs.writeFileSync(subConfig, JSON.stringify(parsed, null, 2), 'utf8');
+          writeJsonFile(subConfig, parsed);
         }
       }
 

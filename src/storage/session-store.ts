@@ -1,8 +1,7 @@
-import * as fs from 'fs';
 import * as path from 'path';
 import { DEFAULT_MODEL_ID, DEFAULT_PROFILE_ID } from '../shared/model-selection';
 import { ArchivedSessionInfo, ChatMessage, ConversationSession, ProtocolRole, ReasoningEffort } from '../shared/types';
-import { DebouncedJsonFile, readJsonFile } from './json-file';
+import { DebouncedJsonFile, readJsonFile, writeJsonFile } from './json-file';
 
 const DEFAULT_TITLE = 'Nueva conversación';
 const LEGACY_DEFAULT_TITLES = new Set([DEFAULT_TITLE, 'Nueva Conversación', 'Conversación Inicial']);
@@ -64,7 +63,7 @@ export class SessionStore {
     const old = this.list().filter((session) => session.updatedAt < cutoff);
     if (old.length === 0 || old.length === this.sessions.size) return;
     try {
-      fs.writeFileSync(archivePath, JSON.stringify([...readJsonFile<StoredSession[]>(archivePath, []), ...old]));
+      writeJsonFile(archivePath, [...readJsonFile<StoredSession[]>(archivePath, []), ...old]);
     } catch {
       return; // sin copia segura no se borra nada
     }
@@ -83,7 +82,7 @@ export class SessionStore {
     const archived = readJsonFile<StoredSession[]>(this.archivePath, []);
     const found = archived.find((session) => session.id === sessionId);
     if (!found) return false;
-    fs.writeFileSync(this.archivePath, JSON.stringify(archived.filter((session) => session !== found)));
+    writeJsonFile(this.archivePath, archived.filter((session) => session !== found));
     const session = migrateSession(found);
     this.sessions.set(session.id, { ...session, updatedAt: Date.now() });
     this.persist();
