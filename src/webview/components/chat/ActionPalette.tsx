@@ -38,6 +38,10 @@ export const ActionPalette: React.FC<Props> = ({ onRun, onClose }) => {
             onChange={(event) => setQuery(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === 'Enter' && matches[0]) run(matches[0].id);
+              else if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                document.querySelector<HTMLButtonElement>('[data-action]')?.focus();
+              }
             }}
             className="w-full bg-zinc-950 border border-zinc-750 rounded-lg pl-8 pr-3 py-1.5 text-xs text-zinc-100 placeholder-zinc-400 focus:outline-none focus:border-indigo-500"
           />
@@ -60,7 +64,19 @@ export const ActionPalette: React.FC<Props> = ({ onRun, onClose }) => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-2 space-y-2">
+      <div
+        className="flex-1 overflow-y-auto p-2 space-y-2"
+        onKeyDown={(event) => {
+          if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+          const buttons = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('[data-action]'));
+          const index = buttons.indexOf(document.activeElement as HTMLButtonElement);
+          const next = buttons[index + (event.key === 'ArrowDown' ? 1 : -1)];
+          if (next) {
+            event.preventDefault();
+            next.focus();
+          }
+        }}
+      >
         {matches.length === 0 && <div className="text-center py-8 text-zinc-400 text-xs">No hay acciones con ese filtro.</div>}
         {ACTION_GROUPS.map((actionGroup) => {
           const actions = matches.filter((action) => action.group === actionGroup);
@@ -73,6 +89,7 @@ export const ActionPalette: React.FC<Props> = ({ onRun, onClose }) => {
                   const { icon: Icon, color } = ACTION_ICONS[action.id] ?? { icon: Wrench, color: 'text-zinc-400' };
                   return (
                     <button
+                      data-action
                       key={action.id}
                       type="button"
                       onClick={() => run(action.id)}

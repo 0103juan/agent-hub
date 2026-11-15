@@ -15,6 +15,30 @@ function getAudioContext(): AudioContext | null {
   return audioCtx;
 }
 
+const VOLUME_KEY = 'agent-hub.volume';
+export type Volume = 'low' | 'medium' | 'high';
+const VOLUME_LEVELS: Record<Volume, number> = { low: 0.35, medium: 0.7, high: 1.4 };
+
+export function getVolume(): Volume {
+  const saved = localStorage.getItem(VOLUME_KEY);
+  return saved === 'low' || saved === 'high' ? saved : 'medium';
+}
+
+export function setVolume(volume: Volume): void {
+  localStorage.setItem(VOLUME_KEY, volume);
+}
+
+/** Un solo nodo de ganancia general: el volumen vale para todas las alertas. */
+let master: GainNode | null = null;
+function masterGain(ctx: AudioContext): GainNode {
+  if (!master) {
+    master = ctx.createGain();
+    master.connect(ctx.destination);
+  }
+  master.gain.value = VOLUME_LEVELS[getVolume()];
+  return master;
+}
+
 export function playCompleteChime(): void {
   try {
     const ctx = getAudioContext();
@@ -39,7 +63,7 @@ export function playCompleteChime(): void {
 
     osc1.connect(gainNode);
     osc2.connect(gainNode);
-    gainNode.connect(ctx.destination);
+    gainNode.connect(masterGain(ctx));
 
     osc1.start(now);
     osc1.stop(now + 0.2);
@@ -65,7 +89,7 @@ export function playAttentionChime(): void {
     gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
 
     osc.connect(gainNode);
-    gainNode.connect(ctx.destination);
+    gainNode.connect(masterGain(ctx));
 
     osc.start(now);
     osc.stop(now + 0.4);

@@ -1,25 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import {
-  FileCode,
-  Folder,
-  FolderOpen,
-  GitBranch,
-  GitCompare,
-  Eye,
-  Plus,
-  Search,
-  ChevronRight,
-  ChevronDown,
-  RefreshCw,
-  X,
-  FileCheck2,
-  FilePlus,
-  FileDiff,
-  Sparkles,
-  ShieldCheck,
-  GitCommit
-} from 'lucide-react';
-import { postToHost } from '../vscode-api';
+import { FileCode, Folder, FolderOpen, GitBranch, GitCompare, Eye, Plus, Search, ChevronRight, ChevronDown, RefreshCw, X, FileCheck2, FilePlus, FileDiff, Sparkles, ShieldCheck, GitCommit, Copy, Check, Code2, ListOrdered } from 'lucide-react';
+import { openInVsCode, postToHost } from '../vscode-api';
+import { normalizeText } from '../../shared/workspace-actions';
 
 export interface GitFileItem {
   path: string;
@@ -65,9 +47,24 @@ export const ProjectFilesSidebar: React.FC<Props> = ({
   onAuditBranch,
   onSearchContent
 }) => {
-  const [activeTab, setActiveTab] = useState<'git' | 'tree'>('git');
+  const [activeTab, setActiveTabState] = useState<'git' | 'tree'>(() => (localStorage.getItem('agent-hub.filesTab') === 'tree' ? 'tree' : 'git'));
+  const setActiveTab = (tab: 'git' | 'tree') => {
+    localStorage.setItem('agent-hub.filesTab', tab);
+    setActiveTabState(tab);
+  };
+  const [statusFilter, setStatusFilter] = useState<GitFileItem['status'] | null>(null);
+  const [gitSort, setGitSort] = useState<'status' | 'name'>('status');
+  const [copiedList, setCopiedList] = useState(false);
   const [search, setSearch] = useState('');
   const [searchMode, setSearchMode] = useState<'name' | 'content'>('name');
+  const [copiedPath, setCopiedPath] = useState<string>();
+  const copyPath = async (file: string) => {
+    try {
+      await navigator.clipboard.writeText(file);
+      setCopiedPath(file);
+      setTimeout(() => setCopiedPath(undefined), 1500);
+    } catch {}
+  };
 
   useEffect(() => {
     if (searchMode === 'content' && activeTab === 'tree' && search.trim().length >= 2) {
@@ -81,10 +78,10 @@ export const ProjectFilesSidebar: React.FC<Props> = ({
   if (!isOpen) return null;
 
   const filteredGit = gitFiles.filter((item) =>
-    item.path.toLowerCase().includes(search.toLowerCase())
-  );
+    normalizeText(item.path).includes(normalizeText(search)) && (!statusFilter || item.status === statusFilter)
+  ).sort((a, b) => (gitSort === 'name' ? a.path.localeCompare(b.path) : 'MADR?'.indexOf(a.status) - 'MADR?'.indexOf(b.status) || a.path.localeCompare(b.path)));
   const filteredTree = projectTree.filter((item) =>
-    item.path.toLowerCase().includes(search.toLowerCase())
+    normalizeText(item.path).includes(normalizeText(search))
   );
 
   const statusColor = (status: GitFileItem['status']) => {
@@ -118,7 +115,7 @@ export const ProjectFilesSidebar: React.FC<Props> = ({
   };
 
   return (
-    <aside className="w-72 shrink-0 border-r border-zinc-800 bg-zinc-950 flex flex-col h-full text-xs">
+    <aside className="w-72 shrink-0 max-[560px]:absolute max-[560px]:inset-y-0 max-[560px]:left-0 max-[560px]:z-30 max-[560px]:w-[85%] max-[560px]:shadow-2xl border-r border-zinc-800 bg-zinc-950 flex flex-col h-full text-xs">
       {/* Header */}
       <div className="p-2 border-b border-zinc-800 flex items-center justify-between gap-1.5 shrink-0 bg-zinc-900/50">
         <div className="flex items-center gap-1">
@@ -144,7 +141,7 @@ export const ProjectFilesSidebar: React.FC<Props> = ({
             }`}
           >
             <Folder className="w-3 h-3" />
-            <span>Archivos</span>
+            <span>Archivos ({projectTree.filter((item) => !item.isDir).length})</span>
           </button>
         </div>
 
@@ -183,6 +180,7 @@ export const ProjectFilesSidebar: React.FC<Props> = ({
             }
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={(e) => e.key === 'Escape' && setSearch('')}
             className="w-full bg-transparent border-none text-[11px] text-zinc-200 focus:outline-none placeholder-zinc-500"
           />
           {search && (
@@ -231,6 +229,54 @@ export const ProjectFilesSidebar: React.FC<Props> = ({
                   <Sparkles className="w-3 h-3 text-amber-400" />
                   <span>Disparadores Inteligentes</span>
                 </div>
+                <div className="flex flex-wrap items-center gap-1 px-1 pb-0.5 font-mono text-[10px]">
+                  {(['M', 'A', 'D', '?'] as const).map((status) => {
+                    const count = gitFiles.filter((item) => item.status === status).length;
+                    return count > 0 && (
+                      <button
+                        key={status}
+                        type="button"
+                        aria-pressed={statusFilter === status}
+                        onClick={() => setStatusFilter(statusFilter === status ? null : status)}
+                        className={`px-1 rounded border cursor-pointer ${statusColor(status)} ${statusFilter === status ? 'ring-1 ring-white/50' : 'opacity-80 hover:opacity-100'}`}
+                        title={`${statusLabel(status)}: ${statusFilter === status ? 'mostrar todos' : 'filtrar solo estos'}`}
+                      >
+                        {status} {count}
+                      </button>
+                    );
+                  })}
+                  <button
+                    type="button"
+                    onClick={() => gitFiles.filter((item) => item.status !== 'D').forEach((item) => postToHost({ command: 'attachFile', file: item.path }))}
+                    className="ml-auto px-1.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 cursor-pointer"
+                    title="Adjuntar al chat todos los archivos cambiados"
+                  >
+                    Adjuntar todos
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(filteredGit.map((item) => `${item.status} ${item.path}`).join('\n'));
+                        setCopiedList(true);
+                        setTimeout(() => setCopiedList(false), 1500);
+                      } catch {}
+                    }}
+                    className="px-1.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 cursor-pointer"
+                    title="Copiar la lista de archivos cambiados"
+                  >
+                    {copiedList ? 'Copiada' : 'Copiar lista'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setGitSort(gitSort === 'status' ? 'name' : 'status')}
+                    className="flex items-center gap-0.5 px-1.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 cursor-pointer"
+                    title={`Ordenado por ${gitSort === 'status' ? 'estado' : 'nombre'}; clic para cambiar`}
+                  >
+                    <ListOrdered className="w-3 h-3" />
+                    {gitSort === 'status' ? 'estado' : 'nombre'}
+                  </button>
+                </div>
                 <div className="flex items-center gap-1">
                   <button
                     type="button"
@@ -263,7 +309,7 @@ export const ProjectFilesSidebar: React.FC<Props> = ({
               filteredGit.map((item) => (
                 <div
                   key={item.path}
-                  className="group flex items-center justify-between gap-1.5 px-2 py-1.5 rounded hover:bg-zinc-900 transition"
+                  className="group relative flex items-center justify-between gap-1.5 px-2 py-1.5 rounded hover:bg-zinc-900 transition"
                 >
                   <div
                     className="flex items-center gap-1.5 min-w-0 flex-1 cursor-pointer"
@@ -277,12 +323,13 @@ export const ProjectFilesSidebar: React.FC<Props> = ({
                     >
                       {item.status}
                     </span>
-                    <span className="truncate font-mono text-[11px] text-zinc-300 group-hover:text-zinc-100">
-                      {item.path}
+                    <span className="flex min-w-0 font-mono text-[11px] text-zinc-300 group-hover:text-zinc-100">
+                      {item.path.includes('/') && <span className="truncate text-zinc-500">{item.path.slice(0, item.path.lastIndexOf('/') + 1)}</span>}
+                      <span className="shrink-0">{item.path.slice(item.path.lastIndexOf('/') + 1)}</span>
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition shrink-0">
+                  <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-1 rounded bg-zinc-900 pl-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition">
                     <button
                       type="button"
                       onClick={() => (onOpenDiff ? onOpenDiff(item.path) : onPreviewFile(item.path))}
@@ -298,6 +345,22 @@ export const ProjectFilesSidebar: React.FC<Props> = ({
                       title="Previsualizar archivo completo"
                     >
                       <Eye className="w-3 h-3" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => openInVsCode(workspaceDir ? `${workspaceDir.replace(/[\\/]$/, '')}/${item.path}` : item.path)}
+                      className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-blue-300 transition"
+                      title="Abrir en VS Code"
+                    >
+                      <Code2 className="w-3 h-3" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => copyPath(item.path)}
+                      className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition"
+                      title="Copiar la ruta"
+                    >
+                      {copiedPath === item.path ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
                     </button>
                     <button
                       type="button"
@@ -375,6 +438,14 @@ export const ProjectFilesSidebar: React.FC<Props> = ({
                     title="Previsualizar"
                   >
                     <Eye className="w-3 h-3" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => copyPath(item.path)}
+                    className="p-0.5 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200"
+                    title="Copiar la ruta"
+                  >
+                    {copiedPath === item.path ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
                   </button>
                   <button
                     type="button"

@@ -115,6 +115,10 @@ export interface StandaloneOptions {
   asApp?: boolean;
   workspaceDir?: string;
   staticDir?: string;
+  onPopOutWindow?: (url?: string) => void | Promise<void>;
+  onToggleAlwaysOnTop?: () => void | Promise<void>;
+  onOpenBeside?: () => void | Promise<void>;
+  onOpenMain?: () => void | Promise<void>;
 }
 
 export interface StandaloneInstance {
@@ -159,9 +163,19 @@ export function startStandalone(options: StandaloneOptions = {}): Promise<Standa
     chat: new ChatService(sessions, telemetry, providers, post, (text) => console.log(`[AgentHub Notice] ${text}`), pendingStore),
     mcp: new MCPSyncer(),
     post,
-    openBesidePanel: () => {},
-    openMainPanel: () => {},
-    popOutWindow: async () => {}
+    openBesidePanel: () => {
+      options.onOpenBeside?.();
+    },
+    openMainPanel: () => {
+      options.onOpenMain?.();
+    },
+    popOutWindow: async () => {
+      if (options.onPopOutWindow) {
+        await options.onPopOutWindow(server.url);
+      } else {
+        openUrlInBrowser(server.url);
+      }
+    }
   };
   hub.chat.verify = runProjectTests;
 
@@ -180,9 +194,25 @@ export function startStandalone(options: StandaloneOptions = {}): Promise<Standa
       void publishAccountsAndMcps(hub);
       void (handlers.getWorkspaceOverview as any)?.({});
     },
-    openBeside: () => {},
-    openMain: () => {},
-    popOutWindow: () => {},
+    openBeside: () => {
+      options.onOpenBeside?.();
+    },
+    openMain: () => {
+      options.onOpenMain?.();
+    },
+    popOutWindow: async (msg: any) => {
+      const targetUrl = typeof msg?.url === 'string' && msg.url.trim() ? msg.url : server.url;
+      if (options.onPopOutWindow) {
+        await options.onPopOutWindow(targetUrl);
+      } else {
+        openUrlInBrowser(targetUrl);
+      }
+    },
+    toggleAlwaysOnTop: async () => {
+      if (options.onToggleAlwaysOnTop) {
+        await options.onToggleAlwaysOnTop();
+      }
+    },
     openExternalBrowser: () => openUrlInBrowser(server.url),
     ...sessionHandlers(hub),
     ...libraryHandlers(hub),

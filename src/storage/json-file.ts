@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 const WRITE_DELAY_MS = 400;
+const BACKUP_EVERY_MS = 10 * 60_000;
 
 export function readJsonFile<T>(filePath: string, fallback: T): T {
   try {
@@ -13,6 +14,10 @@ export function readJsonFile<T>(filePath: string, fallback: T): T {
       if (error instanceof SyntaxError) {
         try {
           fs.renameSync(filePath, `${filePath}.corrupt-${Date.now()}`);
+        } catch {}
+        // La última copia buena (`.bak`) evita arrancar con todo vacío.
+        try {
+          return JSON.parse(fs.readFileSync(`${filePath}.bak`, 'utf8')) as T;
         } catch {}
       }
     }
@@ -32,6 +37,13 @@ export function writeJsonFile(filePath: string, value: unknown): void {
   } finally {
     fs.closeSync(fd);
   }
+  // Copia de la versión anterior como mucho cada 10 minutos: un archivo grande no se duplica en cada escritura.
+  try {
+    const backup = `${filePath}.bak`;
+    if (fs.existsSync(filePath) && (!fs.existsSync(backup) || Date.now() - fs.statSync(backup).mtimeMs > BACKUP_EVERY_MS)) {
+      fs.copyFileSync(filePath, backup);
+    }
+  } catch {}
   fs.renameSync(tempPath, filePath);
 }
 

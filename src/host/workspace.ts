@@ -58,6 +58,56 @@ export interface GitStatusItem {
   status: 'M' | 'A' | 'D' | '?' | 'R';
 }
 
+export function getGitBranch(dir?: string): string {
+  const root = dir ?? workspaceDir();
+  if (!root || !fs.existsSync(root)) return '';
+  try {
+    const branch = execSync('git branch --show-current', {
+      cwd: root,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+      maxBuffer: 64 * 1024 * 1024
+    }).trim();
+    if (branch) return branch;
+
+    // Si está en detached HEAD o no hay rama nombrada
+    const shortSha = execSync('git rev-parse --short HEAD', {
+      cwd: root,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+      maxBuffer: 64 * 1024 * 1024
+    }).trim();
+    return shortSha ? `HEAD (${shortSha})` : '';
+  } catch {
+    return '';
+  }
+}
+
+export interface GitBranchSummary {
+  branch: string;
+  uncommittedCount: number;
+  gitFiles: GitStatusItem[];
+  isGit: boolean;
+}
+
+export function getGitBranchSummary(dir?: string): GitBranchSummary {
+  const root = dir ?? workspaceDir();
+  if (!root || !fs.existsSync(root)) {
+    return { branch: '', uncommittedCount: 0, gitFiles: [], isGit: false };
+  }
+  const branch = getGitBranch(root);
+  if (!branch) {
+    return { branch: '', uncommittedCount: 0, gitFiles: [], isGit: false };
+  }
+  const gitFiles = getGitStatusFiles(root);
+  return {
+    branch,
+    uncommittedCount: gitFiles.length,
+    gitFiles,
+    isGit: true
+  };
+}
+
 export function getGitStatusFiles(dir?: string): GitStatusItem[] {
   const root = dir ?? workspaceDir();
   if (!root || !fs.existsSync(root)) return [];

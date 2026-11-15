@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { downloadText } from '../utils/format';
 import {
   X,
   Copy,
@@ -7,6 +8,7 @@ import {
   FileCode,
   GitCompare,
   Columns2,
+  Download,
   Rows2
 } from 'lucide-react';
 
@@ -40,6 +42,15 @@ export const InteractiveDiffModal: React.FC<Props> = ({
   const originalLines = original ? original.split('\n') : [];
   const modifiedLines = modified ? modified.split('\n') : [];
   const maxLines = Math.max(originalLines.length, modifiedLines.length);
+  const diffLines = rawDiff ? rawDiff.split('\n') : [];
+  const added = diffLines.filter((line) => line.startsWith('+') && !line.startsWith('+++')).length;
+  const removed = diffLines.filter((line) => line.startsWith('-') && !line.startsWith('---')).length;
+
+  useEffect(() => {
+    const closeOnEscape = (event: KeyboardEvent) => event.key === 'Escape' && onClose();
+    document.addEventListener('keydown', closeOnEscape);
+    return () => document.removeEventListener('keydown', closeOnEscape);
+  }, [onClose]);
 
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-150">
@@ -54,6 +65,11 @@ export const InteractiveDiffModal: React.FC<Props> = ({
             <span className="px-1.5 py-0.5 rounded text-[10px] bg-zinc-800 text-zinc-400 border border-zinc-700">
               Diff HEAD ↔ Actual
             </span>
+            {(added > 0 || removed > 0) && (
+              <span className="font-mono text-[11px] shrink-0">
+                <span className="text-emerald-400">+{added}</span> <span className="text-rose-400">−{removed}</span>
+              </span>
+            )}
           </div>
 
           <div className="flex items-center gap-2">
@@ -80,6 +96,24 @@ export const InteractiveDiffModal: React.FC<Props> = ({
               </button>
             </div>
 
+            <button
+              type="button"
+              onClick={() => downloadText(`${file.split(/[\\/]/).pop() ?? 'cambios'}.diff`, rawDiff || modified)}
+              className="flex items-center gap-1 px-2.5 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white border border-zinc-700 text-xs transition cursor-pointer"
+              title="Descargar el diff como archivo .diff"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span className="hidden min-[560px]:inline">.diff</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => navigator.clipboard.writeText(file).catch(() => {})}
+              className="flex items-center gap-1 px-2.5 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white border border-zinc-700 text-xs transition cursor-pointer"
+              title="Copiar la ruta del archivo"
+            >
+              <FileCode className="w-3.5 h-3.5" />
+              <span className="hidden min-[560px]:inline">Ruta</span>
+            </button>
             <button
               type="button"
               onClick={handleCopy}

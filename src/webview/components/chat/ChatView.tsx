@@ -1,11 +1,12 @@
 import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
-import { CheckSquare, ChevronDown, ChevronUp, Cpu, Download, FolderGit2, Layers, ListTree, Pin, Plus, Repeat, SlidersHorizontal, Square, Wallet, X } from 'lucide-react';
+import { CheckSquare, ChevronDown, ChevronUp, Cpu, Download, Pencil, FolderGit2, Layers, ListTree, Pin, Plus, Repeat, SlidersHorizontal, Square, Wallet, X } from 'lucide-react';
 import { agentName } from '../../../shared/agent-name';
 import { PROTOCOL_ROLES } from '../../../shared/protocol-roles';
 import { resolveSelection } from '../../../shared/model-selection';
-import { ConversationSession, ProtocolRole, ProviderType, QueuedMessage, ReasoningEffort, SessionPermission } from '../../../shared/types';
+import { ConversationSession, FileContextAttachment, ProtocolRole, ProviderType, QueuedMessage, ReasoningEffort, SessionPermission } from '../../../shared/types';
 import { HubAction, HubState } from '../../state/hub-state';
 import { ACCENTS, getAccent, setAccent } from '../../state/accent';
+import { formatTime } from '../../utils/format';
 import { postToHost } from '../../vscode-api';
 import { EffortSelector } from '../EffortSelector';
 import { ProtocolRoleSelector } from '../ProtocolRoleSelector';
@@ -28,12 +29,15 @@ const Editor = memo(Composer);
 
 const NO_EFFORTS: ReasoningEffort[] = [];
 const NO_QUEUE: QueuedMessage[] = [];
+const NO_ATTACHMENTS: FileContextAttachment[] = [];
 
 interface Props {
   state: HubState;
   session: ConversationSession;
   /** Oculta las barras secundarias; quedan el chat y el composer. */
   focusMode?: boolean;
+  /** Dentro de una columna: el título y el proyecto ya están en la barra de la columna, y Historial/Nueva tarea en la barra superior. */
+  embedded?: boolean;
   dispatch: React.Dispatch<HubAction>;
   onOpenHistory: () => void;
   onNewTask: () => void;
@@ -74,6 +78,7 @@ const Onboarding: React.FC<{ state: HubState }> = ({ state }) => {
           </li>
         ))}
       </ul>
+      <div className="mt-1 text-[10px] text-zinc-500">Atajos: Ctrl+K paleta de comandos · Ctrl+/ todos los atajos</div>
     </div>
   );
 };
@@ -81,7 +86,8 @@ const Onboarding: React.FC<{ state: HubState }> = ({ state }) => {
 /** Menú con los mensajes del usuario y los fijados; llevar al mensaje es scroll a su ancla. */
 const ConversationIndex: React.FC<{ session: ConversationSession }> = ({ session }) => {
   const [open, setOpen] = useState(false);
-  const entries = session.messages.filter((m) => m.role === 'user' || m.pinned);
+  const [onlyPinned, setOnlyPinned] = useState(false);
+  const entries = session.messages.filter((m) => (m.role === 'user' || m.pinned) && (!onlyPinned || m.pinned));
   const goTo = (messageId: string) => {
     document.getElementById(`msg-${messageId}`)?.scrollIntoView({ block: 'center' });
     setOpen(false);
@@ -100,7 +106,13 @@ const ConversationIndex: React.FC<{ session: ConversationSession }> = ({ session
       </button>
       {open && (
         <ul className="absolute right-0 top-full mt-1 z-30 w-64 max-h-64 overflow-y-auto rounded-lg border border-zinc-700 bg-zinc-900 p-1 shadow-xl">
-          {entries.length === 0 && <li className="p-1.5 text-[11px] text-zinc-400">Aún no hay mensajes.</li>}
+          <li className="flex items-center justify-between px-1.5 py-1 text-[10px] text-zinc-500 uppercase tracking-wider">
+            <span>{entries.length} entradas</span>
+            <button type="button" aria-pressed={onlyPinned} onClick={() => setOnlyPinned(!onlyPinned)} className={`normal-case tracking-normal text-[11px] ${onlyPinned ? 'text-amber-300' : 'text-zinc-400 hover:text-zinc-200'}`}>
+              Solo fijados
+            </button>
+          </li>
+          {entries.length === 0 && <li className="p-1.5 text-[11px] text-zinc-400">{onlyPinned ? 'No hay mensajes fijados.' : 'Aún no hay mensajes.'}</li>}
           {entries.map((m) => (
             <li key={m.id}>
               <button
@@ -110,6 +122,7 @@ const ConversationIndex: React.FC<{ session: ConversationSession }> = ({ session
               >
                 {m.pinned && <Pin className="w-3 h-3 text-amber-400 fill-amber-400 shrink-0" aria-label="Fijado" />}
                 <span className="truncate">{m.content.trim().split('\n')[0] || '(sin texto)'}</span>
+                <span className="ml-auto shrink-0 font-mono text-[10px] text-zinc-500">{formatTime(m.timestamp)}</span>
               </button>
             </li>
           ))}
@@ -156,7 +169,7 @@ const AccentPicker: React.FC<{ current?: string; onPick: (color: string) => void
 
 const formatTokens = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(1)}k` : `${n}`);
 
-export const ChatView: React.FC<Props> = ({ state, session, focusMode, dispatch, onOpenHistory, onNewTask }) => {
+export const ChatView: React.FC<Props> = ({ state, session, focusMode, embedded, dispatch, onOpenHistory, onNewTask }) => {
   const { id: sessionId, profileId, modelId, effort: sessionEffort } = session;
   const selection = useMemo(
     () => resolveSelection({ profileId, modelId, effort: sessionEffort }, state.accounts),
@@ -185,13 +198,14 @@ export const ChatView: React.FC<Props> = ({ state, session, focusMode, dispatch,
   const spentUSD = useMemo(() => session.messages.reduce((sum, m) => sum + (m.costUSD ?? 0), 0), [session.messages]);
   const budgetPercent = session.budgetUSD ? Math.min(100, Math.round((spentUSD / session.budgetUSD) * 100)) : 0;
 
-  const attachmentsRef = useRef(state.attachments);
-  attachmentsRef.current = state.attachments;
+  const attachments = state.attachments[sessionId] ?? NO_ATTACHMENTS;
+  const attachmentsRef = useRef(attachments);
+  attachmentsRef.current = attachments;
 
   // `targetId` envía a otro agente del equipo (menciones con @).
   const sendPrompt = useCallback(
     async (prompt: string, planFirst?: boolean, targetId?: string) => {
-      dispatch({ type: 'clearAttachments' });
+      dispatch({ type: 'clearAttachments', sessionId: targetId ?? sessionId });
       const attachments = await withThumbnails(attachmentsRef.current);
       postToHost({ command: 'sendPrompt', sessionId: targetId ?? sessionId, prompt, attachments, ...(planFirst ? { planFirst } : {}) });
     },
@@ -231,41 +245,29 @@ export const ChatView: React.FC<Props> = ({ state, session, focusMode, dispatch,
 
     const historyChars = session.messages.reduce((sum, m) => sum + m.content.length + (m.thinking?.length ?? 0), 0);
     const historyTokens = Math.round(historyChars / 4);
-    const attachmentChars = state.attachments.reduce((sum, a) => sum + (a.content?.length ?? 0), 0);
+    const attachmentChars = attachments.reduce((sum, a) => sum + (a.content?.length ?? 0), 0);
     const attachmentTokens = Math.round(attachmentChars / 4);
     const systemTokens = 500;
     const usedTokens = historyTokens + attachmentTokens + systemTokens;
     const percentage = Math.min(100, Math.round((usedTokens / limit) * 100));
 
     return { usedTokens, limit, percentage, historyTokens, attachmentTokens, systemTokens };
-  }, [session.messages, state.attachments, model?.label]);
+  }, [session.messages, attachments, model?.label]);
 
-  return (
-    <div className="flex flex-col h-full space-y-2.5">
-      <div
-        className="flex items-center justify-between gap-2 px-1 text-xs shrink-0 border-l-2 pl-1.5"
-        style={{ borderLeftColor: accent ?? 'transparent' }}
-      >
-        <AccentPicker
-          current={accent}
-          onPick={(color) => {
-            setAccent(session.projectName, color);
-            setAccentTick((tick) => tick + 1);
-          }}
-        />
-        <button
-          type="button"
-          onClick={onOpenHistory}
-          className="flex-1 min-w-0 flex items-center gap-1.5 text-zinc-300 hover:text-indigo-300 transition font-medium p-1 rounded hover:bg-zinc-850"
-          title={`${session.projectName || 'General'} / ${session.title}`}
-        >
-          <FolderGit2 className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-          <span className="hidden min-[420px]:inline max-w-[40%] truncate shrink-0 text-zinc-400 font-mono text-[11px]">{session.projectName || 'General'} /</span>
-          <span className="min-w-0 truncate font-semibold text-zinc-200">{session.title}</span>
-          <ChevronDown className="w-3 h-3 text-zinc-400 shrink-0" />
-        </button>
+  const [renaming, setRenaming] = useState<string | null>(null);
+  const [isEmbeddedToolsOpen, setIsEmbeddedToolsOpen] = useState(false);
 
-        <div className="flex items-center gap-1 shrink-0">
+  const tools = (
+    <>
+          <button
+            type="button"
+            onClick={() => setRenaming(session.title)}
+            className="p-1 rounded bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 border border-zinc-700/60 transition"
+            aria-label="Renombrar la conversación"
+            title="Renombrar la conversación"
+          >
+            <Pencil className="w-3 h-3 text-cyan-400" />
+          </button>
           <select
             value={session.permission ?? 'full'}
             onChange={(event) =>
@@ -336,6 +338,60 @@ export const ChatView: React.FC<Props> = ({ state, session, focusMode, dispatch,
               </div>
             )}
           </div>
+    </>
+  );
+
+  return (
+    <div className="flex flex-col h-full space-y-2.5">
+      {(!embedded || renaming !== null) && (
+      <div
+        className="flex items-center justify-between gap-2 px-1 text-xs shrink-0 border-l-2 pl-1.5"
+        style={{ borderLeftColor: accent ?? 'transparent' }}
+      >
+        <AccentPicker
+          current={accent}
+          onPick={(color) => {
+            setAccent(session.projectName, color);
+            setAccentTick((tick) => tick + 1);
+          }}
+        />
+        {renaming !== null ? (
+          <form
+            className="flex-1 min-w-0"
+            onSubmit={(event) => {
+              event.preventDefault();
+              if (renaming.trim() && renaming.trim() !== session.title) postToHost({ command: 'updateSession', sessionId, patch: { title: renaming.trim() } });
+              setRenaming(null);
+            }}
+          >
+            <input
+              autoFocus
+              value={renaming}
+              maxLength={80}
+              aria-label="Nuevo título de la conversación"
+              onChange={(event) => setRenaming(event.target.value)}
+              onBlur={() => setRenaming(null)}
+              onKeyDown={(event) => event.key === 'Escape' && setRenaming(null)}
+              className="w-full bg-zinc-900 border border-indigo-500 rounded px-2 py-0.5 text-xs text-zinc-100 focus:outline-none"
+            />
+          </form>
+        ) : (
+        <button
+          type="button"
+          onClick={onOpenHistory}
+          className="flex-1 min-w-0 flex items-center gap-1.5 text-zinc-300 hover:text-indigo-300 transition font-medium p-1 rounded hover:bg-zinc-850"
+          title={`${session.projectName || 'General'} / ${session.title}`}
+        >
+          <FolderGit2 className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+          <span className="hidden min-[420px]:inline max-w-[40%] truncate shrink-0 text-zinc-400 font-mono text-[11px]">{session.projectName || 'General'} /</span>
+          <span className="min-w-0 truncate font-semibold text-zinc-200">{session.title}</span>
+          <ChevronDown className="w-3 h-3 text-zinc-400 shrink-0" />
+        </button>
+        )}
+
+        <div className="flex items-center gap-1 shrink-0">
+          {!embedded && (<>
+          {tools}
           <button
             type="button"
             onClick={onOpenHistory}
@@ -356,15 +412,17 @@ export const ChatView: React.FC<Props> = ({ state, session, focusMode, dispatch,
             <Plus className="w-3 h-3" />
             <span className="hidden min-[420px]:inline">Nueva tarea</span>
           </button>
+          </>)}
         </div>
       </div>
+      )}
 
       {!focusMode && (
         <div className="shrink-0 space-y-2">
           {/* Barra de control compacta y desplegable */}
-          <div className="flex items-center justify-between gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900/90 border border-zinc-800 text-xs shadow-xs">
+          <div className="flex items-center justify-between gap-x-1.5 px-2 py-1 rounded-lg bg-zinc-900/90 border border-zinc-800 text-xs shadow-xs overflow-x-auto no-scrollbar">
             {/* Selector interactivo de Cuenta, Modelo y Rol arriba en la sección compacta */}
-            <div className="flex items-center gap-1.5 min-w-0">
+            <div className="flex items-center gap-1.5 min-w-0 shrink-0">
               <AccountBar
                 sessionId={sessionId}
                 accounts={state.accounts}
@@ -378,6 +436,64 @@ export const ChatView: React.FC<Props> = ({ state, session, focusMode, dispatch,
                 compact={true}
               />
             </div>
+
+            {embedded && (
+              <div className="relative shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setIsEmbeddedToolsOpen(!isEmbeddedToolsOpen)}
+                  className={`p-1 rounded transition border cursor-pointer ${
+                    isEmbeddedToolsOpen
+                      ? 'bg-zinc-700 text-zinc-100 border-zinc-600'
+                      : 'bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 border-zinc-700/60'
+                  }`}
+                  title="Opciones de la sesión (Permisos, Renombrar, Exportar)"
+                >
+                  <SlidersHorizontal className="w-3 h-3 text-zinc-400" />
+                </button>
+                {isEmbeddedToolsOpen && (
+                  <div className="absolute right-0 top-full mt-1 w-52 bg-zinc-900 border border-zinc-750 rounded-lg shadow-2xl p-2.5 z-40 space-y-2 text-xs animate-in fade-in zoom-in-95">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] text-zinc-400">Permisos:</span>
+                      <select
+                        value={session.permission ?? 'full'}
+                        onChange={(e) => {
+                          postToHost({ command: 'updateSession', sessionId, patch: { permission: e.target.value as SessionPermission } });
+                        }}
+                        className="text-[11px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-200 border border-zinc-700"
+                      >
+                        <option value="full">Completo</option>
+                        <option value="readonly">Solo lectura</option>
+                      </select>
+                    </div>
+                    <div className="flex items-center gap-1.5 pt-1.5 border-t border-zinc-800">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRenaming(session.title);
+                          setIsEmbeddedToolsOpen(false);
+                        }}
+                        className="flex-1 flex items-center justify-center gap-1 py-1 rounded bg-zinc-800 hover:bg-zinc-750 text-zinc-300 text-[11px]"
+                      >
+                        <Pencil className="w-3 h-3 text-cyan-400" />
+                        <span>Renombrar</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          postToHost({ command: 'exportSession', sessionId, format: 'markdown' });
+                          setIsEmbeddedToolsOpen(false);
+                        }}
+                        className="p-1 rounded bg-zinc-800 hover:bg-zinc-750 text-zinc-300 text-[11px]"
+                        title="Exportar Markdown"
+                      >
+                        <Download className="w-3 h-3 text-indigo-400" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Métricas clave y botón desplegar */}
             <div className="flex items-center gap-1.5 shrink-0">
@@ -597,7 +713,7 @@ export const ChatView: React.FC<Props> = ({ state, session, focusMode, dispatch,
       ) : (
       <Editor
         focusTick={state.focusComposerTick}
-        attachments={state.attachments}
+        attachments={attachments}
         workspaceFiles={state.workspaceFiles}
         composerText={state.composerText}
         sessionId={sessionId}

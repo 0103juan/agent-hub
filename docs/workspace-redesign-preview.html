@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rediseño Visual de AgentHub · Conversación Única vs Multi-Columna &amp; Colas con Adjuntos</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            zinc: {
+              750: '#232328',
+              850: '#1f1f23',
+              900: '#18181b',
+              950: '#09090b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    code, pre { font-family: 'JetBrains Mono', monospace; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    @keyframes wave {
+      0%, 100% { height: 6px; }
+      50% { height: 20px; }
+    }
+    .wave-bar { animation: wave 1.2s ease-in-out infinite; }
+    .wave-bar:nth-child(2) { animation-delay: 0.2s; }
+    .wave-bar:nth-child(3) { animation-delay: 0.4s; }
+    .wave-bar:nth-child(4) { animation-delay: 0.6s; }
+    .wave-bar:nth-child(5) { animation-delay: 0.8s; }
+  </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen antialiased selection:bg-indigo-500/30 selection:text-indigo-300">
+
+  <!-- Header del Prototipo -->
+  <header class="border-b border-zinc-800 bg-zinc-950/90 backdrop-blur sticky top-0 z-50 px-6 py-3">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-bold text-sm">
+          UI
+        </div>
+        <div>
+          <h1 class="text-sm font-bold text-white flex items-center gap-2">
+            <span>Rediseño de Espacio de Trabajo &amp; Colas</span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800 font-mono">v0.1.2 Prototipo Real</span>
+          </h1>
+          <p class="text-[11px] text-zinc-400">Optimizando altura vertical en columnas, colas con fotos y dictado sin Windows Voice</p>
+        </div>
+      </div>
+
+      <!-- Selector interactivo de vista -->
+      <div class="flex items-center bg-zinc-900 p-1 rounded-xl border border-zinc-800 text-xs">
+        <button id="btn-split" onclick="switchView('split')" class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-medium transition shadow">
+          Vista Varias Columnas (Split 3x)
+        </button>
+        <button id="btn-single" onclick="switchView('single')" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-200 transition">
+          Vista 1 Conversación (Full)
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-6 py-8 space-y-10">
+
+    <!-- Tarjetas de diagnóstico de los 3 problemas resueltos -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+      <div class="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 space-y-1.5">
+        <span class="font-bold text-amber-400 flex items-center gap-1.5 text-sm">
+          <span>📐</span> 1. Headers y Toolbars Unificados
+        </span>
+        <p class="text-zinc-400">En la captura, cada columna gastaba 3 filas de header y 2 filas de acciones sobre el composer (más de 180px de altura perdida). Ahora se consolidan en <strong>1 sola fila</strong> sin saltos.</p>
+      </div>
+
+      <div class="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 space-y-1.5">
+        <span class="font-bold text-purple-400 flex items-center gap-1.5 text-sm">
+          <span>📎</span> 2. Colas con Vista Previa de Adjuntos
+        </span>
+        <p class="text-zinc-400">Antes la cola solo mostraba una línea de texto plano y el backend descartaba las imágenes. Ahora cada mensaje en cola tiene <strong>miniaturas de fotos, chips de archivos</strong> y botón para editar.</p>
+      </div>
+
+      <div class="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 space-y-1.5">
+        <span class="font-bold text-rose-400 flex items-center gap-1.5 text-sm">
+          <span>🎙️</span> 3. Dictado Nativo sin Windows Voice
+        </span>
+        <p class="text-zinc-400">Se eliminó el script de simulación <code>Win+H</code>. Ahora graba directamente desde el micrófono del navegador con indicador de ondas en vivo y adjunta la nota de voz para el modelo multimodal.</p>
+      </div>
+    </div>
+
+    <!-- ==================== VISTA MULTI-COLUMNA (SPLIT 3x) ==================== -->
+    <div id="view-split" class="space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-base font-bold text-white flex items-center gap-2">
+            <span>🪟</span> Modo Dividido: 3 Columnas Optimizadas
+          </h2>
+          <p class="text-xs text-zinc-400">Cada columna tiene cabecera y barra de herramientas en 1 sola línea horizontal, ahorrando 55px por columna</p>
+        </div>
+        <span class="text-xs px-2.5 py-1 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 font-mono">Ancho ~380px por columna</span>
+      </div>
+
+      <!-- Contenedor 3 Columnas -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+
+        <!-- COLUMNA 1: Con Cola Activa y Adjuntos -->
+        <div class="rounded-xl border border-zinc-800 bg-zinc-950 flex flex-col h-[680px] shadow-2xl overflow-hidden">
+          <!-- Cabecera de Columna Fila 1 -->
+          <div class="flex items-center justify-between px-3 py-1.5 bg-zinc-900/90 border-b border-zinc-800 text-[11px]">
+            <div class="flex items-center gap-1.5 truncate">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+              <span class="font-mono text-zinc-500">1</span>
+              <span class="font-semibold text-zinc-200 truncate">Quiero mejorar la interfaz...</span>
+              <span class="px-1.5 py-0.2 rounded bg-zinc-800 text-zinc-400 font-mono text-[10px]">agent-hub</span>
+            </div>
+            <div class="flex items-center gap-1 text-zinc-400 shrink-0">
+              <span class="px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-300 font-mono text-[10px] border border-emerald-500/20">✓ main</span>
+              <button class="p-1 hover:text-zinc-200">↗</button>
+              <button class="p-1 hover:text-zinc-200">✕</button>
+            </div>
+          </div>
+
+          <!-- Cabecera de Columna Fila 2: Control Bar Unificada en 1 sola fila -->
+          <div class="flex items-center justify-between gap-1.5 px-2.5 py-1 bg-zinc-900/40 border-b border-zinc-800/80 text-xs overflow-x-auto no-scrollbar">
+            <div class="flex items-center gap-1.5 shrink-0">
+              <!-- Cuenta & Modelo -->
+              <span class="px-2 py-0.5 rounded bg-zinc-850 border border-zinc-750 text-[11px] text-zinc-300 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+                Gemini 3.8 Flash
+              </span>
+              <!-- Rol -->
+              <span class="px-2 py-0.5 rounded bg-purple-500/10 border border-purple-500/30 text-purple-300 text-[11px] font-medium">
+                Diseñador
+              </span>
+            </div>
+            <!-- Opciones Compactas & Métricas -->
+            <div class="flex items-center gap-1.5 shrink-0 ml-auto">
+              <div class="px-1.5 py-0.5 rounded bg-zinc-850 border border-zinc-750 font-mono text-[10px] text-zinc-300 flex items-center gap-1">
+                <span>⚡ 1%</span>
+                <span class="text-emerald-400 font-semibold">• $0.85</span>
+              </div>
+              <!-- Botón Más Opciones (Permisos, Renombrar, Exportar) -->
+              <button class="p-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700/60" title="Permisos, Renombrar, Exportar">
+                ⚙️
+              </button>
+            </div>
+          </div>
+
+          <!-- Mensajes del Chat -->
+          <div class="flex-1 p-3 overflow-y-auto space-y-3 text-xs">
+            <div class="p-2.5 rounded-lg bg-zinc-900/60 border border-zinc-850 space-y-1">
+              <div class="flex items-center justify-between text-[10px] text-zinc-400">
+                <span class="font-bold text-indigo-400">Claude Sonnet 3.5</span>
+                <span>12:44</span>
+              </div>
+              <p class="text-zinc-300 leading-relaxed">
+                El endpoint <code class="text-emerald-300">validate</code> quedó implementado en <code class="text-purple-300">SESV-121-endpoint-validate</code> con dos commits limpios y tests pasando.
+              </p>
+            </div>
+            <div class="p-2.5 rounded-lg bg-indigo-950/20 border border-indigo-500/20 text-right space-y-1 ml-6">
+              <span class="text-[10px] text-indigo-400 block font-semibold">Tú</span>
+              <p class="text-zinc-200">Aplica el arreglo y sube el PR.</p>
+            </div>
+          </div>
+
+          <!-- Footer y Composer -->
+          <div class="p-2.5 bg-zinc-900/80 border-t border-zinc-800 space-y-2">
+
+            <!-- NUEVA VISTA DE COLA CON ARCHIVOS ADJUNTOS -->
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between text-[11px] px-1">
+                <span class="font-bold flex items-center gap-1.5 text-amber-400">
+                  <span>⏱️</span> Mensajes en cola (2)
+                </span>
+                <span class="text-[10px] text-zinc-500">Se ejecutan al terminar el turno</span>
+              </div>
+
+              <!-- Tarjeta en cola 1: Con archivo adjunto e imagen -->
+              <div class="p-2 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition space-y-1.5 shadow-sm">
+                <div class="flex items-center justify-between gap-1.5">
+                  <div class="flex items-center gap-1.5 min-w-0">
+                    <span class="px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono text-[9px] font-bold border border-amber-500/40">#1</span>
+                    <span class="text-[11px] text-zinc-200 truncate font-medium">Hay veces que dice que va a reportar y no reporta...</span>
+                  </div>
+                  <div class="flex items-center gap-1 shrink-0">
+                    <button class="p-1 rounded text-zinc-400 hover:text-zinc-200" title="Subir texto al borrador">↖</button>
+                    <button class="p-1 rounded text-zinc-400 hover:text-rose-400" title="Quitar de cola">✕</button>
+                  </div>
+                </div>
+                <!-- Miniatura de Imagen Adjunta en la Cola -->
+                <div class="flex items-center gap-2 pt-1 border-t border-zinc-800/60">
+                  <div class="flex items-center gap-1.5 px-2 py-0.5 rounded bg-zinc-950 border border-zinc-800 text-[10px] text-zinc-300">
+                    <div class="w-4 h-4 rounded bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-[9px]">🖼️</div>
+                    <span class="truncate max-w-[130px]">1794418842850-image.png</span>
+                  </div>
+                  <span class="text-[10px] text-zinc-500">1 imagen</span>
+                </div>
+              </div>
+
+              <!-- Tarjeta en cola 2 -->
+              <div class="p-2 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition space-y-1.5 shadow-sm">
+                <div class="flex items-center justify-between gap-1.5">
+                  <div class="flex items-center gap-1.5 min-w-0">
+                    <span class="px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono text-[9px] font-bold border border-amber-500/40">#2</span>
+                    <span class="text-[11px] text-zinc-200 truncate font-medium">Mira si se puede aplicar el organic driven development...</span>
+                  </div>
+                  <div class="flex items-center gap-1 shrink-0">
+                    <button class="p-1 rounded text-zinc-400 hover:text-zinc-200" title="Subir texto al borrador">↖</button>
+                    <button class="p-1 rounded text-zinc-400 hover:text-rose-400" title="Quitar de cola">✕</button>
+                  </div>
+                </div>
+                <!-- Adjuntos: 2 capturas -->
+                <div class="flex items-center gap-1.5 pt-1 border-t border-zinc-800/60">
+                  <div class="flex items-center gap-1 px-1.5 py-0.5 rounded bg-zinc-950 border border-zinc-800 text-[10px] text-zinc-300">
+                    <span>🖼️</span>
+                    <span class="truncate max-w-[90px]">flujo-odd.png</span>
+                  </div>
+                  <div class="flex items-center gap-1 px-1.5 py-0.5 rounded bg-zinc-950 border border-zinc-800 text-[10px] text-zinc-300">
+                    <span>🖼️</span>
+                    <span class="truncate max-w-[90px]">gentle-ai.png</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Toolbar de Acciones en 1 SOLA FILA con scroll horizontal suave -->
+            <div class="flex items-center justify-between gap-1 text-[11px] overflow-x-auto no-scrollbar py-0.5">
+              <div class="flex items-center gap-1 shrink-0">
+                <button class="px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-750 text-zinc-300 flex items-center gap-1 border border-zinc-700/60">
+                  <span>📎</span> Contexto
+                </button>
+                <button class="px-2 py-0.5 rounded bg-pink-950/40 text-pink-300 hover:bg-pink-900/50 flex items-center gap-1 border border-pink-700/50">
+                  <span>📁</span> Archivos
+                </button>
+                <button class="px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-750 text-zinc-300 flex items-center gap-1 border border-zinc-700/60">
+                  <span>±</span> Diff
+                </button>
+                <button class="px-2 py-0.5 rounded bg-amber-950/30 text-amber-300 hover:bg-amber-900/40 flex items-center gap-1 border border-amber-700/40">
+                  <span>⚠️</span> Problemas
+                </button>
+              </div>
+              <div class="flex items-center gap-1 shrink-0 ml-auto">
+                <button class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1 font-medium">
+                  <span>▶</span> Test
+                </button>
+                <button class="px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/30 flex items-center gap-1 font-medium">
+                  <span>⚡</span> Flujos
+                </button>
+              </div>
+            </div>
+
+            <!-- Caja de Texto del Composer -->
+            <div class="p-2 rounded-xl bg-zinc-950 border border-zinc-800 focus-within:border-indigo-500 space-y-1.5">
+              <textarea placeholder="Pregunta a Gemini 3.8 Flash, @ para agentes, / para comandos..." rows="2" class="w-full bg-transparent text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none resize-none"></textarea>
+              <div class="flex items-center justify-between pt-1 border-t border-zinc-850 text-[11px]">
+                <span class="text-zinc-500 text-[10px]">Enter para enviar · Mayús+Enter salto</span>
+                <div class="flex items-center gap-1.5">
+                  <button class="px-2 py-1 rounded bg-zinc-850 hover:bg-zinc-800 text-zinc-300 border border-zinc-750 flex items-center gap-1 text-[11px]" title="Modo Loop continuo">
+                    <span>🔁</span> Loop
+                  </button>
+                  <!-- Botón Dictar Nativo -->
+                  <button onclick="demoRecording(this)" class="px-2 py-1 rounded bg-zinc-850 hover:bg-zinc-800 text-indigo-300 border border-zinc-750 flex items-center gap-1 text-[11px] transition" title="Dictar por voz con micrófono">
+                    <span>🎙️</span> Dictar
+                  </button>
+                  <button class="px-2.5 py-1 rounded bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-[11px] shadow">
+                    Enviar
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- COLUMNA 2: En Grabación de Voz Nativa -->
+        <div class="rounded-xl border border-zinc-800 bg-zinc-950 flex flex-col h-[680px] shadow-2xl overflow-hidden">
+          <div class="flex items-center justify-between px-3 py-1.5 bg-zinc-900/90 border-b border-zinc-800 text-[11px]">
+            <div class="flex items-center gap-1.5 truncate">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+              <span class="font-mono text-zinc-500">2</span>
+              <span class="font-semibold text-zinc-200 truncate">Revisa las tareas pendientes que tengo...</span>
+              <span class="px-1.5 py-0.2 rounded bg-zinc-800 text-zinc-400 font-mono text-[10px]">seizTwo-embargos</span>
+            </div>
+            <div class="flex items-center gap-1 text-zinc-400 shrink-0">
+              <span class="px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-300 font-mono text-[10px] border border-emerald-500/20">✓ develop</span>
+              <button class="p-1 hover:text-zinc-200">↗</button>
+              <button class="p-1 hover:text-zinc-200">✕</button>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between gap-1.5 px-2.5 py-1 bg-zinc-900/40 border-b border-zinc-800/80 text-xs overflow-x-auto no-scrollbar">
+            <div class="flex items-center gap-1.5 shrink-0">
+              <span class="px-2 py-0.5 rounded bg-zinc-850 border border-zinc-750 text-[11px] text-zinc-300 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                Claude Sonnet 3.5
+              </span>
+              <span class="px-2 py-0.5 rounded bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-[11px] font-medium">
+                Coordinador
+              </span>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0 ml-auto">
+              <div class="px-1.5 py-0.5 rounded bg-zinc-850 border border-zinc-750 font-mono text-[10px] text-zinc-300 flex items-center gap-1">
+                <span>⚡ 2%</span>
+                <span class="text-emerald-400 font-semibold">• $2.93</span>
+              </div>
+              <button class="p-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700/60">⚙️</button>
+            </div>
+          </div>
+
+          <div class="flex-1 p-3 overflow-y-auto space-y-3 text-xs">
+            <div class="p-2.5 rounded-lg bg-zinc-900/60 border border-zinc-850 space-y-2">
+              <span class="font-bold text-amber-400 text-[10px]">Claude Sonnet 3.5 COORDINADOR</span>
+              <p class="text-zinc-300">
+                Se detectó una discrepancia en el endpoint de validación. ¿Deseas que apunte a <code class="text-cyan-300">/documents/{id}/finalize</code> o que cree un handler independiente para extracciones?
+              </p>
+              <div class="flex flex-wrap gap-1.5 pt-1">
+                <button class="px-2 py-1 rounded bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/40 text-[11px]">A: Apuntar a documents/finalize</button>
+                <button class="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 text-[11px]">B: Crear handler dedicado</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer con Módulo de Grabación de Voz Activa -->
+          <div class="p-2.5 bg-zinc-900/80 border-t border-zinc-800 space-y-2">
+            <!-- BANNER DE DICTADO NATIVO ACTIVO -->
+            <div class="p-2.5 rounded-xl bg-rose-950/30 border border-rose-500/40 text-xs space-y-2 animate-in fade-in">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span>
+                  <span class="font-bold text-rose-300">Grabando dictado nativo</span>
+                  <span class="font-mono text-zinc-400 text-[11px]">00:08</span>
+                </div>
+                <!-- Animación de ondas de audio -->
+                <div class="flex items-center gap-0.5 h-5 px-2">
+                  <div class="w-1 bg-rose-400 rounded-full wave-bar"></div>
+                  <div class="w-1 bg-rose-400 rounded-full wave-bar"></div>
+                  <div class="w-1 bg-rose-400 rounded-full wave-bar"></div>
+                  <div class="w-1 bg-rose-400 rounded-full wave-bar"></div>
+                  <div class="w-1 bg-rose-400 rounded-full wave-bar"></div>
+                </div>
+              </div>
+              <div class="flex items-center justify-between text-[11px]">
+                <span class="text-zinc-400">Sin ventanas de Windows Voice • Audio directo al modelo</span>
+                <div class="flex items-center gap-1.5">
+                  <button class="px-2 py-0.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs">✓ Listo</button>
+                  <button class="px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-400 text-xs">✕</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Toolbar 1 fila -->
+            <div class="flex items-center justify-between gap-1 text-[11px] overflow-x-auto no-scrollbar py-0.5">
+              <div class="flex items-center gap-1 shrink-0">
+                <button class="px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700/60">📎 Contexto</button>
+                <button class="px-2 py-0.5 rounded bg-pink-950/40 text-pink-300 border border-pink-700/50">📁 Archivos</button>
+                <button class="px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700/60">± Diff</button>
+              </div>
+              <div class="flex items-center gap-1 shrink-0 ml-auto">
+                <button class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-medium">▶ Test</button>
+                <button class="px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/30 font-medium">⚡ Flujos</button>
+              </div>
+            </div>
+
+            <div class="p-2 rounded-xl bg-zinc-950 border border-zinc-800 space-y-1.5">
+              <textarea placeholder="Dictando: 'Elige la opción B y pásasela al Desarrollador para que termine...'" rows="2" class="w-full bg-transparent text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none resize-none"></textarea>
+              <div class="flex items-center justify-between pt-1 border-t border-zinc-850 text-[11px]">
+                <span class="text-zinc-500 text-[10px]">Enter para enviar</span>
+                <button class="px-2.5 py-1 rounded bg-indigo-600 text-white font-medium text-[11px]">Enviar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- COLUMNA 3: Desarrollador Ejecutando -->
+        <div class="rounded-xl border border-zinc-800 bg-zinc-950 flex flex-col h-[680px] shadow-2xl overflow-hidden">
+          <div class="flex items-center justify-between px-3 py-1.5 bg-zinc-900/90 border-b border-zinc-800 text-[11px]">
+            <div class="flex items-center gap-1.5 truncate">
+              <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+              <span class="font-mono text-zinc-500">3</span>
+              <span class="font-semibold text-zinc-200 truncate">Revisa la tarea de soporte SA-85...</span>
+              <span class="px-1.5 py-0.2 rounded bg-zinc-800 text-zinc-400 font-mono text-[10px]">finesa-extraccion</span>
+            </div>
+            <div class="flex items-center gap-1 text-zinc-400 shrink-0">
+              <span class="px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-300 font-mono text-[10px] border border-emerald-500/20">✓ develop</span>
+              <button class="p-1 hover:text-zinc-200">↗</button>
+              <button class="p-1 hover:text-zinc-200">✕</button>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between gap-1.5 px-2.5 py-1 bg-zinc-900/40 border-b border-zinc-800/80 text-xs overflow-x-auto no-scrollbar">
+            <div class="flex items-center gap-1.5 shrink-0">
+              <span class="px-2 py-0.5 rounded bg-zinc-850 border border-zinc-750 text-[11px] text-zinc-300 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+                Claude Opus 5.5
+              </span>
+              <span class="px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-[11px] font-medium">
+                Desarrollador
+              </span>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0 ml-auto">
+              <div class="px-1.5 py-0.5 rounded bg-zinc-850 border border-zinc-750 font-mono text-[10px] text-zinc-300 flex items-center gap-1">
+                <span>⚡ 2%</span>
+                <span class="text-emerald-400 font-semibold">• $2.05</span>
+              </div>
+              <button class="p-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700/60">⚙️</button>
+            </div>
+          </div>
+
+          <div class="flex-1 p-3 overflow-y-auto space-y-3 text-xs">
+            <div class="p-2.5 rounded-lg bg-zinc-900/90 border border-zinc-800 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="font-semibold text-emerald-400 flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                  Ejecución activa
+                </span>
+                <span class="font-mono text-zinc-400 text-[10px]">0:27 · 12:44</span>
+              </div>
+              <div class="p-2 rounded bg-zinc-950 font-mono text-[11px] text-zinc-300 space-y-1">
+                <div class="text-indigo-400">$ ./gradlew :api-rest:test --continue</div>
+                <div class="text-zinc-500 text-[10px]">> Task :api-rest:test PASSED</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-2.5 bg-zinc-900/80 border-t border-zinc-800 space-y-2">
+            <div class="flex items-center justify-between gap-1 text-[11px] overflow-x-auto no-scrollbar py-0.5">
+              <div class="flex items-center gap-1 shrink-0">
+                <button class="px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700/60">📎 Contexto</button>
+                <button class="px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700/60">± Diff</button>
+              </div>
+              <div class="flex items-center gap-1 shrink-0 ml-auto">
+                <button class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-medium">▶ Test</button>
+              </div>
+            </div>
+
+            <div class="p-2 rounded-xl bg-zinc-950 border border-zinc-800 space-y-1.5">
+              <textarea placeholder="El agente está ejecutando. Lo que escribas se encolará..." rows="2" class="w-full bg-transparent text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none resize-none"></textarea>
+              <div class="flex items-center justify-between pt-1 border-t border-zinc-850 text-[11px]">
+                <span class="text-amber-400 text-[10px] font-medium">Turno en ejecución</span>
+                <div class="flex items-center gap-1.5">
+                  <button class="px-2.5 py-1 rounded bg-rose-600 hover:bg-rose-500 text-white font-medium text-[11px]">Detener</button>
+                  <button class="px-2.5 py-1 rounded bg-indigo-600/60 text-white font-medium text-[11px]">En cola</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ==================== VISTA CONVERSACIÓN ÚNICA (FULL) ==================== -->
+    <div id="view-single" class="space-y-4 hidden">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-base font-bold text-white flex items-center gap-2">
+            <span>💬</span> Modo Individual (1 Conversación)
+          </h2>
+          <p class="text-xs text-zinc-400">Header espacioso con proyecto, rama, selectores alineados y toolbar inferior completa</p>
+        </div>
+      </div>
+
+      <div class="rounded-2xl border border-zinc-800 bg-zinc-950 max-w-4xl mx-auto shadow-2xl overflow-hidden flex flex-col h-[720px]">
+        <!-- Header Unificado Espacioso -->
+        <div class="p-3.5 bg-zinc-900/90 border-b border-zinc-800 flex items-center justify-between gap-4">
+          <div class="flex items-center gap-3 min-w-0">
+            <span class="w-3 h-3 rounded-full bg-emerald-400 shrink-0"></span>
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-white text-sm truncate">SESV-121 Implementar endpoint de validación</span>
+                <span class="px-2 py-0.5 rounded bg-zinc-800 border border-zinc-750 text-zinc-300 font-mono text-xs">seizTwo-embargos-back</span>
+              </div>
+              <span class="text-[11px] text-zinc-400">Rama activa: <strong class="text-emerald-300 font-mono">SESV-121-endpoint-validate</strong></span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 shrink-0">
+            <span class="px-2.5 py-1 rounded bg-zinc-850 border border-zinc-750 text-xs text-zinc-200 font-medium">Claude Sonnet 3.5</span>
+            <span class="px-2.5 py-1 rounded bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-medium">Coordinador</span>
+            <span class="px-2 py-1 rounded bg-zinc-850 border border-zinc-750 font-mono text-xs text-emerald-400 font-bold">$2.93</span>
+            <button class="px-2.5 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 text-xs font-medium">Exportar</button>
+          </div>
+        </div>
+
+        <!-- Área de Chat -->
+        <div class="flex-1 p-6 overflow-y-auto space-y-4 text-sm">
+          <div class="p-4 rounded-xl bg-zinc-900/60 border border-zinc-850 space-y-2 max-w-2xl">
+            <div class="flex items-center justify-between text-xs text-zinc-400">
+              <span class="font-bold text-amber-400">Claude Sonnet 3.5 COORDINADOR</span>
+              <span>12:44</span>
+            </div>
+            <p class="text-zinc-300 leading-relaxed">
+              El Desarrollador completó la validación del endpoint con tests MockMvc en verde. Commit <code>bd453e6</code> listo en local.
+            </p>
+          </div>
+        </div>
+
+        <!-- Composer Inferior con Cola y Toolbar en 1 Fila -->
+        <div class="p-4 bg-zinc-900/90 border-t border-zinc-800 space-y-3">
+          <!-- Toolbar en 1 Sola Fila -->
+          <div class="flex items-center justify-between text-xs border-b border-zinc-800/80 pb-2">
+            <div class="flex items-center gap-2">
+              <button class="px-2.5 py-1 rounded bg-zinc-800 hover:bg-zinc-750 text-zinc-300 border border-zinc-700/60 flex items-center gap-1.5">
+                <span>📎</span> Adjuntar Contexto
+              </button>
+              <button class="px-2.5 py-1 rounded bg-pink-950/40 text-pink-300 hover:bg-pink-900/50 border border-pink-700/50 flex items-center gap-1.5">
+                <span>📁</span> Archivos del Proyecto
+              </button>
+              <button class="px-2.5 py-1 rounded bg-zinc-800 hover:bg-zinc-750 text-zinc-300 border border-zinc-700/60 flex items-center gap-1.5">
+                <span>±</span> Git Diff
+              </button>
+              <button class="px-2.5 py-1 rounded bg-amber-950/30 text-amber-300 hover:bg-amber-900/40 border border-amber-700/40 flex items-center gap-1.5">
+                <span>⚠️</span> Problemas (0)
+              </button>
+            </div>
+            <div class="flex items-center gap-2">
+              <button class="px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-medium">▶ Correr Tests</button>
+              <button class="px-2.5 py-1 rounded bg-purple-500/10 text-purple-300 border border-purple-500/30 font-medium">⚡ Flujos de Automatización</button>
+            </div>
+          </div>
+
+          <!-- Textarea Composer -->
+          <div class="p-3 rounded-xl bg-zinc-950 border border-zinc-800 focus-within:border-indigo-500 space-y-2">
+            <textarea placeholder="Escribe tu instrucción o pregunta a Claude Sonnet 3.5..." rows="3" class="w-full bg-transparent text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none resize-none"></textarea>
+            <div class="flex items-center justify-between pt-2 border-t border-zinc-850 text-xs">
+              <span class="text-zinc-500">Enter para enviar · Mayús+Enter para nueva línea</span>
+              <div class="flex items-center gap-2">
+                <button class="px-3 py-1 rounded-lg bg-zinc-850 hover:bg-zinc-800 text-zinc-300 border border-zinc-750">🔁 Loop</button>
+                <button class="px-3 py-1 rounded-lg bg-zinc-850 hover:bg-zinc-800 text-indigo-300 border border-zinc-750 flex items-center gap-1.5">
+                  <span>🎙️</span> Dictar Voz Nativo
+                </button>
+                <button class="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow">Enviar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    function switchView(mode) {
+      const splitView = document.getElementById('view-split');
+      const singleView = document.getElementById('view-single');
+      const btnSplit = document.getElementById('btn-split');
+      const btnSingle = document.getElementById('btn-single');
+
+      if (mode === 'split') {
+        splitView.classList.remove('hidden');
+        singleView.classList.add('hidden');
+        btnSplit.className = 'px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-medium transition shadow';
+        btnSingle.className = 'px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-200 transition';
+      } else {
+        splitView.classList.add('hidden');
+        singleView.classList.remove('hidden');
+        btnSingle.className = 'px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-medium transition shadow';
+        btnSplit.className = 'px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-200 transition';
+      }
+    }
+
+    function demoRecording(btn) {
+      alert("Demostración de grabación: Inicia captura de micrófono nativo con MediaRecorder sin llamar a Windows Voice ni abrir popups externos.");
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,1673 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgentHub — Tactical Command Center (100% Feature-Complete)</title>
+  <style>
+    :root {
+      --bg: #07090e;
+      --surface: #0e131f;
+      --surface-2: #141b2b;
+      --surface-3: #1a2337;
+      --border: #202b3f;
+      --border-hi: rgba(245, 158, 11, 0.65);
+      --border-cyan: rgba(56, 189, 248, 0.45);
+      --text: #f3f6fc;
+      --muted: #94a3b8;
+      --dim: #60718a;
+      --amber: #f59e0b;
+      --amber-glow: rgba(245, 158, 11, 0.25);
+      --amber-soft: rgba(245, 158, 11, 0.12);
+      --blue: #3b82f6;
+      --cyan: #38bdf8;
+      --cyan-soft: rgba(56, 189, 248, 0.14);
+      --blue-soft: rgba(59, 130, 246, 0.14);
+      --rose: #f43f5e;
+      --rose-soft: rgba(244, 63, 94, 0.14);
+      --emerald: #10b981;
+      --emerald-soft: rgba(16, 185, 129, 0.14);
+      --indigo: #6366f1;
+      --purple: #c084fc;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background:
+        radial-gradient(circle at 50% 18%, rgba(245, 158, 11, 0.08), transparent 40%),
+        radial-gradient(circle at 85% 75%, rgba(56, 189, 248, 0.05), transparent 40%),
+        radial-gradient(#1a2335 1px, transparent 1px),
+        var(--bg);
+      background-size: 100% 100%, 100% 100%, 22px 22px, 100% 100%;
+      color: var(--text);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      user-select: none;
+    }
+
+    body[data-density="compact"] { font-size: 11px; }
+    body[data-density="compact"] .chip { padding: 2px 7px; font-size: 10.5px; }
+    body[data-density="compact"] .topbar { padding: 4px 10px; }
+
+    .mono {
+      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* TOPBAR COMPLETA */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 6px 14px;
+      background: rgba(14, 19, 31, 0.96);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      z-index: 30;
+      flex-wrap: wrap;
+    }
+
+    .top-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .brand-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      padding-right: 8px;
+      border-right: 1px solid var(--border);
+    }
+
+    .brand-mark {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      background: linear-gradient(135deg, var(--amber), #b45309);
+      display: grid;
+      place-items: center;
+      color: #07090e;
+      font-weight: 900;
+      font-size: 12px;
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.5);
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 9px;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text);
+      font-size: 11.5px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .chip:hover { border-color: #3b4c6e; background: var(--surface-3); }
+    .chip.amber { border-color: var(--border-hi); background: var(--amber-soft); color: #fde68a; }
+    .chip.emerald { border-color: rgba(16, 185, 129, 0.45); background: var(--emerald-soft); color: #6ee7b7; }
+    .chip.blue { border-color: rgba(59, 130, 246, 0.45); background: var(--blue-soft); color: #93c5fd; }
+    .chip.cyan { border-color: var(--border-cyan); background: var(--cyan-soft); color: #7dd3fc; }
+    .chip.purple { border-color: rgba(192, 132, 252, 0.45); background: rgba(192, 132, 252, 0.12); color: #d8b4fe; }
+    .chip.rose { border-color: rgba(244, 63, 94, 0.45); background: var(--rose-soft); color: #fda4af; }
+    .chip.active { border-color: var(--amber); background: rgba(245, 158, 11, 0.2); }
+
+    .icon-btn {
+      padding: 5px 7px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--muted);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      transition: all 0.15s;
+      position: relative;
+    }
+    .icon-btn:hover { background: var(--surface-3); color: var(--text); border-color: #475569; }
+    .icon-btn.active { background: rgba(99, 102, 241, 0.2); color: #a5b4fc; border-color: var(--indigo); }
+    .icon-btn.has-badge::after {
+      content: attr(data-badge);
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background: var(--amber);
+      color: #07090e;
+      font-size: 9px;
+      font-weight: 800;
+      padding: 1px 4px;
+      border-radius: 10px;
+      line-height: 1;
+    }
+
+    .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+    .dot.green { background: var(--emerald); box-shadow: 0 0 8px var(--emerald); }
+    .dot.amber { background: var(--amber); box-shadow: 0 0 8px var(--amber); }
+    .dot.blue { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+    .dot.pulse { animation: pulseAnim 1.4s infinite; }
+    @keyframes pulseAnim { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.2); } }
+
+    /* NAVEGACIÓN PRINCIPAL: 7 TABS + HUD CENTER */
+    .nav-tabs {
+      display: inline-flex;
+      background: #090d15;
+      padding: 3px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      gap: 2px;
+    }
+
+    .nav-tab {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      padding: 5px 10px;
+      font-size: 11.5px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .nav-tab:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+    .nav-tab.active {
+      background: linear-gradient(135deg, #25334e, #182236);
+      color: #fde68a;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+    .nav-tab .tab-key {
+      font-size: 9.5px;
+      color: var(--dim);
+      background: rgba(0,0,0,0.3);
+      padding: 1px 4px;
+      border-radius: 4px;
+    }
+
+    /* FRANJA DE AGENTES EN EJECUCIÓN */
+    .agents-strip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 14px;
+      background: #080b12;
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+      font-size: 11px;
+    }
+    .strip-label { color: var(--dim); font-weight: 700; letter-spacing: 0.05em; white-space: nowrap; }
+    .agent-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 9px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .agent-pill:hover { border-color: var(--border-hi); transform: translateY(-1px); }
+    .agent-pill.running { border-color: rgba(245, 158, 11, 0.5); background: rgba(245, 158, 11, 0.08); }
+
+    /* BARRA SPLIT & BROADCAST */
+    .split-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 5px 14px;
+      background: #0a0e18;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .split-layout-btns {
+      display: flex;
+      gap: 2px;
+      background: #06080e;
+      padding: 2px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+    .split-layout-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      padding: 3px 7px;
+      font-size: 11px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .split-layout-btn.active { background: var(--surface-3); color: var(--cyan); font-weight: bold; }
+    .broadcast-box {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex: 1;
+      max-width: 480px;
+    }
+    .broadcast-input {
+      flex: 1;
+      background: #07090f;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 8px;
+      color: var(--text);
+      font-size: 11px;
+      outline: none;
+    }
+    .broadcast-input:focus { border-color: var(--cyan); }
+
+    /* VISTAS */
+    .view-container { flex: 1; display: none; min-height: 0; position: relative; }
+    .view-container.active { display: flex; flex-direction: column; }
+
+    /* VISTA 1: HUD TÁCTICO */
+    .hud-stage {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 310px 1fr 340px;
+      gap: 12px;
+      padding: 12px;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .hud-col { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+    .hud-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 6px;
+    }
+
+    .center-hud-core {
+      background: radial-gradient(circle, #101625 0%, #090d16 80%);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      box-shadow: inset 0 0 40px rgba(245, 158, 11, 0.05);
+    }
+
+    .dial-svg-wrapper {
+      position: relative;
+      width: 250px;
+      height: 250px;
+      display: grid;
+      place-items: center;
+    }
+
+    .dial-center-content { position: absolute; text-align: center; pointer-events: none; }
+    .dial-val {
+      font-size: 42px;
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 0 16px rgba(245, 158, 11, 0.6);
+      line-height: 1;
+    }
+    .dial-sub { font-size: 10px; color: var(--amber); font-weight: 700; letter-spacing: 0.14em; margin-top: 4px; }
+
+    .hud-svg-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .workstations-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 10px;
+      width: 100%;
+    }
+
+    .station-box {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .station-box:hover { border-color: var(--border-hi); background: var(--surface-3); transform: translateY(-2px); }
+    .station-box.active { border-color: var(--amber); box-shadow: 0 0 14px rgba(245, 158, 11, 0.2); }
+
+    .stages-bar { display: flex; gap: 6px; width: 100%; margin-top: 4px; }
+    .stage-item {
+      flex: 1;
+      padding: 6px;
+      background: #090d15;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      text-align: center;
+      font-size: 10px;
+    }
+    .stage-item.completed { border-color: var(--emerald); color: var(--emerald); }
+    .stage-item.active { border-color: var(--amber); background: var(--amber-soft); color: #fde68a; font-weight: bold; }
+
+    /* VISTA 2: MULTI-COLUMN CHAT */
+    .chat-split-view {
+      flex: 1;
+      display: flex;
+      gap: 8px;
+      padding: 8px;
+      overflow-x: auto;
+      background: var(--bg);
+    }
+
+    .chat-col {
+      flex: 1;
+      min-width: 360px;
+      max-width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* DECK DE SESIÓN Y CONTEXTO (TOKENS, PRESUPUESTO, PERMISOS) */
+    .session-deck {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 6px 12px;
+      background: #090d16;
+      border-bottom: 1px solid var(--border);
+      font-size: 11px;
+      flex-wrap: wrap;
+    }
+
+    .context-meter {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10.5px;
+      color: var(--muted);
+    }
+    .context-meter-bar {
+      width: 70px;
+      height: 5px;
+      border-radius: 3px;
+      background: #1e293b;
+      overflow: hidden;
+    }
+    .context-meter-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--emerald), var(--amber));
+    }
+
+    .chat-col-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      padding: 8px 12px;
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 12px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .msg-bubble {
+      max-width: 94%;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 12.5px;
+      line-height: 1.5;
+      position: relative;
+    }
+    .msg-user {
+      align-self: flex-end;
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      border: 1px solid #334155;
+      color: #f8fafc;
+    }
+    .msg-agent {
+      align-self: flex-start;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: #e2e8f0;
+    }
+
+    /* BLOQUES DE PENSAMIENTO (THINKING) */
+    .thinking-box {
+      margin-bottom: 8px;
+      padding: 6px 10px;
+      background: #07090f;
+      border-left: 3px solid var(--purple);
+      border-radius: 4px;
+      font-size: 11px;
+      color: #d8b4fe;
+    }
+
+    /* PREGUNTAS INTERACTIVAS (QUESTION OPTIONS) */
+    .question-prompt-box {
+      margin-top: 8px;
+      padding: 8px 10px;
+      background: #060911;
+      border: 1px solid var(--border-hi);
+      border-radius: 8px;
+    }
+    .question-options-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .q-btn {
+      background: var(--surface-3);
+      border: 1px solid var(--border);
+      color: #fde68a;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .q-btn:hover { background: var(--amber); color: #07090e; }
+
+    /* DIFF LINES EN MENSAJE */
+    .diff-block {
+      margin-top: 8px;
+      background: #05070d;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+    .diff-add { color: #6ee7b7; }
+    .diff-del { color: #fda4af; }
+
+    .msg-tools-box {
+      margin-top: 6px;
+      padding: 6px 10px;
+      background: #070a10;
+      border: 1px solid #1e293b;
+      border-radius: 6px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .msg-actions { display: flex; gap: 4px; margin-top: 6px; opacity: 0.7; }
+    .msg-actions:hover { opacity: 1; }
+    .msg-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-size: 10.5px;
+      cursor: pointer;
+      padding: 2px 5px;
+      border-radius: 4px;
+    }
+    .msg-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+    /* COMPOSER COMPLETO */
+    .col-composer {
+      padding: 8px 10px;
+      background: var(--surface-2);
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    /* BARRA DE HERRAMIENTAS DEL COMPOSER */
+    .composer-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      overflow-x: auto;
+      font-size: 11px;
+      padding-bottom: 2px;
+    }
+
+    /* BANDEJA DE AUTOMATIZACIÓN Y FLUJOS */
+    .composer-flows-tray {
+      padding: 8px 10px;
+      background: #080b13;
+      border: 1px solid rgba(192, 132, 252, 0.4);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 11px;
+    }
+
+    .composer-textarea {
+      width: 100%;
+      min-height: 54px;
+      background: #080b13;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px;
+      color: var(--text);
+      font-size: 12px;
+      resize: vertical;
+      outline: none;
+      font-family: inherit;
+    }
+    .composer-textarea:focus { border-color: var(--border-hi); }
+
+    .composer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* BANNER DE COLA DE MENSAJES (QUEUE) */
+    .queue-banner {
+      padding: 6px 10px;
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+    }
+
+    /* BANNER DE GRABACIÓN DE VOZ */
+    .voice-recording-banner {
+      padding: 6px 10px;
+      background: rgba(244, 63, 94, 0.15);
+      border: 1px solid rgba(244, 63, 94, 0.4);
+      border-radius: 6px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+    }
+    .voice-recording-banner.active { display: flex; }
+
+    /* VISTA 3: DOCS PREVIEW */
+    .docs-view-layout { flex: 1; display: grid; grid-template-columns: 240px 1fr; min-height: 0; }
+    .docs-sidebar { background: #090d16; border-right: 1px solid var(--border); padding: 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+    .docs-main-work { display: flex; flex-direction: column; min-height: 0; background: var(--bg); }
+    .docs-toolbar { display: flex; align-items: center; justify-content: space-between; padding: 6px 12px; background: var(--surface); border-bottom: 1px solid var(--border); }
+    .docs-content-split { flex: 1; display: grid; grid-template-columns: 1fr 1fr; min-height: 0; }
+    .docs-editor-pane { background: #080b13; padding: 12px; overflow-y: auto; font-size: 12px; color: #e2e8f0; border-right: 1px solid var(--border); outline: none; white-space: pre-wrap; }
+    .docs-preview-pane { background: #05070c; padding: 12px; overflow-y: auto; display: flex; justify-content: center; }
+    .preview-frame-container { width: 100%; height: 100%; border-radius: 8px; border: 1px solid var(--border); overflow: hidden; background: #0a0d16; }
+    .preview-frame-container.tablet { max-width: 768px; }
+    .preview-frame-container.mobile { max-width: 390px; }
+    .preview-frame-container iframe { width: 100%; height: 100%; border: none; }
+
+    /* VISTA 4: SQUAD CANVAS & PIPELINE */
+    .agents-view-layout { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
+    .pipeline-flow { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; }
+    .pipeline-node {
+      flex: 1;
+      min-width: 140px;
+      padding: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .pipeline-node.done { border-color: var(--emerald); }
+    .pipeline-node.active { border-color: var(--amber); background: var(--amber-soft); }
+
+    /* VISTA 5: MEMORIA */
+    .memory-view-layout { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+    .memory-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+
+    /* VISTA 6: CUENTAS */
+    .accounts-view-layout { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+
+    /* VISTA 7: MCPS */
+    .mcps-view-layout { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+    .mcp-server-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+
+    /* VISTA 8: TELEMETRÍA */
+    .telemetry-view-layout { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+    .stats-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+    .stat-tile { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 4px; }
+
+    /* TERMINAL SHELL DRAWER */
+    .terminal-drawer {
+      position: fixed;
+      background: #05070d;
+      border: 1px solid var(--border-hi);
+      z-index: 50;
+      display: none;
+      flex-direction: column;
+      box-shadow: 0 -10px 40px rgba(0,0,0,0.8);
+      transition: all 0.2s ease;
+    }
+    .terminal-drawer.open { display: flex; }
+    .terminal-drawer.dock-bottom { left: 0; right: 0; bottom: 0; height: 320px; border-left: 0; border-right: 0; border-bottom: 0; }
+    .terminal-drawer.dock-right { top: 44px; bottom: 0; right: 0; width: 480px; border-top: 0; border-bottom: 0; border-right: 0; }
+    .terminal-header { display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; background: #0c101a; border-bottom: 1px solid var(--border); }
+    .term-tab { padding: 3px 8px; border-radius: 5px; border: 1px solid var(--border); background: #070910; font-size: 11px; color: var(--muted); cursor: pointer; }
+    .term-tab.active { border-color: var(--emerald); color: #6ee7b7; background: rgba(16, 185, 129, 0.1); }
+    .terminal-body { flex: 1; padding: 10px 14px; overflow-y: auto; font-size: 12px; color: #a7f3d0; line-height: 1.5; }
+    .terminal-input-bar { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: #090c14; border-top: 1px solid var(--border); }
+    .terminal-input { flex: 1; background: transparent; border: none; color: #fff; font-size: 12px; outline: none; }
+
+    /* FILES SIDEBAR */
+    .files-sidebar {
+      position: fixed;
+      top: 44px;
+      bottom: 0;
+      left: 0;
+      width: 330px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      z-index: 40;
+      display: none;
+      flex-direction: column;
+      box-shadow: 10px 0 30px rgba(0,0,0,0.6);
+    }
+    .files-sidebar.open { display: flex; }
+
+    /* MODALES HUD */
+    .hud-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 6, 11, 0.82);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+    .hud-modal-overlay.open { display: flex; }
+    .hud-modal {
+      width: 660px;
+      max-width: 95vw;
+      background: var(--surface);
+      border: 1px solid var(--border-hi);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .btn-action {
+      background: linear-gradient(135deg, var(--amber), #d97706);
+      color: #07090e;
+      border: none;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 7px;
+      font-size: 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+    .btn-action:hover { filter: brightness(1.15); box-shadow: 0 0 14px var(--amber-glow); }
+    .btn-secondary {
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .btn-secondary:hover { background: var(--surface-3); border-color: #475569; }
+
+    .drawer-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 6, 11, 0.65);
+      backdrop-filter: blur(4px);
+      display: none;
+      justify-content: flex-end;
+      z-index: 90;
+    }
+    .drawer-overlay.open { display: flex; }
+    .drawer-pane {
+      width: 400px;
+      max-width: 92vw;
+      height: 100%;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body data-density="comfortable">
+
+  <!-- ==================== TOPBAR COMPLETA ==================== -->
+  <header class="topbar">
+    <div class="top-group">
+      <div class="brand-box" id="brandBtn" title="Ir al Command Center">
+        <div class="brand-mark">✦</div>
+        <strong style="font-size: 13px; letter-spacing: 0.02em;">AGENTHUB</strong>
+      </div>
+
+      <!-- Workspace Global -->
+      <div class="chip amber" id="workspacePickerTrigger" title="Selector de Workspace y carpetas recientes">
+        <span>📁 <strong>agent-hub</strong></span>
+        <span style="font-size: 10px; color: var(--amber);">▾</span>
+      </div>
+
+      <!-- Git Branch Global -->
+      <div class="chip emerald mono" id="gitBranchTrigger" title="Rama Git del proyecto activo">
+        <span>⎇ main</span>
+        <span style="background: rgba(16,185,129,0.2); padding: 1px 5px; border-radius: 4px; font-weight: bold;">+2</span>
+      </div>
+    </div>
+
+    <!-- Navegación: 7 Pestañas + HUD Center -->
+    <nav class="nav-tabs" aria-label="Navegación de Pestañas">
+      <button type="button" class="nav-tab active" data-view="hud">✦ HUD Center</button>
+      <button type="button" class="nav-tab" data-view="chat">💬 Chat <span class="tab-key">Ctrl+1</span></button>
+      <button type="button" class="nav-tab" data-view="docs">📄 Docs (MD/HTML) <span class="tab-key">Ctrl+2</span></button>
+      <button type="button" class="nav-tab" data-view="memory">🧠 Memoria <span class="tab-key">Ctrl+3</span></button>
+      <button type="button" class="nav-tab" data-view="agents">👥 Agentes <span class="tab-key">Ctrl+4</span></button>
+      <button type="button" class="nav-tab" data-view="accounts">👤 Cuentas <span class="tab-key">Ctrl+5</span></button>
+      <button type="button" class="nav-tab" data-view="mcps">🔌 MCPs <span class="tab-key">Ctrl+6</span></button>
+      <button type="button" class="nav-tab" data-view="telemetry">📊 Métricas <span class="tab-key">Ctrl+7</span></button>
+    </nav>
+
+    <!-- Controles de Sistema (100% App.tsx) -->
+    <div class="top-group">
+      <button type="button" class="icon-btn" id="toggleFocusBtn" title="Modo Enfoque (Ctrl+Shift+F)">⛶</button>
+      <button type="button" class="icon-btn has-badge" data-badge="2" id="toggleFilesSidebarBtn" title="Explorador de Archivos y Git">📂</button>
+      <button type="button" class="icon-btn" id="openSpotlightBtn" title="Lanzador rápido Spotlight (Alt+Espacio)">⚡</button>
+      <button type="button" class="icon-btn" id="toggleTerminalBtn" title="Terminal Shell Integrada (Ctrl+`)">💻</button>
+      <button type="button" class="icon-btn" id="openSecurityModalBtn" title="Auditor de Seguridad, Entorno y SQL">🛡️</button>
+      <button type="button" class="icon-btn" id="openScratchpadBtn" title="Borrador de Trabajo / Scratchpad (.agent-hub/scratchpad.md)">📝</button>
+      <button type="button" class="icon-btn" id="toggleSoundBtn" title="Alertas sonoras activas (clic para silenciar)">🔊</button>
+      <button type="button" class="icon-btn" id="toggleDensityBtn" title="Cambiar Densidad (Cómodo / Compacto)">≡</button>
+      <button type="button" class="icon-btn" id="toggleCentralModeBtn" title="Modo Central: enfoca el chat activo (Ctrl+Alt+M)">⤢</button>
+      <button type="button" class="icon-btn" id="toggleMultiColBtn" title="Ver varios chats a la vez (Split Columns)">▥</button>
+      <button type="button" class="icon-btn" id="splitBesideBtn" title="Panel Lateral Dividido (Ctrl+Alt+B)">◫</button>
+      <button type="button" class="icon-btn" id="popOutBtn" title="Desacoplar a Ventana Flotante (Ctrl+Alt+W)">❐</button>
+      <button type="button" class="icon-btn" id="openExternalBtn" title="Abrir en Navegador PWA (localhost:3710)">🌐</button>
+      <button type="button" class="icon-btn" id="refreshBtn" title="Refrescar estado">🔄</button>
+      <button type="button" class="chip blue mono" id="openVsCodeBtn" title="Abrir proyecto en VS Code"><span>&lt;/&gt; VS Code</span></button>
+      <button type="button" class="chip" id="openSessionDrawerBtn">🗂 Historial 26</button>
+      <button type="button" class="icon-btn" id="openShortcutsBtn" title="Atajos de teclado (Ctrl+/)">⌨</button>
+      <button type="button" class="btn-action" id="newTaskBtn">+ Nueva tarea</button>
+    </div>
+  </header>
+
+  <!-- FRANJA DE AGENTES EN EJECUCIÓN -->
+  <div class="agents-strip" id="agentsRunningStrip">
+    <span class="strip-label">SQUAD ACTIVO:</span>
+    <div class="agent-pill running"><span class="dot amber pulse"></span><strong>Arquitecto</strong> · <span>Spec PlayStore</span></div>
+    <div class="agent-pill running"><span class="dot green pulse"></span><strong>Desarrollador</strong> · <span>Terminal Integrada v2</span></div>
+    <div class="agent-pill"><span class="dot green"></span><strong>Tester</strong> · <span>198/198 Pass</span></div>
+    <div class="agent-pill"><span class="dot green"></span><strong>Seguridad</strong> · <span>0 Vulnerabilidades</span></div>
+    <div class="agent-pill running" style="border-color: var(--purple);"><span class="dot blue pulse"></span><strong>Diseñador</strong> · <span>Command Center 100%</span></div>
+  </div>
+
+  <!-- BARRA SPLIT & BROADCAST -->
+  <div class="split-bar" id="splitControlBar">
+    <div class="top-group">
+      <span style="font-size: 11px; font-weight: bold; color: var(--muted);">LAYOUT SPLIT:</span>
+      <div class="split-layout-btns">
+        <button type="button" class="split-layout-btn" data-layout="1">1 Col</button>
+        <button type="button" class="split-layout-btn active" data-layout="2">2 Cols</button>
+        <button type="button" class="split-layout-btn" data-layout="3">3 Cols</button>
+        <button type="button" class="split-layout-btn" data-layout="4">4 Cols</button>
+        <button type="button" class="split-layout-btn" data-layout="grid">Grid 2x2</button>
+        <button type="button" class="split-layout-btn" data-layout="rows">Filas</button>
+      </div>
+      <div class="chip" id="splitPresetsTrigger"><span>⭐ Sets de Pantalla ▾</span></div>
+      <div class="chip rose mono"><span>⚠️ 1 Atención Requerida</span></div>
+    </div>
+    <div class="broadcast-box">
+      <span style="font-size: 11px; color: var(--cyan); font-weight: bold;">📢 Broadcast:</span>
+      <input type="text" id="broadcastInput" class="broadcast-input" placeholder="Enviar instrucción a todas las columnas simultáneamente..." />
+      <button type="button" class="btn-action" style="padding: 3px 10px; font-size: 11px;" id="broadcastSendBtn">Enviar</button>
+    </div>
+  </div>
+
+  <!-- ==============================================================
+       VISTA 1: COMMAND CENTER HUD (HOLO-DIAL & TACTICAL WORKSPACE)
+       ============================================================== -->
+  <main class="view-container active" id="view-hud">
+    <div class="hud-stage">
+      <aside class="hud-col">
+        <div class="hud-card">
+          <div class="card-header"><span>ROLES DE PROTOCOLO ACTIVOS</span><span class="mono" style="color: var(--amber);">5 ASIGNADOS</span></div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div class="station-box active" onclick="switchMainTab('chat')">
+              <div style="display: flex; justify-content: space-between;"><span class="chip amber" style="font-size: 10px;">ARQUITECTO</span><span class="mono" style="font-size: 10px; color: var(--emerald);">ACTIVO</span></div>
+              <div style="font-size: 12px; font-weight: bold;">Spec Despliegue Rápido PlayStore</div>
+              <div class="mono" style="font-size: 10px; color: var(--dim);">docs/specs/playstore-fast-deploy.md</div>
+            </div>
+            <div class="station-box" onclick="switchMainTab('chat')">
+              <div style="display: flex; justify-content: space-between;"><span class="chip blue" style="font-size: 10px;">DESARROLLADOR</span><span class="mono" style="font-size: 10px; color: var(--emerald);">ACTIVO</span></div>
+              <div style="font-size: 12px; font-weight: bold;">Terminal Multi-Pestaña &amp; Git Fallback Fix</div>
+              <div class="mono" style="font-size: 10px; color: var(--dim);">src/host/handlers/editor-handlers.ts</div>
+            </div>
+            <div class="station-box" onclick="switchMainTab('chat')">
+              <div style="display: flex; justify-content: space-between;"><span class="chip emerald" style="font-size: 10px;">TESTER</span><span class="mono" style="font-size: 10px; color: #a7f3d0;">198 PASS</span></div>
+              <div style="font-size: 12px; font-weight: bold;">37 Suites · Cero Regresiones</div>
+              <div class="mono" style="font-size: 10px; color: var(--dim);">tests/agent-hub.test.ts</div>
+            </div>
+          </div>
+        </div>
+        <div class="hud-card">
+          <div class="card-header"><span>ETAPAS DEL PROTOCOLO</span><span class="mono" style="color: var(--emerald);">PASO 4 DE 5</span></div>
+          <div class="stages-bar">
+            <div class="stage-item completed">1. ARQ</div>
+            <div class="stage-item completed">2. SPEC</div>
+            <div class="stage-item completed">3. CODE</div>
+            <div class="stage-item active">4. DESIGN</div>
+            <div class="stage-item">5. TEST</div>
+          </div>
+        </div>
+      </aside>
+
+      <section class="hud-col">
+        <div class="center-hud-core">
+          <svg class="hud-svg-canvas" viewBox="0 0 600 320" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="glowLine" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.8" />
+                <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.2" />
+              </linearGradient>
+            </defs>
+            <path d="M 50 160 Q 200 40 300 130 T 550 160" fill="none" stroke="url(#glowLine)" stroke-width="1.5" stroke-dasharray="4 4" />
+            <circle cx="300" cy="130" r="4" fill="#f59e0b" />
+          </svg>
+          <div class="dial-svg-wrapper">
+            <svg width="240" height="240" viewBox="0 0 240 240">
+              <circle cx="120" cy="120" r="105" fill="none" stroke="#162035" stroke-width="8" />
+              <circle cx="120" cy="120" r="105" fill="none" stroke="#f59e0b" stroke-width="8" stroke-dasharray="660" stroke-dashoffset="180" stroke-linecap="round" />
+              <circle cx="120" cy="120" r="85" fill="none" stroke="#1e293b" stroke-width="4" />
+              <circle cx="120" cy="120" r="85" fill="none" stroke="#38bdf8" stroke-width="4" stroke-dasharray="534" stroke-dashoffset="320" stroke-linecap="round" />
+            </svg>
+            <div class="dial-center-content">
+              <div class="dial-val mono">100%</div>
+              <div class="dial-sub">INTEGRIDAD OPERACIONAL</div>
+              <div class="mono" style="font-size: 10px; color: var(--muted); margin-top: 2px;">CERO OMISIONES</div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 16px; margin-top: 14px; text-align: center;">
+            <div><div style="font-size: 10px; color: var(--dim);">SESIONES TOTALES</div><div class="mono" style="font-size: 16px; font-weight: bold; color: #fff;">26 Activas</div></div>
+            <div style="border-left: 1px solid var(--border); padding-left: 16px;"><div style="font-size: 10px; color: var(--dim);">TIEMPO DE TURNO</div><div class="mono" style="font-size: 16px; font-weight: bold; color: var(--emerald);">1.1s avg</div></div>
+            <div style="border-left: 1px solid var(--border); padding-left: 16px;"><div style="font-size: 10px; color: var(--dim);">COSTO ACUMULADO</div><div class="mono" style="font-size: 16px; font-weight: bold; color: var(--amber);">$0.042</div></div>
+          </div>
+        </div>
+
+        <div class="hud-card">
+          <div class="card-header">
+            <span>WORKSTATIONS DEL SISTEMA (CLIC PARA CHAT)</span>
+            <button type="button" class="btn-secondary" style="font-size: 10px;" onclick="switchMainTab('chat')">Abrir Multi-Chat Split ➔</button>
+          </div>
+          <div class="workstations-grid">
+            <div class="station-box" onclick="switchMainTab('chat')">
+              <div style="display: flex; justify-content: space-between;"><span class="mono" style="color: var(--amber); font-weight: bold;">COL 1 · ARQUITECTO</span><span class="mono" style="font-size: 10px; color: var(--dim);">Gemini 3.8 Flash</span></div>
+              <p style="font-size: 11.5px; color: #cbd5e1; line-height: 1.4;">Workspace: <code>📁 agent-hub</code> (Repo Git activo · ⎇ main [+2])</p>
+            </div>
+            <div class="station-box" onclick="switchMainTab('chat')">
+              <div style="display: flex; justify-content: space-between;"><span class="mono" style="color: var(--cyan); font-weight: bold;">COL 2 · DESARROLLADOR</span><span class="mono" style="font-size: 10px; color: var(--dim);">Gemini 3.8 Flash</span></div>
+              <p style="font-size: 11.5px; color: #cbd5e1; line-height: 1.4;">Workspace: <code>📁 docs-offline</code> (Sin Git · ⚪ Sin Git)</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="hud-col">
+        <div class="hud-card">
+          <div class="card-header"><span>SERVIDORES MCP ACTIVOS</span><span class="mono" style="color: var(--emerald);">8 ONLINE</span></div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <div class="chip" style="justify-content: space-between;"><span>🔌 filesystem</span><span class="mono" style="color: var(--emerald);">13 tools</span></div>
+            <div class="chip" style="justify-content: space-between;"><span>🔌 github</span><span class="mono" style="color: var(--emerald);">26 tools</span></div>
+            <div class="chip" style="justify-content: space-between;"><span>🔌 playwright</span><span class="mono" style="color: var(--emerald);">18 tools</span></div>
+            <div class="chip" style="justify-content: space-between;"><span>🔌 context7</span><span class="mono" style="color: var(--emerald);">2 tools</span></div>
+          </div>
+        </div>
+        <div class="hud-card" style="flex: 1;">
+          <div class="card-header"><span>LIVE TERMINAL OUTPUT</span><button type="button" class="btn-secondary" style="font-size: 10px;" id="openTerminalFromHudBtn">Abrir Shell ➔</button></div>
+          <pre class="mono" style="flex: 1; min-height: 160px; background: #06080e; border: 1px solid var(--border); border-radius: 8px; padding: 10px; font-size: 11px; color: #6ee7b7; overflow-y: auto; line-height: 1.5;">
+$ npm test
+ ✓ tests/agent-hub.test.ts (198 tests) 412ms
+ Test Files  1 passed (1)
+      Tests  198 passed (198)
+ PASS  All suites clean. Exit 0.
+          </pre>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- ==============================================================
+       VISTA 2: MULTI-COLUMN CHAT (100% CARACTERÍSTICAS DE COMPOSER Y MESSAGELIST)
+       ============================================================== -->
+  <section class="view-container" id="view-chat">
+    <div class="chat-split-view" id="chatSplitContainer">
+
+      <!-- COLUMNA 1: ARQUITECTO (WORKSPACE CON GIT) -->
+      <article class="chat-col">
+        <!-- HEADER DE COLUMNA: WORKSPACE + GIT BRANCH + ACCENT + PERMISOS -->
+        <header class="chat-col-header">
+          <div class="top-group">
+            <span style="width: 10px; height: 10px; border-radius: 50%; background: var(--amber);" title="Color de proyecto (AccentPicker)"></span>
+            <strong style="font-size: 12px;">#1 PlayStore Spec</strong>
+            <span class="chip amber" style="font-size: 10px;">Arquitecto</span>
+            <span class="chip mono" style="font-size: 10.5px;" title="Workspace específico asignado">📁 agent-hub</span>
+            <span class="chip emerald mono" style="font-size: 10px;" title="Repo Git con cambios">⎇ main <span style="color:#6ee7b7; font-weight:bold;">+2</span></span>
+          </div>
+
+          <div class="top-group">
+            <!-- Permisos del Agente: Completo / Solo lectura -->
+            <select class="btn-secondary" style="font-size: 10px; padding: 2px 5px;" title="Permisos de ejecución del agente">
+              <option value="full">Permiso: Completo</option>
+              <option value="readonly">Permiso: Solo lectura</option>
+            </select>
+            <span class="chip mono" style="font-size: 10px;">Esfuerzo: Max</span>
+            <span class="chip mono" style="font-size: 10px;">Gemini 3.8</span>
+            <button type="button" class="icon-btn" title="Índice de conversación y fijados">📑</button>
+            <button type="button" class="icon-btn" title="Exportar chat (.md, .html, .json)">⬇</button>
+            <button type="button" class="icon-btn" title="Cerrar esta columna">✕</button>
+          </div>
+        </header>
+
+        <!-- DECK DE SESIÓN Y TOKENS (CONTEXT BUDGET & USD) -->
+        <div class="session-deck">
+          <div class="context-meter" title="Uso del contexto de 1,000,000 de tokens">
+            <span>Contexto:</span>
+            <div class="context-meter-bar"><div class="context-meter-fill" style="width: 28%;"></div></div>
+            <span class="mono">28.4k / 1M (3%)</span>
+          </div>
+          <div class="top-group">
+            <span class="mono" style="color: var(--muted); font-size: 10px;">Costo acumulado: <strong style="color: var(--amber);">$0.008 USD</strong></span>
+            <button type="button" class="btn-secondary" style="font-size: 9.5px; padding: 1px 6px;">Failover ➔ Claude</button>
+          </div>
+        </div>
+
+        <!-- LISTA DE MENSAJES (MESSAGELIST COMPLETO) -->
+        <div class="chat-messages">
+          <div class="msg-bubble msg-user">
+            <p>Genera la especificación de despliegue rápido para Google Play Store para subir bundles con Node.js y la API v3.</p>
+          </div>
+
+          <div class="msg-bubble msg-agent">
+            <!-- Bloque de Pensamiento (Thinking) -->
+            <div class="thinking-box mono">
+              💭 <strong>Razonamiento interno (1.2s):</strong> Evaluando androidpublisher v3 vs fastlane. La API nativa no requiere Ruby ni dependencias externas.
+            </div>
+
+            <div style="font-size: 11px; color: var(--amber); font-weight: bold; margin-bottom: 4px;">ARQUITECTO:</div>
+            <p>He completado la especificación en <code>docs/specs/playstore-fast-deploy.md</code> con autenticación por Service Account JSON fuera de Git.</p>
+
+            <!-- Detección de Diff en Mensaje -->
+            <div class="diff-block mono">
+              <div style="color: var(--muted); font-size: 10px; margin-bottom: 2px;">DIFF SUGERIDO: package.json</div>
+              <div class="diff-add">+ "@googleapis/androidpublisher": "^3.1.0"</div>
+            </div>
+
+            <!-- Preguntas Interactivas del Agente (Question Options) -->
+            <div class="question-prompt-box">
+              <div style="font-size: 11px; font-weight: bold; color: var(--amber);">¿A qué canal de Google Play deseas compilar primero?</div>
+              <div class="question-options-list">
+                <button type="button" class="q-btn">Internal Testing (Recomendado)</button>
+                <button type="button" class="q-btn">Closed Alpha</button>
+                <button type="button" class="q-btn">Open Beta</button>
+                <button type="button" class="q-btn">Production</button>
+              </div>
+            </div>
+
+            <div class="msg-actions">
+              <button type="button" class="msg-btn">📌 Fijar</button>
+              <button type="button" class="msg-btn">📋 Copiar</button>
+              <button type="button" class="msg-btn">🔄 Reintentar</button>
+              <span class="mono" style="margin-left: auto; font-size: 10px; color: var(--dim);">Turno: 1.2s · $0.004</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- COMPOSER COMPLETO DE LA COLUMNA -->
+        <footer class="col-composer">
+          <!-- COLA DE MENSAJES PENDIENTES (MESSAGE QUEUE) -->
+          <div class="queue-banner">
+            <span style="color: var(--amber); font-weight: bold;">⏳ Mensajes en cola (1):</span>
+            <span class="mono" style="color: var(--muted); font-size: 10.5px;">#1 "Validar permisos de service account..."</span>
+            <button type="button" class="btn-secondary" style="font-size: 9.5px; padding: 1px 5px;">Reanudar cola</button>
+          </div>
+
+          <!-- BANNER DE GRABACIÓN DE VOZ (MICROPHONE DICTATION) -->
+          <div class="voice-recording-banner" id="voiceBannerCol1">
+            <span style="color: var(--rose); font-weight: bold;">🔴 Grabando audio (0:04) — Habla con naturalidad...</span>
+            <button type="button" class="btn-action" style="padding: 2px 8px; font-size: 10px;" onclick="toggleVoiceRecording('voiceBannerCol1')">Finalizar</button>
+          </div>
+
+          <!-- BANDEJA DESPLEGABLE DE AUTOMATIZACIÓN Y FLUJOS (TOOLS EXPANDED) -->
+          <div class="composer-flows-tray" id="composerFlowsTrayCol1" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 4px;">
+              <div class="top-group">
+                <button type="button" class="btn-action" style="padding: 3px 9px; font-size: 10.5px;">⚡ Ejecutar Pipeline TDD</button>
+                <select class="btn-secondary" style="font-size: 10.5px;">
+                  <option>Plantilla: TDD Autónomo</option>
+                  <option>Plantilla: Full-Stack</option>
+                  <option>Plantilla: Auditoría de Seguridad</option>
+                </select>
+              </div>
+              <button type="button" class="btn-secondary" style="font-size: 10px;">Auditar rama vs main</button>
+            </div>
+            <div style="display: flex; gap: 14px; font-size: 10.5px; color: var(--muted);">
+              <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;"><input type="checkbox" checked /> Copia aparte (Worktree aislado)</label>
+              <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;"><input type="checkbox" /> Aprobar cada traspaso</label>
+              <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;"><input type="checkbox" /> Plan primero (solo lectura)</label>
+            </div>
+          </div>
+
+          <!-- BARRA DE ACCIONES RÁPIDAS DE CONTEXTO -->
+          <div class="composer-toolbar">
+            <div class="top-group">
+              <button type="button" class="btn-secondary" title="Adjuntar selección o archivo activo del editor">📎 Contexto</button>
+              <button type="button" class="btn-secondary" title="Adjuntar archivos del proyecto">📁 Archivos</button>
+              <button type="button" class="btn-secondary" title="Adjuntar el git diff actual">± Diff</button>
+              <button type="button" class="btn-secondary" style="color: var(--amber);" title="Adjuntar advertencias y errores del editor">⚠️ Problemas</button>
+            </div>
+
+            <div class="top-group">
+              <button type="button" class="btn-secondary" style="color: var(--emerald);" title="Ejecutar tests del proyecto">▶ Test</button>
+              <button type="button" class="btn-secondary" style="color: var(--blue);" title="Generar commit semántico">✨ Commit</button>
+              <button type="button" class="chip purple" style="padding: 2px 8px; font-size: 10.5px;" onclick="toggleComposerFlows('composerFlowsTrayCol1')" title="Desplegar flujos de trabajo (Pipeline TDD, Worktree)">
+                <span>⚙ Flujos ▾</span>
+              </button>
+              <button type="button" class="btn-secondary" title="Buscar y ejecutar acciones del workspace">🔧 Acciones</button>
+              <button type="button" class="icon-btn" onclick="toggleVoiceRecording('voiceBannerCol1')" title="Dictado por voz o nota de audio">🎤</button>
+            </div>
+          </div>
+
+          <textarea class="composer-textarea" placeholder="Escribe un mensaje al Arquitecto... (Ctrl+Enter para enviar, @ para mencionar, / para snippets)"></textarea>
+
+          <div class="composer-bottom">
+            <div class="top-group">
+              <span class="mono" style="font-size: 10px; color: var(--dim);">Enter: salto de línea · Ctrl+Enter: enviar</span>
+            </div>
+            <div class="top-group">
+              <button type="button" class="btn-secondary" style="color: var(--rose);">■ Detener</button>
+              <button type="button" class="btn-action">Enviar</button>
+            </div>
+          </div>
+        </footer>
+      </article>
+
+      <!-- COLUMNA 2: DESARROLLADOR (DEMOSTRANDO WORKSPACE SIN GIT) -->
+      <article class="chat-col">
+        <header class="chat-col-header">
+          <div class="top-group">
+            <span style="width: 10px; height: 10px; border-radius: 50%; background: var(--blue);"></span>
+            <strong style="font-size: 12px;">#2 Docs Offline</strong>
+            <span class="chip blue" style="font-size: 10px;">Desarrollador</span>
+            <span class="chip mono" style="font-size: 10.5px;" title="Workspace asignado">📁 docs-offline</span>
+            <!-- ESTADO REAL SIN GIT CORREGIDO -->
+            <span class="chip mono" style="font-size: 10px; color: var(--muted); border-color: #334155;" title="Esta carpeta no es Git (ya no inventa 'main')">⚪ Sin Git</span>
+            <button type="button" class="btn-secondary" style="font-size: 9.5px; padding: 1px 6px;" title="Inicializar control de versiones">+ git init</button>
+          </div>
+
+          <div class="top-group">
+            <select class="btn-secondary" style="font-size: 10px; padding: 2px 5px;"><option>Permiso: Completo</option><option>Permiso: Solo lectura</option></select>
+            <span class="chip mono" style="font-size: 10px;">Esfuerzo: High</span>
+            <span class="chip mono" style="font-size: 10px;">Gemini 3.8</span>
+            <button type="button" class="icon-btn">📑</button>
+            <button type="button" class="icon-btn">✕</button>
+          </div>
+        </header>
+
+        <div class="session-deck">
+          <div class="context-meter">
+            <span>Contexto:</span>
+            <div class="context-meter-bar"><div class="context-meter-fill" style="width: 14%;"></div></div>
+            <span class="mono">14.1k / 1M (1.4%)</span>
+          </div>
+          <div class="top-group">
+            <span class="mono" style="color: var(--muted); font-size: 10px;">Costo: <strong style="color: var(--amber);">$0.003 USD</strong></span>
+          </div>
+        </div>
+
+        <div class="chat-messages">
+          <div class="msg-bubble msg-user">
+            <p>¿Qué sucede con los archivos en esta carpeta? ¿Cómo sabe el agente dónde ejecutar comandos?</p>
+          </div>
+
+          <div class="msg-bubble msg-agent">
+            <div style="font-size: 11px; color: var(--blue); font-weight: bold; margin-bottom: 4px;">DESARROLLADOR:</div>
+            <p>Cada chat en AgentHub tiene su propio <strong>Workspace CWD</strong> aislado:</p>
+            <ul style="margin-left: 16px; margin-top: 4px; line-height: 1.6;">
+              <li><strong>Ruta activa:</strong> Los comandos de terminal y lecturas de archivos se ejecutan en <code>C:\...\docs-offline</code>.</li>
+              <li><strong>Estado Git veraz:</strong> Al no tener <code>.git</code>, se muestra <code>⚪ Sin Git</code> sin forzar falsamente <code>main</code>.</li>
+              <li><strong>Multi-Proyecto simultáneo:</strong> Mientras la Columna 1 trabaja en <code>agent-hub</code>, esta columna opera en un directorio complementario.</li>
+            </ul>
+          </div>
+        </div>
+
+        <footer class="col-composer">
+          <div class="composer-toolbar">
+            <div class="top-group">
+              <button type="button" class="btn-secondary">📎 Contexto</button>
+              <button type="button" class="btn-secondary">📁 Archivos</button>
+              <button type="button" class="btn-secondary">± Diff</button>
+            </div>
+            <div class="top-group">
+              <button type="button" class="btn-secondary" style="color: var(--emerald);">▶ Test</button>
+              <button type="button" class="chip purple" style="padding: 2px 8px; font-size: 10.5px;">⚙ Flujos ▾</button>
+              <button type="button" class="btn-secondary">🔧 Acciones</button>
+            </div>
+          </div>
+          <textarea class="composer-textarea" placeholder="Escribe un mensaje al Desarrollador..."></textarea>
+          <div class="composer-bottom">
+            <span class="mono" style="font-size: 10px; color: var(--dim);">Enter: salto · Ctrl+Enter: enviar</span>
+            <button type="button" class="btn-action">Enviar</button>
+          </div>
+        </footer>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ==============================================================
+       VISTA 3: DOCS (MARKDOWN & HTML PREVIEWER RESPONSIVO)
+       ============================================================== -->
+  <section class="view-container" id="view-docs">
+    <div class="docs-view-layout">
+      <aside class="docs-sidebar">
+        <div style="font-size: 11px; font-weight: bold; color: var(--muted); padding-bottom: 6px; border-bottom: 1px solid var(--border);">ARCHIVOS DE DOCUMENTACIÓN</div>
+        <div class="chip amber mono" style="justify-content: space-between;"><span>📄 command-center-redesign.html</span><span style="font-size: 9px; color: var(--amber);">HTML</span></div>
+        <div class="chip mono" style="justify-content: space-between;"><span>📄 markdown-html-viewer.html</span><span style="font-size: 9px; color: var(--cyan);">HTML</span></div>
+        <div class="chip mono" style="justify-content: space-between;"><span>📄 tactical-hud-architecture.md</span><span style="font-size: 9px; color: var(--muted);">MD</span></div>
+        <div class="chip mono" style="justify-content: space-between;"><span>📄 playstore-fast-deploy.md</span><span style="font-size: 9px; color: var(--muted);">MD</span></div>
+        <div class="chip mono" style="justify-content: space-between;"><span>📄 terminal-integrada.md</span><span style="font-size: 9px; color: var(--muted);">MD</span></div>
+      </aside>
+
+      <main class="docs-main-work">
+        <header class="docs-toolbar">
+          <div class="top-group">
+            <strong style="font-size: 12px;">command-center-redesign.html</strong>
+            <span class="chip emerald mono" style="font-size: 10px;">HTML Sandbox Seguro</span>
+          </div>
+          <div class="top-group">
+            <button type="button" class="btn-secondary active" id="viewDeviceDesktop" onclick="setDocViewport('desktop')">🖥️ Desktop</button>
+            <button type="button" class="btn-secondary" id="viewDeviceTablet" onclick="setDocViewport('tablet')">📱 Tablet (768px)</button>
+            <button type="button" class="btn-secondary" id="viewDeviceMobile" onclick="setDocViewport('mobile')">📱 Móvil (390px)</button>
+            <button type="button" class="btn-secondary" onclick="toggleDocCodePane()">[ Código / Preview ]</button>
+          </div>
+        </header>
+        <div class="docs-content-split">
+          <div class="docs-editor-pane mono" id="docSourcePane" contenteditable="true" style="display: none;">
+&lt;!-- Vista HTML / Markdown Source Editable --&gt;
+&lt;div class="hud"&gt;
+  &lt;h1&gt;AgentHub Visualizer&lt;/h1&gt;
+  &lt;p&gt;Visualización segura en iframe con sandbox allow-scripts.&lt;/p&gt;
+&lt;/div&gt;
+          </div>
+          <div class="docs-preview-pane" style="grid-column: span 2;" id="docPreviewContainer">
+            <div class="preview-frame-container" id="docDeviceFrame">
+              <iframe sandbox="allow-scripts" srcdoc="<!DOCTYPE html><html><body style='margin:0;padding:24px;background:#090c13;color:#f1f5f9;font-family:Inter,sans-serif;'><div style='border:1px solid #202b3f;border-radius:12px;padding:20px;background:#0e131f;'><span style='font-size:11px;color:#f59e0b;font-weight:800;letter-spacing:.08em;'>AGENTHUB UNIFIED HTML &amp; MARKDOWN PREVIEW</span><h2 style='margin:10px 0 8px;font-size:18px;'>Visualizador HTML Sandboxed</h2><p style='color:#94a3b8;font-size:13px;line-height:1.6;'>Renderizado en vivo con cambio instantáneo entre Desktop, Tablet (768px) y Móvil (390px) sin salir de AgentHub.</p></div></body></html>"></iframe>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </section>
+
+  <!-- ==============================================================
+       VISTA 4: SQUAD CANVAS & PIPELINES TDD
+       ============================================================== -->
+  <section class="view-container" id="view-agents">
+    <div class="agents-view-layout">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h2 style="font-size: 16px;">👥 Pipeline Autónomo del Squad &amp; Worktrees</h2>
+          <p style="font-size: 12px; color: var(--muted); margin-top: 2px;">Coordinador ➔ Arquitecto ➔ Tester ➔ Desarrollador ➔ Revisor ➔ Seguridad ➔ Diseñador</p>
+        </div>
+        <div class="top-group">
+          <button type="button" class="btn-secondary">Descartar Copia Aparte</button>
+          <button type="button" class="btn-action">Fusionar Cambios del Squad (Merge)</button>
+        </div>
+      </div>
+
+      <!-- PIPELINE VISUAL SECUENCIAL -->
+      <div class="pipeline-flow">
+        <div class="pipeline-node done">
+          <span style="font-size: 10px; color: var(--emerald); font-weight: bold;">1. ARQUITECTO</span>
+          <div style="font-size: 11.5px; font-weight: bold;">Spec Aprobada</div>
+          <span class="mono" style="font-size: 10px; color: var(--dim);">1.4s · $0.003</span>
+        </div>
+        <div class="pipeline-node done">
+          <span style="font-size: 10px; color: var(--emerald); font-weight: bold;">2. TESTER</span>
+          <div style="font-size: 11.5px; font-weight: bold;">198 Tests Pasando</div>
+          <span class="mono" style="font-size: 10px; color: var(--dim);">0.8s · $0.001</span>
+        </div>
+        <div class="pipeline-node active">
+          <span style="font-size: 10px; color: var(--amber); font-weight: bold;">3. DESARROLLADOR</span>
+          <div style="font-size: 11.5px; font-weight: bold;">Terminal v2 &amp; Fallback Fix</div>
+          <span class="mono" style="font-size: 10px; color: var(--dim);">En turno activo</span>
+        </div>
+        <div class="pipeline-node">
+          <span style="font-size: 10px; color: var(--dim);">4. REVISOR</span>
+          <div style="font-size: 11.5px; color: var(--muted);">Pendiente</div>
+        </div>
+        <div class="pipeline-node">
+          <span style="font-size: 10px; color: var(--dim);">5. SEGURIDAD</span>
+          <div style="font-size: 11.5px; color: var(--muted);">0 Hallazgos</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==============================================================
+       VISTA 5: MEMORIA
+       ============================================================== -->
+  <section class="view-container" id="view-memory">
+    <div class="memory-view-layout">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h2 style="font-size: 16px;">🧠 Memoria &amp; Experiencias Acumuladas (.agent-hub/experience.md)</h2>
+          <p style="font-size: 12px; color: var(--muted); margin-top: 2px;">Persistencia de lecciones técnicas para evitar repetición de errores entre agentes.</p>
+        </div>
+        <button type="button" class="btn-action">+ Nueva Lección</button>
+      </div>
+      <div class="memory-card">
+        <div style="display: flex; justify-content: space-between;"><span class="chip amber mono" style="font-size: 10px;">GIT · FALLBACK BUG</span><span class="mono" style="font-size: 10px; color: var(--dim);">hace 10 min</span></div>
+        <h3 style="font-size: 13px; margin-top: 4px;">Carpetas sin Git no deben forzar 'main'</h3>
+        <p style="font-size: 12px; color: #cbd5e1; line-height: 1.5; margin-top: 4px;"><code>editor-handlers.ts</code> forzaba <code>main</code> si <code>getGitBranch()</code> devolvía vacío. Ahora emite <code>isGit: false</code> y se muestra <code>⚪ Sin Git</code>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==============================================================
+       VISTA 6: CUENTAS & PERFILES (ACCOUNTS & PROFILE CARDS)
+       ============================================================== -->
+  <section class="view-container" id="view-accounts">
+    <div class="accounts-view-layout">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h2 style="font-size: 16px;">👤 Gestión de Cuentas &amp; Rotación de Cuotas</h2>
+          <p style="font-size: 12px; color: var(--muted); margin-top: 2px;">Suscripciones usadas por las CLIs y proveedores multimodales.</p>
+        </div>
+        <button type="button" class="btn-action">+ Vincular Cuenta</button>
+      </div>
+      <div class="stats-tiles">
+        <div class="stat-tile">
+          <div style="display: flex; justify-content: space-between;"><span class="chip amber mono" style="font-size: 10px;">GOOGLE ANTIGRAVITY</span><span class="dot green"></span></div>
+          <div style="font-size: 14px; font-weight: bold; margin-top: 4px;">Antigravity Account #1 (Principal)</div>
+          <div style="font-size: 11px; color: var(--muted);">juan0@...</div>
+          <div style="margin-top: 8px;"><div style="font-size: 10px; color: var(--dim);">CUOTA: 84% DISPONIBLE</div><div style="height: 6px; background: #1e293b; border-radius: 4px; overflow: hidden; margin-top: 2px;"><div style="width: 84%; height: 100%; background: var(--emerald);"></div></div></div>
+        </div>
+        <div class="stat-tile">
+          <div style="display: flex; justify-content: space-between;"><span class="chip blue mono" style="font-size: 10px;">GEMINI CLI</span><span class="dot green"></span></div>
+          <div style="font-size: 14px; font-weight: bold; margin-top: 4px;">Gemini Pro Fallback</div>
+          <div style="font-size: 11px; color: var(--muted);">gemini-pro-tier@...</div>
+          <div style="margin-top: 8px;"><div style="font-size: 10px; color: var(--dim);">CUOTA: 100% DISPONIBLE</div><div style="height: 6px; background: #1e293b; border-radius: 4px; overflow: hidden; margin-top: 2px;"><div style="width: 100%; height: 100%; background: var(--emerald);"></div></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==============================================================
+       VISTA 7: MCPS
+       ============================================================== -->
+  <section class="view-container" id="view-mcps">
+    <div class="mcps-view-layout">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h2 style="font-size: 16px;">🔌 Servidores Model Context Protocol (MCP)</h2>
+          <p style="font-size: 12px; color: var(--muted); margin-top: 2px;">Herramientas externas sincronizadas con el host de AgentHub.</p>
+        </div>
+        <button type="button" class="btn-action">🔄 Sincronizar MCPs</button>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div class="mcp-server-card"><div><div style="font-weight: bold; font-size: 13px;">📁 filesystem</div><div style="font-size: 11px; color: var(--muted);">Lectura y escritura en el workspace.</div></div><span class="chip emerald mono">13 tools</span></div>
+        <div class="mcp-server-card"><div><div style="font-weight: bold; font-size: 13px;">🐙 github</div><div style="font-size: 11px; color: var(--muted);">Gestión de PRs, issues y ramas.</div></div><span class="chip emerald mono">26 tools</span></div>
+        <div class="mcp-server-card"><div><div style="font-weight: bold; font-size: 13px;">🎭 playwright</div><div style="font-size: 11px; color: var(--muted);">Navegador headless y capturas web.</div></div><span class="chip emerald mono">18 tools</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==============================================================
+       VISTA 8: TELEMETRÍA Y COSTOS
+       ============================================================== -->
+  <section class="view-container" id="view-telemetry">
+    <div class="telemetry-view-layout">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h2 style="font-size: 16px;">📊 Telemetría, Latencias &amp; Consumo de Tokens</h2>
+          <p style="font-size: 12px; color: var(--muted); margin-top: 2px;">Métricas en tiempo real registradas por sesión.</p>
+        </div>
+        <button type="button" class="btn-secondary">Limpiar Métricas</button>
+      </div>
+      <div class="stats-tiles">
+        <div class="stat-tile"><div style="font-size: 11px; color: var(--muted);">TOKENS PROCESADOS</div><div class="mono" style="font-size: 22px; font-weight: bold; color: #fff;">184,290</div><div style="font-size: 10px; color: var(--emerald);">+12.4k en el último turno</div></div>
+        <div class="stat-tile"><div style="font-size: 11px; color: var(--muted);">COSTO TOTAL ESTIMADO</div><div class="mono" style="font-size: 22px; font-weight: bold; color: var(--amber);">$0.042 USD</div><div style="font-size: 10px; color: var(--muted);">Tasa por 1M tokens: $0.15</div></div>
+        <div class="stat-tile"><div style="font-size: 11px; color: var(--muted);">LATENCIA PROMEDIO</div><div class="mono" style="font-size: 22px; font-weight: bold; color: var(--cyan);">1.18s</div><div style="font-size: 10px; color: var(--emerald);">p95: 2.10s</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==============================================================
+       TERMINAL SHELL DRAWER (BOTTOM Y RIGHT DOCK)
+       ============================================================== -->
+  <div class="terminal-drawer dock-bottom" id="terminalDrawer">
+    <header class="terminal-header">
+      <div class="terminal-tabs">
+        <div class="term-tab active" id="termTab1">pwsh (PowerShell 7)</div>
+        <div class="term-tab" id="termTab2">bash</div>
+        <button type="button" class="btn-secondary" style="padding: 2px 6px; font-size: 10px;" id="termNewTabBtn">+ Nueva</button>
+      </div>
+      <div class="top-group">
+        <span class="chip mono" style="font-size: 10px;">Snippets: <code>npm test</code> | <code>npm run build</code></span>
+        <button type="button" class="btn-secondary" style="font-size: 10px;" id="termToggleDockBtn">Cambiar Dock (Bottom / Right)</button>
+        <button type="button" class="btn-secondary" style="font-size: 10px;" id="termAskAiBtn">✨ Ask AI</button>
+        <button type="button" class="icon-btn" onclick="toggleTerminalDrawer()">✕</button>
+      </div>
+    </header>
+    <div class="terminal-body mono" id="terminalLogBody">
+AgentHub Integrated Shell [pwsh 7.4.5]
+Workspace: C:\Users\juan0\Documents\GitHub\portafolio\agent-hub
+PS C:\Users\juan0\Documents\GitHub\portafolio\agent-hub> vitest run
+ ✓ tests/agent-hub.test.ts (198 tests) 412ms
+ Test Files  1 passed (1)
+      Tests  198 passed (198)
+PS C:\Users\juan0\Documents\GitHub\portafolio\agent-hub> _
+    </div>
+    <footer class="terminal-input-bar">
+      <span class="mono" style="color: var(--emerald); font-weight: bold;">PS &gt;</span>
+      <input type="text" id="termInteractiveInput" class="terminal-input mono" placeholder="Escribe un comando o envía stdin al proceso activo..." />
+      <button type="button" class="btn-action" style="padding: 3px 10px; font-size: 11px;" id="termSendBtn">Ejecutar</button>
+    </footer>
+  </div>
+
+  <!-- ==============================================================
+       PROJECT FILES SIDEBAR (ÁRBOL COMPLETO Y CAMBIOS GIT)
+       ============================================================== -->
+  <aside class="files-sidebar" id="filesSidebar">
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--border);">
+      <strong style="font-size: 12px;">📁 Explorador &amp; Cambios Git</strong>
+      <button type="button" class="icon-btn" onclick="toggleFilesSidebar()">✕</button>
+    </div>
+    <div style="padding: 8px 12px; border-bottom: 1px solid var(--border);">
+      <button type="button" class="btn-action" style="width: 100%; justify-content: center; font-size: 11px;" id="generateCommitBtn">✨ Commit Semántico con IA</button>
+    </div>
+    <div style="flex: 1; overflow-y: auto; padding: 10px 14px; display: flex; flex-direction: column; gap: 6px;">
+      <div style="font-size: 10px; font-weight: bold; color: var(--muted);">CAMBIOS SIN CONFIRMAR (2)</div>
+      <div class="chip amber mono" style="justify-content: space-between;" onclick="openDiffModal('src/webview/App.tsx')">
+        <span>M src/webview/App.tsx</span><span style="font-size: 9px; color: var(--amber);">Ver Diff</span>
+      </div>
+      <div class="chip emerald mono" style="justify-content: space-between;" onclick="openDiffModal('docs/design/command-center-redesign.html')">
+        <span>A docs/design/command-center-redesign.html</span><span style="font-size: 9px; color: var(--emerald);">Ver Diff</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ==============================================================
+       MODALES HUD (Diff, Workspace, Branch, Security, Shortcuts, Spotlight, Scratchpad, Session)
+       ============================================================== -->
+  <div id="diffModal" class="hud-modal-overlay">
+    <div class="hud-modal" style="width: 800px;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <strong style="font-size: 14px;">🔍 Diff Interactivo: <span id="diffModalFileName">src/webview/App.tsx</span></strong>
+        <button type="button" class="chip" onclick="document.getElementById('diffModal').classList.remove('open')">✕</button>
+      </div>
+      <div class="mono" style="background: #06080e; border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 11.5px; max-height: 380px; overflow-y: auto; line-height: 1.6;">
+        <div style="color: var(--rose);">- let currentBranch = getGitBranch(root) || 'main';</div>
+        <div style="color: var(--emerald);">+ const isGit = Boolean(branch);</div>
+        <div style="color: var(--emerald);">+ let currentBranch = branch;</div>
+      </div>
+      <div style="display: flex; justify-content: space-between;">
+        <button type="button" class="btn-secondary" style="color: var(--rose);">⏪ Revertir Cambios</button>
+        <button type="button" class="btn-action" onclick="document.getElementById('diffModal').classList.remove('open')">Cerrar Diff</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="workspaceModal" class="hud-modal-overlay">
+    <div class="hud-modal">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <strong style="font-size: 14px;">📁 Selector de Workspace &amp; Proyectos</strong>
+        <button type="button" class="chip" onclick="document.getElementById('workspaceModal').classList.remove('open')">✕</button>
+      </div>
+      <div class="mono" style="padding: 8px 12px; background: #080c14; border-radius: 8px; border: 1px solid var(--amber); color: #fde68a;">C:\Users\juan0\Documents\GitHub\portafolio\agent-hub</div>
+      <button type="button" class="btn-action">+ Abrir otra carpeta del disco</button>
+    </div>
+  </div>
+
+  <div id="branchModal" class="hud-modal-overlay">
+    <div class="hud-modal">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <strong style="font-size: 14px;">⎇ Gestor de Ramas Git</strong>
+        <button type="button" class="chip" onclick="document.getElementById('branchModal').classList.remove('open')">✕</button>
+      </div>
+      <div class="chip emerald mono"><span>● main</span><span style="color: var(--emerald);">✓ al día</span></div>
+      <div style="display: flex; gap: 8px; margin-top: 6px;">
+        <input type="text" placeholder="Nombre de nueva rama..." class="mono" style="flex: 1; background: #080c14; border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; color: white; font-size: 11px;" />
+        <button type="button" class="btn-action">+ Crear rama</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="securityModal" class="hud-modal-overlay">
+    <div class="hud-modal">
+      <div style="display: flex; justify-content: space-between; align-items: center;"><strong style="font-size: 14px;">🛡️ Auditoría de Seguridad &amp; Entorno</strong><button type="button" class="chip" onclick="document.getElementById('securityModal').classList.remove('open')">✕</button></div>
+      <div class="mono" style="font-size: 11px; padding: 10px; background: #080c14; border-radius: 8px; border: 1px solid var(--border); color: #cbd5e1; line-height: 1.6;">
+        <div>✓ Escaneo de credenciales en git diff: limpio.</div>
+        <div>✓ Detección de sentencias SQL destructivas: sin hallazgos.</div>
+        <div>✓ Comparación con .env.example: 100% documentado.</div>
+      </div>
+      <button type="button" class="btn-action">Re-ejecutar auditoría completa</button>
+    </div>
+  </div>
+
+  <div id="shortcutsModal" class="hud-modal-overlay">
+    <div class="hud-modal">
+      <div style="display: flex; justify-content: space-between; align-items: center;"><strong style="font-size: 14px;">⌨ Atajos de Teclado de AgentHub</strong><button type="button" class="chip" onclick="document.getElementById('shortcutsModal').classList.remove('open')">✕</button></div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11.5px;">
+        <div class="chip" style="justify-content: space-between;"><span>Terminal Integrada</span><kbd class="mono">Ctrl + `</kbd></div>
+        <div class="chip" style="justify-content: space-between;"><span>Paleta de Comandos</span><kbd class="mono">Ctrl + K</kbd></div>
+        <div class="chip" style="justify-content: space-between;"><span>Modo Enfoque</span><kbd class="mono">Ctrl + Shift + F</kbd></div>
+        <div class="chip" style="justify-content: space-between;"><span>Lanzador Spotlight</span><kbd class="mono">Alt + Espacio</kbd></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="scratchpadDrawer" class="drawer-overlay">
+    <aside class="drawer-pane">
+      <div style="display: flex; justify-content: space-between; align-items: center;"><strong style="font-size: 13px;">📝 Borrador de Trabajo (scratchpad.md)</strong><button type="button" class="chip" onclick="document.getElementById('scratchpadDrawer').classList.remove('open')">✕</button></div>
+      <textarea class="mono" style="flex: 1; min-height: 300px; background: #080c14; border: 1px solid var(--border); border-radius: 8px; padding: 10px; color: white; font-size: 12px; resize: none; outline: none;"># Notas persistidas</textarea>
+      <button type="button" class="btn-action">Guardar notas (Ctrl+S)</button>
+    </aside>
+  </div>
+
+  <div id="sessionDrawer" class="drawer-overlay">
+    <aside class="drawer-pane">
+      <div style="display: flex; justify-content: space-between; align-items: center;"><strong style="font-size: 13px;">🗂 Historial de Conversaciones (26)</strong><button type="button" class="chip" onclick="document.getElementById('sessionDrawer').classList.remove('open')">✕</button></div>
+      <input type="text" placeholder="Buscar en historial..." class="mono" style="background: #080c14; border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; color: white; font-size: 11px;" />
+    </aside>
+  </div>
+
+  <!-- JAVASCRIPT -->
+  <script>
+    const navTabs = document.querySelectorAll('.nav-tab');
+    const viewContainers = document.querySelectorAll('.view-container');
+
+    function switchMainTab(viewName) {
+      navTabs.forEach(t => t.classList.toggle('active', t.getAttribute('data-view') === viewName));
+      viewContainers.forEach(v => v.classList.toggle('active', v.id === `view-${viewName}`));
+    }
+
+    navTabs.forEach(tab => {
+      tab.addEventListener('click', () => switchMainTab(tab.getAttribute('data-view')));
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && /^[1-7]$/.test(e.key)) {
+        e.preventDefault();
+        const views = ['chat', 'docs', 'memory', 'agents', 'accounts', 'mcps', 'telemetry'];
+        switchMainTab(views[Number(e.key) - 1]);
+      } else if ((e.ctrlKey || e.metaKey) && e.key === '`') {
+        e.preventDefault();
+        toggleTerminalDrawer();
+      } else if (e.key === 'Escape') {
+        document.querySelectorAll('.hud-modal-overlay, .drawer-overlay').forEach(el => el.classList.remove('open'));
+      }
+    });
+
+    const termDrawer = document.getElementById('terminalDrawer');
+    function toggleTerminalDrawer() {
+      termDrawer.classList.toggle('open');
+      if (termDrawer.classList.contains('open')) document.getElementById('termInteractiveInput').focus();
+    }
+    document.getElementById('toggleTerminalBtn').addEventListener('click', toggleTerminalDrawer);
+    document.getElementById('openTerminalFromHudBtn').addEventListener('click', toggleTerminalDrawer);
+
+    document.getElementById('termToggleDockBtn').addEventListener('click', () => {
+      if (termDrawer.classList.contains('dock-bottom')) {
+        termDrawer.classList.remove('dock-bottom');
+        termDrawer.classList.add('dock-right');
+      } else {
+        termDrawer.classList.remove('dock-right');
+        termDrawer.classList.add('dock-bottom');
+      }
+    });
+
+    const termInput = document.getElementById('termInteractiveInput');
+    const termLog = document.getElementById('terminalLogBody');
+    function sendTermCmd() {
+      const val = termInput.value.trim();
+      if (!val) return;
+      termLog.innerHTML += `\nPS C:\\Users\\juan0\\Documents\\GitHub\\portafolio\\agent-hub&gt; ${val}\n[Proceso ejecutado con código 0]`;
+      termInput.value = '';
+      termLog.scrollTop = termLog.scrollHeight;
+    }
+    document.getElementById('termSendBtn').addEventListener('click', sendTermCmd);
+    termInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendTermCmd(); });
+
+    const filesSidebar = document.getElementById('filesSidebar');
+    function toggleFilesSidebar() { filesSidebar.classList.toggle('open'); }
+    document.getElementById('toggleFilesSidebarBtn').addEventListener('click', toggleFilesSidebar);
+
+    document.getElementById('workspacePickerTrigger').addEventListener('click', () => document.getElementById('workspaceModal').classList.add('open'));
+    document.getElementById('gitBranchTrigger').addEventListener('click', () => document.getElementById('branchModal').classList.add('open'));
+    document.getElementById('openSecurityModalBtn').addEventListener('click', () => document.getElementById('securityModal').classList.add('open'));
+    document.getElementById('openShortcutsBtn').addEventListener('click', () => document.getElementById('shortcutsModal').classList.add('open'));
+    document.getElementById('openScratchpadBtn').addEventListener('click', () => document.getElementById('scratchpadDrawer').classList.add('open'));
+    document.getElementById('openSessionDrawerBtn').addEventListener('click', () => document.getElementById('sessionDrawer').classList.add('open'));
+
+    function openDiffModal(fileName) {
+      document.getElementById('diffModalFileName').innerText = fileName;
+      document.getElementById('diffModal').classList.add('open');
+    }
+
+    document.getElementById('toggleDensityBtn').addEventListener('click', () => {
+      const isComfortable = document.body.getAttribute('data-density') === 'comfortable';
+      document.body.setAttribute('data-density', isComfortable ? 'compact' : 'comfortable');
+    });
+
+    let soundOn = true;
+    document.getElementById('toggleSoundBtn').addEventListener('click', () => {
+      soundOn = !soundOn;
+      document.getElementById('toggleSoundBtn').innerText = soundOn ? '🔊' : '🔇';
+    });
+
+    document.getElementById('toggleFocusBtn').addEventListener('click', () => {
+      const strip = document.getElementById('agentsRunningStrip');
+      strip.style.display = strip.style.display === 'none' ? 'flex' : 'none';
+    });
+
+    document.getElementById('toggleCentralModeBtn').addEventListener('click', () => switchMainTab('chat'));
+
+    document.getElementById('openVsCodeBtn').addEventListener('click', () => {
+      window.open('vscode://file/C:/Users/juan0/Documents/GitHub/portafolio/agent-hub', '_blank');
+    });
+
+    function toggleComposerFlows(trayId) {
+      const tray = document.getElementById(trayId);
+      if (tray) tray.style.display = tray.style.display === 'none' ? 'flex' : 'none';
+    }
+
+    function toggleVoiceRecording(bannerId) {
+      const banner = document.getElementById(bannerId);
+      if (banner) banner.classList.toggle('active');
+    }
+
+    function setDocViewport(device) {
+      const frame = document.getElementById('docDeviceFrame');
+      frame.className = `preview-frame-container ${device}`;
+      document.querySelectorAll('#viewDeviceDesktop, #viewDeviceTablet, #viewDeviceMobile').forEach(b => b.classList.remove('active'));
+      if (device === 'desktop') document.getElementById('viewDeviceDesktop').classList.add('active');
+      if (device === 'tablet') document.getElementById('viewDeviceTablet').classList.add('active');
+      if (device === 'mobile') document.getElementById('viewDeviceMobile').classList.add('active');
+    }
+
+    function toggleDocCodePane() {
+      const codePane = document.getElementById('docSourcePane');
+      const prevPane = document.getElementById('docPreviewContainer');
+      const isHidden = codePane.style.display === 'none';
+      codePane.style.display = isHidden ? 'block' : 'none';
+      prevPane.style.gridColumn = isHidden ? 'span 1' : 'span 2';
+    }
+  </script>
+</body>
+</html>

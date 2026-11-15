@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { CostSummary, TelemetryRegistry, ModelAccountTelemetry } from '../../shared/types';
 import { BarChart3, Activity, Brain, DollarSign, RotateCcw, Filter, Layers, AlertTriangle, X, Download } from 'lucide-react';
 import { ProviderBadge } from './ProviderBadge';
+import { downloadText } from '../utils/format';
 
 interface Props {
   telemetryRegistry: TelemetryRegistry;
@@ -12,12 +13,14 @@ interface Props {
 export const TelemetryDashboard: React.FC<Props> = ({ telemetryRegistry, costs, onClearTelemetry }) => {
   const [filterProvider, setFilterProvider] = useState<string>('all');
   const [showClearConfirm, setShowClearConfirm] = useState<boolean>(false);
+  const [rangeDays, setRangeDays] = useState(14);
+  const [sortBy, setSortBy] = useState<'cost' | 'turns' | 'name'>('cost');
 
   const entries: ModelAccountTelemetry[] = Object.values(telemetryRegistry);
 
-  const filteredEntries = filterProvider === 'all'
-    ? entries
-    : entries.filter((e) => e.provider === filterProvider);
+  const filteredEntries = (filterProvider === 'all' ? entries : entries.filter((e) => e.provider === filterProvider)).sort((a, b) =>
+    sortBy === 'cost' ? b.cumulativeCostUSD - a.cumulativeCostUSD : sortBy === 'turns' ? b.turnsCount - a.turnsCount : a.accountName.localeCompare(b.accountName)
+  );
 
   // Totales acumulados globales
   const totalIn = entries.reduce((acc, curr) => acc + (curr.totalInputTokens || 0), 0);
@@ -27,7 +30,13 @@ export const TelemetryDashboard: React.FC<Props> = ({ telemetryRegistry, costs, 
   const totalCost = entries.reduce((acc, curr) => acc + (curr.cumulativeCostUSD || 0), 0);
   const totalTurns = entries.reduce((acc, curr) => acc + (curr.turnsCount || 0), 0);
 
-  const recentDays = costs.days.slice(-14);
+  const recentDays = costs.days.slice(-rangeDays);
+  const lastWeek = costs.days.slice(-7);
+  // Proyección simple: el promedio diario de los últimos 7 días registrados por 30.
+  const monthlyProjection = lastWeek.length >= 3 ? (lastWeek.reduce((sum, d) => sum + d.costUSD, 0) / lastWeek.length) * 30 : 0;
+  const todayKey = new Date().toLocaleDateString('en-CA'); // AAAA-MM-DD en hora local
+  const agentsTotal = costs.agents.reduce((sum, agent) => sum + agent.costUSD, 0);
+  const rangeTotal = recentDays.reduce((sum, d) => sum + d.costUSD, 0);
   const maxDayCost = Math.max(...recentDays.map((d) => d.costUSD), 0);
   const maxAgentCost = Math.max(...costs.agents.map((a) => a.costUSD), 0);
   const usd = (value: number) => `$${value.toFixed(value < 1 ? 4 : 2)}`;
@@ -36,8 +45,8 @@ export const TelemetryDashboard: React.FC<Props> = ({ telemetryRegistry, costs, 
     if (entries.length === 0) return;
     const headers = ['Cuenta', 'Modelo', 'Proveedor', 'Turnos', 'Tokens Entrada', 'Tokens Salida', 'Tokens Razonamiento', 'Cache Reuso', 'Costo USD'];
     const rows = entries.map((e) => [
-      `"${e.accountName}"`,
-      `"${e.modelName}"`,
+      `"${e.accountName.replace(/"/g, '""')}"`,
+      `"${e.modelName.replace(/"/g, '""')}"`,
       `"${e.provider}"`,
       e.turnsCount,
       e.totalInputTokens,
@@ -46,18 +55,30 @@ export const TelemetryDashboard: React.FC<Props> = ({ telemetryRegistry, costs, 
       e.totalCacheReadTokens,
       e.cumulativeCostUSD.toFixed(4)
     ]);
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `agenthub-telemetria-${Date.now()}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    downloadText(`agenthub-telemetria-${Date.now()}.csv`, [headers.join(','), ...rows.map((r) => r.join(','))].join('\n'), 'text/csv');
+  };
+
+  const [summaryCopied, setSummaryCopied] = useState(false);
+  const handleCopySummary = async () => {
+    const lines = [
+      `Tokens: ${(totalTokens / 1000).toFixed(1)}k (${(totalIn / 1000).toFixed(1)}k entrada, ${(totalOut / 1000).toFixed(1)}k salida, ${(totalThink / 1000).toFixed(1)}k razonamiento)`,
+      `Costo: $${totalCost.toFixed(3)} en ${totalTurns} turnos`,
+      ...entries.map((e) => `- ${e.accountName} · ${e.modelName}: ${e.turnsCount} turnos, $${e.cumulativeCostUSD.toFixed(4)}`)
+    ];
+    try {
+      await navigator.clipboard.writeText(lines.join('\n'));
+      setSummaryCopied(true);
+      setTimeout(() => setSummaryCopied(false), 1500);
+    } catch {}
+  };
+
+  const handleExportJSON = () => {
+    if (entries.length === 0) return;
+    downloadText(`agenthub-telemetria-${Date.now()}.json`, JSON.stringify({ totals: { totalTokens, totalCost, totalTurns }, entries, costs }, null, 2), 'application/json');
   };
 
   return (
-    <div className="space-y-4 p-1">
+    <div className="space-y-4 p-1 w-full min-w-0">
       {/* Top Header */}
       <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-lg bg-zinc-900 border border-zinc-800">
         <div className="min-w-0">
@@ -72,6 +93,22 @@ export const TelemetryDashboard: React.FC<Props> = ({ telemetryRegistry, costs, 
 
         {entries.length > 0 && (
           <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={handleCopySummary}
+              className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 transition"
+              title="Copiar un resumen en texto para pegarlo en un reporte"
+            >
+              <Download className="w-3 h-3 text-indigo-400" />
+              <span>{summaryCopied ? 'Copiado' : 'Copiar resumen'}</span>
+            </button>
+            <button
+              onClick={handleExportJSON}
+              className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 transition"
+              title="Exportar métricas, totales y gasto en JSON"
+            >
+              <Download className="w-3 h-3 text-cyan-400" />
+              <span>Exportar JSON</span>
+            </button>
             <button
               onClick={handleExportCSV}
               className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 transition"
@@ -147,7 +184,7 @@ export const TelemetryDashboard: React.FC<Props> = ({ telemetryRegistry, costs, 
             ${totalCost.toFixed(3)}
           </div>
           <div className="text-[11px] text-emerald-500/80">
-            Acumulado reportado por las CLIs
+            {totalTurns > 0 ? `$${(totalCost / totalTurns).toFixed(3)} por turno` : 'Acumulado reportado por las CLIs'}
           </div>
         </div>
 
@@ -176,16 +213,42 @@ export const TelemetryDashboard: React.FC<Props> = ({ telemetryRegistry, costs, 
         ) : (
           <>
             <div className="space-y-1">
-              <div className="text-[11px] text-zinc-400">Por día (últimos {recentDays.length})</div>
-              {recentDays.map((d) => (
+              <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-zinc-400">
+                <span>Por día (últimos {recentDays.length})</span>
+                {[7, 14, 30].map((days) => (
+                  <button
+                    key={days}
+                    type="button"
+                    aria-pressed={rangeDays === days}
+                    onClick={() => setRangeDays(days)}
+                    className={`px-1.5 rounded border transition ${rangeDays === days ? 'bg-zinc-800 text-white border-zinc-700' : 'border-transparent hover:text-zinc-200'}`}
+                  >
+                    {days} d
+                  </button>
+                ))}
+                <span className="ml-auto font-mono text-zinc-300">Total {usd(rangeTotal)}</span>
+              </div>
+              {monthlyProjection > 0 && (
+                <div className="text-[11px] text-zinc-500">Si sigues al ritmo de la última semana: <span className="font-mono text-amber-300">≈ {usd(monthlyProjection)}</span> al mes.</div>
+              )}
+              {recentDays.map((d, dayIndex) => {
+                const previous = recentDays[dayIndex - 1];
+                const delta = previous && previous.costUSD > 0 ? Math.round(((d.costUSD - previous.costUSD) / previous.costUSD) * 100) : null;
+                const date = new Date(`${d.day}T00:00:00`);
+                const label = d.day === todayKey ? 'hoy' : date.toLocaleDateString('es', { weekday: 'short' });
+                return (
                 <div key={d.day} className="flex items-center gap-2 text-[11px] font-mono">
-                  <span className="w-20 shrink-0 text-zinc-400">{d.day}</span>
+                  <span className="w-24 shrink-0 text-zinc-400">{d.day} <span className="text-zinc-500">{label}</span></span>
                   <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
                     <div className="h-full rounded-full bg-emerald-500" style={{ width: `${maxDayCost > 0 ? Math.max(2, (d.costUSD / maxDayCost) * 100) : 0}%` }} />
                   </div>
-                  <span className="w-16 shrink-0 text-right text-zinc-200">{usd(d.costUSD)}</span>
+                  <span className="w-16 shrink-0 text-right text-zinc-200 font-mono">{usd(d.costUSD)}</span>
+                  <span className={`w-9 shrink-0 text-right ${delta === null ? 'text-zinc-600' : delta > 0 ? 'text-amber-400' : 'text-emerald-400'}`} title="Cambio frente al día anterior">
+                    {delta === null ? '—' : `${delta > 0 ? '▲' : '▼'}${Math.abs(delta)}%`}
+                  </span>
                 </div>
-              ))}
+                );
+              })}
             </div>
             <div className="space-y-1">
               <div className="text-[11px] text-zinc-400">Por agente</div>
@@ -196,6 +259,9 @@ export const TelemetryDashboard: React.FC<Props> = ({ telemetryRegistry, costs, 
                     <div className="h-full rounded-full bg-indigo-500" style={{ width: `${maxAgentCost > 0 ? Math.max(2, (a.costUSD / maxAgentCost) * 100) : 0}%` }} />
                   </div>
                   <span className="w-16 shrink-0 text-right text-zinc-200">{usd(a.costUSD)}</span>
+                  <span className="w-9 shrink-0 text-right text-zinc-500" title="Parte del gasto total por agente">
+                    {agentsTotal > 0 ? `${Math.round((a.costUSD / agentsTotal) * 100)}%` : '—'}
+                  </span>
                 </div>
               ))}
             </div>
@@ -228,6 +294,21 @@ export const TelemetryDashboard: React.FC<Props> = ({ telemetryRegistry, costs, 
         ))}
       </div>
 
+      <div className="flex items-center gap-1.5 text-[11px]">
+        <span className="text-zinc-400 ml-1">Ordenar por:</span>
+        {([['cost', 'Costo'], ['turns', 'Turnos'], ['name', 'Cuenta']] as const).map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            aria-pressed={sortBy === id}
+            onClick={() => setSortBy(id)}
+            className={`px-2 py-0.5 rounded font-medium transition ${sortBy === id ? 'bg-zinc-800 text-white border border-zinc-700' : 'text-zinc-400 hover:text-zinc-300'}`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
       {/* Granular Breakdown per Model and Account */}
       {filteredEntries.length === 0 ? (
         <div className="text-center p-6 bg-zinc-900/40 rounded-lg border border-zinc-800 text-zinc-400 text-xs">
@@ -249,14 +330,14 @@ export const TelemetryDashboard: React.FC<Props> = ({ telemetryRegistry, costs, 
                 className="p-3 bg-zinc-900 border border-zinc-800 rounded-lg space-y-2.5 hover:border-zinc-700 transition"
               >
                 {/* Entry Header */}
-                <div className="flex items-center justify-between gap-2 pb-1.5 border-b border-zinc-800">
+                <div className="flex flex-wrap items-center justify-between gap-2 pb-1.5 border-b border-zinc-800">
                   <div className="flex items-center gap-2 min-w-0">
                     <ProviderBadge provider={item.provider} />
 
                     <div className="min-w-0">
                       <div className="font-semibold text-xs text-zinc-100 flex flex-wrap items-center gap-x-1.5">
                         <span>{item.accountName}</span>
-                        <span className="font-mono text-indigo-400 text-[11px] px-1.5 py-px rounded bg-indigo-500/10 border border-indigo-500/20">
+                        <span className="font-mono text-indigo-400 text-[11px] px-1.5 py-px rounded whitespace-nowrap bg-indigo-500/10 border border-indigo-500/20">
                           {item.modelName}
                         </span>
                       </div>
@@ -271,7 +352,9 @@ export const TelemetryDashboard: React.FC<Props> = ({ telemetryRegistry, costs, 
                       <span className="text-xs font-mono font-bold text-emerald-400">
                         ${item.cumulativeCostUSD.toFixed(4)}
                       </span>
-                      <span className="block text-[11px] text-zinc-400">Costo acumulado</span>
+                      <span className="block text-[11px] text-zinc-400">
+                        Costo acumulado{item.turnsCount > 0 ? ` · $${(item.cumulativeCostUSD / item.turnsCount).toFixed(4)}/turno` : ''}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -333,6 +416,11 @@ export const TelemetryDashboard: React.FC<Props> = ({ telemetryRegistry, costs, 
                   <div className="p-1.5 bg-zinc-800/40 rounded border border-zinc-800">
                     <span className="text-zinc-400 block">Caché reusada:</span>
                     <span className="text-emerald-400 font-bold">{item.totalCacheReadTokens.toLocaleString()}</span>
+                    {item.totalCacheReadTokens > 0 && (
+                      <span className="block text-[10px] text-zinc-500" title="Parte de la entrada que salió de la caché">
+                        {Math.round((item.totalCacheReadTokens / (item.totalInputTokens + item.totalCacheReadTokens)) * 100)}% de la entrada
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>

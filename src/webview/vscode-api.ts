@@ -30,6 +30,7 @@ if (!hasVsCodeApi && typeof window !== 'undefined') {
       eventSource = new EventSource('/events');
 
       eventSource.onopen = () => {
+        window.dispatchEvent(new CustomEvent('agenthub:connection', { detail: true }));
         postToHost({ command: 'ready' });
       };
 
@@ -43,6 +44,7 @@ if (!hasVsCodeApi && typeof window !== 'undefined') {
       };
 
       eventSource.onerror = () => {
+        window.dispatchEvent(new CustomEvent('agenthub:connection', { detail: false }));
         eventSource?.close();
         setTimeout(connectSSE, 2000);
       };
@@ -52,6 +54,10 @@ if (!hasVsCodeApi && typeof window !== 'undefined') {
   };
 
   connectSSE();
+}
+
+export function isElectron(): boolean {
+  return typeof navigator !== 'undefined' && /electron/i.test(navigator.userAgent);
 }
 
 export function isStandaloneBrowser(): boolean {

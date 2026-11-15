@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { AccountProfile } from '../../shared/types';
-import { CheckCircle2, LogIn, LogOut } from 'lucide-react';
+import { Check, CheckCircle2, Copy, LogIn, LogOut } from 'lucide-react';
 import { ProviderBadge } from './ProviderBadge';
 
 interface Props {
@@ -13,6 +13,15 @@ interface Props {
 
 export const ProfileCard: React.FC<Props> = ({ profile, isActive, onSelect, onLogin, onLogout }) => {
   const isConnected = profile.status === 'connected';
+  const [copied, setCopied] = useState(false);
+  const copyEmail = async () => {
+    if (!profile.email) return;
+    try {
+      await navigator.clipboard.writeText(profile.email);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {}
+  };
 
   return (
     <div
@@ -47,7 +56,7 @@ export const ProfileCard: React.FC<Props> = ({ profile, isActive, onSelect, onLo
               </span>
             ) : (
               <span className="block text-[11px] text-zinc-400 truncate">
-                {isConnected ? profile.models[0]?.label || 'Listo' : 'No autenticado'}
+                {isConnected ? `${profile.models[0]?.label || 'Listo'}${profile.models.length > 1 ? ` · ${profile.models.length} modelos` : ''}` : 'No autenticado'}
               </span>
             )}
           </span>
@@ -60,6 +69,17 @@ export const ProfileCard: React.FC<Props> = ({ profile, isActive, onSelect, onLo
                 <span className="text-[11px] uppercase font-semibold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                   {profile.subscriptionType}
                 </span>
+              )}
+              {profile.email && (
+                <button
+                  type="button"
+                  aria-label={`Copiar el correo de ${profile.name}`}
+                  title="Copiar el correo"
+                  onClick={copyEmail}
+                  className="p-1 rounded text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition"
+                >
+                  {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                </button>
               )}
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
               <button

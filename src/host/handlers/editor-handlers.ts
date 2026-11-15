@@ -1,12 +1,14 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import * as os from 'os';
 import { spawn, execFile, execFileSync } from 'child_process';
 import * as vscode from 'vscode';
 import { findSecrets } from '../../analysis/secret-scanner';
 import { auditEnvSync } from '../../analysis/code-audits';
 import { findDestructiveStatements, findQueryIssues } from '../../analysis/sql-review';
-import { currentEditor, workspaceDir, setCustomWorkspaceDir, getRecentWorkspaces, getGitStatusFiles, getProjectTree } from '../workspace';
+import { currentEditor, workspaceDir, setCustomWorkspaceDir, getRecentWorkspaces, getGitStatusFiles, getProjectTree, getGitBranch, getGitBranchSummary } from '../workspace';
 import { rollbackCheckpoint } from '../git-checkpoint';
+import { listDocuments, readDocument, saveDocument } from '../documents';
 import { HubContext } from '../hub-context';
 import { HandlerMap } from './handler-types';
 
@@ -14,8 +16,38 @@ const PROPOSAL_SCHEME = 'agent-hub-proposal';
 
 let latestProposal = '';
 
-/** Un comando a la vez en la terminal integrada; `npm run dev` y similares no terminan solos. */
-let terminalProc: ReturnType<typeof spawn> | undefined;
+/** Lista blanca de shells permitidas desde la vista para evitar inyección de ejecutables arbitrarios. */
+export function resolveShellOption(shell?: string): string | boolean {
+  switch (shell) {
+    case 'pwsh':
+      return process.platform === 'win32' ? 'pwsh.exe' : 'pwsh';
+    case 'cmd':
+      return process.platform === 'win32' ? 'cmd.exe' : true;
+    case 'bash':
+      return 'bash';
+    case 'wsl':
+      return process.platform === 'win32' ? 'wsl.exe' : true;
+    default:
+      return true;
+  }
+}
+
+/** Un proceso activo por pestaña de terminal (`terminalId`), p. ej. `npm run dev` en paralelo a `npm test`. */
+const terminalProcs = new Map<string, ReturnType<typeof spawn>>();
+/** Directorio de trabajo persistente por pestaña tras ejecutar `cd`. */
+const terminalCwds = new Map<string, string>();
+
+const SNIPPETS_REL_PATH = path.join('.agent-hub', 'terminal-snippets.json');
+
+function resolveCdCommand(commandLine: string): string | undefined {
+  const match = commandLine.trim().match(/^cd(?:\s+\/d)?\s+(.+)$/i);
+  if (!match) return undefined;
+  const raw = match[1].trim();
+  if ((raw.startsWith('"') && raw.endsWith('"')) || (raw.startsWith("'") && raw.endsWith("'"))) {
+    return raw.slice(1, -1);
+  }
+  return raw;
+}
 
 /** Con `shell: true`, `kill()` en Windows solo cierra cmd.exe y deja vivo al proceso hijo. */
 function killTree(proc: ReturnType<typeof spawn>): void {
@@ -55,6 +87,16 @@ const addedDecorationType = vscode.window.createTextEditorDecorationType({
 
 let activeDecoratedEditor: vscode.TextEditor | undefined;
 
+/** Carpeta GitHub que contiene los proyectos: el ancestro llamado GitHub del espacio actual, o ~/Documents/GitHub. */
+function githubRoot(): string {
+  let cur = workspaceDir() ?? '';
+  while (cur && path.dirname(cur) !== cur) {
+    if (path.basename(cur).toLowerCase() === 'github') return cur;
+    cur = path.dirname(cur);
+  }
+  return path.join(os.homedir(), 'Documents', 'GitHub');
+}
+
 export function editorHandlers(hub?: HubContext): HandlerMap<
   | 'insertCode'
   | 'openDiff'
@@ -66,32 +108,104 @@ export function editorHandlers(hub?: HubContext): HandlerMap<
   | 'previewFile'
   | 'setWorkspaceDir'
   | 'chooseWorkspaceDir'
+  | 'listDirs'
+  | 'listDocuments'
+  | 'readDocument'
+  | 'saveDocument'
+  | 'startSystemDictation'
   | 'getWorkspaceOverview'
   | 'openFolderInExplorer'
   | 'runTerminalCommand'
+  | 'sendTerminalInput'
   | 'stopTerminalCommand'
+  | 'loadTerminalSnippets'
+  | 'saveTerminalSnippets'
   | 'gitDiffFile'
   | 'gitRevertFile'
   | 'gitCommitQuick'
   | 'searchContent'
   | 'getGitBranches'
+  | 'getDirGitStatus'
   | 'checkoutBranch'
   | 'createBranch'
   | 'deleteBranch'
+  | 'initGitRepo'
   | 'runSecurityAudit'
   | 'loadScratchpad'
   | 'saveScratchpad'
 > {
+  const resolveTargetDir = (dir?: string, sessionId?: string): string => {
+    if (dir && fs.existsSync(dir)) return dir;
+    if (sessionId) {
+      const sessionDir = hub?.sessions?.get(sessionId)?.projectPath;
+      if (sessionDir && fs.existsSync(sessionDir)) return sessionDir;
+    }
+    const activeDir = hub?.sessions?.getActive()?.projectPath;
+    if (activeDir && fs.existsSync(activeDir)) return activeDir;
+    return workspaceDir() ?? process.cwd();
+  };
+
+  const emitGitBranches = (dir?: string) => {
+    const root = resolveTargetDir(dir);
+    const branch = getGitBranch(root);
+    const isGit = Boolean(branch);
+    const currentBranch = branch;
+    const branches: string[] = [];
+    const squadBranches: string[] = [];
+    const seen = new Set<string>();
+
+    if (isGit) {
+      try {
+        // Usar -a para listar ramas locales y remotas disponibles
+        const rawBranches = git(root, 'branch', '-a', '--no-color');
+        for (const line of rawBranches.split('\n')) {
+          let clean = line.replace(/^[*+\s]+/, '').trim();
+          if (!clean || clean.includes('->')) continue;
+
+          if (clean.startsWith('remotes/')) {
+            clean = clean.replace(/^remotes\/[^/]+\//, '');
+          }
+
+          if (!clean || seen.has(clean)) continue;
+          seen.add(clean);
+
+          if (clean.startsWith('agent-hub/') || clean.startsWith('squad-') || clean.startsWith('squad/') || clean.startsWith('pipeline-')) {
+            squadBranches.push(clean);
+          } else {
+            branches.push(clean);
+          }
+        }
+      } catch {}
+    }
+
+    hub?.post({
+      type: 'gitBranches',
+      dir: root,
+      isGit,
+      currentBranch,
+      branches,
+      squadBranches
+    });
+  };
+
   const emitWorkspaceOverview = () => {
     const root = workspaceDir() ?? process.cwd();
+    const branch = getGitBranch(root);
+    const isGit = Boolean(branch);
     hub?.post({
       type: 'workspaceOverview',
       workspaceDir: root,
+      isGit,
+      currentBranch: branch,
       recentWorkspaces: getRecentWorkspaces(),
-      gitFiles: getGitStatusFiles(root),
+      gitFiles: isGit ? getGitStatusFiles(root) : [],
       projectTree: getProjectTree(root)
     });
+    emitGitBranches(root);
   };
+
+  // Documentos puede abrirse sobre la carpeta de una conversación y no la global.
+  const docRoot = (root?: string) => (root && fs.existsSync(root) && fs.statSync(root).isDirectory() ? root : workspaceDir() ?? process.cwd());
 
   return {
     setWorkspaceDir: async ({ dir }: { dir: string }) => {
@@ -101,6 +215,45 @@ export function editorHandlers(hub?: HubContext): HandlerMap<
 
     getWorkspaceOverview: async () => {
       emitWorkspaceOverview();
+    },
+
+    listDocuments: async ({ all, root: requested }: { all?: boolean; root?: string }) => {
+      const root = docRoot(requested);
+      hub?.post({ type: 'documents', root, ...listDocuments(root, all) });
+    },
+
+    readDocument: async ({ file, root }: { file: string; root?: string }) => {
+      const result = readDocument(docRoot(root), file);
+      hub?.post('error' in result ? { type: 'documentContent', file, error: result.error } : { type: 'documentContent', ...result });
+    },
+
+    saveDocument: async ({ file, content, expectedMtime, force, root }: { file: string; content: string; expectedMtime?: number; force?: boolean; root?: string }) => {
+      const result = saveDocument(docRoot(root), file, content, expectedMtime, force);
+      hub?.post({ type: 'documentSaved', file, ...result });
+    },
+
+    listDirs: async ({ dir }: { dir?: string }) => {
+      const root = githubRoot();
+      const target = dir && fs.existsSync(dir) ? dir : root;
+      let entries: Array<{ name: string; path: string; isGit: boolean }> = [];
+      try {
+        entries = fs.readdirSync(target, { withFileTypes: true })
+          .filter((e) => e.isDirectory() && !e.name.startsWith('.') && e.name !== 'node_modules')
+          .map((e) => {
+            const full = path.join(target, e.name);
+            return { name: e.name, path: full, isGit: fs.existsSync(path.join(full, '.git')) };
+          })
+          .sort((a, b) => a.name.localeCompare(b.name));
+      } catch {}
+      hub?.post({ type: 'dirListing', root, dir: target, entries });
+    },
+
+    // Electron (sin servicio de voz de Google) y los webviews de VS Code no soportan Web Speech: se usa el dictado de Windows (Win+H) sobre el campo enfocado.
+    startSystemDictation: async () => {
+      if (process.platform !== 'win32') return;
+      const ps = "Add-Type -Namespace W -Name K -MemberDefinition '[DllImport(\"user32.dll\")] public static extern void keybd_event(byte b, byte s, uint f, int e);';" +
+        "[W.K]::keybd_event(0x5B,0,0,0);[W.K]::keybd_event(0x48,0,0,0);[W.K]::keybd_event(0x48,0,2,0);[W.K]::keybd_event(0x5B,0,2,0)";
+      execFile('powershell.exe', ['-NoProfile', '-Command', ps], { windowsHide: true }, () => {});
     },
 
     chooseWorkspaceDir: async () => {
@@ -310,33 +463,115 @@ export function editorHandlers(hub?: HubContext): HandlerMap<
       }
     },
 
-    stopTerminalCommand: () => {
-      if (!terminalProc) return;
-      hub?.post({ type: 'terminalOutput', output: '\n[Deteniendo…]\n' });
-      killTree(terminalProc);
+    stopTerminalCommand: ({ terminalId = 'default' }: { terminalId?: string } = {}) => {
+      const proc = terminalProcs.get(terminalId);
+      if (!proc) return;
+      hub?.post({ type: 'terminalOutput', terminalId, output: '\n[Deteniendo…]\n' });
+      killTree(proc);
     },
 
-    runTerminalCommand: async ({ commandLine }: { commandLine: string }) => {
-      if (terminalProc) {
-        hub?.post({ type: 'terminalOutput', output: '\n[Ya hay un comando en ejecución: detenlo antes de lanzar otro]\n' });
+    sendTerminalInput: ({ terminalId = 'default', data }: { terminalId?: string; data: string }) => {
+      const proc = terminalProcs.get(terminalId);
+      if (!proc || !proc.stdin?.writable) return;
+      proc.stdin.write(`${data}\n`);
+      hub?.post({ type: 'terminalOutput', terminalId, output: `> ${data}\n` });
+    },
+
+    loadTerminalSnippets: ({ cwd }: { cwd?: string } = {}) => {
+      const root = cwd && fs.existsSync(cwd) ? cwd : (workspaceDir() ?? process.cwd());
+      const file = path.join(root, SNIPPETS_REL_PATH);
+      let snippets: Array<{ label: string; cmd: string }> = [];
+      try {
+        if (fs.existsSync(file)) {
+          const parsed = JSON.parse(fs.readFileSync(file, 'utf8'));
+          if (Array.isArray(parsed)) {
+            snippets = parsed.filter((s) => s && typeof s.label === 'string' && typeof s.cmd === 'string');
+          }
+        }
+      } catch {}
+      hub?.post({ type: 'terminalSnippets', snippets });
+    },
+
+    saveTerminalSnippets: ({ cwd, snippets }: { cwd?: string; snippets: Array<{ label: string; cmd: string }> }) => {
+      const root = cwd && fs.existsSync(cwd) ? cwd : (workspaceDir() ?? process.cwd());
+      const file = path.join(root, SNIPPETS_REL_PATH);
+      const clean = (Array.isArray(snippets) ? snippets : [])
+        .filter((s) => s && typeof s.label === 'string' && typeof s.cmd === 'string' && s.cmd.trim())
+        .map((s) => ({ label: s.label.trim() || s.cmd.trim(), cmd: s.cmd.trim() }))
+        .slice(0, 50);
+      fs.mkdirSync(path.dirname(file), { recursive: true });
+      fs.writeFileSync(file, JSON.stringify(clean, null, 2), 'utf8');
+      hub?.post({ type: 'terminalSnippets', snippets: clean });
+    },
+
+    runTerminalCommand: async ({
+      terminalId = 'default',
+      commandLine,
+      cwd,
+      shell
+    }: {
+      terminalId?: string;
+      commandLine: string;
+      cwd?: string;
+      shell?: string;
+    }) => {
+      if (terminalProcs.has(terminalId)) {
+        hub?.post({ type: 'terminalOutput', terminalId, output: '\n[Ya hay un comando en ejecución en esta pestaña: detenlo antes de lanzar otro]\n' });
         return;
       }
-      const root = workspaceDir() ?? process.cwd();
-      hub?.post({ type: 'terminalOutput', output: `\n$ ${commandLine}\n`, command: commandLine });
-      try {
-        // `detached` en Unix crea un grupo de procesos para poder matarlo entero.
-        const proc = spawn(commandLine, { shell: true, cwd: root, windowsHide: true, detached: process.platform !== 'win32' });
-        terminalProc = proc;
-        proc.stdout?.on('data', (data: Buffer) => {
-          hub?.post({ type: 'terminalOutput', output: data.toString('utf8'), command: commandLine });
-        });
-        proc.stderr?.on('data', (data: Buffer) => {
-          hub?.post({ type: 'terminalOutput', output: data.toString('utf8'), command: commandLine });
-        });
-        proc.on('close', (code: number | null) => {
-          if (terminalProc === proc) terminalProc = undefined;
+      const fallbackRoot = workspaceDir() ?? process.cwd();
+      const baseCwd = cwd && fs.existsSync(cwd) ? cwd : fallbackRoot;
+      const savedCwd = terminalCwds.get(terminalId);
+      const root = savedCwd && fs.existsSync(savedCwd) ? savedCwd : baseCwd;
+
+      const cdTarget = resolveCdCommand(commandLine);
+      if (cdTarget !== undefined && !/[&|;<>]/.test(commandLine)) {
+        hub?.post({ type: 'terminalOutput', terminalId, output: `\n$ ${commandLine}\n`, command: commandLine, cwd: root });
+        const nextDir = cdTarget === '~' ? os.homedir() : path.resolve(root, cdTarget);
+        if (fs.existsSync(nextDir) && fs.statSync(nextDir).isDirectory()) {
+          terminalCwds.set(terminalId, nextDir);
           hub?.post({
             type: 'terminalOutput',
+            terminalId,
+            output: `${nextDir}\n`,
+            exitCode: 0,
+            command: commandLine,
+            cwd: nextDir
+          });
+        } else {
+          hub?.post({
+            type: 'terminalOutput',
+            terminalId,
+            output: `cd: no existe el directorio: ${nextDir}\n`,
+            exitCode: 1,
+            command: commandLine,
+            cwd: root
+          });
+        }
+        return;
+      }
+
+      hub?.post({ type: 'terminalOutput', terminalId, output: `\n$ ${commandLine}\n`, command: commandLine, cwd: root });
+      try {
+        // `detached` en Unix crea un grupo de procesos para poder matarlo entero.
+        const proc = spawn(commandLine, {
+          shell: resolveShellOption(shell),
+          cwd: root,
+          windowsHide: true,
+          detached: process.platform !== 'win32'
+        });
+        terminalProcs.set(terminalId, proc);
+        proc.stdout?.on('data', (data: Buffer) => {
+          hub?.post({ type: 'terminalOutput', terminalId, output: data.toString('utf8'), command: commandLine });
+        });
+        proc.stderr?.on('data', (data: Buffer) => {
+          hub?.post({ type: 'terminalOutput', terminalId, output: data.toString('utf8'), command: commandLine });
+        });
+        proc.on('close', (code: number | null) => {
+          if (terminalProcs.get(terminalId) === proc) terminalProcs.delete(terminalId);
+          hub?.post({
+            type: 'terminalOutput',
+            terminalId,
             output: `\n[Proceso terminado con código ${code ?? 0}]\n`,
             exitCode: code ?? 0,
             command: commandLine
@@ -344,9 +579,10 @@ export function editorHandlers(hub?: HubContext): HandlerMap<
           emitWorkspaceOverview();
         });
         proc.on('error', (err: Error) => {
-          if (terminalProc === proc) terminalProc = undefined;
+          if (terminalProcs.get(terminalId) === proc) terminalProcs.delete(terminalId);
           hub?.post({
             type: 'terminalOutput',
+            terminalId,
             output: `\nError al ejecutar: ${err.message}\n`,
             exitCode: 1,
             command: commandLine
@@ -355,6 +591,7 @@ export function editorHandlers(hub?: HubContext): HandlerMap<
       } catch (err) {
         hub?.post({
           type: 'terminalOutput',
+          terminalId,
           output: `\nError al iniciar: ${err instanceof Error ? err.message : String(err)}\n`,
           exitCode: 1,
           command: commandLine
@@ -508,84 +745,120 @@ export function editorHandlers(hub?: HubContext): HandlerMap<
       hub?.post({ type: 'contentSearchResults', query, results });
     },
 
-    getGitBranches: async () => {
-      const root = workspaceDir() ?? process.cwd();
-      let currentBranch = 'main';
-      const branches: string[] = [];
-      const squadBranches: string[] = [];
-
-      try {
-        currentBranch = git(root, 'rev-parse', '--abbrev-ref', 'HEAD').trim();
-        const rawBranches = git(root, 'branch', '--list', '--no-color');
-        for (const line of rawBranches.split('\n')) {
-          const clean = line.replace(/^\*?\s+/, '').trim();
-          if (!clean) continue;
-          if (clean.startsWith('agent-hub/') || clean.startsWith('squad-') || clean.startsWith('pipeline-')) {
-            squadBranches.push(clean);
-          } else {
-            branches.push(clean);
-          }
-        }
-      } catch {}
-
+    getDirGitStatus: async ({ dir, sessionId }: { dir?: string; sessionId?: string }) => {
+      const targetDir = resolveTargetDir(dir, sessionId);
+      const summary = getGitBranchSummary(targetDir);
       hub?.post({
-        type: 'gitBranches',
-        currentBranch: currentBranch || 'main',
-        branches: branches.length > 0 ? branches : ['main'],
-        squadBranches
+        type: 'dirGitStatus',
+        dir: targetDir,
+        sessionId,
+        branch: summary.branch,
+        uncommittedCount: summary.uncommittedCount,
+        gitFiles: summary.gitFiles
       });
+      emitGitBranches(targetDir);
     },
 
-    checkoutBranch: async ({ branch }: { branch: string }) => {
-      const root = workspaceDir() ?? process.cwd();
+    getGitBranches: async ({ dir, sessionId }: { dir?: string; sessionId?: string } = {}) => {
+      const targetDir = resolveTargetDir(dir, sessionId);
+      emitGitBranches(targetDir);
+    },
+
+    checkoutBranch: async ({ branch, dir, sessionId }: { branch: string; dir?: string; sessionId?: string }) => {
+      const root = resolveTargetDir(dir, sessionId);
       try {
         assertBranchName(branch);
         git(root, 'checkout', branch);
-        emitWorkspaceOverview();
+        emitGitBranches(root);
+        const summary = getGitBranchSummary(root);
+        hub?.post({
+          type: 'dirGitStatus',
+          dir: root,
+          sessionId,
+          branch: summary.branch,
+          uncommittedCount: summary.uncommittedCount,
+          gitFiles: summary.gitFiles
+        });
         hub?.post({
           type: 'notice',
-          notice: { id: `branch-${Date.now()}`, sessionId: '', text: `Cambiado a rama ${branch}`, at: Date.now() }
+          notice: { id: `branch-${Date.now()}`, sessionId: sessionId || '', text: `Cambiado a rama ${branch}`, at: Date.now() }
         });
       } catch (err) {
         hub?.post({
           type: 'notice',
-          notice: { id: `branch-err-${Date.now()}`, sessionId: '', text: `Error al cambiar de rama: ${err instanceof Error ? err.message : String(err)}`, at: Date.now() }
+          notice: { id: `branch-err-${Date.now()}`, sessionId: sessionId || '', text: `Error al cambiar de rama: ${err instanceof Error ? err.message : String(err)}`, at: Date.now() }
         });
       }
     },
 
-    createBranch: async ({ branch }: { branch: string }) => {
-      const root = workspaceDir() ?? process.cwd();
+    createBranch: async ({ branch, dir, sessionId }: { branch: string; dir?: string; sessionId?: string }) => {
+      const root = resolveTargetDir(dir, sessionId);
       const safeBranch = branch.trim().replace(/\s+/g, '-');
       try {
         assertBranchName(safeBranch);
         git(root, 'checkout', '-b', safeBranch);
-        emitWorkspaceOverview();
+        emitGitBranches(root);
+        const summary = getGitBranchSummary(root);
+        hub?.post({
+          type: 'dirGitStatus',
+          dir: root,
+          sessionId,
+          branch: summary.branch,
+          uncommittedCount: summary.uncommittedCount,
+          gitFiles: summary.gitFiles
+        });
         hub?.post({
           type: 'notice',
-          notice: { id: `branch-create-${Date.now()}`, sessionId: '', text: `Rama ${safeBranch} creada exitosamente`, at: Date.now() }
+          notice: { id: `branch-create-${Date.now()}`, sessionId: sessionId || '', text: `Rama ${safeBranch} creada exitosamente`, at: Date.now() }
         });
       } catch (err) {
         hub?.post({
           type: 'notice',
-          notice: { id: `branch-create-err-${Date.now()}`, sessionId: '', text: `Error al crear rama: ${err instanceof Error ? err.message : String(err)}`, at: Date.now() }
+          notice: { id: `branch-create-err-${Date.now()}`, sessionId: sessionId || '', text: `Error al crear rama: ${err instanceof Error ? err.message : String(err)}`, at: Date.now() }
         });
       }
     },
 
-    deleteBranch: async ({ branch }: { branch: string }) => {
-      const root = workspaceDir() ?? process.cwd();
+    deleteBranch: async ({ branch, dir, sessionId }: { branch: string; dir?: string; sessionId?: string }) => {
+      const root = resolveTargetDir(dir, sessionId);
       try {
         assertBranchName(branch);
         git(root, 'branch', '-D', branch);
+        emitGitBranches(root);
         hub?.post({
           type: 'notice',
-          notice: { id: `branch-del-${Date.now()}`, sessionId: '', text: `Rama ${branch} eliminada`, at: Date.now() }
+          notice: { id: `branch-del-${Date.now()}`, sessionId: sessionId || '', text: `Rama ${branch} eliminada`, at: Date.now() }
         });
       } catch (err) {
         hub?.post({
           type: 'notice',
-          notice: { id: `branch-del-err-${Date.now()}`, sessionId: '', text: `No se pudo eliminar la rama: ${err instanceof Error ? err.message : String(err)}`, at: Date.now() }
+          notice: { id: `branch-del-err-${Date.now()}`, sessionId: sessionId || '', text: `No se pudo eliminar la rama: ${err instanceof Error ? err.message : String(err)}`, at: Date.now() }
+        });
+      }
+    },
+
+    initGitRepo: async ({ dir, sessionId }: { dir?: string; sessionId?: string } = {}) => {
+      const root = resolveTargetDir(dir, sessionId);
+      try {
+        git(root, 'init');
+        emitGitBranches(root);
+        const summary = getGitBranchSummary(root);
+        hub?.post({
+          type: 'dirGitStatus',
+          dir: root,
+          sessionId,
+          branch: summary.branch,
+          uncommittedCount: summary.uncommittedCount,
+          gitFiles: summary.gitFiles
+        });
+        hub?.post({
+          type: 'notice',
+          notice: { id: `git-init-${Date.now()}`, sessionId: sessionId || '', text: `Repositorio Git inicializado en ${root}`, at: Date.now() }
+        });
+      } catch (err) {
+        hub?.post({
+          type: 'notice',
+          notice: { id: `git-init-err-${Date.now()}`, sessionId: sessionId || '', text: `Error al inicializar Git: ${err instanceof Error ? err.message : String(err)}`, at: Date.now() }
         });
       }
     },

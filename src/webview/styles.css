@@ -175,3 +175,130 @@ body {
   .no-scrollbar { scrollbar-width: none; }
   .no-scrollbar::-webkit-scrollbar { display: none; }
 }
+
+/* Accesibilidad y pulido */
+:focus-visible {
+  outline: 2px solid #818cf8;
+  outline-offset: 1px;
+}
+
+textarea:focus-visible,
+input:focus-visible {
+  outline: none;
+}
+
+::selection {
+  background: rgba(99, 102, 241, 0.45);
+  color: #fff;
+}
+
+.font-mono {
+  font-variant-numeric: tabular-nums;
+}
+
+.msg-list {
+  scrollbar-gutter: stable;
+  overscroll-behavior: contain;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Respuesta táctil al pulsar y detalles de texto */
+button:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+a {
+  text-underline-offset: 2px;
+}
+
+kbd {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* Al imprimir (Ctrl+P) queda solo la conversación, sin barras ni controles. */
+@media print {
+  body {
+    overflow: visible;
+    background: #fff;
+    color: #000;
+  }
+  button,
+  textarea,
+  aside,
+  [role='alert'] {
+    display: none !important;
+  }
+  .msg-list {
+    overflow: visible !important;
+  }
+  .msg-bubble {
+    break-inside: avoid;
+    border-color: #ccc !important;
+    background: #fff !important;
+    color: #000 !important;
+  }
+}
+
+/* Controles nativos con el color de la marca, texto mejor repartido y detalles */
+:root {
+  accent-color: #6366f1;
+}
+
+p,
+li {
+  text-wrap: pretty;
+}
+
+summary {
+  cursor: pointer;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Detalles de interacción */
+button:disabled {
+  cursor: not-allowed;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+img {
+  -webkit-user-drag: none;
+}
+
+textarea {
+  scrollbar-width: thin;
+}
+
+/* Modo de contraste forzado de Windows: los bordes dejan de ser decorativos y pasan a ser necesarios. */
+@media (forced-colors: active) {
+  button,
+  input,
+  textarea,
+  select {
+    border: 1px solid ButtonText;
+  }
+  :focus-visible {
+    outline: 2px solid Highlight;
+  }
+}
+
+/* zinc-500 sobre zinc-900 da 3,7:1; este tono llega a 5:1 y conserva la jerarquía frente a zinc-400. */
+.text-zinc-500 {
+  color: #8a8a93;
+}

@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgentHub — Visualizador de Markdown y HTML</title>
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #111216;
+      --surface-2: #18181b;
+      --border: #27272a;
+      --text: #f4f4f5;
+      --muted: #a1a1aa;
+      --dim: #71717a;
+      --indigo: #6366f1;
+      --indigo-soft: rgba(99, 102, 241, 0.16);
+      --emerald: #10b981;
+      --amber: #f59e0b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .mono {
+      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .shell {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 560px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
+    }
+
+    /* Top Bar */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 14px;
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .file-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 6px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .badge-md { background: var(--indigo-soft); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.4); }
+    .badge-html { background: rgba(245, 158, 11, 0.14); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.4); }
+    .badge-safe { background: rgba(16, 185, 129, 0.14); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.35); }
+
+    .filepath {
+      font-size: 12px;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .seg {
+      display: inline-flex;
+      background: #0c0c0f;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2px;
+      gap: 2px;
+    }
+
+    .seg button {
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .seg button.active {
+      background: #27272a;
+      color: var(--text);
+    }
+
+    .btn {
+      border: 1px solid var(--border);
+      background: #141418;
+      color: var(--muted);
+      font-size: 11px;
+      padding: 5px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .btn:hover { color: var(--text); border-color: #3f3f46; }
+
+    /* Workspace Split */
+    .workspace {
+      display: grid;
+      grid-template-columns: 220px 1fr 1fr;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .workspace.preview-only { grid-template-columns: 220px 1fr; }
+    .workspace.code-only { grid-template-columns: 220px 1fr; }
+
+    /* Sidebar */
+    .sidebar {
+      border-right: 1px solid var(--border);
+      background: #0d0e12;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .side-title {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-bottom: 6px;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 8px;
+      border-radius: 7px;
+      font-size: 12px;
+      color: var(--muted);
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+
+    .file-item.active {
+      background: var(--indigo-soft);
+      border-color: rgba(99, 102, 241, 0.35);
+      color: var(--text);
+    }
+
+    .outline-item {
+      font-size: 11px;
+      color: var(--muted);
+      padding: 4px 6px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .outline-item:hover { background: #18181b; color: var(--text); }
+    .outline-item.h2 { padding-left: 14px; color: var(--dim); }
+
+    /* Code Pane */
+    .code-pane {
+      border-right: 1px solid var(--border);
+      background: #0a0a0d;
+      padding: 14px 16px;
+      font-size: 12px;
+      line-height: 1.65;
+      color: #d4d4d8;
+      overflow: auto;
+      white-space: pre-wrap;
+    }
+
+    .tok-h { color: #818cf8; font-weight: 700; }
+    .tok-k { color: #f472b6; }
+    .tok-s { color: #34d399; }
+    .tok-c { color: #71717a; }
+
+    /* Preview Pane */
+    .preview-pane {
+      background: #0f1015;
+      padding: 20px;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .md-doc {
+      width: 100%;
+      max-width: 680px;
+      line-height: 1.7;
+      font-size: 13.5px;
+      color: #e4e4e7;
+    }
+
+    .md-doc h1 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .md-doc h2 {
+      font-size: 15px;
+      font-weight: 600;
+      margin: 18px 0 8px;
+      color: #c7d2fe;
+    }
+
+    .md-doc p { margin-bottom: 10px; color: #d4d4d8; }
+
+    .md-callout {
+      border-left: 3px solid var(--indigo);
+      background: rgba(99, 102, 241, 0.08);
+      padding: 10px 12px;
+      border-radius: 0 8px 8px 0;
+      margin: 12px 0;
+      font-size: 12.5px;
+      color: #c7d2fe;
+    }
+
+    .md-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 12px;
+    }
+
+    .md-table th, .md-table td {
+      border: 1px solid var(--border);
+      padding: 7px 10px;
+      text-align: left;
+    }
+
+    .md-table th { background: #18181b; color: var(--text); }
+
+    /* HTML Sandboxed Frame */
+    .html-stage {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .device-frame {
+      width: 100%;
+      flex: 1;
+      min-height: 380px;
+      background: #ffffff;
+      border: 1px solid #3f3f46;
+      border-radius: 10px;
+      overflow: hidden;
+      transition: width 0.2s ease;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    }
+
+    .device-frame.tablet { width: 768px; max-width: 100%; }
+    .device-frame.mobile { width: 390px; max-width: 100%; }
+
+    .device-frame iframe {
+      width: 100%;
+      height: 100%;
+      min-height: 380px;
+      border: 0;
+      display: block;
+    }
+
+    /* Footer */
+    .statusbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 14px;
+      border-top: 1px solid var(--border);
+      background: var(--surface-2);
+      font-size: 11px;
+      color: var(--dim);
+    }
+
+    @media (max-width: 900px) {
+      .workspace { grid-template-columns: 1fr; }
+      .sidebar { border-right: 0; border-bottom: 1px solid var(--border); }
+      .code-pane { border-right: 0; border-bottom: 1px solid var(--border); }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="file-meta">
+        <span id="typeBadge" class="badge badge-md">MD</span>
+        <span id="filePath" class="filepath mono">docs/specs/terminal-integrada.md</span>
+        <span id="sandboxBadge" class="badge badge-safe" style="display: none;">Sandbox · allow-scripts</span>
+      </div>
+
+      <div class="controls">
+        <div class="seg" role="tablist" aria-label="Modo de visualización">
+          <button type="button" data-mode="code">Código</button>
+          <button type="button" data-mode="split" class="active">Dividido</button>
+          <button type="button" data-mode="preview">Vista previa</button>
+        </div>
+        <div id="viewportSeg" class="seg" style="display: none;" aria-label="Tamaño de pantalla HTML">
+          <button type="button" data-vp="desktop" class="active">Desktop</button>
+          <button type="button" data-vp="tablet">Tablet</button>
+          <button type="button" data-vp="mobile">Móvil</button>
+        </div>
+        <button type="button" class="btn" id="toggleDocBtn">Cambiar a HTML</button>
+      </div>
+    </header>
+
+    <div id="workspace" class="workspace">
+      <aside class="sidebar">
+        <div>
+          <div class="side-title">Documentos</div>
+          <div class="file-item active" data-doc="md">
+            <span class="mono">terminal-integrada.md</span>
+            <span class="badge badge-md">MD</span>
+          </div>
+          <div class="file-item" data-doc="html">
+            <span class="mono">command-center.html</span>
+            <span class="badge badge-html">HTML</span>
+          </div>
+        </div>
+        <div id="outlineBox">
+          <div class="side-title">Índice</div>
+          <div class="outline-item">1. Contexto Actual</div>
+          <div class="outline-item h2">Núcleo de Ejecución</div>
+          <div class="outline-item">2. Criterios (Given/When/Then)</div>
+          <div class="outline-item">3. Tareas Atómicas</div>
+        </div>
+      </aside>
+
+      <pre id="codePane" class="code-pane mono"></pre>
+      <section id="previewPane" class="preview-pane"></section>
+    </div>
+
+    <footer class="statusbar mono">
+      <span id="statusLeft">UTF-8 · ~2 min de lectura · 4 secciones</span>
+      <span>Ctrl+S guardar · Esc cerrar</span>
+    </footer>
+  </div>
+
+  <script>
+    const MD_SOURCE = `<span class="tok-h"># Especificación: Terminal Integrada v2</span>\n\n<span class="tok-k">&gt; [!NOTE]</span> Ejecución multi-pestaña con cwd por sesión.\n\n<span class="tok-h">## Criterios de Aceptación</span>\n| Caso | Resultado |\n| :--- | :--- |\n| Multi-tab | <span class="tok-s">Paralelo por terminalId</span> |\n| stdin | <span class="tok-s">Interactivo en vivo</span> |`;
+
+    const HTML_SOURCE = `<span class="tok-c">&lt;!DOCTYPE html&gt;</span>\n<span class="tok-k">&lt;html&gt;</span>\n  <span class="tok-k">&lt;body</span> <span class="tok-s">style="background:#0b0e14;color:#f1f5f9;font-family:sans-serif;padding:24px"</span><span class="tok-k">&gt;</span>\n    <span class="tok-h">&lt;h2&gt;</span>Vista previa HTML aislada<span class="tok-h">&lt;/h2&gt;</span>\n    <span class="tok-k">&lt;p&gt;</span>Renderizada dentro de iframe sandboxed.<span class="tok-k">&lt;/p&gt;</span>\n  <span class="tok-k">&lt;/body&gt;</span>\n<span class="tok-k">&lt;/html&gt;</span>`;
+
+    const HTML_SRCDOC = `<!DOCTYPE html><html><body style="margin:0;padding:24px;background:#0b0e14;color:#f1f5f9;font-family:Inter,sans-serif;"><div style="border:1px solid #27272a;border-radius:12px;padding:18px;background:#131720;"><span style="font-size:11px;color:#fbbf24;font-weight:700;letter-spacing:.08em;">HTML SANDBOX PREVIEW</span><h2 style="margin:8px 0 6px;font-size:18px;">Renderizado seguro en vivo</h2><p style="margin:0;color:#94a3b8;font-size:13px;line-height:1.6;">Cualquier archivo .html del proyecto se previsualiza aquí con selector Desktop / Tablet / Móvil sin salir de AgentHub.</p></div></body></html>`;
+
+    let docType = 'md';
+    let mode = 'split';
+    let viewport = 'desktop';
+
+    const workspace = document.getElementById('workspace');
+    const codePane = document.getElementById('codePane');
+    const previewPane = document.getElementById('previewPane');
+    const typeBadge = document.getElementById('typeBadge');
+    const filePath = document.getElementById('filePath');
+    const sandboxBadge = document.getElementById('sandboxBadge');
+    const viewportSeg = document.getElementById('viewportSeg');
+    const outlineBox = document.getElementById('outlineBox');
+    const statusLeft = document.getElementById('statusLeft');
+    const toggleDocBtn = document.getElementById('toggleDocBtn');
+
+    function render() {
+      const isHtml = docType === 'html';
+      typeBadge.textContent = isHtml ? 'HTML' : 'MD';
+      typeBadge.className = 'badge ' + (isHtml ? 'badge-html' : 'badge-md');
+      filePath.textContent = isHtml ? 'docs/design/command-center-redesign.html' : 'docs/specs/terminal-integrada.md';
+      sandboxBadge.style.display = isHtml ? 'inline-flex' : 'none';
+      viewportSeg.style.display = isHtml && mode !== 'code' ? 'inline-flex' : 'none';
+      outlineBox.style.display = isHtml ? 'none' : 'block';
+      toggleDocBtn.textContent = isHtml ? 'Cambiar a Markdown' : 'Cambiar a HTML';
+      statusLeft.textContent = isHtml ? 'HTML5 · iframe sandbox · ' + viewport : 'UTF-8 · ~2 min de lectura · 4 secciones';
+
+      document.querySelectorAll('.file-item').forEach((el) => {
+        el.classList.toggle('active', el.dataset.doc === docType);
+      });
+
+      workspace.className = 'workspace' + (mode === 'preview' ? ' preview-only' : mode === 'code' ? ' code-only' : '');
+      codePane.style.display = mode === 'preview' ? 'none' : 'block';
+      previewPane.style.display = mode === 'code' ? 'none' : 'flex';
+      codePane.innerHTML = isHtml ? HTML_SOURCE : MD_SOURCE;
+
+      if (isHtml) {
+        previewPane.innerHTML = `<div class="html-stage"><div class="device-frame ${viewport}"><iframe sandbox="allow-scripts" srcdoc="${HTML_SRCDOC.replace(/"/g, '&quot;')}"></iframe></div></div>`;
+      } else {
+        previewPane.innerHTML = `<article class="md-doc"><h1>Especificación: Terminal Integrada v2</h1><div class="md-callout"><strong>Nota:</strong> Ejecución multi-pestaña con <code>cwd</code> por sesión activa.</div><h2>Criterios de Aceptación</h2><table class="md-table"><thead><tr><th>Caso</th><th>Resultado</th></tr></thead><tbody><tr><td>Multi-tab</td><td>Paralelo por <code>terminalId</code></td></tr><tr><td>stdin</td><td>Interactivo en vivo</td></tr></tbody></table></article>`;
+      }
+    }
+
+    document.querySelectorAll('[data-mode]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        mode = btn.dataset.mode;
+        document.querySelectorAll('[data-mode]').forEach((b) => b.classList.toggle('active', b === btn));
+        render();
+      });
+    });
+
+    document.querySelectorAll('[data-vp]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        viewport = btn.dataset.vp;
+        document.querySelectorAll('[data-vp]').forEach((b) => b.classList.toggle('active', b === btn));
+        render();
+      });
+    });
+
+    document.querySelectorAll('.file-item').forEach((item) => {
+      item.addEventListener('click', () => { docType = item.dataset.doc; render(); });
+    });
+
+    toggleDocBtn.addEventListener('click', () => {
+      docType = docType === 'md' ? 'html' : 'md';
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>

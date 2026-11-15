@@ -7,10 +7,13 @@ import {
   X,
   ExternalLink,
   RefreshCw,
+  Copy,
+  Search,
   GitMerge,
   Workflow
 } from 'lucide-react';
 import { ModalShell } from './ModalShell';
+import { normalizeText } from '../../shared/workspace-actions';
 
 interface Props {
   currentBranch: string;
@@ -35,11 +38,27 @@ export const BranchManagerModal: React.FC<Props> = ({
 }) => {
   const [newBranchName, setNewBranchName] = useState('');
   const [isCreating, setIsCreating] = useState(false);
+  const [filter, setFilter] = useState('');
+  const [pendingDelete, setPendingDelete] = useState<string>();
+  const [copiedBranch, setCopiedBranch] = useState<string>();
+  const copyBranch = async (name: string) => {
+    try {
+      await navigator.clipboard.writeText(name);
+      setCopiedBranch(name);
+      setTimeout(() => setCopiedBranch(undefined), 1500);
+    } catch {}
+  };
+  // Git no admite espacios ni estos caracteres en una rama; los espacios pasan a guiones.
+  const cleanName = newBranchName.trim().replace(/\s+/g, '-');
+  const nameError = /[~^:?*[\\]|\.\.|@\{|\.lock$|^-|\/$/.test(cleanName) ? 'Ese nombre no es válido para git.' : branches.includes(cleanName) ? 'Esa rama ya existe.' : '';
+  const visibleBranches = [...branches]
+    .filter((name) => normalizeText(name).includes(normalizeText(filter.trim())))
+    .sort((a, b) => (a === currentBranch ? -1 : b === currentBranch ? 1 : a.localeCompare(b)));
 
   const handleCreateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newBranchName.trim()) return;
-    onCreate(newBranchName.trim());
+    if (!cleanName || nameError) return;
+    onCreate(cleanName);
     setNewBranchName('');
     setIsCreating(false);
   };
@@ -96,9 +115,11 @@ export const BranchManagerModal: React.FC<Props> = ({
               onChange={(e) => setNewBranchName(e.target.value)}
               className="flex-1 bg-transparent border-none text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none font-mono"
             />
+            {nameError && <span className="text-[11px] text-rose-300 shrink-0">{nameError}</span>}
             <button
               type="submit"
-              className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-xs font-medium transition"
+              disabled={!cleanName || Boolean(nameError)}
+              className="disabled:opacity-40 px-2.5 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-xs font-medium transition"
             >
               Crear y Cambiar
             </button>
@@ -114,9 +135,23 @@ export const BranchManagerModal: React.FC<Props> = ({
 
         {/* Ramas Locales */}
         <div className="space-y-1.5">
-          <div className="font-semibold text-zinc-300 px-1">Ramas Locales ({branches.length})</div>
+          <div className="flex items-center justify-between gap-2 px-1">
+            <span className="font-semibold text-zinc-300">Ramas Locales ({visibleBranches.length === branches.length ? branches.length : `${visibleBranches.length} de ${branches.length}`})</span>
+            {branches.length > 5 && (
+              <span className="relative">
+                <Search className="w-3 h-3 text-zinc-500 absolute left-1.5 top-1/2 -translate-y-1/2" />
+                <input
+                  value={filter}
+                  onChange={(e) => setFilter(e.target.value)}
+                  placeholder="Filtrar ramas…"
+                  aria-label="Filtrar ramas"
+                  className="w-40 bg-zinc-950 border border-zinc-800 rounded pl-6 pr-2 py-0.5 text-[11px] text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-indigo-500"
+                />
+              </span>
+            )}
+          </div>
           <div className="max-h-52 overflow-y-auto space-y-1 p-1">
-            {branches.map((b) => {
+            {visibleBranches.map((b) => {
               const isCurrent = b === currentBranch;
               return (
                 <div
@@ -130,6 +165,9 @@ export const BranchManagerModal: React.FC<Props> = ({
                   <div className="flex items-center gap-2 min-w-0">
                     <GitBranch className={`w-3.5 h-3.5 ${isCurrent ? 'text-emerald-400' : 'text-zinc-500'}`} />
                     <span className="font-mono truncate">{b}</span>
+                    <button type="button" onClick={() => copyBranch(b)} className="text-zinc-500 hover:text-zinc-200 shrink-0" title="Copiar el nombre de la rama" aria-label={`Copiar ${b}`}>
+                      {copiedBranch === b ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                    </button>
                     {isCurrent && (
                       <span className="text-[10px] bg-emerald-950 text-emerald-400 px-1.5 py-0.2 rounded border border-emerald-800">
                         actual
@@ -146,14 +184,33 @@ export const BranchManagerModal: React.FC<Props> = ({
                         >
                           Cambiar
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => onDelete(b)}
-                          className="p-1 rounded hover:bg-rose-950/60 text-zinc-500 hover:text-rose-400 transition"
-                          title={`Eliminar rama ${b}`}
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </button>
+                        {pendingDelete === b ? (
+                          <>
+                            <span className="text-[11px] text-rose-300">¿Eliminar?</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                onDelete(b);
+                                setPendingDelete(undefined);
+                              }}
+                              className="px-1.5 py-0.5 rounded bg-rose-600 hover:bg-rose-500 text-white text-[11px] font-medium"
+                            >
+                              Sí
+                            </button>
+                            <button type="button" onClick={() => setPendingDelete(undefined)} aria-label="Cancelar" className="text-zinc-400 hover:text-zinc-200">
+                              <X className="w-3 h-3" />
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setPendingDelete(b)}
+                            className="p-1 rounded hover:bg-rose-950/60 text-zinc-500 hover:text-rose-400 transition"
+                            title={`Eliminar rama ${b}`}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        )}
                       </>
                     )}
                   </div>

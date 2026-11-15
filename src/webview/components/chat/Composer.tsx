@@ -1,10 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   AlertTriangle,
+  ArrowUpRight,
   Bot,
+  Check,
   ChevronDown,
   ChevronUp,
   Clock,
+  FileText,
   FolderUp,
   GitBranch,
   GitCommit,
@@ -17,6 +20,8 @@ import {
   Send,
   SlidersHorizontal,
   Square,
+  Trash2,
+  Volume2,
   Workflow,
   Wrench,
   X
@@ -33,6 +38,35 @@ import { AttachmentChips } from './AttachmentChips';
 const FILE_SEARCH_DELAY_MS = 150;
 const MAX_SLASH_ITEMS = 8;
 const TOKEN_WARN = 8000;
+const HISTORY_KEY = 'agent-hub.promptHistory';
+const HISTORY_MAX = 50;
+const MAX_TEXTAREA_PX = 240;
+/** Pegar más texto que esto lo adjunta como archivo: el prompt no se llena de miles de líneas. */
+const LONG_PASTE_CHARS = 12_000;
+const draftKey = (sessionId: string) => `agent-hub.draft.${sessionId}`;
+
+/** Plantillas de `/`: cargan el texto en el borrador para completarlo antes de enviar. */
+const SNIPPETS: Array<{ name: string; hint: string; text: string }> = [
+  { name: 'resumir', hint: 'Resumir lo que hay en contexto', text: 'Resume en pocos puntos lo esencial de ' },
+  { name: 'explicar', hint: 'Explicar código paso a paso', text: 'Explica paso a paso cómo funciona ' },
+  { name: 'tests', hint: 'Pedir pruebas para un cambio', text: 'Escribe pruebas que fallen si se rompe ' },
+  { name: 'refactor', hint: 'Simplificar sin cambiar el comportamiento', text: 'Simplifica sin cambiar el comportamiento: ' }
+];
+
+const readHistory = (): string[] => {
+  try {
+    const list = JSON.parse(localStorage.getItem(HISTORY_KEY) ?? '[]');
+    return Array.isArray(list) ? list.filter((item) => typeof item === 'string') : [];
+  } catch {
+    return [];
+  }
+};
+const pushHistory = (text: string): void => {
+  try {
+    const list = readHistory().filter((item) => item !== text);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify([...list, text].slice(-HISTORY_MAX)));
+  } catch {}
+};
 
 interface SlashItem {
   key: string;
@@ -58,12 +92,12 @@ interface Props {
 
 const NO_AGENTS: Array<{ id: string; name: string }> = [];
 
-function savePastedFile(file: File): void {
+function savePastedFile(file: File, sessionId: string): void {
   const reader = new FileReader();
   reader.onload = () => {
     const extension = file.type.split('/')[1] ?? 'bin';
     const fileName = file.name || `clip_${Date.now()}.${extension}`;
-    postToHost({ command: 'savePastedFile', dataUri: reader.result as string, fileName });
+    postToHost({ command: 'savePastedFile', dataUri: reader.result as string, fileName, sessionId });
   };
   reader.readAsDataURL(file);
 }
@@ -73,6 +107,17 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
   const [isSearchingFiles, setIsSearchingFiles] = useState(false);
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [dictationHint, setDictationHint] = useState(false);
+  const [pasteHint, setPasteHint] = useState(false);
+  // Con Ctrl+Enter para enviar, Enter solo hace salto de línea: cómodo para prompts largos.
+  const [ctrlEnter, setCtrlEnter] = useState(() => localStorage.getItem('agent-hub.ctrlEnter') === '1');
+  const toggleCtrlEnter = () =>
+    setCtrlEnter((current) => {
+      localStorage.setItem('agent-hub.ctrlEnter', current ? '0' : '1');
+      return !current;
+    });
+  const historyPos = useRef(-1);
+  const draftSession = useRef(sessionId);
   const [requireApproval, setRequireApproval] = useState(false);
   const [template, setTemplate] = useState(TEAM_TEMPLATES[0].id);
   const [isolate, setIsolate] = useState(true);
@@ -93,6 +138,12 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
   const fileSearchTimer = useRef<ReturnType<typeof setTimeout>>();
   const recognitionRef = useRef<any>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const audioStreamRef = useRef<MediaStream | null>(null);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const recordingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const speechTranscribedRef = useRef(false);
 
   const [isDragging, setIsDragging] = useState(false);
 
@@ -102,6 +153,40 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
     };
     window.addEventListener('agenthub:focus-composer', handleFocusComposer);
     return () => window.removeEventListener('agenthub:focus-composer', handleFocusComposer);
+  }, []);
+
+  // Cada sesión conserva su borrador al cambiar de pestaña o recargar.
+  useEffect(() => {
+    draftSession.current = sessionId;
+    historyPos.current = -1;
+    try {
+      setPrompt(localStorage.getItem(draftKey(sessionId)) ?? '');
+    } catch {}
+  }, [sessionId]);
+
+  useEffect(() => {
+    try {
+      if (prompt) localStorage.setItem(draftKey(draftSession.current), prompt);
+      else localStorage.removeItem(draftKey(draftSession.current));
+    } catch {}
+  }, [prompt]);
+
+  // El cuadro crece con el texto hasta un tope.
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${Math.min(el.scrollHeight, MAX_TEXTAREA_PX)}px`;
+  }, [prompt]);
+
+  // "Editar" en un mensaje del usuario carga su texto aquí.
+  useEffect(() => {
+    const onSetComposer = (event: Event) => {
+      setPrompt(String((event as CustomEvent).detail ?? ''));
+      textareaRef.current?.focus();
+    };
+    window.addEventListener('agenthub:set-composer', onSetComposer);
+    return () => window.removeEventListener('agenthub:set-composer', onSetComposer);
   }, []);
 
   useEffect(() => {
@@ -114,47 +199,142 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
     dispatch({ type: 'composerTextConsumed' });
   }, [composerText, dispatch]);
 
-  const toggleVoiceDictation = () => {
-    if (isListening) {
-      try {
-        recognitionRef.current?.stop();
-      } catch {}
-      setIsListening(false);
-      return;
+  const stopVoiceRecording = () => {
+    if (recordingTimerRef.current) {
+      clearInterval(recordingTimerRef.current);
+      recordingTimerRef.current = null;
     }
+    try {
+      recognitionRef.current?.stop();
+    } catch {}
 
-    const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRec) {
-      alert('Tu navegador no soporta la Web Speech API para dictado por voz.');
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+    }
+    if (audioStreamRef.current) {
+      audioStreamRef.current.getTracks().forEach((track) => track.stop());
+      audioStreamRef.current = null;
+    }
+    setIsListening(false);
+  };
+
+  const cancelVoiceRecording = () => {
+    if (recordingTimerRef.current) {
+      clearInterval(recordingTimerRef.current);
+      recordingTimerRef.current = null;
+    }
+    try {
+      recognitionRef.current?.stop();
+    } catch {}
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.ondataavailable = null;
+      mediaRecorderRef.current.onstop = null;
+      mediaRecorderRef.current.stop();
+    }
+    if (audioStreamRef.current) {
+      audioStreamRef.current.getTracks().forEach((track) => track.stop());
+      audioStreamRef.current = null;
+    }
+    audioChunksRef.current = [];
+    setIsListening(false);
+    setRecordingSeconds(0);
+  };
+
+  const toggleVoiceDictation = async () => {
+    if (isListening) {
+      stopVoiceRecording();
       return;
     }
 
     try {
-      const recognition = new SpeechRec();
-      recognition.lang = 'es-ES';
-      recognition.continuous = true;
-      recognition.interimResults = true;
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioStreamRef.current = stream;
+      audioChunksRef.current = [];
+      speechTranscribedRef.current = false;
 
-      recognition.onstart = () => setIsListening(true);
-      recognition.onerror = () => setIsListening(false);
-      recognition.onend = () => setIsListening(false);
+      const mimeType = typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : '';
+      const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+      mediaRecorderRef.current = recorder;
 
-      recognition.onresult = (event: any) => {
-        let transcript = '';
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          transcript += event.results[i][0].transcript;
-        }
-        if (transcript.trim()) {
-          setPrompt((prev) => (prev ? `${prev} ${transcript.trim()}` : transcript.trim()));
+      recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) {
+          audioChunksRef.current.push(e.data);
         }
       };
 
-      recognitionRef.current = recognition;
-      recognition.start();
-    } catch {
+      recorder.onstop = () => {
+        if (audioChunksRef.current.length > 0) {
+          const audioBlob = new Blob(audioChunksRef.current, { type: recorder.mimeType || 'audio/webm' });
+          // Si el reconocimiento de voz no transcribió texto (ej. en Electron sin servicio online),
+          // convertimos el audio a adjunto de notas de voz para que el modelo multimodal lo escuche.
+          if (!speechTranscribedRef.current && audioBlob.size > 500) {
+            const reader = new FileReader();
+            reader.onload = () => {
+              postToHost({
+                command: 'savePastedFile',
+                dataUri: reader.result as string,
+                fileName: `nota-voz-${Date.now()}.${recorder.mimeType?.includes('wav') ? 'wav' : 'webm'}`,
+                sessionId
+              });
+            };
+            reader.readAsDataURL(audioBlob);
+          }
+        }
+        setRecordingSeconds(0);
+      };
+
+      recorder.start(250);
+      setIsListening(true);
+      setRecordingSeconds(0);
+      recordingTimerRef.current = setInterval(() => {
+        setRecordingSeconds((sec) => sec + 1);
+      }, 1000);
+
+      // Intento paralelo de transcripción en tiempo real con Web Speech API
+      const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRec) {
+        try {
+          const recognition = new SpeechRec();
+          recognition.lang = 'es-ES';
+          recognition.continuous = true;
+          recognition.interimResults = true;
+          recognition.onresult = (event: any) => {
+            let transcript = '';
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+              transcript += event.results[i][0].transcript;
+            }
+            if (transcript.trim()) {
+              speechTranscribedRef.current = true;
+              setPrompt((prev) => (prev ? `${prev} ${transcript.trim()}` : transcript.trim()));
+            }
+          };
+          recognition.onerror = () => {};
+          recognitionRef.current = recognition;
+          recognition.start();
+        } catch {}
+      }
+    } catch (err) {
+      console.warn('Error al activar dictado de micrófono:', err);
+      setDictationHint(true);
+      setTimeout(() => setDictationHint(false), 5000);
       setIsListening(false);
     }
   };
+
+  // Ctrl+Mayús+D inicia o detiene el dictado sin tocar el ratón.
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key.toLowerCase() === 'd') {
+        event.preventDefault();
+        toggleVoiceDictation();
+      } else if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key.toLowerCase() === 'p') {
+        event.preventDefault();
+        setPlanFirst((on) => !on);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  });
 
   const runAction = (actionId: string) =>
     postToHost({ command: 'runAction', actionId, sessionId, input: prompt });
@@ -173,6 +353,14 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
         label: `/${name}`,
         hint: name === 'loop' ? 'Bucle iterativo continuo hasta que termine la sesión o lo detengas' : name === 'pipeline' ? 'Equipo completo con el texto que sigue' : 'Mismo prompt en varias cuentas',
         run: () => setPrompt(`/${name} `)
+      })),
+    ...SNIPPETS
+      .filter((snippet) => snippet.name.startsWith(slashQuery))
+      .map((snippet) => ({
+        key: `snippet-${snippet.name}`,
+        label: `/${snippet.name}`,
+        hint: snippet.hint,
+        run: () => { setPrompt(snippet.text); textareaRef.current?.focus(); }
       })),
     ...Object.values(PROTOCOL_ROLES)
       .filter((role) => role.id.startsWith(slashQuery))
@@ -228,6 +416,8 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
     }
     // `@agente mensaje` va a la sesión de ese agente, sin el prefijo.
     const text = prompt.trim();
+    pushHistory(text);
+    historyPos.current = -1;
     const target = [...mentionAgents]
       .sort((a, b) => b.name.length - a.name.length)
       .find((agent) => text.startsWith(`@${agent.name}`) && /^\s+\S/.test(text.slice(agent.name.length + 1)));
@@ -261,7 +451,7 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
   };
 
   const attachFile = (file: string) => {
-    postToHost({ command: 'attachFile', file });
+    postToHost({ command: 'attachFile', file, sessionId });
     setPrompt(prompt.replace(/@\S*$/, ''));
     setIsSearchingFiles(false);
   };
@@ -269,40 +459,130 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
   return (
     <div className="space-y-2 shrink-0">
       {attachments.length > 0 && (
-        <AttachmentChips attachments={attachments} onRemove={(index) => dispatch({ type: 'removeAttachment', index })} />
+        <AttachmentChips attachments={attachments} onRemove={(index) => dispatch({ type: 'removeAttachment', sessionId, index })} />
       )}
 
+      {/* Banner de grabación de voz en vivo */}
+      {isListening && (
+        <div className="flex items-center justify-between p-2 rounded-lg bg-rose-950/40 border border-rose-500/40 text-xs animate-in fade-in">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping" />
+            <span className="font-semibold text-rose-300">
+              Grabando voz ({Math.floor(recordingSeconds / 60)}:{(recordingSeconds % 60).toString().padStart(2, '0')})
+            </span>
+            <span className="text-zinc-400 text-[11px] hidden sm:inline">• Habla con naturalidad</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={stopVoiceRecording}
+              className="flex items-center gap-1 px-2.5 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs transition cursor-pointer"
+            >
+              <Check className="w-3 h-3" />
+              <span>Listo</span>
+            </button>
+            <button
+              type="button"
+              onClick={cancelVoiceRecording}
+              className="p-1 text-zinc-400 hover:text-zinc-200 cursor-pointer"
+              title="Cancelar grabación"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Cola de mensajes enriquecida con archivos adjuntos */}
       {queue.length > 0 && (
-        <ul className="space-y-1" aria-label="Mensajes en cola">
-          {queue.map((queued) => (
-            <li key={queued.id} className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-zinc-900 border border-zinc-800 text-[11px] text-zinc-300">
-              <Clock className="w-3 h-3 text-amber-400 shrink-0" />
-              <span className="truncate flex-1" title={queued.prompt}>
-                {queued.from && <span className="text-purple-400 font-semibold">{queued.from}: </span>}
-                {queued.prompt}
-              </span>
-              <button
-                type="button"
-                aria-label="Quitar de la cola"
-                onClick={() => postToHost({ command: 'removeQueued', sessionId, queuedId: queued.id })}
-                className="text-zinc-400 hover:text-red-400 transition shrink-0"
+        <div className="space-y-1.5" aria-label="Mensajes en cola">
+          <div className="flex items-center justify-between text-[11px] text-zinc-400 px-1">
+            <span className="font-semibold flex items-center gap-1.5 text-amber-300">
+              <Clock className="w-3.5 h-3.5" />
+              Mensajes en cola ({queue.length})
+            </span>
+            <span className="text-[10px] text-zinc-500">Se envían automáticamente al terminar el turno actual</span>
+          </div>
+          <div className="space-y-1.5 max-h-48 overflow-y-auto pr-0.5">
+            {queue.map((queued, idx) => (
+              <div
+                key={queued.id}
+                className="flex flex-col gap-1.5 p-2 rounded-lg bg-zinc-900/90 border border-zinc-800 hover:border-zinc-700 transition text-xs text-zinc-200 group"
               >
-                <X className="w-3 h-3" />
-              </button>
-            </li>
-          ))}
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-300 font-mono text-[10px] font-semibold border border-amber-500/30 shrink-0">
+                      #{idx + 1}
+                    </span>
+                    {queued.from && (
+                      <span className="text-[11px] text-purple-400 font-semibold truncate shrink-0">
+                        @{queued.from}:
+                      </span>
+                    )}
+                    <span className="text-[11px] text-zinc-300 font-medium truncate" title={queued.prompt}>
+                      {queued.prompt}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      type="button"
+                      title="Cargar texto en el borrador"
+                      onClick={() => {
+                        setPrompt((prev) => (prev ? `${prev}\n${queued.prompt}` : queued.prompt));
+                        postToHost({ command: 'removeQueued', sessionId, queuedId: queued.id });
+                        textareaRef.current?.focus();
+                      }}
+                      className="p-1 rounded text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition"
+                    >
+                      <ArrowUpRight className="w-3 h-3" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Quitar de la cola"
+                      onClick={() => postToHost({ command: 'removeQueued', sessionId, queuedId: queued.id })}
+                      className="p-1 rounded text-zinc-400 hover:text-rose-400 hover:bg-zinc-800 transition"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Vista de Archivos y Capturas Adjuntas en la Cola */}
+                {queued.attachments && queued.attachments.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-zinc-800/60">
+                    {queued.attachments.map((att, aIdx) => {
+                      const src = att.thumbnailUri || att.mediaUri;
+                      const isImg = att.mediaType === 'image' || src?.startsWith('data:image/');
+                      return (
+                        <div
+                          key={aIdx}
+                          className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-zinc-950 border border-zinc-800 text-[10px] text-zinc-300 max-w-[200px]"
+                          title={att.file}
+                        >
+                          {isImg && src ? (
+                            <img src={src} alt={att.file} className="w-4 h-4 rounded object-cover shrink-0" />
+                          ) : (
+                            <FileText className="w-3 h-3 text-indigo-400 shrink-0" />
+                          )}
+                          <span className="truncate">{att.file.split(/[\\/]/).pop()}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
           {!isRunning && (
-            <li>
-              <button
-                type="button"
-                onClick={() => postToHost({ command: 'resumeQueue', sessionId })}
-                className="w-full text-center py-1 text-[11px] text-indigo-400 hover:text-indigo-300 bg-zinc-900/60 rounded border border-zinc-800 transition"
-              >
-                Reanudar cola ({queue.length} mensaje{queue.length === 1 ? '' : 's'})
-              </button>
-            </li>
+            <button
+              type="button"
+              onClick={() => postToHost({ command: 'resumeQueue', sessionId })}
+              className="w-full text-center py-1 text-xs text-indigo-300 hover:text-indigo-200 bg-indigo-950/40 hover:bg-indigo-900/50 rounded-lg border border-indigo-700/50 transition font-medium"
+            >
+              Reanudar cola ({queue.length} mensaje{queue.length === 1 ? '' : 's'})
+            </button>
           )}
-        </ul>
+        </div>
       )}
 
       {slashItems.length > 0 && (
@@ -348,13 +628,13 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
         </div>
       )}
 
-      {/* Barra de herramientas compacta del compositor */}
-      <div className="flex flex-wrap items-center justify-between gap-1 px-0.5 relative z-20 text-[11px]">
+      {/* Barra de herramientas compacta del compositor en una sola fila */}
+      <div className="flex items-center justify-between gap-1 px-0.5 relative z-20 text-[11px] overflow-x-auto no-scrollbar py-0.5">
         {/* Grupo de adjuntos y contexto */}
         <div className="flex items-center gap-1 min-w-0 overflow-x-auto">
           <button
             type="button"
-            onClick={() => postToHost({ command: 'attachActiveEditor' })}
+            onClick={() => postToHost({ command: 'attachActiveEditor', sessionId })}
             className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-zinc-800/90 hover:bg-zinc-750 text-zinc-300 hover:text-indigo-300 border border-zinc-700/70 transition shrink-0 font-medium"
             title="Adjuntar selección o archivo actual del editor"
           >
@@ -364,7 +644,7 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
 
           <button
             type="button"
-            onClick={() => postToHost({ command: 'attachFiles' })}
+            onClick={() => postToHost({ command: 'attachFiles', sessionId })}
             className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-pink-950/40 hover:bg-pink-900/50 text-pink-300 hover:text-pink-200 border border-pink-700/50 transition shrink-0 font-medium"
             title="Adjuntar cualquier archivo del proyecto"
           >
@@ -374,7 +654,7 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
 
           <button
             type="button"
-            onClick={() => postToHost({ command: 'attachGit' })}
+            onClick={() => postToHost({ command: 'attachGit', sessionId })}
             className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-zinc-800/90 hover:bg-zinc-750 text-zinc-300 hover:text-indigo-300 border border-zinc-700/70 transition shrink-0 font-medium"
             title="Adjuntar el diff de git actual"
           >
@@ -384,7 +664,7 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
 
           <button
             type="button"
-            onClick={() => postToHost({ command: 'attachProblems' })}
+            onClick={() => postToHost({ command: 'attachProblems', sessionId })}
             className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-950/30 hover:bg-amber-900/40 text-amber-300 hover:text-amber-200 border border-amber-700/40 transition shrink-0 font-medium"
             title="Adjuntar los errores y avisos del editor (Problemas)"
           >
@@ -531,9 +811,9 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
           files.forEach((file) => {
             const nativePath = (file as any).path;
             if (nativePath) {
-              postToHost({ command: 'attachFile', file: nativePath });
+              postToHost({ command: 'attachFile', file: nativePath, sessionId });
             } else {
-              savePastedFile(file);
+              savePastedFile(file, sessionId);
             }
           });
         }}
@@ -550,21 +830,59 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
           placeholder={`Pregunta a ${accountName ?? 'el agente'}, @ para agentes y archivos, / para comandos...`}
           onChange={(event) => handleChange(event.target.value)}
           onKeyDown={(event) => {
-            if (event.key === 'Enter' && !event.shiftKey) {
+            const el = event.currentTarget;
+            if (event.key === 'Escape' && isRunning && !prompt) {
+              postToHost({ command: 'stopTurn', sessionId });
+            } else if ((event.key === 'ArrowUp' || event.key === 'ArrowDown') && !event.shiftKey && slashItems.length === 0) {
+              const history = readHistory();
+              const atStart = el.selectionStart === 0 && el.selectionEnd === 0;
+              const atEnd = el.selectionStart === prompt.length;
+              if (event.key === 'ArrowUp' && history.length > 0 && (!prompt || atStart)) {
+                event.preventDefault();
+                historyPos.current = Math.min(historyPos.current + 1, history.length - 1);
+                setPrompt(history[history.length - 1 - historyPos.current]);
+              } else if (event.key === 'ArrowDown' && historyPos.current >= 0 && atEnd) {
+                event.preventDefault();
+                historyPos.current -= 1;
+                setPrompt(historyPos.current < 0 ? '' : history[history.length - 1 - historyPos.current]);
+              }
+            }
+            if (event.key === 'Enter' && (ctrlEnter ? event.ctrlKey || event.metaKey : !event.shiftKey)) {
               event.preventDefault();
               if (slashItems.length === 1) slashItems[0].run();
               else submit();
             }
           }}
-          onPaste={(event) => Array.from(event.clipboardData.files).forEach(savePastedFile)}
-          className="w-full bg-transparent text-zinc-100 text-[13px] p-3 focus:outline-none resize-none placeholder-zinc-400 leading-relaxed font-sans"
+          onPaste={(event) => {
+            const files = Array.from(event.clipboardData.files);
+            if (files.length > 0) {
+              files.forEach((file) => savePastedFile(file, sessionId));
+              return;
+            }
+            const text = event.clipboardData.getData('text/plain');
+            if (text.length > LONG_PASTE_CHARS) {
+              event.preventDefault();
+              savePastedFile(new File([text], `pegado-${Date.now()}.txt`, { type: 'text/plain' }), sessionId);
+              setPasteHint(true);
+              setTimeout(() => setPasteHint(false), 6000);
+            }
+          }}
+          className="w-full bg-transparent text-zinc-100 text-[13px] p-3 focus:outline-none resize-none placeholder-zinc-400 leading-relaxed font-sans overflow-y-auto"
         />
 
         <div className="flex items-center justify-between px-3 pb-2 pt-0.5 text-[11px] text-zinc-400">
           <span>
-            <kbd className="px-1 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono text-[11px] text-zinc-400">⏎ Enviar</kbd>
+            <kbd className="px-1 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono text-[11px] text-zinc-400">{ctrlEnter ? 'Ctrl⏎ Enviar' : '⏎ Enviar'}</kbd>
             <span className="mx-1">·</span>
-            <kbd className="px-1 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono text-[11px] text-zinc-400">⇧⏎ Salto</kbd>
+            <kbd className="px-1 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono text-[11px] text-zinc-400">{ctrlEnter ? '⏎ Salto' : '⇧⏎ Salto'}</kbd>
+            <button type="button" onClick={toggleCtrlEnter} className="ml-1 text-[10px] text-zinc-500 hover:text-zinc-300 underline decoration-dotted" title="Cambiar la tecla que envía el mensaje">cambiar</button>
+            {pasteHint && (
+              <span className="ml-2 text-indigo-300" role="status">Texto largo adjuntado como archivo</span>
+            )}
+            {dictationHint && (
+              <span className="ml-2 text-indigo-300" role="status">Dictado de Windows activo: habla ahora</span>
+            )}
+            {prompt.includes('\n') && <span className="ml-2 font-mono">{prompt.split('\n').length} líneas</span>}
             {estimatedTokens > 0 && (
               <span className={`ml-2 font-mono ${estimatedTokens > TOKEN_WARN ? 'text-amber-400' : ''}`} title="Estimación: caracteres del borrador y adjuntos de texto / 4">
                 ~{estimatedTokens.toLocaleString()} tokens
@@ -573,6 +891,17 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
           </span>
 
           <span className="flex items-center gap-1.5">
+            {prompt && (
+              <button
+                type="button"
+                onClick={() => { setPrompt(''); textareaRef.current?.focus(); }}
+                className="flex items-center px-1.5 py-1 rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-red-300 border border-zinc-700/60 transition cursor-pointer"
+                title="Borrar el borrador"
+                aria-label="Borrar el borrador"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            )}
             <button
               type="button"
               onClick={() => {

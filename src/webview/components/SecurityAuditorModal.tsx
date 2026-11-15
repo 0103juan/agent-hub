@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   ShieldAlert,
   ShieldCheck,
@@ -9,6 +9,8 @@ import {
   Send,
   AlertTriangle,
   CheckCircle2,
+  Copy,
+  Check,
   X
 } from 'lucide-react';
 import { ModalShell } from './ModalShell';
@@ -35,7 +37,8 @@ export const SecurityAuditorModal: React.FC<Props> = ({
   const totalIssues =
     data.secretIssues.length + data.undocumentedEnvVars.length + data.sqlIssues.length;
 
-  const handleFixWithAgent = () => {
+  const [copied, setCopied] = useState(false);
+  const buildReport = () => {
     let report = '[AUDITORÍA DE SEGURIDAD Y CÓDIGO - HALLAZGOS DETECTADOS]\n\n';
 
     if (data.secretIssues.length > 0) {
@@ -63,8 +66,20 @@ export const SecurityAuditorModal: React.FC<Props> = ({
     }
 
     report += 'Por favor formula un plan y realiza las correcciones necesarias de forma segura.';
-    onSendToAgent(report);
+    return report;
+  };
+
+  const handleFixWithAgent = () => {
+    onSendToAgent(buildReport());
     onClose();
+  };
+
+  const handleCopyReport = async () => {
+    try {
+      await navigator.clipboard.writeText(buildReport());
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {}
   };
 
   return (
@@ -96,11 +111,22 @@ export const SecurityAuditorModal: React.FC<Props> = ({
               <div className="text-[11px] text-zinc-400">
                 {totalIssues === 0
                   ? 'No se encontraron secretos expuestos, variables huérfanas ni DDL destructivo.'
-                  : 'Revisa las advertencias y envía un informe al agente para corregirlas.'}
+                  : `${data.secretIssues.length} secretos · ${data.undocumentedEnvVars.length} variables sin documentar · ${data.sqlIssues.length} sentencias SQL de riesgo`}
               </div>
             </div>
           </div>
 
+          {totalIssues > 0 && (
+            <button
+              type="button"
+              onClick={handleCopyReport}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 mr-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 font-medium transition cursor-pointer"
+              title="Copiar el informe en Markdown"
+            >
+              {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+              <span>{copied ? 'Copiado' : 'Copiar informe'}</span>
+            </button>
+          )}
           {totalIssues > 0 && (
             <button
               type="button"

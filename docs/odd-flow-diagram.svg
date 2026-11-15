@@ -1,0 +1,208 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 1120" width="100%" height="100%" style="background:#09090b; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+  <defs>
+    <linearGradient id="bgGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#18181b" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#09090b" stop-opacity="1"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#71717a"/>
+    </marker>
+    <marker id="arrow-emerald" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+    </marker>
+    <marker id="arrow-cyan" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#06b6d4"/>
+    </marker>
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <!-- Marco Exterior -->
+  <rect x="16" y="16" width="848" height="1088" rx="20" fill="url(#bgGlow)" stroke="#27272a" stroke-width="1.5"/>
+
+  <!-- Encabezado Principal -->
+  <g transform="translate(48, 52)">
+    <rect x="0" y="0" width="34" height="34" rx="8" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="1.2"/>
+    <text x="9" y="23" font-size="18">🌱</text>
+    <text x="46" y="24" fill="#fafafa" font-size="20" font-weight="700" letter-spacing="-0.02em">Flujo ODD · Organic Driven Development</text>
+    <text x="46" y="46" fill="#a1a1aa" font-size="12">Adaptado a la arquitectura y orquestación de AgentHub · Filosofía de Gentleman Programming</text>
+    <rect x="670" y="8" width="110" height="24" rx="6" fill="#27272a" stroke="#3f3f46" stroke-width="1"/>
+    <text x="682" y="24" fill="#a1a1aa" font-size="11" font-weight="500">AgentHub Flow</text>
+  </g>
+
+  <!-- Línea divisoria cabecera -->
+  <line x1="48" y1="116" x2="832" y2="116" stroke="#27272a" stroke-width="1"/>
+
+  <!-- ==================== PASO 1: AUTHORIZE ==================== -->
+  <g transform="translate(48, 136)" filter="url(#cardShadow)">
+    <rect x="0" y="0" width="370" height="84" rx="12" fill="#18181b" stroke="#f43f5e" stroke-width="1.5" stroke-opacity="0.6"/>
+    <rect x="16" y="16" width="52" height="52" rx="10" fill="#f43f5e" fill-opacity="0.12"/>
+    <text x="32" y="47" font-size="22">🔒</text>
+    <rect x="78" y="18" width="22" height="18" rx="4" fill="#f43f5e" fill-opacity="0.2"/>
+    <text x="85" y="31" fill="#f43f5e" font-size="11" font-weight="700">1</text>
+    <text x="106" y="32" fill="#fafafa" font-size="15" font-weight="600">Authorize</text>
+    <text x="78" y="52" fill="#a1a1aa" font-size="11">Filtro de intencionalidad y permisos de escritura</text>
+    <text x="78" y="68" fill="#71717a" font-size="10" font-family="monospace">AgentHub: session.permission &amp; Auditor</text>
+
+    <!-- Explicación lateral paso 1 -->
+    <path d="M 370 42 L 420 42" stroke="#52525b" stroke-width="1.2" stroke-dasharray="3,3"/>
+    <rect x="420" y="14" width="364" height="56" rx="8" fill="#18181b" stroke="#27272a" stroke-width="1"/>
+    <text x="434" y="34" fill="#e4e4e7" font-size="11"><tspan fill="#f43f5e" font-weight="600">• Pregunta/revisión:</tspan> turno readOnly (sin gastar permisos)</text>
+    <text x="434" y="52" fill="#e4e4e7" font-size="11"><tspan fill="#fbbf24" font-weight="600">• Ambigüedad:</tspan> pregunta · <tspan fill="#34d399" font-weight="600">Cambio claro:</tspan> continúa a explorar</text>
+  </g>
+
+  <!-- Conector 1 -> 2 -->
+  <line x1="233" y1="220" x2="233" y2="248" stroke="#52525b" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- ==================== PASO 2: EXPLORE ==================== -->
+  <g transform="translate(48, 248)" filter="url(#cardShadow)">
+    <rect x="0" y="0" width="370" height="84" rx="12" fill="#18181b" stroke="#6366f1" stroke-width="1.5" stroke-opacity="0.6"/>
+    <rect x="16" y="16" width="52" height="52" rx="10" fill="#6366f1" fill-opacity="0.12"/>
+    <text x="32" y="47" font-size="22">🔍</text>
+    <rect x="78" y="18" width="22" height="18" rx="4" fill="#6366f1" fill-opacity="0.2"/>
+    <text x="85" y="31" fill="#6366f1" font-size="11" font-weight="700">2</text>
+    <text x="106" y="32" fill="#fafafa" font-size="15" font-weight="600">Explore</text>
+    <text x="78" y="52" fill="#a1a1aa" font-size="11">Investigación de contexto antes de tocar código</text>
+    <text x="78" y="68" fill="#71717a" font-size="10" font-family="monospace">AgentHub: Rol Explorador / searchContent</text>
+
+    <!-- Explicación lateral paso 2 -->
+    <path d="M 370 42 L 420 42" stroke="#52525b" stroke-width="1.2" stroke-dasharray="3,3"/>
+    <rect x="420" y="18" width="364" height="48" rx="8" fill="#18181b" stroke="#27272a" stroke-width="1"/>
+    <text x="434" y="38" fill="#e4e4e7" font-size="11"><tspan fill="#818cf8" font-weight="600">¿Contexto grande?</tspan> Delega a un subagente de solo</text>
+    <text x="434" y="54" fill="#a1a1aa" font-size="11">lectura para no ensuciar la ventana principal con tokens.</text>
+  </g>
+
+  <!-- Conector 2 -> 3 -->
+  <line x1="233" y1="332" x2="233" y2="360" stroke="#52525b" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- ==================== PASO 3: RESOLVE UNCERTAINTY ==================== -->
+  <g transform="translate(48, 360)" filter="url(#cardShadow)">
+    <rect x="0" y="0" width="370" height="88" rx="12" fill="#18181b" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,4" stroke-opacity="0.8"/>
+    <rect x="16" y="18" width="52" height="52" rx="10" fill="#f59e0b" fill-opacity="0.12"/>
+    <text x="32" y="49" font-size="22">💡</text>
+    <rect x="78" y="18" width="22" height="18" rx="4" fill="#f59e0b" fill-opacity="0.2"/>
+    <text x="85" y="31" fill="#f59e0b" font-size="11" font-weight="700">3</text>
+    <text x="106" y="32" fill="#fafafa" font-size="15" font-weight="600">Resolve Uncertainty</text>
+    <text x="78" y="48" fill="#fbbf24" font-size="10" font-weight="600">SOLO SI HACE FALTA</text>
+    <text x="78" y="64" fill="#a1a1aa" font-size="11">Despejar dudas antes de escribir una sola línea</text>
+    <text x="78" y="78" fill="#71717a" font-size="10" font-family="monospace">AgentHub: extractQuestionOptions UI</text>
+
+    <!-- Explicación lateral paso 3 -->
+    <path d="M 370 44 L 420 44" stroke="#52525b" stroke-width="1.2" stroke-dasharray="3,3"/>
+    <rect x="420" y="12" width="364" height="64" rx="8" fill="#18181b" stroke="#27272a" stroke-width="1"/>
+    <text x="434" y="32" fill="#e4e4e7" font-size="11"><tspan fill="#38bdf8" font-weight="600">• Duda técnica:</tspan> investiga en repo / schema</text>
+    <text x="434" y="48" fill="#e4e4e7" font-size="11"><tspan fill="#f59e0b" font-weight="600">• Decisión de producto:</tspan> botones interactivos al usuario</text>
+    <text x="434" y="64" fill="#e4e4e7" font-size="11"><tspan fill="#f43f5e" font-weight="600">• Premisa riesgosa:</tspan> el usuario decide antes de mutar</text>
+  </g>
+
+  <!-- Conector 3 -> 4 -->
+  <line x1="233" y1="448" x2="233" y2="476" stroke="#52525b" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- ==================== PASO 4: CLASSIFY ==================== -->
+  <g transform="translate(48, 476)" filter="url(#cardShadow)">
+    <rect x="0" y="0" width="370" height="76" rx="12" fill="#18181b" stroke="#06b6d4" stroke-width="1.5" stroke-opacity="0.8"/>
+    <rect x="16" y="12" width="52" height="52" rx="10" fill="#06b6d4" fill-opacity="0.12"/>
+    <text x="32" y="44" font-size="22">⚖️</text>
+    <rect x="78" y="16" width="22" height="18" rx="4" fill="#06b6d4" fill-opacity="0.2"/>
+    <text x="85" y="29" fill="#06b6d4" font-size="11" font-weight="700">4</text>
+    <text x="106" y="30" fill="#fafafa" font-size="15" font-weight="600">Classify (Escala de Tarea)</text>
+    <text x="78" y="50" fill="#a1a1aa" font-size="11">¿El cambio es pequeño o estructural?</text>
+    <text x="78" y="64" fill="#71717a" font-size="10" font-family="monospace">AgentHub: Directo vs Squad Template</text>
+  </g>
+
+  <!-- Bifurcación: small (hacia abajo directo) vs large (hacia paso 5 Track) -->
+  <!-- Ruta small hacia el paso 6 -->
+  <path d="M 180 552 L 180 670" stroke="#10b981" stroke-width="1.8" marker-end="url(#arrow-emerald)"/>
+  <rect x="145" y="595" width="70" height="22" rx="4" fill="#064e3b" stroke="#10b981" stroke-width="1"/>
+  <text x="156" y="610" fill="#34d399" font-size="11" font-weight="700">small ↓</text>
+
+  <!-- Ruta large hacia el paso 5 -->
+  <path d="M 418 514 L 560 514 L 560 558" stroke="#06b6d4" stroke-width="1.8" marker-end="url(#arrow-cyan)"/>
+  <rect x="460" y="498" width="68" height="22" rx="4" fill="#083344" stroke="#06b6d4" stroke-width="1"/>
+  <text x="473" y="513" fill="#38bdf8" font-size="11" font-weight="700">large →</text>
+
+  <!-- ==================== PASO 5: TRACK (LARGE) ==================== -->
+  <g transform="translate(420, 560)" filter="url(#cardShadow)">
+    <rect x="0" y="0" width="364" height="84" rx="12" fill="#18181b" stroke="#a855f7" stroke-width="1.5" stroke-opacity="0.8"/>
+    <rect x="16" y="16" width="52" height="52" rx="10" fill="#a855f7" fill-opacity="0.12"/>
+    <text x="32" y="47" font-size="22">📋</text>
+    <rect x="78" y="18" width="22" height="18" rx="4" fill="#a855f7" fill-opacity="0.2"/>
+    <text x="85" y="31" fill="#a855f7" font-size="11" font-weight="700">5</text>
+    <text x="106" y="32" fill="#fafafa" font-size="15" font-weight="600">Track &amp; Plan</text>
+    <text x="78" y="52" fill="#d8b4fe" font-size="11" font-family="monospace">odd/tasks/&lt;feature&gt;.md + Memoria</text>
+    <text x="78" y="68" fill="#a1a1aa" font-size="10">Checklist atómico reanudable entre turnos</text>
+  </g>
+
+  <!-- Conector 5 -> 6 -->
+  <path d="M 602 644 L 602 670" stroke="#06b6d4" stroke-width="1.5" marker-end="url(#arrow-cyan)"/>
+
+  <!-- ==================== PASO 6: IMPLEMENT TASK BY TASK ==================== -->
+  <g transform="translate(48, 672)" filter="url(#cardShadow)">
+    <rect x="0" y="0" width="736" height="196" rx="14" fill="#18181b" stroke="#10b981" stroke-width="1.5" stroke-opacity="0.7"/>
+
+    <!-- Cabecera Paso 6 -->
+    <rect x="20" y="18" width="46" height="46" rx="10" fill="#10b981" fill-opacity="0.12"/>
+    <text x="33" y="47" font-size="20">🛠️</text>
+    <rect x="78" y="20" width="22" height="18" rx="4" fill="#10b981" fill-opacity="0.2"/>
+    <text x="85" y="33" fill="#10b981" font-size="11" font-weight="700">6</text>
+    <text x="106" y="34" fill="#fafafa" font-size="16" font-weight="700">Implement task by task</text>
+    <text x="78" y="54" fill="#a1a1aa" font-size="11">Desarrollo modular: pequeños en un turno; grandes divididos con TDD</text>
+
+    <!-- Chips Small vs Large -->
+    <rect x="360" y="20" width="160" height="24" rx="6" fill="#27272a"/>
+    <text x="372" y="36" fill="#34d399" font-size="11" font-weight="600">small → Inline directo</text>
+    <rect x="532" y="20" width="180" height="24" rx="6" fill="#27272a"/>
+    <text x="544" y="36" fill="#38bdf8" font-size="11" font-weight="600">large → Writers / TDD</text>
+
+    <!-- Sub-caja: Niveles de Verificación según Riesgo -->
+    <rect x="20" y="80" width="696" height="96" rx="10" fill="#121215" stroke="#3f3f46" stroke-width="1"/>
+    <text x="34" y="100" fill="#fbbf24" font-size="11" font-weight="700" letter-spacing="0.05em">VERIFICACIÓN SEGÚN RIESGO (QUALITY GATES):</text>
+
+    <!-- Nivel Bajo -->
+    <rect x="34" y="112" width="205" height="52" rx="8" fill="#27272a" fill-opacity="0.6" stroke="#52525b" stroke-width="1"/>
+    <text x="46" y="132" fill="#e4e4e7" font-size="12" font-weight="600">Riesgo Bajo</text>
+    <text x="46" y="150" fill="#a1a1aa" font-size="11">Relectura de diff (`git diff`)</text>
+
+    <!-- Nivel Medio -->
+    <rect x="254" y="112" width="220" height="52" rx="8" fill="#27272a" fill-opacity="0.6" stroke="#f59e0b" stroke-width="1" stroke-opacity="0.5"/>
+    <text x="266" y="132" fill="#fbbf24" font-size="12" font-weight="600">Riesgo Medio</text>
+    <text x="266" y="150" fill="#a1a1aa" font-size="11">Autoverificación con tests del repo</text>
+
+    <!-- Nivel Alto -->
+    <rect x="489" y="112" width="215" height="52" rx="8" fill="#27272a" fill-opacity="0.6" stroke="#f43f5e" stroke-width="1" stroke-opacity="0.5"/>
+    <text x="501" y="132" fill="#f43f5e" font-size="12" font-weight="600">Riesgo Alto</text>
+    <text x="501" y="150" fill="#a1a1aa" font-size="11">Autotests + Revisor cruzado (RDD)</text>
+  </g>
+
+  <!-- Conector 6 -> 7 -->
+  <line x1="416" y1="868" x2="416" y2="904" stroke="#52525b" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- ==================== PASO 7: CLOSE & RDD ==================== -->
+  <g transform="translate(48, 904)" filter="url(#cardShadow)">
+    <rect x="0" y="0" width="440" height="84" rx="12" fill="#18181b" stroke="#3b82f6" stroke-width="1.5" stroke-opacity="0.8"/>
+    <rect x="16" y="16" width="52" height="52" rx="10" fill="#3b82f6" fill-opacity="0.12"/>
+    <text x="32" y="47" font-size="22">🚩</text>
+    <rect x="78" y="18" width="22" height="18" rx="4" fill="#3b82f6" fill-opacity="0.2"/>
+    <text x="85" y="31" fill="#3b82f6" font-size="11" font-weight="700">7</text>
+    <text x="106" y="32" fill="#fafafa" font-size="15" font-weight="600">Close / Finalización</text>
+    <rect x="78" y="46" width="56" height="20" rx="4" fill="#064e3b"/>
+    <text x="88" y="60" fill="#34d399" font-size="10" font-weight="600">Ready</text>
+    <rect x="142" y="46" width="134" height="20" rx="4" fill="#451a03"/>
+    <text x="150" y="60" fill="#fbbf24" font-size="10" font-weight="600">Needs your decision</text>
+
+    <!-- Módulo RDD a la derecha -->
+    <rect x="460" y="0" width="276" height="84" rx="12" fill="#1e1b4b" fill-opacity="0.5" stroke="#6366f1" stroke-width="1.5"/>
+    <text x="476" y="28" font-size="16">🧾</text>
+    <text x="502" y="28" fill="#c7d2fe" font-size="13" font-weight="700">RDD (Receipt-Driven Dev)</text>
+    <text x="476" y="48" fill="#a5b4fc" font-size="11">Foto inmutable (`checkpointHash`)</text>
+    <text x="476" y="66" fill="#818cf8" font-size="10">Recibo con evidencias verificadas antes de push</text>
+  </g>
+
+  <!-- Pie con resumen técnico -->
+  <g transform="translate(48, 1018)">
+    <rect x="0" y="0" width="784" height="54" rx="8" fill="#18181b" stroke="#27272a" stroke-width="1"/>
+    <text x="18" y="24" fill="#10b981" font-size="11" font-weight="700">Principio Clave de ODD en AgentHub:</text>
+    <text x="18" y="42" fill="#a1a1aa" font-size="11">Elimina la burocracia de especificaciones cascada en cambios pequeños; escala de forma orgánica con squads y memoria sólo cuando el requerimiento lo justifica.</text>
+  </g>
+</svg>

@@ -4,9 +4,10 @@ import { ProviderType } from '../../shared/types';
 import { postToHost } from '../vscode-api';
 import { ModalShell } from './ModalShell';
 
-const PROVIDER_OPTIONS: Array<{ provider: ProviderType; label: string; selectedClass: string }> = [
-  { provider: 'claude', label: 'Claude', selectedClass: 'bg-orange-600/20 text-orange-300 border-orange-500/50' },
-  { provider: 'google', label: 'Antigravity', selectedClass: 'bg-blue-600/20 text-blue-300 border-blue-500/50' }
+const PROVIDER_OPTIONS: Array<{ provider: ProviderType; label: string; hint: string; selectedClass: string }> = [
+  { provider: 'claude', label: 'Claude', hint: 'Se abre el inicio de sesión de Claude Code en el navegador.', selectedClass: 'bg-orange-600/20 text-orange-300 border-orange-500/50' },
+  { provider: 'google', label: 'Antigravity', hint: 'Antigravity comparte un solo inicio de sesión: la etiqueta solo identifica la cuenta aquí.', selectedClass: 'bg-blue-600/20 text-blue-300 border-blue-500/50' },
+  { provider: 'ollama', label: 'Ollama', hint: 'Detecta los modelos instalados en http://localhost:11434 sin requerir API keys ni conexión a internet.', selectedClass: 'bg-emerald-600/20 text-emerald-300 border-emerald-500/50' }
 ];
 
 export const AddAccountModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
@@ -23,7 +24,7 @@ export const AddAccountModal: React.FC<{ onClose: () => void }> = ({ onClose }) 
   return (
     <ModalShell title="Vincular nueva cuenta" icon={<Plus className="w-4 h-4 text-indigo-400" />} onClose={onClose}>
       <form onSubmit={submit} className="p-3 space-y-3">
-        <div className="grid grid-cols-2 gap-1.5">
+        <div className="grid grid-cols-3 gap-1.5">
           {PROVIDER_OPTIONS.map((option) => (
             <button
               key={option.provider}
@@ -38,6 +39,7 @@ export const AddAccountModal: React.FC<{ onClose: () => void }> = ({ onClose }) 
           ))}
         </div>
 
+        <p className="text-[11px] text-zinc-400" role="note">{PROVIDER_OPTIONS.find((option) => option.provider === provider)?.hint}</p>
         <label className="block">
           <span className="block text-[11px] text-zinc-400 font-medium mb-1">
             Etiqueta identificadora (ej: Trabajo, Personal 2, Cliente):
@@ -47,12 +49,15 @@ export const AddAccountModal: React.FC<{ onClose: () => void }> = ({ onClose }) 
             value={label}
             onChange={(event) => setLabel(event.target.value)}
             placeholder="ej. Trabajo"
+            maxLength={40}
             autoFocus
             className="w-full bg-zinc-950 border border-zinc-750 rounded-lg px-2.5 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-indigo-500"
           />
         </label>
 
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex items-center justify-between gap-2">
+          <span className="font-mono text-[10px] text-zinc-500">{label.length}/40</span>
+          <span className="flex items-center gap-2">
           <button type="button" onClick={onClose} className="px-3 py-1.5 text-xs rounded-lg hover:bg-zinc-800 text-zinc-400 transition">
             Cancelar
           </button>
@@ -63,6 +68,7 @@ export const AddAccountModal: React.FC<{ onClose: () => void }> = ({ onClose }) 
           >
             Iniciar sesión
           </button>
+          </span>
         </div>
       </form>
     </ModalShell>

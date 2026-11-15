@@ -14,8 +14,16 @@ export const EffortSelector: React.FC<Props> = ({ effort, supportedEfforts, onCh
     { id: 'low', label: 'Bajo' },
     { id: 'medium', label: 'Medio' },
     { id: 'high', label: 'Alto' },
+    ...(supportedEfforts.includes('xhigh') ? [{ id: 'xhigh' as const, label: 'Xalto' }] : []),
     { id: 'max', label: 'Max' }
   ];
+  const hints: Record<ReasoningEffort, string> = {
+    low: 'Respuestas rápidas y baratas, con poco razonamiento',
+    medium: 'Equilibrio entre velocidad y profundidad',
+    high: 'Razona más antes de responder: mejor para código difícil',
+    xhigh: 'Entre Alto y Max: razonamiento muy profundo con menos costo que Max',
+    max: 'Máximo razonamiento: el más lento y el que más cuota gasta'
+  };
 
   return (
     <div className="flex items-center gap-1.5 text-[11px] shrink-0">
@@ -30,6 +38,8 @@ export const EffortSelector: React.FC<Props> = ({ effort, supportedEfforts, onCh
             type="button"
             disabled={!supportedEfforts.includes(opt.id)}
             onClick={() => onChange(opt.id)}
+            aria-pressed={effort === opt.id}
+            title={supportedEfforts.includes(opt.id) ? hints[opt.id] : 'No disponible con este modelo'}
             className={`px-2 py-0.5 rounded text-[11px] font-medium transition disabled:opacity-30 disabled:pointer-events-none ${
               effort === opt.id
                 ? 'bg-indigo-600 text-white shadow-sm'

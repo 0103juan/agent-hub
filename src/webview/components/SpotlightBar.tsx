@@ -13,6 +13,10 @@ import {
   Zap
 } from 'lucide-react';
 
+/** La misma lista que usa el cuadro de mensajes del chat. */
+const PROMPT_HISTORY_KEY = 'agent-hub.promptHistory';
+const RECENT_SHOWN = 5;
+
 interface Props {
   isOpen: boolean;
   onClose: () => void;
@@ -32,6 +36,15 @@ export const SpotlightBar: React.FC<Props> = ({
 }) => {
   const [prompt, setPrompt] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const historyPos = useRef(-1);
+  const readHistory = (): string[] => {
+    try {
+      const list = JSON.parse(localStorage.getItem(PROMPT_HISTORY_KEY) ?? '[]');
+      return Array.isArray(list) ? list.filter((item) => typeof item === 'string') : [];
+    } catch {
+      return [];
+    }
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -56,6 +69,10 @@ export const SpotlightBar: React.FC<Props> = ({
     e.preventDefault();
     const trimmed = prompt.trim();
     if (!trimmed) return;
+    try {
+      const list = readHistory().filter((item) => item !== trimmed);
+      localStorage.setItem(PROMPT_HISTORY_KEY, JSON.stringify([...list, trimmed].slice(-50)));
+    } catch {}
     onSubmitPrompt(trimmed);
     onClose();
   };
@@ -95,7 +112,18 @@ export const SpotlightBar: React.FC<Props> = ({
             ref={inputRef}
             type="text"
             value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
+            onChange={(e) => {
+              historyPos.current = -1;
+              setPrompt(e.target.value);
+            }}
+            onKeyDown={(e) => {
+              if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+              const history = readHistory();
+              if (history.length === 0) return;
+              e.preventDefault();
+              historyPos.current = e.key === 'ArrowUp' ? Math.min(historyPos.current + 1, history.length - 1) : Math.max(historyPos.current - 1, -1);
+              setPrompt(historyPos.current < 0 ? '' : history[history.length - 1 - historyPos.current]);
+            }}
             placeholder="Escribe una instrucción rápida, /goal [objetivo], o presiona Enter..."
             className="flex-1 bg-transparent border-none text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none"
           />
@@ -117,6 +145,25 @@ export const SpotlightBar: React.FC<Props> = ({
 
         {/* Acciones Rápidas (Chips) */}
         <div className="p-3 bg-zinc-900/90 space-y-2">
+          {!prompt && readHistory().length > 0 && (
+            <div className="space-y-0.5">
+              <div className="text-[11px] font-medium text-zinc-400 px-1">Recientes (↑ ↓ para recorrerlos)</div>
+              {readHistory().slice(-RECENT_SHOWN).reverse().map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => {
+                    setPrompt(item);
+                    inputRef.current?.focus();
+                  }}
+                  className="block w-full truncate text-left px-2 py-1 rounded text-[11px] text-zinc-300 hover:bg-zinc-800 cursor-pointer"
+                  title={item}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+          )}
           <div className="text-[11px] font-medium text-zinc-400 px-1">Acciones Rápidas Sugeridas</div>
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
             <button

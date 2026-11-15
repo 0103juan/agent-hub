@@ -31,8 +31,8 @@ import { commitStage, restoreStage, squadDiffFiles } from '../src/host/git-workt
 import { parseIssueRef, resolveRequirement } from '../src/host/issue-source';
 import { runProjectTests, verificationCommands } from '../src/host/test-runner';
 import { HubServer } from '../src/server/hub-server';
-import { isFromHost } from '../src/webview/vscode-api';
-import { editorHandlers } from '../src/host/handlers/editor-handlers';
+import { isFromHost, isElectron } from '../src/webview/vscode-api';
+import { editorHandlers, resolveShellOption } from '../src/host/handlers/editor-handlers';
 import { sessionHandlers } from '../src/host/handlers/session-handlers';
 import { pruneExperience, selectExperience } from '../src/shared/experience';
 import { buildTeamReport } from '../src/shared/team-report';
@@ -47,7 +47,7 @@ import { closestEffort, recommendedFor, resolveSelection } from '../src/shared/m
 import { PROTOCOL_ROLES } from '../src/shared/protocol-roles';
 import { AccountProfile, ConversationSession } from '../src/shared/types';
 import { extractQuestionOptions } from '../src/shared/question-options';
-import { filterActions, WORKSPACE_ACTIONS } from '../src/shared/workspace-actions';
+import { filterActions, normalizeText, WORKSPACE_ACTIONS } from '../src/shared/workspace-actions';
 import { ACTION_ICONS } from '../src/webview/components/chat/action-icons';
 import { migrateSession, SessionStore } from '../src/storage/session-store';
 import { TelemetryStore } from '../src/storage/telemetry-store';
@@ -932,6 +932,16 @@ describe('ChatService', () => {
     assert.strictEqual(session.messages.length, 2);
   });
 
+  it('publica también los mensajes de las sesiones a la vista en columnas', async () => {
+    const { send, sessions, chat, posted, session } = setup((emit) => { emit({ kind: 'text', text: 'x' }); return { status: 'completed' }; });
+    await send('Hola');
+    sessions.create({});
+    chat.setVisible('ventana-1', [session.id]);
+    const last = [...posted].reverse().find((m) => m.type === 'state' && m.patch.sessions);
+    const published = last?.type === 'state' ? last.patch.sessions?.find((candidate) => candidate.id === session.id) : undefined;
+    assert.strictEqual(published?.messages.length, 2);
+  });
+
   it('el título sale del primer mensaje', async () => {
     const { session, send } = setup((emit) => { emit({ kind: 'text', text: 'x' }); return { status: 'completed' }; });
     await send('Revisa el login');
@@ -1310,6 +1320,11 @@ describe('Filtro de acciones', () => {
     assert.ok(filterActions('tunel', 'all').some((action) => action.id === 'local-tunnel'));
   });
 
+  it('normalizeText quita tildes y mayúsculas para los buscadores de la interfaz', () => {
+    assert.strictEqual(normalizeText('Ir a MÉTRICAS'), 'ir a metricas');
+    assert.ok(normalizeText('Configuración').includes(normalizeText('configuracion')));
+  });
+
   it('exige todas las palabras y respeta el grupo', () => {
     assert.deepStrictEqual(filterActions('diagrama secuencia', 'all').map((action) => action.id), ['sequence-diagram']);
     assert.ok(filterActions('', 'Git').every((action) => action.group === 'Git'));
@@ -1431,12 +1446,30 @@ describe('Nuevas características de AgentHub', () => {
     assert.strictEqual(result.options[0], 'Clean Architecture');
   });
 
+  it('extractQuestionOptions detecta listas con viñetas para preguntas y decisiones de agentes', () => {
+    const textClaude =
+      'Necesito saber qué id manda el front al pulsar "Finalizar documento". Según eso:\n' +
+      '- Id de documento: el front llama a la ruta equivocada, y el back debe recibir el id de extracción.\n' +
+      '- Id de extracción, y debe finalizar el documento: el front llama a la ruta correcta, pero el back debe buscar el documento asociado.\n' +
+      '- Id de extracción, y solo valida el campo: el front llama a la ruta correcta y el back solo debe validar el campo.';
+    const result = extractQuestionOptions(textClaude);
+    assert.ok(result);
+    assert.strictEqual(result.question, 'Necesito saber qué id manda el front al pulsar "Finalizar documento". Según eso:');
+    assert.strictEqual(result.options.length, 3);
+    assert.ok(result.options[0].startsWith('Id de documento'));
+  });
+
   it('extractQuestionOptions descarta listas informativas de más de 5 elementos o sin pregunta', () => {
     const text10 = '### 2. Las 10 Mejoras Visuales Implementadas\n1. Uno\n2. Dos\n3. Tres\n4. Cuatro\n5. Cinco\n6. Seis\n7. Siete\n8. Ocho\n9. Nueve\n10. Diez';
     assert.strictEqual(extractQuestionOptions(text10), undefined);
 
     const textNoQuestion = 'Pasos a seguir:\n1. Compilar\n2. Probar\n3. Desplegar';
     assert.strictEqual(extractQuestionOptions(textNoQuestion), undefined);
+  });
+
+  it('extractQuestionOptions descarta títulos explicativos con ¿cómo funciona? o ítems con dos puntos', () => {
+    const textExplanatory = '### ¿Cómo funciona la interacción?\n\n1. **Indicador visual con chevron (`⌄`):**\n   - El botón muestra...\n2. **Menú desplegable en 1 clic:**\n   - Al pulsar...\n3. **Cierre intuitivo:**\n   - Se cierra...\n\n### Archivos Modificados\n- Componente.tsx';
+    assert.strictEqual(extractQuestionOptions(textExplanatory), undefined);
   });
 
   it('ClaudeStreamParser emite evento de pregunta cuando la herramienta es ask_question', () => {
@@ -1885,6 +1918,30 @@ describe('Punta a punta con una CLI simulada', () => {
     }
   });
 
+  it('HubServer envía cabeceras de seguridad y rechaza mensajes enormes', async () => {
+    const received: any[] = [];
+    const server = new HubServer({ port: 3991, staticDir: tempDir(), onMessage: (msg) => { received.push(msg); } });
+    const port = await server.start();
+    try {
+      const status = await fetch(`http://localhost:${port}/api/status`);
+      assert.strictEqual(status.headers.get('x-content-type-options'), 'nosniff');
+      assert.strictEqual(status.headers.get('x-frame-options'), 'DENY');
+      assert.strictEqual(status.headers.get('referrer-policy'), 'no-referrer');
+      assert.ok(typeof ((await status.json()) as any).uptimeSeconds === 'number');
+
+      const big = await fetch(`http://localhost:${port}/api/message`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command: 'savePastedFile', dataUri: 'x'.repeat(49 * 1024 * 1024), fileName: 'a.txt' })
+      }).catch(() => undefined);
+      // Según el momento del corte el cliente ve 413 o un cierre de conexión; en ambos casos no se procesa.
+      assert.ok(big === undefined || big.status === 413);
+      assert.strictEqual(received.length, 0);
+    } finally {
+      await server.stop();
+    }
+  });
+
   it('package.json describe solo la app de escritorio: sin extensión de VS Code y con script de actualización', () => {
     const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '../package.json'), 'utf8'));
     assert.strictEqual(pkg.main, 'dist/electron/main.js');
@@ -2023,6 +2080,53 @@ describe('Punta a punta con una CLI simulada', () => {
     assert.ok(Array.isArray(branchMsg.branches));
   });
 
+  it('editorHandlers lista ramas del proyecto especificado en dir y clasifica squad', async () => {
+    const dir = tempDir();
+    const run = (...args: string[]) => execFileSync('git', args, { cwd: dir, stdio: 'ignore' });
+    run('init', '-q', '-b', 'main');
+    run('config', 'user.email', 't@t');
+    run('config', 'user.name', 't');
+    fs.writeFileSync(path.join(dir, 'a.txt'), 'hola\n');
+    run('add', 'a.txt');
+    run('commit', '-m', 'init');
+    run('branch', 'feature/mi-rama');
+    run('branch', 'squad/agent-worker');
+
+    const emitted: any[] = [];
+    const mockHub: any = { post: (msg: any) => emitted.push(msg) };
+    const handlers = editorHandlers(mockHub);
+
+    await (handlers as any).getGitBranches({ dir });
+    const branchMsg = emitted.find((m) => m.type === 'gitBranches');
+    assert.ok(branchMsg);
+    assert.strictEqual(branchMsg.dir, dir);
+    assert.strictEqual(branchMsg.currentBranch, 'main');
+    assert.ok(branchMsg.branches.includes('main'));
+    assert.ok(branchMsg.branches.includes('feature/mi-rama'));
+    assert.ok(branchMsg.squadBranches.includes('squad/agent-worker'));
+  });
+
+  it('editorHandlers emite rama actual y cambios sin commitear en workspaceOverview y getDirGitStatus', async () => {
+    const dir = tempDir();
+    const run = (...args: string[]) => execFileSync('git', args, { cwd: dir, stdio: 'ignore' });
+    run('init', '-q', '-b', 'feat-test-branch');
+    run('config', 'user.email', 't@t');
+    run('config', 'user.name', 't');
+    fs.writeFileSync(path.join(dir, 'nuevo.txt'), 'contenido\n');
+
+    const emitted: any[] = [];
+    const mockHub: any = { post: (msg: any) => emitted.push(msg) };
+    const handlers = editorHandlers(mockHub);
+
+    await (handlers as any).getDirGitStatus({ dir });
+    const dirMsg = emitted.find((m) => m.type === 'dirGitStatus');
+    assert.ok(dirMsg);
+    assert.strictEqual(dirMsg.branch, 'feat-test-branch');
+    assert.strictEqual(dirMsg.uncommittedCount, 1);
+    assert.strictEqual(dirMsg.gitFiles.length, 1);
+    assert.strictEqual(dirMsg.gitFiles[0].path, 'nuevo.txt');
+  });
+
   it('editorHandlers pasa a git rutas, búsquedas y mensajes sin interpretarlos en una shell', async () => {
     const dir = tempDir();
     // El shim fija la carpeta con el cwd al cargar: se sustituye solo durante este test.
@@ -2065,6 +2169,74 @@ describe('Punta a punta con una CLI simulada', () => {
     assert.ok(finished(), 'el proceso debía terminar tras Detener');
   });
 
+  it('la terminal soporta múltiples pestañas en paralelo, cwd explícito y sendTerminalInput', async () => {
+    const emitted: any[] = [];
+    const handlers = editorHandlers({ post: (msg: any) => emitted.push(msg) } as any);
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'agent-hub-term-'));
+    try {
+      await handlers.runTerminalCommand({
+        terminalId: 'tab-a',
+        commandLine: 'node -e "setInterval(() => {}, 1000)"',
+        cwd: tmpDir
+      });
+      await handlers.runTerminalCommand({
+        terminalId: 'tab-b',
+        commandLine: 'node -e "process.stdin.once(\'data\', d => { console.log(\'ECHO:\' + d.toString().trim()); process.exit(0); })"',
+        cwd: tmpDir
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      handlers.sendTerminalInput({ terminalId: 'tab-b', data: 'hola-stdin' });
+
+      const tabBDone = () => emitted.some((m) => m.terminalId === 'tab-b' && m.exitCode === 0);
+      for (let i = 0; i < 50 && !tabBDone(); i++) await new Promise((resolve) => setTimeout(resolve, 100));
+
+      assert.ok(tabBDone(), 'tab-b debía responder a stdin y terminar con 0');
+      assert.ok(emitted.some((m) => m.terminalId === 'tab-b' && m.output?.includes('ECHO:hola-stdin')));
+      assert.ok(emitted.some((m) => m.terminalId === 'tab-a' && m.cwd === tmpDir));
+
+      handlers.stopTerminalCommand({ terminalId: 'tab-a' });
+      const tabADone = () => emitted.some((m) => m.terminalId === 'tab-a' && m.exitCode !== undefined);
+      for (let i = 0; i < 50 && !tabADone(); i++) await new Promise((resolve) => setTimeout(resolve, 100));
+      assert.ok(tabADone(), 'tab-a debía detenerse de forma independiente');
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it('resolveShellOption solo acepta shells de la lista blanca y cae en default si es inválida', () => {
+    assert.equal(resolveShellOption('default'), true);
+    assert.equal(resolveShellOption(undefined), true);
+    assert.equal(resolveShellOption('bash'), 'bash');
+    assert.equal(resolveShellOption('pwsh'), process.platform === 'win32' ? 'pwsh.exe' : 'pwsh');
+    assert.equal(resolveShellOption('/bin/evil;rm -rf /'), true);
+  });
+
+  it('la terminal persiste cd por pestaña y guarda/carga snippets en .agent-hub', async () => {
+    const emitted: any[] = [];
+    const handlers = editorHandlers({ post: (msg: any) => emitted.push(msg) } as any);
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'agent-hub-cd-'));
+    const subDir = path.join(tmpDir, 'sub');
+    fs.mkdirSync(subDir);
+    try {
+      await handlers.runTerminalCommand({ terminalId: 'cd-tab', commandLine: 'cd sub', cwd: tmpDir });
+      assert.ok(emitted.some((m) => m.terminalId === 'cd-tab' && m.cwd === subDir && m.exitCode === 0));
+
+      await handlers.runTerminalCommand({ terminalId: 'cd-tab', commandLine: 'node -e "console.log(process.cwd())"', cwd: tmpDir });
+      const done = () => emitted.filter((m) => m.terminalId === 'cd-tab' && m.exitCode === 0).length >= 2;
+      for (let i = 0; i < 50 && !done(); i++) await new Promise((resolve) => setTimeout(resolve, 100));
+      assert.ok(emitted.some((m) => m.terminalId === 'cd-tab' && m.output?.includes(subDir)));
+
+      handlers.saveTerminalSnippets({ cwd: tmpDir, snippets: [{ label: 'Test', cmd: 'npm test' }] });
+      emitted.length = 0;
+      handlers.loadTerminalSnippets({ cwd: tmpDir });
+      const loaded = emitted.find((m) => m.type === 'terminalSnippets');
+      assert.deepEqual(loaded?.snippets, [{ label: 'Test', cmd: 'npm test' }]);
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
   it('editorHandlers ejecuta auditoría de seguridad y detecta secretos o envs', async () => {
     const emitted: any[] = [];
     const mockHub: any = { post: (msg: any) => emitted.push(msg) };
@@ -2099,6 +2271,31 @@ describe('Punta a punta con una CLI simulada', () => {
 });
 
 describe('Mensajes de la vista', () => {
+  it('detecta entorno electron a través de userAgent', () => {
+    const originalNavigator = globalThis.navigator;
+    try {
+      Object.defineProperty(globalThis, 'navigator', {
+        value: { userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/130.0.0.0 Electron/45.2.3 Safari/537.36' },
+        configurable: true,
+        writable: true
+      });
+      assert.strictEqual(isElectron(), true);
+
+      Object.defineProperty(globalThis, 'navigator', {
+        value: { userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/130.0.0.0 Safari/537.36' },
+        configurable: true,
+        writable: true
+      });
+      assert.strictEqual(isElectron(), false);
+    } finally {
+      Object.defineProperty(globalThis, 'navigator', {
+        value: originalNavigator,
+        configurable: true,
+        writable: true
+      });
+    }
+  });
+
   it('acepta al host (misma ventana, marcos ancestros) y rechaza iframes descendientes de la vista previa', () => {
     const top: any = {};
     top.parent = top;
@@ -2272,5 +2469,157 @@ describe('getCheckpointFileDiff', () => {
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
+  });
+});
+
+describe('formato de la interfaz', () => {
+  it('etiqueta los días y formatea duración y costo', async () => {
+    const { dayLabel, formatDuration, formatCost, sameDay } = await import('../src/webview/utils/format');
+    const now = new Date(2026, 10, 8, 15, 0).getTime();
+    assert.equal(dayLabel(now, now), 'Hoy');
+    assert.equal(dayLabel(now - 86_400_000, now), 'Ayer');
+    assert.ok(!sameDay(now, now - 86_400_000));
+    assert.equal(formatDuration(450), '450 ms');
+    assert.equal(formatDuration(65_000), '1 min 5 s');
+    assert.equal(formatCost(0.004), '<$0.01');
+    assert.equal(formatCost(1.234), '$1.23');
+  });
+});
+
+describe('Utilidades de la interfaz y acciones', () => {
+  it('relativeTime y extensionFor dan etiquetas legibles', async () => {
+    const { relativeTime, extensionFor } = await import('../src/webview/utils/format');
+    const now = 1_000_000_000_000;
+    assert.strictEqual(relativeTime(now - 10_000, now), 'ahora');
+    assert.strictEqual(relativeTime(now - 5 * 60_000, now), 'hace 5 min');
+    assert.strictEqual(relativeTime(now - 3 * 3_600_000, now), 'hace 3 h');
+    assert.strictEqual(relativeTime(now - 2 * 86_400_000, now), 'hace 2 d');
+    assert.strictEqual(extensionFor('TypeScript'), 'ts');
+    assert.strictEqual(extensionFor('desconocido'), 'txt');
+  });
+
+  it('cada acción tiene grupo válido y las del agente traen un prompt con contenido', async () => {
+    const { ACTION_GROUPS } = await import('../src/shared/workspace-actions');
+    for (const action of WORKSPACE_ACTIONS) {
+      assert.ok((ACTION_GROUPS as readonly string[]).includes(action.group), action.id);
+      assert.ok(action.label.length > 0 && action.description.length > 0, action.id);
+      if (action.agentPrompt !== undefined) assert.ok(action.agentPrompt.length > 40, action.id);
+    }
+  });
+
+  it('HubServer responde 404 a un archivo inexistente y cachea los assets', async () => {
+    const dir = tempDir();
+    fs.mkdirSync(path.join(dir, 'assets'));
+    fs.writeFileSync(path.join(dir, 'index.html'), '<html></html>');
+    fs.writeFileSync(path.join(dir, 'assets', 'app-abc12345.js'), 'console.log(1)');
+    fs.writeFileSync(path.join(dir, 'assets', 'index.js'), 'console.log(2)');
+    const server = new HubServer({ port: 3992, staticDir: dir, onMessage: () => {} });
+    const port = await server.start();
+    try {
+      const missing = await fetch(`http://localhost:${port}/assets/no-existe.js`);
+      assert.strictEqual(missing.status, 404);
+      const asset = await fetch(`http://localhost:${port}/assets/app-abc12345.js`);
+      assert.match(asset.headers.get('cache-control') ?? '', /immutable/);
+      // Sin hash en el nombre (como el index.js de Vite aquí): siempre se revalida.
+      const unhashed = await fetch(`http://localhost:${port}/assets/index.js`);
+      assert.strictEqual(unhashed.headers.get('cache-control'), 'no-cache');
+      const page = await fetch(`http://localhost:${port}/ruta-de-la-app`);
+      assert.strictEqual(page.status, 200);
+      assert.strictEqual(page.headers.get('cache-control'), 'no-cache');
+    } finally {
+      await server.stop();
+    }
+  });
+});
+
+describe('Documentos del editor', () => {
+  const write = (root: string, file: string, content = '# hola') => {
+    const full = path.join(root, file);
+    fs.mkdirSync(path.dirname(full), { recursive: true });
+    fs.writeFileSync(full, content);
+    return full;
+  };
+
+  it('lista los documentos de texto, incluida .agent-hub, y omite dependencias y binarios', async () => {
+    const { listDocuments } = await import('../src/host/documents');
+    const root = tempDir();
+    write(root, 'README.md');
+    write(root, 'docs/guia.md');
+    write(root, '.agent-hub/scratchpad.md');
+    write(root, 'node_modules/pkg/LEEME.md');
+    write(root, '.git/notas.md');
+    write(root, 'foto.png', 'x');
+    write(root, 'package-lock.json', '{}');
+    const paths = listDocuments(root).files.map((doc) => doc.path).sort();
+    assert.deepStrictEqual(paths, ['.agent-hub/scratchpad.md', 'README.md', 'docs/guia.md']);
+  });
+
+  it('no deja leer ni escribir fuera del proyecto ni archivos que no son texto', async () => {
+    const { readDocument, saveDocument, resolveDocument } = await import('../src/host/documents');
+    const root = tempDir();
+    const outside = write(tempDir(), 'secreto.md', 'privado');
+    write(root, 'foto.png', 'x');
+    assert.strictEqual(resolveDocument(root, '../' + path.basename(path.dirname(outside)) + '/secreto.md'), undefined);
+    assert.strictEqual(resolveDocument(root, outside), undefined);
+    assert.strictEqual(resolveDocument(root, 'foto.png'), undefined);
+    assert.ok('error' in readDocument(root, outside));
+    assert.strictEqual(saveDocument(root, '../fuera.md', 'x').ok, false);
+    assert.strictEqual(saveDocument(root, 'programa.exe', 'x').ok, false);
+  });
+
+  it('guarda y detecta que el archivo cambió en disco antes de pisarlo', async () => {
+    const { readDocument, saveDocument } = await import('../src/host/documents');
+    const root = tempDir();
+    const full = write(root, 'nota.md', 'v1');
+    const opened = readDocument(root, 'nota.md');
+    assert.ok(!('error' in opened));
+    const { mtime } = opened as { content: string; mtime: number };
+
+    // Otro proceso (un agente) edita el archivo después de abrirlo.
+    fs.writeFileSync(full, 'v-del-agente');
+    const future = new Date(Date.now() + 5000);
+    fs.utimesSync(full, future, future);
+
+    const conflict = saveDocument(root, 'nota.md', 'v-mia', mtime);
+    assert.strictEqual(conflict.ok, false);
+    assert.strictEqual((conflict as { conflict?: boolean }).conflict, true);
+    assert.strictEqual(fs.readFileSync(full, 'utf8'), 'v-del-agente');
+
+    const forced = saveDocument(root, 'nota.md', 'v-mia', mtime, true);
+    assert.strictEqual(forced.ok, true);
+    assert.strictEqual(fs.readFileSync(full, 'utf8'), 'v-mia');
+  });
+
+  it('recorre todas las subcarpetas, también las profundas, y avisa qué carpetas omite', async () => {
+    const { listDocuments } = await import('../src/host/documents');
+    const root = tempDir();
+    write(root, 'a/b/c/d/e/f/g/profundo.md');
+    write(root, 'a/b/medio.md');
+    write(root, 'node_modules/x/ignorado.md');
+    write(root, 'dist/ignorado.md');
+    const listing = listDocuments(root);
+    assert.deepStrictEqual(listing.files.map((doc) => doc.path).sort(), ['a/b/c/d/e/f/g/profundo.md', 'a/b/medio.md']);
+    assert.deepStrictEqual(listing.skipped, ['dist', 'node_modules']);
+    assert.strictEqual(listing.truncated, false);
+  });
+
+  it('el código solo se lista cuando se pide, y se puede abrir y editar igual', async () => {
+    const { listDocuments, saveDocument, readDocument } = await import('../src/host/documents');
+    const root = tempDir();
+    write(root, 'src/app.ts', 'const a = 1;');
+    write(root, 'README.md');
+    write(root, 'src/app.min.js', 'x');
+    assert.deepStrictEqual(listDocuments(root).files.map((doc) => doc.path), ['README.md']);
+    assert.deepStrictEqual(listDocuments(root, true).files.map((doc) => doc.path).sort(), ['README.md', 'src/app.ts']);
+    assert.strictEqual(saveDocument(root, 'src/app.ts', 'const a = 2;').ok, true);
+    assert.strictEqual((readDocument(root, 'src/app.ts') as { content: string }).content, 'const a = 2;');
+  });
+
+  it('crea el documento y sus carpetas si no existen', async () => {
+    const { saveDocument } = await import('../src/host/documents');
+    const root = tempDir();
+    assert.strictEqual(saveDocument(root, '.agent-hub/notas.md', '# notas\n').ok, true);
+    assert.strictEqual(fs.readFileSync(path.join(root, '.agent-hub', 'notas.md'), 'utf8'), '# notas\n');
+    assert.deepStrictEqual(fs.readdirSync(path.join(root, '.agent-hub')), ['notas.md']);
   });
 });

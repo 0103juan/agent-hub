@@ -18,6 +18,20 @@ function iconFor(attachment: FileContextAttachment): React.ReactNode {
 /** Bandeja del compositor: miniatura para imágenes y etiqueta para el resto. */
 export const AttachmentChips: React.FC<Props> = ({ attachments, onRemove }) => (
   <div className="flex flex-wrap items-center gap-1.5 p-1.5 bg-zinc-900/60 rounded border border-zinc-800">
+    {attachments.length > 1 && (
+      <span className="flex items-center gap-1.5 w-full text-[10px] text-zinc-500">
+        <span>
+          {attachments.length} adjuntos · ~{Math.round(attachments.reduce((sum, a) => sum + (a.content?.length ?? 0), 0) / 4).toLocaleString()} tokens de texto
+        </span>
+        <button
+          type="button"
+          onClick={() => attachments.forEach(() => onRemove(0))}
+          className="ml-auto text-zinc-400 hover:text-red-400"
+        >
+          Quitar todos
+        </button>
+      </span>
+    )}
     {attachments.map((attachment, index) => {
       const label = `${attachment.file}${attachment.lines ? `#${attachment.lines}` : ''}`;
       const remove = (

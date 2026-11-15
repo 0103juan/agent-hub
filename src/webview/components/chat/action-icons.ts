@@ -1,8 +1,4 @@
-import {
-  BookOpen, Box, Container, Database, Eye, EyeOff, FileCheck, FileCode2, FileSpreadsheet, Gauge, Ghost,
-  GitBranch, GitCommit, GitCompare, GitFork, GitPullRequest, HeartPulse, History, KeyRound, Lock, LucideIcon, Network, Play, Radio, RotateCcw,
-  Scale, Shield, ShieldCheck, Smartphone, Trash2, Zap
-} from 'lucide-react';
+import { BookOpen, Box, Container, Database, Eye, EyeOff, FileCheck, FileCode2, FileSpreadsheet, Gauge, Ghost, GitBranch, GitCommit, GitCompare, GitFork, GitPullRequest, HeartPulse, History, KeyRound, Lock, LucideIcon, Network, Play, Radio, RotateCcw, Scale, Shield, ShieldCheck, Smartphone, Trash2, Zap, Bug, Compass, FileText, GraduationCap, ListChecks, Map, Scissors, ShieldAlert, TestTube2, Timer } from 'lucide-react';
 
 export const ACTION_ICONS: Record<string, { icon: LucideIcon; color: string }> = {
   'tests': { icon: Play, color: 'text-emerald-400' },
@@ -35,5 +31,15 @@ export const ACTION_ICONS: Record<string, { icon: LucideIcon; color: string }> =
   'openapi': { icon: FileCode2, color: 'text-cyan-400' },
   'mock-data': { icon: FileSpreadsheet, color: 'text-emerald-400' },
   'load-test': { icon: Gauge, color: 'text-orange-400' },
-  'runbook': { icon: BookOpen, color: 'text-blue-400' }
+  'runbook': { icon: BookOpen, color: 'text-blue-400' },
+  'explain-repo': { icon: Compass, color: 'text-cyan-400' },
+  'todo-scan': { icon: ListChecks, color: 'text-amber-400' },
+  'test-gaps': { icon: TestTube2, color: 'text-emerald-400' },
+  'security-diff': { icon: ShieldAlert, color: 'text-red-400' },
+  'perf-review': { icon: Timer, color: 'text-orange-400' },
+  'readme-improve': { icon: FileText, color: 'text-blue-400' },
+  'commit-split': { icon: Scissors, color: 'text-pink-400' },
+  'refactor-plan': { icon: Map, color: 'text-violet-400' },
+  'onboarding-guide': { icon: GraduationCap, color: 'text-indigo-400' },
+  'explain-error': { icon: Bug, color: 'text-rose-400' }
 };

@@ -16,8 +16,11 @@ const GIT_OPTS = { encoding: 'utf8', windowsHide: true, maxBuffer: 64 * 1024 * 1
 export function contextHandlers(hub: HubContext): HandlerMap<
   'attachActiveEditor' | 'attachFiles' | 'savePastedFile' | 'searchFiles' | 'attachFile' | 'attachProblems' | 'attachGit'
 > {
+  // El adjunto va a la conversación que lo pidió y se lee de su carpeta, no de la global.
+  const dirOf = (sessionId?: string) => (sessionId && hub.sessions?.get(sessionId)?.projectPath) || workspaceDir();
+
   return {
-    attachActiveEditor: () => {
+    attachActiveEditor: ({ sessionId }) => {
       const editor = currentEditor();
       if (!editor) {
         void vscode.window.showWarningMessage('No hay ningún archivo abierto.');
@@ -26,6 +29,7 @@ export function contextHandlers(hub: HubContext): HandlerMap<
       const { document, selection } = editor;
       hub.post({
         type: 'attachmentAdded',
+        sessionId,
         attachment: {
           file: vscode.workspace.asRelativePath(document.uri),
           lines: selection.isEmpty ? undefined : `L${selection.start.line + 1}-L${selection.end.line + 1}`,
@@ -35,18 +39,18 @@ export function contextHandlers(hub: HubContext): HandlerMap<
       });
     },
 
-    attachFiles: async () => {
+    attachFiles: async ({ sessionId }) => {
       const uris = await vscode.window.showOpenDialog({ canSelectMany: true, openLabel: 'Adjuntar' });
       for (const uri of uris ?? []) {
-        hub.post({ type: 'attachmentAdded', attachment: await readAttachment(uri.fsPath) });
+        hub.post({ type: 'attachmentAdded', sessionId, attachment: await readAttachment(uri.fsPath) });
       }
     },
 
-    savePastedFile: async ({ dataUri, fileName }) => {
+    savePastedFile: async ({ dataUri, fileName, sessionId }) => {
       await fs.promises.mkdir(PASTED_FILES_DIR, { recursive: true });
       const fsPath = path.join(PASTED_FILES_DIR, `${Date.now()}-${path.basename(fileName)}`);
       await fs.promises.writeFile(fsPath, Buffer.from(dataUri.replace(/^data:[^;]*;base64,/, ''), 'base64'));
-      hub.post({ type: 'attachmentAdded', attachment: await readAttachment(fsPath, path.basename(fileName)) });
+      hub.post({ type: 'attachmentAdded', sessionId, attachment: await readAttachment(fsPath, path.basename(fileName)) });
     },
 
     searchFiles: async ({ query }) => {
@@ -55,15 +59,15 @@ export function contextHandlers(hub: HubContext): HandlerMap<
       hub.post({ type: 'workspaceFiles', files: files.map((file) => vscode.workspace.asRelativePath(file)) });
     },
 
-    attachFile: async ({ file }) => {
-      const root = workspaceDir();
+    attachFile: async ({ file, sessionId }) => {
+      const root = dirOf(sessionId);
       if (!root) return;
       const fullPath = path.resolve(root, file);
       if (!fullPath.startsWith(root + path.sep)) return;
-      hub.post({ type: 'attachmentAdded', attachment: await readAttachment(fullPath, file) });
+      hub.post({ type: 'attachmentAdded', sessionId, attachment: await readAttachment(fullPath, file) });
     },
 
-    attachProblems: () => {
+    attachProblems: ({ sessionId }) => {
       const allDiagnostics = vscode.languages.getDiagnostics();
       const relevant: string[] = [];
       for (const [uri, diags] of allDiagnostics) {
@@ -83,6 +87,7 @@ export function contextHandlers(hub: HubContext): HandlerMap<
       const content = relevant.slice(0, 30).join('\n');
       hub.post({
         type: 'attachmentAdded',
+        sessionId,
         attachment: {
           file: 'Problemas del Workspace',
           content: `### Diagnósticos activos (${relevant.length}):\n${content}`,
@@ -91,8 +96,8 @@ export function contextHandlers(hub: HubContext): HandlerMap<
       });
     },
 
-    attachGit: () => {
-      const root = workspaceDir();
+    attachGit: ({ sessionId }) => {
+      const root = dirOf(sessionId);
       if (!root) {
         void vscode.window.showWarningMessage('No hay ningún espacio de trabajo abierto.');
         return;
@@ -107,6 +112,7 @@ export function contextHandlers(hub: HubContext): HandlerMap<
         }
         hub.post({
           type: 'attachmentAdded',
+        sessionId,
           attachment: {
             file: 'Git Status & Diff',
             content: `### Estado de Git\n\`\`\`text\n${status}\n\`\`\`\n\n### Resumen de cambios\n\`\`\`text\n${diffStat}\n\`\`\`\n\n### Diff parcial\n\`\`\`diff\n${diff}\n\`\`\``,

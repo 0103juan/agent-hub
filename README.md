@@ -72,3 +72,36 @@ Los turnos corren con `--dangerously-skip-permissions`, porque en modo headless 
 ## Licencia
 
 MIT © [Juan Cuervo](https://github.com/0103juan)
+
+## Atajos de teclado
+
+`Ctrl+/` abre la lista completa dentro de la app. Los principales:
+
+| Atajo | Qué hace |
+| --- | --- |
+| `Ctrl+K` | Paleta de comandos: sesiones, roles, acciones y comandos de la app |
+| `Ctrl+N` | Nueva conversación |
+| `Ctrl+1` a `7` | Cambiar de pestaña (4: Documentos) |
+| `Alt+↑` / `Alt+↓` | Conversación anterior / siguiente |
+| `Ctrl+B` / `Ctrl+E` | Panel de archivos / borrador de trabajo |
+| `Ctrl+Shift+F` | Modo enfoque (Esc sale) |
+| `Ctrl+Shift+C` | Copiar la última respuesta |
+| `Ctrl+Shift+D` | Iniciar o detener el dictado |
+| `Ctrl+Shift+P` | «Plan primero» |
+| `↑` / `↓` en el cuadro vacío | Recorrer los mensajes que enviaste |
+| `Ctrl +` / `Ctrl -` / `Ctrl 0` | Zoom de la ventana (se recuerda) |
+| `F11` / `F12` / `Ctrl+R` / `Ctrl+W` | Pantalla completa / herramientas de desarrollo / recargar / ocultar a la bandeja |
+
+## Dictado por voz
+
+Electron no trae el servicio de voz de Chrome, así que el botón Dictar usa el dictado de Windows (`Win+H`) sobre el cuadro de mensaje. En un navegador Chrome o Edge se usa el reconocimiento del propio navegador.
+
+## Seguridad del servidor local
+
+El servidor escucha solo en `127.0.0.1`. Rechaza peticiones cuyo `Host` u `Origin` no sean los propios (frena DNS rebinding y webs abiertas en el navegador), limita cada mensaje a 48 MB, responde con `X-Content-Type-Options`, `X-Frame-Options: DENY` y `Referrer-Policy: no-referrer`, y no sirve archivos fuera de su carpeta. Electron solo concede los permisos de micrófono, avisos, portapapeles y pantalla completa.
+
+## Datos y registros
+
+- Sesiones: `~/.agent-hub/sessions.json`, con una copia `.bak` cada 10 minutos como máximo. Si el archivo viene dañado se aparta como `.corrupt-<fecha>` y se lee la copia.
+- Registro del proceso principal de Electron: `~/.agent-hub/logs/main.log` (rota a `main.log.1` al pasar de 1 MB).
+- Tamaño, posición y zoom de la ventana: `~/.agent-hub/window-state.json`.

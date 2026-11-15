@@ -179,6 +179,10 @@ export interface QueuedMessage {
   prompt: string;
   /** Nombre del agente que lo envió; ausente si lo escribió la persona. */
   from?: string;
+  /** Archivos o capturas adjuntas que acompañan al mensaje en cola. */
+  attachments?: FileContextAttachment[];
+  /** Marca de tiempo de cuándo se encoló. */
+  at?: number;
 }
 
 /** Lo que un agente está haciendo ahora; alimenta la vista de agentes. */

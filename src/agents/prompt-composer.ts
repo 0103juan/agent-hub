@@ -120,10 +120,17 @@ export function composePrompt({ prompt, role, attachments = [], history = [], te
     sections.push(
       `[EQUIPO]\nTe llamas "${team.self}" y trabajas con: ${team.mates.join(', ')}.\n` +
         'Para escribirle a un compañero pon en tu respuesta una línea `>> nombre: mensaje` (termina con una línea en blanco). ' +
-        'Hazlo solo si necesitas algo de él, y no contestes a mensajes que no piden respuesta.' +
+        'Hazlo solo si necesitas algo de él, y no contestes a mensajes que no piden respuesta.\n' +
+        'REGLA: Cada turno concluye cuando respondes; no te quedas en segundo plano esperando para avisar después. Espera la respuesta de tus herramientas o reporta el estado verificado sin prometer avisos fantasma.' +
         (team.next?.length
           ? ` Cuando termines tu parte, pásale el trabajo a ${team.next.map((name) => `"${name}"`).join(' y a ')} con una línea \`>> ${team.next[0]}: ...\` por cada uno, con estos campos, uno por línea: ${HANDOFF_FIELDS.join(' ')}`
           : '')
+    );
+  } else if (role === 'coordinador') {
+    sections.push(
+      `[MODO INDIVIDUAL - SIN SQUAD]\n` +
+        'En esta sesión estás trabajando en un chat individual sin compañeros de equipo configurados.\n' +
+        'No delegues en agentes imaginarios ni digas "le pasé el trabajo al Desarrollador y te aviso". Guía y coordina la tarea directamente con el usuario.'
     );
   }
 

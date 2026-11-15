@@ -45,7 +45,8 @@ export interface HubState {
   /** Sube cada vez que la extensión pide enfocar el composer. */
   focusComposerTick: number;
   live: Record<string, LiveStatus>;
-  attachments: FileContextAttachment[];
+  /** Adjuntos pendientes de enviar, por conversación. */
+  attachments: Record<string, FileContextAttachment[]>;
   workspaceFiles: string[];
   /** Texto que la extensión pide poner en el borrador. */
   composerText?: string;
@@ -53,8 +54,8 @@ export interface HubState {
 
 export type HubAction =
   | HostMessage
-  | { type: 'removeAttachment'; index: number }
-  | { type: 'clearAttachments' }
+  | { type: 'removeAttachment'; sessionId: string; index: number }
+  | { type: 'clearAttachments'; sessionId: string }
   | { type: 'composerTextConsumed' };
 
 export const INITIAL_HUB_STATE: HubState = {
@@ -78,7 +79,7 @@ export const INITIAL_HUB_STATE: HubState = {
   notices: [],
   focusComposerTick: 0,
   live: {},
-  attachments: [],
+  attachments: {},
   workspaceFiles: []
 };
 
@@ -125,7 +126,10 @@ export function hubReducer(state: HubState, action: HubAction): HubState {
         questionOptions: { question: action.question, options: action.options }
       }));
     case 'attachmentAdded':
-      return { ...state, attachments: [...state.attachments, action.attachment] };
+    {
+      const id = action.sessionId ?? state.activeSessionId;
+      return { ...state, attachments: { ...state.attachments, [id]: [...(state.attachments[id] ?? []), action.attachment] } };
+    }
     case 'workspaceFiles':
       return { ...state, workspaceFiles: action.files };
     case 'searchResults':
@@ -147,9 +151,9 @@ export function hubReducer(state: HubState, action: HubAction): HubState {
     case 'composerText':
       return { ...state, composerText: action.text };
     case 'removeAttachment':
-      return { ...state, attachments: state.attachments.filter((_, index) => index !== action.index) };
+      return { ...state, attachments: { ...state.attachments, [action.sessionId]: (state.attachments[action.sessionId] ?? []).filter((_, index) => index !== action.index) } };
     case 'clearAttachments':
-      return { ...state, attachments: [] };
+      return { ...state, attachments: { ...state.attachments, [action.sessionId]: [] } };
     case 'composerTextConsumed':
       return { ...state, composerText: undefined };
     default:

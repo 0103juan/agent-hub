@@ -1,14 +1,18 @@
 import { AccountProfile, ModelOption, ProviderType } from '../../shared/types';
 import { AgentEvent, AgentProvider, AgentRun, AgentTurnRequest, TurnOutcome } from '../agent-provider';
 
-const OLLAMA_HOST = 'http://localhost:11434';
+const DEFAULT_OLLAMA_HOST = 'http://localhost:11434';
+
+function getOllamaHost(): string {
+  return process.env.OLLAMA_HOST || DEFAULT_OLLAMA_HOST;
+}
 
 export class OllamaProvider implements AgentProvider {
   public readonly type: ProviderType = 'ollama';
 
   public async discoverAccounts(): Promise<AccountProfile[]> {
     try {
-      const res = await fetch(`${OLLAMA_HOST}/api/tags`, {
+      const res = await fetch(`${getOllamaHost()}/api/tags`, {
         signal: AbortSignal.timeout(1500)
       });
       if (!res.ok) return [];
@@ -40,7 +44,7 @@ export class OllamaProvider implements AgentProvider {
 
     const outcome = (async (): Promise<TurnOutcome> => {
       try {
-        const response = await fetch(`${OLLAMA_HOST}/api/chat`, {
+        const response = await fetch(`${getOllamaHost()}/api/chat`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

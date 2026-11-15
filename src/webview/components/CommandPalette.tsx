@@ -3,7 +3,7 @@ import { Command, Search } from 'lucide-react';
 import { agentName } from '../../shared/agent-name';
 import { PROTOCOL_ROLES } from '../../shared/protocol-roles';
 import { ConversationSession } from '../../shared/types';
-import { filterActions } from '../../shared/workspace-actions';
+import { filterActions, normalizeText } from '../../shared/workspace-actions';
 import { ModalShell } from './ModalShell';
 
 interface Entry {
@@ -16,6 +16,8 @@ interface Entry {
 
 interface Props {
   sessions: ConversationSession[];
+  /** Comandos de la propia aplicación (pestañas, vistas, zoom…). */
+  appCommands?: Array<{ key: string; label: string; hint?: string; run: () => void }>;
   onSwitchSession: (sessionId: string) => void;
   onSelectRole: (role: ConversationSession['protocolRole'] & string) => void;
   onRunAction: (actionId: string) => void;
@@ -23,14 +25,15 @@ interface Props {
 }
 
 /** Paleta global (Ctrl/Cmd+K): cambiar de sesión, aplicar un rol o ejecutar una acción. */
-export const CommandPalette: React.FC<Props> = ({ sessions, onSwitchSession, onSelectRole, onRunAction, onClose }) => {
+export const CommandPalette: React.FC<Props> = ({ sessions, appCommands = [], onSwitchSession, onSelectRole, onRunAction, onClose }) => {
   const [query, setQuery] = useState('');
   const [cursor, setCursor] = useState(0);
 
   const entries = useMemo(() => {
-    const needle = query.trim().toLowerCase();
+    const needle = normalizeText(query.trim());
     const all: Entry[] = [
-      ...sessions.map((s) => ({
+      ...appCommands.map((command) => ({ ...command, group: 'Aplicación' })),
+      ...[...sessions].sort((a, b) => b.updatedAt - a.updatedAt).map((s) => ({
         key: `s-${s.id}`,
         group: 'Sesiones',
         label: s.title || agentName(s),
@@ -44,7 +47,7 @@ export const CommandPalette: React.FC<Props> = ({ sessions, onSwitchSession, onS
         hint: `${role.recommendedModel} · ${role.recommendedEffort}${role.readOnly ? ' · solo lectura' : ''}${role.handoffTo ? ` → ${PROTOCOL_ROLES[role.handoffTo]?.label ?? role.handoffTo}` : ''}`,
         run: () => onSelectRole(role.id)
       }))
-    ].filter((entry) => !needle || `${entry.label} ${entry.hint ?? ''}`.toLowerCase().includes(needle));
+    ].filter((entry) => !needle || normalizeText(`${entry.label} ${entry.hint ?? ''}`).includes(needle));
     const actions = filterActions(query, 'all').map((action) => ({
       key: `a-${action.id}`,
       group: 'Acciones',
@@ -53,7 +56,7 @@ export const CommandPalette: React.FC<Props> = ({ sessions, onSwitchSession, onS
       run: () => onRunAction(action.id)
     }));
     return [...all, ...actions];
-  }, [query, sessions, onSwitchSession, onSelectRole, onRunAction]);
+  }, [query, sessions, appCommands, onSwitchSession, onSelectRole, onRunAction]);
 
   const active = Math.min(cursor, entries.length - 1);
   const run = (entry: Entry | undefined) => {
@@ -105,11 +108,15 @@ export const CommandPalette: React.FC<Props> = ({ sessions, onSwitchSession, onS
             onMouseMove={() => setCursor(index)}
             className={`flex w-full items-center gap-2 text-left px-2 py-1 rounded text-[11px] ${index === active ? 'bg-zinc-800' : ''}`}
           >
-            <span className="w-16 shrink-0 text-zinc-500 uppercase text-[10px]">{entry.group}</span>
+            <span className="w-20 shrink-0 text-zinc-500 uppercase text-[10px]">{entry.group}</span>
             <span className="truncate text-zinc-200 font-medium">{entry.label}</span>
             {entry.hint && <span className="truncate text-zinc-400 ml-auto">{entry.hint}</span>}
           </button>
         ))}
+      </div>
+      <div className="px-3 py-1.5 border-t border-zinc-800 text-[10px] text-zinc-500 flex items-center justify-between shrink-0">
+        <span>↑↓ navegar · ⏎ ejecutar · Esc cerrar</span>
+        <span>{entries.length} resultado{entries.length === 1 ? '' : 's'}</span>
       </div>
     </ModalShell>
   );

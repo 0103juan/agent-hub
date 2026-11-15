@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Metodologías Driven Development en AgentHub (ODD, RDD, EDD, TDD, SDD)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            zinc: {
+              850: '#1f1f23',
+              900: '#18181b',
+              950: '#09090b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    code, pre { font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen antialiased selection:bg-emerald-500/30 selection:text-emerald-300">
+
+  <!-- Barra de navegación -->
+  <header class="border-b border-zinc-800/80 bg-zinc-950/80 backdrop-blur sticky top-0 z-50 px-6 py-3.5">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-sm">
+          AH
+        </div>
+        <div>
+          <div class="text-sm font-bold flex items-center gap-2">
+            <span>AgentHub</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-300 font-normal">Arquitectura Agéntica</span>
+          </div>
+          <p class="text-[11px] text-zinc-400">Guía de Metodologías Driven Development para IA</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 text-xs">
+        <span class="px-2.5 py-1 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          ODD Ready
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-6 py-10 space-y-14">
+
+    <!-- Hero Section -->
+    <section class="space-y-4">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
+        <span>🌱</span>
+        <span>Filosofía Gentleman Programming &amp; Gentle-AI aplicada a AgentHub</span>
+      </div>
+      <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white max-w-3xl leading-tight">
+        Organic Driven Development (ODD) y el Ecosistema de Flujos de IA
+      </h1>
+      <p class="text-zinc-400 text-base max-w-3xl leading-relaxed">
+        El desarrollo agéntico suele caer en dos extremos: o se improvisa sin estructura (generando alucinaciones y código roto), o se impone un <strong>Spec-Driven Development (SDD)</strong> en cascada donde hasta para arreglar un typo se queman miles de tokens en 5 agentes. 
+        <strong>ODD</strong> introduce la escala orgánica: adapta el esfuerzo y el proceso al tamaño real de cada tarea.
+      </p>
+    </section>
+
+    <!-- Visualizador del Diagrama de Flujo ODD -->
+    <section class="space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-bold text-white flex items-center gap-2">
+            <span>🗺️</span> Flujo ODD de 7 Pasos en AgentHub
+          </h2>
+          <p class="text-xs text-zinc-400">Cómo transcurre una petición orgánica desde la autorización hasta el recibo verificable</p>
+        </div>
+        <a href="odd-flow-diagram.svg" target="_blank" class="text-xs px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 transition flex items-center gap-1.5">
+          <span>Abrir SVG vectorial</span>
+          <span>↗</span>
+        </a>
+      </div>
+
+      <div class="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4 sm:p-6 overflow-hidden shadow-2xl flex justify-center">
+        <img src="odd-flow-diagram.svg" alt="Diagrama de Flujo ODD" class="w-full max-w-3xl rounded-xl border border-zinc-800/80 shadow-inner">
+      </div>
+    </section>
+
+    <!-- Mapeo Técnico: Cómo AgentHub implementa cada paso de ODD -->
+    <section class="space-y-6">
+      <div>
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <span>🧩</span> Mapeo Arquitectónico: ODD en el Código de AgentHub
+        </h2>
+        <p class="text-xs text-zinc-400">AgentHub ya cuenta con los cimientos técnicos para ejecutar este flujo sin fricción</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+
+        <!-- Paso 1 -->
+        <div class="p-4 rounded-xl bg-zinc-900/70 border border-zinc-800 hover:border-rose-500/40 transition space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-rose-400 text-sm flex items-center gap-2">
+              <span class="w-6 h-6 rounded bg-rose-500/15 flex items-center justify-center text-xs">1</span>
+              Authorize
+            </span>
+            <code class="text-[10px] bg-zinc-950 px-2 py-0.5 rounded border border-zinc-800 text-zinc-400">session.permission</code>
+          </div>
+          <p class="text-zinc-300">Si el usuario solo hace una pregunta o pide una explicación, el turno corre en <code class="text-rose-300">readOnly: true</code>. No se arriesgan cambios accidentales ni se tocan archivos.</p>
+          <div class="text-[11px] text-zinc-500 font-mono">AgentHub: session.permission === 'readOnly' | 'full'</div>
+        </div>
+
+        <!-- Paso 2 -->
+        <div class="p-4 rounded-xl bg-zinc-900/70 border border-zinc-800 hover:border-indigo-500/40 transition space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-indigo-400 text-sm flex items-center gap-2">
+              <span class="w-6 h-6 rounded bg-indigo-500/15 flex items-center justify-center text-xs">2</span>
+              Explore
+            </span>
+            <code class="text-[10px] bg-zinc-950 px-2 py-0.5 rounded border border-zinc-800 text-zinc-400">Rol: Explorador</code>
+          </div>
+          <p class="text-zinc-300">Antes de modificar nada, se investiga el repositorio. Si la lectura es masiva, se delega al rol Explorador o se usa búsqueda indexada para no inundar de tokens la conversación principal.</p>
+          <div class="text-[11px] text-zinc-500 font-mono">AgentHub: command: searchContent &amp; PROTOCOL_ROLES.explorador</div>
+        </div>
+
+        <!-- Paso 3 -->
+        <div class="p-4 rounded-xl bg-zinc-900/70 border border-zinc-800 hover:border-amber-500/40 transition space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-amber-400 text-sm flex items-center gap-2">
+              <span class="w-6 h-6 rounded bg-amber-500/15 flex items-center justify-center text-xs">3</span>
+              Resolve Uncertainty
+            </span>
+            <code class="text-[10px] bg-zinc-950 px-2 py-0.5 rounded border border-zinc-800 text-zinc-400">questionOptions</code>
+          </div>
+          <p class="text-zinc-300">Las dudas técnicas se resuelven investigando el código; las <strong>decisiones de producto</strong> se presentan con botones interactivos al usuario para que decida antes de mutar.</p>
+          <div class="text-[11px] text-zinc-500 font-mono">AgentHub: extractQuestionOptions &amp; MessageList pills</div>
+        </div>
+
+        <!-- Paso 4 y 5 -->
+        <div class="p-4 rounded-xl bg-zinc-900/70 border border-zinc-800 hover:border-cyan-500/40 transition space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-cyan-400 text-sm flex items-center gap-2">
+              <span class="w-6 h-6 rounded bg-cyan-500/15 flex items-center justify-center text-xs">4-5</span>
+              Classify &amp; Track
+            </span>
+            <code class="text-[10px] bg-zinc-950 px-2 py-0.5 rounded border border-zinc-800 text-zinc-400">DocumentsView</code>
+          </div>
+          <p class="text-zinc-300"><strong class="text-emerald-400">Small:</strong> se implementa directo en el turno. <strong class="text-cyan-400">Large:</strong> genera un checklist en <code class="text-purple-300">odd/tasks/&lt;feature&gt;.md</code> visible en la pestaña Documentos y enlazado con la memoria persistente.</p>
+          <div class="text-[11px] text-zinc-500 font-mono">AgentHub: .agent-hub/memory.md + scratchpad.md</div>
+        </div>
+
+        <!-- Paso 6 -->
+        <div class="p-4 rounded-xl bg-zinc-900/70 border border-zinc-800 hover:border-emerald-500/40 transition space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-emerald-400 text-sm flex items-center gap-2">
+              <span class="w-6 h-6 rounded bg-emerald-500/15 flex items-center justify-center text-xs">6</span>
+              Implement &amp; Risk Gates
+            </span>
+            <code class="text-[10px] bg-zinc-950 px-2 py-0.5 rounded border border-zinc-800 text-zinc-400">verifyBeforeHandoff</code>
+          </div>
+          <p class="text-zinc-300">Verificación escalonada: bajo riesgo = diff visual; medio = ejecución de la suite de pruebas del proyecto (`npm test`, `gradle test`); alto = auditoría cruzada con el rol Revisor.</p>
+          <div class="text-[11px] text-zinc-500 font-mono">AgentHub: hub.chat.verify &amp; interactiveDiffModal</div>
+        </div>
+
+        <!-- Paso 7 -->
+        <div class="p-4 rounded-xl bg-zinc-900/70 border border-zinc-800 hover:border-blue-500/40 transition space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-blue-400 text-sm flex items-center gap-2">
+              <span class="w-6 h-6 rounded bg-blue-500/15 flex items-center justify-center text-xs">7</span>
+              Close &amp; RDD Receipt
+            </span>
+            <code class="text-[10px] bg-zinc-950 px-2 py-0.5 rounded border border-zinc-800 text-zinc-400">checkpointHash</code>
+          </div>
+          <p class="text-zinc-300">El turno entrega el reporte final con estado inmutable: hash de checkpoint de Git, resumen de tests pasados y estado de git sin cambios sin commitear antes de ofrecer push.</p>
+          <div class="text-[11px] text-zinc-500 font-mono">AgentHub: reply.checkpointHash + reply.checkpointDiff</div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Catálogo de Driven Developments para IA -->
+    <section class="space-y-6">
+      <div>
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <span>📚</span> Catálogo de Metodologías "-Driven Development" para Agentes
+        </h2>
+        <p class="text-xs text-zinc-400">Otras filosofías modernas aplicables a AgentHub para optimizar calidad, tokens y velocidad</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+        <!-- ODD -->
+        <div class="p-5 rounded-2xl bg-zinc-900 border border-emerald-500/30 flex flex-col justify-between space-y-4">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-2xl">🌱</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">Adaptativo</span>
+            </div>
+            <h3 class="text-base font-bold text-white">ODD (Organic-Driven)</h3>
+            <p class="text-xs text-zinc-400 leading-relaxed">
+              Elimina la burocracia en tareas simples e introduce estructura solo cuando la escala lo exige. No hay comandos especiales ni sobreingeniería de especificaciones iniciales.
+            </p>
+          </div>
+          <div class="text-[11px] bg-zinc-950 p-2.5 rounded-lg border border-zinc-800 space-y-1">
+            <span class="text-zinc-500 block font-semibold">Ideal para:</span>
+            <span class="text-emerald-300">Desarrollo del día a día, refactors puntuales y bugs de cualquier escala.</span>
+          </div>
+        </div>
+
+        <!-- RDD -->
+        <div class="p-5 rounded-2xl bg-zinc-900 border border-indigo-500/30 flex flex-col justify-between space-y-4">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-2xl">🧾</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-950 text-indigo-400 border border-indigo-800">Evidencia Fija</span>
+            </div>
+            <h3 class="text-base font-bold text-white">RDD (Receipt / Review-Driven)</h3>
+            <p class="text-xs text-zinc-400 leading-relaxed">
+              Todo cambio debe terminar con un "Recibo": un comprobante verificable con hash inmutable, log de tests limpios, diff sin secretos y verificación de contrato.
+            </p>
+          </div>
+          <div class="text-[11px] bg-zinc-950 p-2.5 rounded-lg border border-zinc-800 space-y-1">
+            <span class="text-zinc-500 block font-semibold">Ideal para:</span>
+            <span class="text-indigo-300">Pull requests a producción, sistemas financieros y cambios de alto riesgo.</span>
+          </div>
+        </div>
+
+        <!-- EDD -->
+        <div class="p-5 rounded-2xl bg-zinc-900 border border-amber-500/30 flex flex-col justify-between space-y-4">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-2xl">🔍</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-950 text-amber-400 border border-amber-800">Cero Suposiciones</span>
+            </div>
+            <h3 class="text-base font-bold text-white">EDD (Evidence-Driven)</h3>
+            <p class="text-xs text-zinc-400 leading-relaxed">
+              Exige que antes de tocar código se cree una prueba o script de reproducción que demuestre el fallo objetivamente (Evidencia 1). La solución solo es válida si apaga esa evidencia (Evidencia 2).
+            </p>
+          </div>
+          <div class="text-[11px] bg-zinc-950 p-2.5 rounded-lg border border-zinc-800 space-y-1">
+            <span class="text-zinc-500 block font-semibold">Ideal para:</span>
+            <span class="text-amber-300">Depuración de bugs escurridizos, problemas de concurrencia y memory leaks.</span>
+          </div>
+        </div>
+
+        <!-- TDD -->
+        <div class="p-5 rounded-2xl bg-zinc-900 border border-rose-500/30 flex flex-col justify-between space-y-4">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-2xl">🧪</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-rose-950 text-rose-400 border border-rose-800">Red-Green-Refactor</span>
+            </div>
+            <h3 class="text-base font-bold text-white">TDD (Test-Driven Agéntico)</h3>
+            <p class="text-xs text-zinc-400 leading-relaxed">
+              El agente Tester escribe la suite de pruebas unitarias o de integración antes que el Desarrollador escriba el código de negocio. El Desarrollador solo implementa lo justo para pasarlas.
+            </p>
+          </div>
+          <div class="text-[11px] bg-zinc-950 p-2.5 rounded-lg border border-zinc-800 space-y-1">
+            <span class="text-zinc-500 block font-semibold">Ideal para:</span>
+            <span class="text-rose-300">Reglas de negocio complejas, validadores, motores de cálculo y APIs REST.</span>
+          </div>
+        </div>
+
+        <!-- SDD -->
+        <div class="p-5 rounded-2xl bg-zinc-900 border border-cyan-500/30 flex flex-col justify-between space-y-4">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-2xl">📐</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800">Contrato Primero</span>
+            </div>
+            <h3 class="text-base font-bold text-white">SDD (Spec-Driven / BDD)</h3>
+            <p class="text-xs text-zinc-400 leading-relaxed">
+              El Arquitecto redacta un archivo de especificación completo con criterios Given/When/Then y endpoints. No se escribe código hasta que el usuario aprueba la especificación.
+            </p>
+          </div>
+          <div class="text-[11px] bg-zinc-950 p-2.5 rounded-lg border border-zinc-800 space-y-1">
+            <span class="text-zinc-500 block font-semibold">Ideal para:</span>
+            <span class="text-cyan-300">Arquitecturas nuevas, microservicios, migraciones y contratos de integración.</span>
+          </div>
+        </div>
+
+        <!-- CDD / MDD -->
+        <div class="p-5 rounded-2xl bg-zinc-900 border border-purple-500/30 flex flex-col justify-between space-y-4">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-2xl">🧠</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-950 text-purple-400 border border-purple-800">Memoria y Contexto</span>
+            </div>
+            <h3 class="text-base font-bold text-white">CDD / MDD (Context &amp; Memory)</h3>
+            <p class="text-xs text-zinc-400 leading-relaxed">
+              Aísla exploraciones pesadas en chats separados o worktrees para preservar limpio el presupuesto de tokens. Persiste lecciones y reglas aprendidas en archivos de memoria fija.
+            </p>
+          </div>
+          <div class="text-[11px] bg-zinc-950 p-2.5 rounded-lg border border-zinc-800 space-y-1">
+            <span class="text-zinc-500 block font-semibold">Ideal para:</span>
+            <span class="text-purple-300">Monorepos masivos, proyectos de larga duración y multi-cuentas CLI.</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Comparativa: ODD vs SDD (Waterfall) -->
+    <section class="p-6 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-4">
+      <h2 class="text-lg font-bold text-white flex items-center gap-2">
+        <span>⚖️</span> Comparativa Directa: ODD vs SDD en AgentHub
+      </h2>
+      <div class="overflow-x-auto text-xs">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-zinc-800 text-zinc-400">
+              <th class="py-2.5 px-3 font-semibold">Dimensión</th>
+              <th class="py-2.5 px-3 font-semibold text-rose-300">SDD Tradicional (Pipeline Rígido)</th>
+              <th class="py-2.5 px-3 font-semibold text-emerald-300">ODD (Organic Driven Development)</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-zinc-800/60 text-zinc-300">
+            <tr>
+              <td class="py-2.5 px-3 font-medium text-white">Gasto de Tokens en cambios pequeños</td>
+              <td class="py-2.5 px-3 text-rose-400">Muy Alto (dispara 4 o 5 agentes aun para un fix de 2 líneas)</td>
+              <td class="py-2.5 px-3 text-emerald-400">Mínimo (clasifica como Small y resuelve inline en 1 turno)</td>
+            </tr>
+            <tr>
+              <td class="py-2.5 px-3 font-medium text-white">Manejo de la Incertidumbre</td>
+              <td class="py-2.5 px-3">Asume o redacta documentos extensos con premisas no verificadas</td>
+              <td class="py-2.5 px-3">Paso 3 explícito: investiga o pregunta antes de redactar código</td>
+            </tr>
+            <tr>
+              <td class="py-2.5 px-3 font-medium text-white">Escalabilidad en cambios grandes</td>
+              <td class="py-2.5 px-3">Estructurado pero rígido ante cambios de requerimiento a mitad de camino</td>
+              <td class="py-2.5 px-3">Crea <code>odd/tasks/&lt;feature&gt;.md</code> desacoplado y reanudable paso a paso</td>
+            </tr>
+            <tr>
+              <td class="py-2.5 px-3 font-medium text-white">Validación de Salida</td>
+              <td class="py-2.5 px-3">Solo delegación de texto al siguiente agente</td>
+              <td class="py-2.5 px-3">Quality Gates por riesgo (diff &gt; test &gt; auditoría cruzada RDD)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Recomendación de Implementación -->
+    <section class="p-6 rounded-2xl bg-gradient-to-r from-emerald-950/30 to-zinc-900 border border-emerald-500/30 space-y-3">
+      <h3 class="text-base font-bold text-white flex items-center gap-2">
+        <span>🚀</span> Cómo integrarlo en AgentHub ahora mismo
+      </h3>
+      <p class="text-xs text-zinc-300 leading-relaxed">
+        Se añadió la plantilla <strong><code>odd</code></strong> en <code class="text-emerald-300">src/shared/team-templates.ts</code> con la cadena:
+        <span class="font-mono text-emerald-400">Explorador (investigación sin tokens) → Coordinador (clasifica/resuelve) → Desarrollador → Revisor (cierre RDD)</span>.
+        Además, en tareas cotidianas se puede trabajar en un solo chat con la directiva orgánica de resolución directa para cambios pequeños y desglose documentado para cambios estructurales.
+      </p>
+    </section>
+
+  </main>
+
+  <footer class="border-t border-zinc-800 text-center py-6 text-xs text-zinc-500">
+    AgentHub Architecture · Diseñado profesionalmente siguiendo la skill disenador-grafico
+  </footer>
+
+</body>
+</html>

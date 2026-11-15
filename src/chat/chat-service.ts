@@ -106,6 +106,9 @@ export class ChatService {
   private comms: AgentMessage[] = [];
   /** Agentes que terminaron o preguntaron mientras la persona veía otro. */
   private readonly attention = new Set<string>();
+  /** Sesiones a la vista en cada ventana (vista en columnas, ventanas sueltas): también reciben sus mensajes. */
+  // ponytail: no se limpia al cerrar una ventana; solo cuesta algo de carga extra hasta reiniciar.
+  private readonly visible = new Map<string, string[]>();
   /** Milisegundos sin salida del agente antes de cancelar el turno; 0 lo desactiva. */
   public idleTimeoutMs = 0;
   /** Turnos que pueden correr a la vez; 0 es sin límite. Los demás esperan su turno. */
@@ -304,16 +307,22 @@ export class ChatService {
     this.publishSessions();
   }
 
-  /** Solo viajan los mensajes de la sesión activa: el historial completo puede pesar megas. */
+  public setVisible(clientId: string, sessionIds: string[]): void {
+    this.visible.set(clientId, sessionIds.slice(0, 8));
+    this.publishSessions();
+  }
+
+  /** Solo viajan los mensajes de la sesión activa y de las que están a la vista: el historial completo puede pesar megas. */
   public publishSessions(): void {
     const activeSessionId = this.sessions.getActive().id;
+    const shown = new Set([activeSessionId, ...[...this.visible.values()].flat()]);
     this.post({
       type: 'state',
       patch: {
         sessions: this.sessions.list().map((session) => ({
           ...session,
           messageCount: session.messages.length,
-          messages: session.id === activeSessionId ? session.messages : []
+          messages: shown.has(session.id) ? session.messages : []
         })),
         activeSessionId,
         runningSessionIds: this.runningSessionIds(),
@@ -345,7 +354,9 @@ export class ChatService {
 
   /** Misma regla al precalentar y al enviar: si difiere, la CLI precalentada no se reutiliza. */
   private isReadOnly(session: ConversationSession, role: ProtocolRole | undefined): boolean {
-    return session.permission === 'readonly' || Boolean(role && PROTOCOL_ROLES[role].readOnly);
+    if (session.permission === 'readonly') return true;
+    if (session.permission === 'full') return false;
+    return Boolean(role && PROTOCOL_ROLES[role]?.readOnly);
   }
 
   /** Mensaje informativo local: no pasa por ningún modelo. */
@@ -368,7 +379,16 @@ export class ChatService {
     if (!session) return;
     if (this.isRunning(sessionId)) {
       const queue = this.queues.get(sessionId) ?? [];
-      queue.push({ item: { id: newMessageId(), prompt, from: options.from }, options });
+      queue.push({
+        item: {
+          id: newMessageId(),
+          prompt,
+          from: options.from,
+          attachments: attachments.length > 0 ? [...attachments] : undefined,
+          at: Date.now()
+        },
+        options
+      });
       this.queues.set(sessionId, queue);
       this.publishSessions();
       return;
@@ -540,7 +560,7 @@ export class ChatService {
           prompt: composePrompt({ prompt: options.planFirst ? PLAN_PREFIX + activePrompt : (isGoal ? GOAL_PREFIX + activePrompt : activePrompt), role, attachments, history, team, projectRules: loadProjectRules(workspaceDir),
             // Con conversación reanudada la CLI ya tiene esto del primer turno: no se paga de nuevo.
             experience: resumeId ? undefined : loadExperience(workspaceDir),
-            canWrite: !resumeId && !(role && PROTOCOL_ROLES[role].readOnly)
+            canWrite: !resumeId && !this.isReadOnly(session, role)
           }),
           workspaceDir,
           modelId: model.id,

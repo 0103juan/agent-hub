@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { ArchivedSessionInfo, ConversationSession, ProtocolRole, SearchHit } from '../../shared/types';
+import { formatFull, relativeTime } from '../utils/format';
 import { postToHost } from '../vscode-api';
 import { PROTOCOL_ROLES } from '../../shared/protocol-roles';
+import { normalizeText } from '../../shared/workspace-actions';
 import {
   Plus,
   MessageSquare,
@@ -16,8 +18,11 @@ import {
   ChevronDown,
   ChevronRight,
   Pencil,
+  Star,
   X
 } from 'lucide-react';
+
+const FAVORITE_SESSIONS_KEY = 'agent-hub.favoriteSessions';
 
 interface Props {
   sessions: ConversationSession[];
@@ -60,6 +65,26 @@ export const SessionDrawer: React.FC<Props> = ({
   const [showArchive, setShowArchive] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProjectFilter, setSelectedProjectFilter] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<'recent' | 'name' | 'messages'>('recent');
+  const [favorites, setFavorites] = useState<string[]>(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(FAVORITE_SESSIONS_KEY) ?? '[]');
+      return Array.isArray(saved) ? saved.filter((id) => typeof id === 'string') : [];
+    } catch {
+      return [];
+    }
+  });
+  const toggleFavorite = (id: string) =>
+    setFavorites((current) => {
+      const next = current.includes(id) ? current.filter((item) => item !== id) : [...current, id];
+      try {
+        localStorage.setItem(FAVORITE_SESSIONS_KEY, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  const [confirmClearEmpty, setConfirmClearEmpty] = useState(false);
+  // Conversaciones sin un solo mensaje (y que no son la activa): se pueden borrar de una vez.
+  const emptySessions = sessions.filter((s) => (s.messageCount ?? s.messages.length) === 0 && s.id !== activeSessionId);
   // Con muchos proyectos solo queda abierto el de la conversación activa.
   const [collapsedProjects, setCollapsedProjects] = useState<Record<string, boolean>>(() => {
     const names = new Set(sessions.map((s) => s.projectName || UNASSIGNED));
@@ -105,16 +130,23 @@ export const SessionDrawer: React.FC<Props> = ({
   const filteredSessions = sessions.filter((s) => {
     const matchesSearch =
       searchQuery === '' ||
-      (s.title && s.title.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (s.taskSlug && s.taskSlug.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (s.projectName && s.projectName.toLowerCase().includes(searchQuery.toLowerCase()));
+      (s.title && normalizeText(s.title).includes(normalizeText(searchQuery))) ||
+      (s.taskSlug && normalizeText(s.taskSlug).includes(normalizeText(searchQuery))) ||
+      (s.projectName && normalizeText(s.projectName).includes(normalizeText(searchQuery)));
 
     const currentProject = s.projectName || UNASSIGNED;
     const matchesProject =
       selectedProjectFilter === 'all' || currentProject === selectedProjectFilter;
 
     return matchesSearch && matchesProject;
-  });
+  }).sort((a, b) =>
+    Number(favorites.includes(b.id)) - Number(favorites.includes(a.id)) ||
+    (sortBy === 'name'
+      ? (a.title || '').localeCompare(b.title || '')
+      : sortBy === 'messages'
+        ? (b.messageCount ?? b.messages.length) - (a.messageCount ?? a.messages.length)
+        : (b.updatedAt ?? 0) - (a.updatedAt ?? 0))
+  );
 
   // Agrupar sesiones por Proyecto -> Tarea
   const groupedByProject: Record<string, ConversationSession[]> = {};
@@ -168,6 +200,7 @@ export const SessionDrawer: React.FC<Props> = ({
         <div className="text-xs font-bold text-zinc-100 flex items-center gap-1.5">
           <Layers className="w-4 h-4 text-indigo-400" />
           <span>Historial y tareas</span>
+          <span className="font-mono text-[11px] font-normal text-zinc-500">({sessions.length})</span>
         </div>
         <button
           type="button"
@@ -269,9 +302,61 @@ export const SessionDrawer: React.FC<Props> = ({
               placeholder="Buscar tareas, chats o proyectos..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-7 pr-2 py-1 bg-zinc-800/60 border border-zinc-800 rounded text-xs text-zinc-200 placeholder-zinc-400 focus:outline-none focus:border-zinc-700"
+              onKeyDown={(e) => {
+                if (e.key === 'Escape' && searchQuery) {
+                  e.stopPropagation();
+                  setSearchQuery('');
+                }
+              }}
+              className="w-full pl-7 pr-7 py-1 bg-zinc-800/60 border border-zinc-800 rounded text-xs text-zinc-200 placeholder-zinc-400 focus:outline-none focus:border-zinc-700"
             />
+            {searchQuery && (
+              <button type="button" aria-label="Borrar la búsqueda" onClick={() => setSearchQuery('')} className="absolute right-1.5 top-1.5 text-zinc-400 hover:text-zinc-200">
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
+          <div className="flex items-center gap-1 text-[11px]">
+            <span className="text-zinc-500">Ordenar:</span>
+            {([['recent', 'Recientes'], ['name', 'Nombre'], ['messages', 'Más largas']] as const).map(([id, label]) => (
+              <button
+                key={id}
+                type="button"
+                aria-pressed={sortBy === id}
+                onClick={() => setSortBy(id)}
+                className={`px-1.5 py-0.5 rounded transition ${sortBy === id ? 'bg-zinc-800 text-zinc-200 font-medium' : 'text-zinc-400 hover:text-zinc-200'}`}
+              >
+                {label}
+              </button>
+            ))}
+            {searching && <span className="ml-auto font-mono text-zinc-500">{filteredSessions.length} de {sessions.length}</span>}
+          </div>
+          {emptySessions.length > 0 && sessions.length - emptySessions.length >= 1 && (
+            <div className="flex items-center gap-1.5 text-[11px]">
+              {confirmClearEmpty ? (
+                <>
+                  <span className="text-red-300">¿Eliminar {emptySessions.length} vacías?</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      emptySessions.forEach((s) => onDeleteSession(s.id));
+                      setConfirmClearEmpty(false);
+                    }}
+                    className="px-1.5 bg-red-700 hover:bg-red-600 text-white rounded"
+                  >
+                    Sí
+                  </button>
+                  <button type="button" aria-label="Cancelar" onClick={() => setConfirmClearEmpty(false)} className="text-zinc-400 hover:text-zinc-200">
+                    <X className="w-3 h-3" />
+                  </button>
+                </>
+              ) : (
+                <button type="button" onClick={() => setConfirmClearEmpty(true)} className="text-zinc-400 hover:text-red-300">
+                  Limpiar {emptySessions.length} conversaciones vacías
+                </button>
+              )}
+            </div>
+          )}
 
           {availableProjects.length > 1 && (
             <div className="flex items-center gap-1 py-0.5 text-[11px] overflow-x-auto whitespace-nowrap pb-1">
@@ -524,11 +609,27 @@ export const SessionDrawer: React.FC<Props> = ({
                                 )}
                                 <span>•</span>
                                 <span className="shrink-0">{s.messageCount ?? s.messages.length} msgs</span>
+                                {s.updatedAt > 0 && (
+                                  <>
+                                    <span>•</span>
+                                    <span className="shrink-0" title={formatFull(s.updatedAt)}>{relativeTime(s.updatedAt)}</span>
+                                  </>
+                                )}
                               </span>
                             </span>
                           </button>
 
                           <div className="flex items-center gap-1 shrink-0">
+                            <button
+                              type="button"
+                              aria-pressed={favorites.includes(s.id)}
+                              aria-label={favorites.includes(s.id) ? 'Quitar de favoritas' : 'Marcar como favorita'}
+                              title={favorites.includes(s.id) ? 'Quitar de favoritas' : 'Marcar como favorita (sube al principio)'}
+                              onClick={() => toggleFavorite(s.id)}
+                              className="text-zinc-500 hover:text-amber-300"
+                            >
+                              <Star className={`w-3 h-3 ${favorites.includes(s.id) ? 'text-amber-400 fill-amber-400' : ''}`} />
+                            </button>
                             {s.id === activeSessionId && (
                               <Check className="w-3.5 h-3.5 text-indigo-400" />
                             )}

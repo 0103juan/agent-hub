@@ -6,6 +6,23 @@ import { PROTOCOL_ROLES } from '../../shared/protocol-roles';
 import { ConversationSession, ProtocolRole } from '../../shared/types';
 import { HubState } from '../state/hub-state';
 import { postToHost } from '../vscode-api';
+import { relativeTime } from '../utils/format';
+import { normalizeText } from '../../shared/workspace-actions';
+
+const SPAWN_KEY = 'agent-hub.spawnForm';
+
+/** El formulario recuerda el último proyecto y los roles elegidos. */
+const readSpawn = (): { project: string; roles: Array<ProtocolRole | ''> } => {
+  try {
+    const saved = JSON.parse(localStorage.getItem(SPAWN_KEY) ?? '{}');
+    return {
+      project: typeof saved.project === 'string' ? saved.project : '',
+      roles: Array.isArray(saved.roles) && saved.roles.length > 0 ? saved.roles : ['']
+    };
+  } catch {
+    return { project: '', roles: [''] };
+  }
+};
 
 interface Props {
   state: HubState;
@@ -16,13 +33,17 @@ const SELECT_CLASS =
   'bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-zinc-200 text-[11px] focus:outline-none focus:border-indigo-500';
 
 const SpawnForm: React.FC<{ projects: string[] }> = ({ projects }) => {
-  const [project, setProject] = useState('');
-  const [roles, setRoles] = useState<Array<ProtocolRole | ''>>(['']);
+  const initial = React.useMemo(readSpawn, []);
+  const [project, setProject] = useState(initial.project);
+  const [roles, setRoles] = useState<Array<ProtocolRole | ''>>(initial.roles);
   const [prompt, setPrompt] = useState('');
   const [isolate, setIsolate] = useState(true);
 
   const spawn = (event: React.FormEvent) => {
     event.preventDefault();
+    try {
+      localStorage.setItem(SPAWN_KEY, JSON.stringify({ project, roles }));
+    } catch {}
     postToHost({
       command: 'spawnAgents',
       projectName: project || undefined,
@@ -34,7 +55,7 @@ const SpawnForm: React.FC<{ projects: string[] }> = ({ projects }) => {
   };
 
   return (
-    <form onSubmit={spawn} className="p-2.5 bg-zinc-900 border border-zinc-800 rounded-lg space-y-2">
+    <form onSubmit={spawn} className="max-w-3xl p-2.5 bg-zinc-900 border border-zinc-800 rounded-lg space-y-2">
       <div className="text-[11px] font-semibold text-zinc-200 flex items-center gap-1.5">
         <Users className="w-3.5 h-3.5 text-indigo-400" />
         Crear agentes en paralelo
@@ -89,6 +110,12 @@ const SpawnForm: React.FC<{ projects: string[] }> = ({ projects }) => {
         aria-label="Tarea inicial"
         placeholder="Tarea inicial para todos (opcional). Se hablan con «>> nombre: mensaje»."
         onChange={(e) => setPrompt(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+            e.preventDefault();
+            e.currentTarget.form?.requestSubmit();
+          }
+        }}
         className="w-full bg-zinc-950 border border-zinc-700 rounded p-2 text-[11px] text-zinc-100 placeholder-zinc-400 focus:outline-none focus:border-indigo-500 resize-none"
       />
 
@@ -98,7 +125,7 @@ const SpawnForm: React.FC<{ projects: string[] }> = ({ projects }) => {
       </label>
 
       <button type="submit" className="w-full py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded font-medium text-[11px] transition">
-        Iniciar {roles.length} {roles.length === 1 ? 'agente' : 'agentes'}
+        Iniciar {roles.length} {roles.length === 1 ? 'agente' : 'agentes'} <span className="opacity-60">(Ctrl+Enter)</span>
       </button>
     </form>
   );
@@ -235,6 +262,9 @@ const Board: React.FC<{ agents: ConversationSession[]; state: HubState; onOpenCh
                 <span className="block text-zinc-400 truncate">
                   {(session.protocolRole && PROTOCOL_ROLES[session.protocolRole]?.label) || 'Sin rol'}
                 </span>
+                <span className="block text-zinc-500 font-mono truncate">
+                  {session.messageCount ?? session.messages.length} msgs · {relativeTime(session.updatedAt)}
+                </span>
               </button>
             ))}
           </section>
@@ -245,17 +275,38 @@ const Board: React.FC<{ agents: ConversationSession[]; state: HubState; onOpenCh
 };
 
 export const AgentsView: React.FC<Props> = ({ state, onOpenChat }) => {
-  const [viewMode, setViewMode] = useState<'cards' | 'canvas' | 'board'>('cards');
+  const [viewMode, setViewModeState] = useState<'cards' | 'canvas' | 'board'>(() => {
+    const saved = localStorage.getItem('agent-hub.agentsView');
+    return saved === 'canvas' || saved === 'board' ? saved : 'cards';
+  });
+  const setViewMode = (mode: 'cards' | 'canvas' | 'board') => {
+    localStorage.setItem('agent-hub.agentsView', mode);
+    setViewModeState(mode);
+  };
+  const [agentFilter, setAgentFilter] = useState('');
   const isWorking = (session: ConversationSession) => state.runningSessionIds.includes(session.id) && !state.waitingSessionIds.includes(session.id);
   const agents = state.sessions
     .filter((session) => session.squad || state.runningSessionIds.includes(session.id) || state.waitingSessionIds.includes(session.id) || state.queues[session.id]?.length)
     .sort((a, b) => Number(isWorking(b)) - Number(isWorking(a)));
+  const workingAgents = agents.filter(isWorking);
+  const shownAgents = agents.filter((session) => normalizeText(agentName(session)).includes(normalizeText(agentFilter.trim())));
   const projects = [...new Set(state.sessions.flatMap((session) => (session.projectName ? [session.projectName] : [])))];
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 w-full min-w-0">
       <div className="flex items-center justify-between gap-2 px-1">
         <span className="text-xs font-bold text-zinc-200">Panel de Coordinación</span>
+        {workingAgents.length > 1 && (
+          <button
+            type="button"
+            onClick={() => workingAgents.forEach((session) => postToHost({ command: 'stopTurn', sessionId: session.id }))}
+            className="flex items-center gap-1 px-2 py-0.5 rounded bg-red-600/20 hover:bg-red-600/30 text-red-300 border border-red-500/40 text-[11px] transition"
+            title="Detener el turno de todos los agentes que están trabajando"
+          >
+            <Square className="w-3 h-3 fill-current" />
+            Detener {workingAgents.length}
+          </button>
+        )}
         <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 p-0.5 rounded-md text-xs">
           <button
             type="button"
@@ -299,11 +350,22 @@ export const AgentsView: React.FC<Props> = ({ state, onOpenChat }) => {
         <>
           <SpawnForm projects={projects} />
 
+      {agents.length > 3 && (
+        <input
+          value={agentFilter}
+          onChange={(event) => setAgentFilter(event.target.value)}
+          placeholder={`Filtrar entre ${agents.length} agentes…`}
+          aria-label="Filtrar agentes"
+          className="w-full bg-zinc-950 border border-zinc-800 rounded px-2 py-1 text-[11px] text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-indigo-500"
+        />
+      )}
       {agents.length === 0 ? (
         <p className="text-center text-[11px] text-zinc-400 p-4">Aún no hay agentes activos ni en equipo.</p>
+      ) : shownAgents.length === 0 ? (
+        <p className="text-center text-[11px] text-zinc-400 p-4">Ningún agente coincide con el filtro.</p>
       ) : (
         <ul className="space-y-2" aria-label="Agentes">
-          {agents.map((session) => (
+          {shownAgents.map((session) => (
             <AgentCard key={session.id} session={session} state={state} onOpenChat={onOpenChat} />
           ))}
         </ul>
@@ -314,7 +376,7 @@ export const AgentsView: React.FC<Props> = ({ state, onOpenChat }) => {
 
       {viewMode === 'cards' && state.comms.length > 0 && (
         <section aria-label="Comunicación entre agentes" className="space-y-1.5">
-          <h2 className="text-[11px] font-semibold text-zinc-200">Comunicación</h2>
+          <h2 className="text-[11px] font-semibold text-zinc-200">Comunicación ({state.comms.length})</h2>
           <ul className="space-y-1.5">
             {[...state.comms].reverse().map((message) => (
               <li key={message.id} className="p-2 bg-zinc-900 border border-zinc-800 rounded-lg text-[11px]">

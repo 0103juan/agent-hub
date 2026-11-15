@@ -1,19 +1,33 @@
 import React, { memo, useEffect, useRef, useState } from 'react';
-import { AlertCircle, Brain, Check, CheckCircle2, ChevronDown, ChevronRight, Copy, FileCode, Film, GitFork, Image as ImageIcon, Layers, Loader2, Music, Pin, RotateCcw, Search, ShieldCheck, Sparkles, Terminal, UserRound, X } from 'lucide-react';
+import { AlertCircle, Brain, Check, CheckCircle2, ChevronDown, ChevronRight, ChevronUp, Clock, Copy, FileCode, Film, GitFork, Image as ImageIcon, Layers, Loader2, Music, Pencil, Pin, RefreshCw, RotateCcw, Search, ShieldCheck, Sparkles, Terminal, UserRound, X } from 'lucide-react';
 import { PROTOCOL_ROLES } from '../../../shared/protocol-roles';
+import { normalizeText } from '../../../shared/workspace-actions';
 import { AccountProfile, ChatMessage, FileContextAttachment, LiveStatus, ProtocolRole, ProviderType } from '../../../shared/types';
 import { extractQuestionOptions, isQuestionPrompt, QuestionOptions } from '../../../shared/question-options';
 import { postToHost } from '../../vscode-api';
+import { dayLabel, formatCost, formatDuration, formatFull, formatTime, sameDay } from '../../utils/format';
 import { ProviderBadge } from '../ProviderBadge';
 import { AgentHubIcon } from '../AgentHubLogo';
 import { ROLE_COLORS } from '../SquadCanvas';
 import { DiffLines } from './DiffLines';
 import { Markdown } from './Markdown';
 
-const STICK_TO_BOTTOM_PX = 320;
+const STICK_TO_BOTTOM_PX = 48;
 const PAGE_SIZE = 40;
 const LONG_BLOCK_CHARS = 400;
-const QUICK_PROMPTS = ['Explicar arquitectura del proyecto', 'Revisar vulnerabilidades y seguridad', 'Generar tests unitarios para cambios'];
+const QUICK_PROMPTS = [
+  'Explicar arquitectura del proyecto',
+  'Revisar vulnerabilidades y seguridad',
+  'Generar tests unitarios para cambios',
+  'Resumir los cambios sin commitear',
+  'Buscar código muerto y duplicado',
+  'Proponer mejoras de rendimiento'
+];
+const COLLAPSE_USER_CHARS = 700;
+const LONG_ANSWER_WORDS = 150;
+const SHOW_TOP_PX = 600;
+/** El composer escucha este evento para cargar un texto (editar y reenviar). */
+const setComposerText = (text: string) => window.dispatchEvent(new CustomEvent('agenthub:set-composer', { detail: text }));
 
 const AttachmentPreview: React.FC<{ attachment: FileContextAttachment }> = ({ attachment }) => {
   const { mediaType, mediaUri, thumbnailUri, file, sizeFormatted, fsPath } = attachment;
@@ -173,9 +187,12 @@ const QuestionOptionsCard: React.FC<{
   disabled: boolean;
   onSelectOption: (optionText: string) => void;
 }> = ({ questionOptions, disabled, onSelectOption }) => {
+  const [dismissed, setDismissed] = useState(false);
   const [showOtherInput, setShowOtherInput] = useState(false);
   const [otherText, setOtherText] = useState('');
   const [selected, setSelected] = useState<string | undefined>(questionOptions.selected);
+
+  if (dismissed) return null;
 
   const handleSelect = (option: string) => {
     setSelected(option);
@@ -209,9 +226,19 @@ const QuestionOptionsCard: React.FC<{
 
   return (
     <div className="mt-3 p-3 rounded-xl border border-indigo-500/30 bg-zinc-950/80 shadow-md space-y-2.5">
-      <div className="flex items-center gap-2 text-xs font-semibold text-zinc-200">
-        <Sparkles className="w-4 h-4 text-indigo-400 shrink-0" />
-        <span className="truncate">{questionOptions.question}</span>
+      <div className="flex items-center justify-between gap-2 text-xs font-semibold text-zinc-200">
+        <div className="flex items-center gap-2 min-w-0">
+          <Sparkles className="w-4 h-4 text-indigo-400 shrink-0" />
+          <span className="truncate" title={questionOptions.question}>{questionOptions.question}</span>
+        </div>
+        <button
+          type="button"
+          onClick={() => setDismissed(true)}
+          title="Descartar opciones"
+          className="p-1 rounded text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition cursor-pointer"
+        >
+          <X className="w-3.5 h-3.5" />
+        </button>
       </div>
 
       <div className="space-y-1.5">
@@ -220,25 +247,37 @@ const QuestionOptionsCard: React.FC<{
           const cleanText = opt.replace(/\s*\((?:recommended|recomendado)\)\s*/gi, '').trim();
           const isSelected = selected === opt || selected === cleanText;
 
+          const colonIdx = cleanText.indexOf(':');
+          const hasColon = colonIdx > 0 && colonIdx <= 65;
+          const title = hasColon ? cleanText.slice(0, colonIdx).trim() : cleanText;
+          const description = hasColon ? cleanText.slice(colonIdx + 1).trim() : '';
+
           return (
             <button
               key={idx}
               type="button"
               disabled={disabled || Boolean(selected)}
               onClick={() => handleSelect(cleanText)}
-              className={`w-full text-left p-2 rounded-lg text-xs flex items-center justify-between gap-2 border transition ${
+              className={`w-full text-left p-2.5 rounded-lg text-xs flex items-start justify-between gap-2.5 border transition ${
                 isSelected
                   ? 'bg-indigo-600/30 border-indigo-500 text-indigo-200 font-medium'
-                  : 'bg-zinc-900/90 hover:bg-zinc-800/90 border-zinc-800 hover:border-indigo-500/50 text-zinc-300'
-              } disabled:opacity-80 disabled:cursor-default`}
+                  : 'bg-zinc-900/90 hover:bg-zinc-800/90 border-zinc-800 hover:border-indigo-500/50 text-zinc-300 cursor-pointer'
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
             >
-              <div className="flex items-center gap-2 min-w-0">
-                <span className="w-5 h-5 rounded-full bg-zinc-800 text-zinc-400 font-mono text-[11px] flex items-center justify-center shrink-0 border border-zinc-700/60">
+              <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                <span className="w-5 h-5 rounded-full bg-zinc-800 text-zinc-300 font-mono text-[11px] flex items-center justify-center shrink-0 border border-zinc-700/60 mt-0.5">
                   {idx + 1}
                 </span>
-                <span className="truncate">{cleanText}</span>
+                <div className="min-w-0 flex-1">
+                  <div className="font-medium text-zinc-200 leading-tight">{title}</div>
+                  {description && (
+                    <div className="text-[11px] text-zinc-400 mt-1 leading-relaxed break-words font-normal">
+                      {description}
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center gap-1.5 shrink-0">
+              <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
                 {isRecommended && (
                   <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-medium">
                     Recomendado
@@ -401,9 +440,11 @@ interface BubbleProps {
   /** Solo el mensaje en curso recibe el estado en vivo, para no repintar los demás. */
   live?: LiveStatus;
   isLast: boolean;
+  /** Texto del mensaje del usuario que originó esta respuesta; permite regenerarla. */
+  regenerateFrom?: string;
 }
 
-const MessageBubble = memo<BubbleProps>(({ message, sessionId, onSendSuggestion, provider, role, fileDiffs, live, isLast }) => {
+const MessageBubble = memo<BubbleProps>(({ message, sessionId, onSendSuggestion, provider, role, fileDiffs, live, isLast, regenerateFrom }) => {
   const isUser = message.role === 'user';
   const attachments = message.attachments ?? [];
   const turn = splitTurn(message);
@@ -411,10 +452,15 @@ const MessageBubble = memo<BubbleProps>(({ message, sessionId, onSendSuggestion,
   const questionOptions = rawQuestion && isQuestionPrompt(rawQuestion.question) && rawQuestion.options.length >= 2 ? rawQuestion : undefined;
   const [copied, setCopied] = useState(false);
   const [activeDiffFile, setActiveDiffFile] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState(false);
+  const collapsible = isUser && message.content.length > COLLAPSE_USER_CHARS;
+  const wordCount = isUser || message.isStreaming ? 0 : (turn.answer || message.content).trim().split(/\s+/).length;
 
-  const copyMessageText = async () => {
+  const copyMessageText = async (event?: React.MouseEvent) => {
     try {
-      const textToCopy = isUser ? message.content : (turn.answer || message.content);
+      const body = isUser ? message.content : (turn.answer || message.content);
+      // Con Mayús: lleva el autor y la hora, útil para pegar en un ticket o un chat.
+      const textToCopy = event?.shiftKey ? `**${isUser ? 'Tú' : message.modelName}** · ${formatFull(message.timestamp)}\n\n${body}` : body;
       await navigator.clipboard.writeText(textToCopy);
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
@@ -431,8 +477,8 @@ const MessageBubble = memo<BubbleProps>(({ message, sessionId, onSendSuggestion,
           : 'bg-zinc-900/90 hover:bg-zinc-900 text-zinc-200 mr-2 border-zinc-800/80 shadow-xs animate-message-fade'
       } ${message.isError ? '!border-red-500/50' : ''}`}
     >
-      <div className="flex items-center justify-between text-[11px] text-zinc-400 mb-1.5 font-mono">
-        <div className="flex items-center gap-1.5">
+      <div className="flex flex-wrap items-center justify-between gap-y-1 text-[11px] text-zinc-400 mb-1.5 font-mono">
+        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 min-w-0">
           {message.isError && <AlertCircle className="w-3.5 h-3.5 text-red-400" />}
           {isUser ? (
             <div className="flex items-center gap-1 text-indigo-300 font-semibold">
@@ -453,14 +499,30 @@ const MessageBubble = memo<BubbleProps>(({ message, sessionId, onSendSuggestion,
           {message.isPlan && <span className="px-1.5 py-0.2 rounded border border-indigo-500/50 bg-indigo-950/50 text-indigo-300 uppercase text-[10px] font-semibold">Plan</span>}
           {message.isStreaming && !isUser && <TurnStatus message={message} hasAnswer={Boolean(turn.answer)} live={live} />}
           {message.pinned && <Pin className="w-3 h-3 text-amber-400 fill-amber-400" aria-label="Fijado" />}
+          {!isUser && !message.isStreaming && wordCount >= LONG_ANSWER_WORDS && (
+            <span className="text-zinc-500 text-[10px]" title={`~${Math.round(message.content.length / 4).toLocaleString()} tokens`}>
+              {wordCount.toLocaleString()} palabras · {Math.max(1, Math.round(wordCount / 220))} min
+            </span>
+          )}
+          <time dateTime={new Date(message.timestamp).toISOString()} title={formatFull(message.timestamp)} className="text-zinc-500 text-[10px]">
+            {formatTime(message.timestamp)}
+          </time>
+          {!isUser && !message.isStreaming && message.durationMs !== undefined && (
+            <span className="flex items-center gap-0.5 text-zinc-500 text-[10px]" title="Duración del turno">
+              <Clock className="w-2.5 h-2.5" />{formatDuration(message.durationMs)}
+            </span>
+          )}
+          {!isUser && !message.isStreaming && message.costUSD !== undefined && message.costUSD > 0 && (
+            <span className="text-zinc-500 text-[10px]" title={`Costo del turno: $${message.costUSD.toFixed(4)}`}>{formatCost(message.costUSD)}</span>
+          )}
         </div>
         {!message.isStreaming && (
-          <div className="flex items-center gap-1 opacity-70 hover:opacity-100 transition">
+          <div className="flex items-center gap-1 ml-auto shrink-0 opacity-70 hover:opacity-100 transition">
             <button
               type="button"
               onClick={copyMessageText}
               className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 hover:bg-zinc-750 text-zinc-300 border border-zinc-700/60 transition cursor-pointer"
-              title="Copiar texto del mensaje al portapapeles"
+              title="Copiar el texto (Mayús+clic: con autor y hora)"
               aria-label="Copiar texto del mensaje"
             >
               {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-zinc-400" />}
@@ -487,6 +549,28 @@ const MessageBubble = memo<BubbleProps>(({ message, sessionId, onSendSuggestion,
                 <span className="hidden min-[400px]:inline">Segunda opinión</span>
               </button>
             )}
+            {isUser && (
+              <button
+                type="button"
+                onClick={() => setComposerText(message.content)}
+                className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 hover:bg-zinc-750 text-zinc-300 border border-zinc-700/60 transition cursor-pointer"
+                title="Cargar este mensaje en el cuadro de texto para editarlo y reenviarlo"
+              >
+                <Pencil className="w-3 h-3 text-cyan-400" />
+                <span className="hidden min-[400px]:inline">Editar</span>
+              </button>
+            )}
+            {!isUser && isLast && regenerateFrom && (
+              <button
+                type="button"
+                onClick={() => onSendSuggestion(regenerateFrom)}
+                className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 hover:bg-zinc-750 text-zinc-300 border border-zinc-700/60 transition cursor-pointer"
+                title={message.isError ? 'Volver a enviar el último mensaje: el turno falló' : 'Volver a enviar el último mensaje para obtener otra respuesta'}
+              >
+                <RefreshCw className="w-3 h-3 text-emerald-400" />
+                <span className="hidden min-[400px]:inline">{message.isError ? 'Reintentar' : 'Regenerar'}</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={() => postToHost({ command: 'forkSession', sessionId, messageId: message.id })}
@@ -504,7 +588,19 @@ const MessageBubble = memo<BubbleProps>(({ message, sessionId, onSendSuggestion,
 
       {isUser ? (
         <div className="font-sans break-words">
-          <Markdown text={message.content} withCodeActions={false} />
+          <div className={collapsible && !expanded ? 'max-h-40 overflow-hidden [mask-image:linear-gradient(#000_60%,transparent)]' : undefined}>
+            <Markdown text={message.content} withCodeActions={false} />
+          </div>
+          {collapsible && (
+            <button
+              type="button"
+              onClick={() => setExpanded((on) => !on)}
+              className="mt-1 flex items-center gap-1 text-[11px] text-indigo-300 hover:text-indigo-200 cursor-pointer"
+            >
+              {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+              {expanded ? 'Ver menos' : 'Ver todo el mensaje'}
+            </button>
+          )}
         </div>
       ) : turn.answer ? (
         <div className={message.isError ? 'text-red-300' : undefined}>
@@ -649,7 +745,7 @@ interface Props {
 
 export const MessageList: React.FC<Props> = ({ sessionId, messages, accountName, accounts, role, fileDiffs, live, onSendSuggestion }) => {
   const [searchQuery, setSearchQuery] = React.useState('');
-  const [filterMode, setFilterMode] = React.useState<'all' | 'modified' | 'errors'>('all');
+  const [filterMode, setFilterMode] = React.useState<'all' | 'modified' | 'errors' | 'pinned'>('all');
   const [isSearchOpen, setIsSearchOpen] = React.useState(false);
   const [visibleCount, setVisibleCount] = React.useState(PAGE_SIZE);
   const wasStreamingRef = useRef(false);
@@ -677,8 +773,9 @@ export const MessageList: React.FC<Props> = ({ sessionId, messages, accountName,
   const filteredMessages = messages.filter((m) => {
     if (filterMode === 'modified' && !m.checkpointHash) return false;
     if (filterMode === 'errors' && !m.isError) return false;
+    if (filterMode === 'pinned' && !m.pinned) return false;
     if (!searchQuery.trim()) return true;
-    return m.content.toLowerCase().includes(searchQuery.toLowerCase());
+    return normalizeText(m.content).includes(normalizeText(searchQuery));
   });
 
   useEffect(() => setVisibleCount(PAGE_SIZE), [sessionId]);
@@ -699,7 +796,34 @@ export const MessageList: React.FC<Props> = ({ sessionId, messages, accountName,
     return () => cancelAnimationFrame(frame);
   }, [messages.length, lastMessage?.content, lastMessage?.activity?.length, lastMessage?.role]);
 
+  // Al abrir un chat se empieza abajo, aunque en el anterior se hubiera subido a leer.
+  useEffect(() => {
+    isFollowing.current = true;
+  }, [sessionId]);
+
+  // El contenido crece después del primer pintado (resaltado de código, imágenes, tablas, mensajes que llegan tarde)
+  // y la columna cambia de tamaño: mientras se sigue el final, se mantiene pegado abajo.
+  useEffect(() => {
+    const element = scrollRef.current;
+    if (!element) return;
+    const stick = () => {
+      if (isFollowing.current) element.scrollTop = element.scrollHeight;
+    };
+    const mutations = new MutationObserver(stick);
+    mutations.observe(element, { childList: true, subtree: true, characterData: true });
+    const resize = new ResizeObserver(stick);
+    resize.observe(element);
+    element.addEventListener('load', stick, true);
+    stick();
+    return () => {
+      mutations.disconnect();
+      resize.disconnect();
+      element.removeEventListener('load', stick, true);
+    };
+  }, []);
+
   const [showScrollBottom, setShowScrollBottom] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   const trackFollowing = () => {
     const element = scrollRef.current;
@@ -707,6 +831,7 @@ export const MessageList: React.FC<Props> = ({ sessionId, messages, accountName,
       const isNearBottom = element.scrollHeight - element.scrollTop - element.clientHeight < STICK_TO_BOTTOM_PX;
       isFollowing.current = isNearBottom;
       setShowScrollBottom(!isNearBottom);
+      setShowScrollTop(element.scrollTop > SHOW_TOP_PX);
     }
   };
 
@@ -720,7 +845,17 @@ export const MessageList: React.FC<Props> = ({ sessionId, messages, accountName,
   };
 
   return (
-    <div ref={scrollRef} onScroll={trackFollowing} className="msg-list flex-1 overflow-y-auto space-y-3 p-1 min-h-0 relative">
+    <div className="relative flex-1 min-h-0 flex flex-col">
+      <div
+        ref={scrollRef}
+        onScroll={trackFollowing}
+        onWheel={(e) => {
+          if (e.deltaY < 0) isFollowing.current = false;
+        }}
+        role="log"
+        aria-label="Conversación"
+        className="msg-list select-text flex-1 overflow-y-auto space-y-3 p-1 min-h-0 relative"
+      >
       {isSearchOpen && (
         <div className="flex items-center gap-2 p-1.5 rounded-lg bg-zinc-900/95 border border-zinc-700 shadow-lg text-xs sticky top-0 z-20 glass-panel">
           <Search className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
@@ -731,7 +866,13 @@ export const MessageList: React.FC<Props> = ({ sessionId, messages, accountName,
             onChange={(e) => setSearchQuery(e.target.value)}
             className="flex-1 bg-transparent border-none text-zinc-200 focus:outline-none text-xs"
             autoFocus
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') { setIsSearchOpen(false); setSearchQuery(''); setFilterMode('all'); }
+            }}
           />
+          {(searchQuery.trim() || filterMode !== 'all') && (
+            <span className="text-[10px] font-mono text-zinc-400 shrink-0">{filteredMessages.length} de {messages.length}</span>
+          )}
           <div className="flex items-center gap-1">
             <button
               type="button"
@@ -746,6 +887,13 @@ export const MessageList: React.FC<Props> = ({ sessionId, messages, accountName,
               className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${filterMode === 'modified' ? 'bg-amber-600 text-white' : 'text-zinc-400 hover:text-zinc-200'}`}
             >
               Modificados
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilterMode('pinned')}
+              className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${filterMode === 'pinned' ? 'bg-amber-500 text-zinc-950' : 'text-zinc-400 hover:text-zinc-200'}`}
+            >
+              Fijados
             </button>
             <button
               type="button"
@@ -817,16 +965,41 @@ export const MessageList: React.FC<Props> = ({ sessionId, messages, accountName,
               Mostrar {Math.min(hiddenCount, PAGE_SIZE)} anteriores ({hiddenCount} ocultos)
             </button>
           )}
-          {groupSystemNotes(shownMessages).map((item) =>
-            Array.isArray(item) ? (
-              <SystemGroup
-                key={item[0].id}
-                messages={item}
-                defaultOpen={item[item.length - 1] === lastMessage && item.some((m) => m.isError)}
-              />
+          {hiddenCount > PAGE_SIZE && (
+            <button
+              type="button"
+              onClick={() => {
+                isFollowing.current = false;
+                setVisibleCount(filteredMessages.length);
+              }}
+              className="w-full text-[11px] py-1 rounded text-zinc-400 hover:text-zinc-200 transition"
+            >
+              Mostrar todos los {filteredMessages.length} mensajes
+            </button>
+          )}
+          {groupSystemNotes(shownMessages).map((item, index, items) => {
+            const first = Array.isArray(item) ? item[0] : item;
+            const previous = items[index - 1];
+            const previousMessage = previous && (Array.isArray(previous) ? previous[previous.length - 1] : previous);
+            const day = (!previousMessage || !sameDay(previousMessage.timestamp, first.timestamp)) && (
+              <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-zinc-500 select-none">
+                <span className="flex-1 h-px bg-zinc-800" />
+                <span>{dayLabel(first.timestamp)}</span>
+                <span className="flex-1 h-px bg-zinc-800" />
+              </div>
+            );
+            return Array.isArray(item) ? (
+              <React.Fragment key={item[0].id}>
+                {day}
+                <SystemGroup
+                  messages={item}
+                  defaultOpen={item[item.length - 1] === lastMessage && item.some((m) => m.isError)}
+                />
+              </React.Fragment>
             ) : (
+              <React.Fragment key={item.id}>
+              {day}
               <MessageBubble
-                key={item.id}
                 message={item}
                 sessionId={sessionId}
                 onSendSuggestion={onSendSuggestion}
@@ -835,17 +1008,37 @@ export const MessageList: React.FC<Props> = ({ sessionId, messages, accountName,
                 fileDiffs={fileDiffs}
                 live={item === lastMessage ? live : undefined}
                 isLast={item === lastMessage}
+                regenerateFrom={item === lastMessage && item.role === 'assistant' ? [...messages].reverse().find((m) => m.role === 'user')?.content : undefined}
               />
-            )
-          )}
+              </React.Fragment>
+            );
+          })}
         </>
+      )}
+      </div>
+
+      {showScrollTop && (
+        <button
+          type="button"
+          onClick={() => {
+            isFollowing.current = false;
+            setShowScrollBottom(true);
+            scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          aria-label="Ir al inicio de la conversación"
+          title="Ir al inicio de la conversación"
+          className={`absolute right-3 ${showScrollBottom ? 'bottom-12' : 'bottom-3'} z-20 flex w-fit items-center gap-1 px-2 py-1 rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] border border-zinc-600 shadow-lg transition cursor-pointer`}
+        >
+          <ChevronUp className="w-3.5 h-3.5" />
+          <span>Inicio</span>
+        </button>
       )}
 
       {showScrollBottom && (
         <button
           type="button"
           onClick={scrollToBottom}
-          className="sticky bottom-2 mx-auto z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-medium shadow-xl border border-indigo-400/30 transition-all hover:scale-105 cursor-pointer animate-float-bounce"
+          className="absolute left-1/2 -translate-x-1/2 bottom-3 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-medium shadow-xl border border-indigo-400/30 transition-all hover:scale-105 cursor-pointer animate-float-bounce"
         >
           <ChevronDown className="w-3.5 h-3.5" />
           <span>Ir al último mensaje</span>

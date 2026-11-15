@@ -3,6 +3,7 @@ import { ModelAccountTelemetry } from '../../shared/types';
 import { Activity, Clock, DollarSign, Brain, ArrowDownRight, ArrowUpRight, ChevronDown, ShieldCheck } from 'lucide-react';
 
 const NEAR_LIMIT_PERCENT = 85;
+const CRITICAL_PERCENT = 95;
 
 const toPercent = (utilization?: number) =>
   utilization === undefined ? null : Math.min(100, Math.round(utilization * 100));
@@ -23,7 +24,7 @@ const QuotaMeter: React.FC<MeterProps> = ({ icon, label, title, percent, barClas
     <span className="text-zinc-400 shrink-0">{label}</span>
     <span className="flex-1 min-w-3 h-1.5 mx-0.5 bg-zinc-800 rounded-full overflow-hidden">
       <span
-        className={`block h-full rounded-full transition-all duration-500 ${(percent ?? 0) > NEAR_LIMIT_PERCENT ? 'bg-amber-500' : barClass}`}
+        className={`block h-full rounded-full transition-all duration-500 ${(percent ?? 0) >= CRITICAL_PERCENT ? 'bg-red-500' : (percent ?? 0) > NEAR_LIMIT_PERCENT ? 'bg-amber-500' : barClass}`}
         style={{ width: `${percent ?? 0}%` }}
       />
     </span>
@@ -70,6 +71,18 @@ export const TelemetryBar: React.FC<{ activeTelemetry: ModelAccountTelemetry | u
         <span>{formatTokens(activeTelemetry?.totalOutputTokens)} out</span>
       </span>
 
+      {(activeTelemetry?.turnsCount || 0) > 0 && (
+        <span className="flex items-center gap-0.5 text-zinc-400" title="Promedio de tokens (entrada + salida) por turno">
+          <span>
+            Ø {formatTokens(((activeTelemetry?.totalInputTokens || 0) + (activeTelemetry?.totalOutputTokens || 0)) / (activeTelemetry?.turnsCount || 1))}/turno
+          </span>
+        </span>
+      )}
+      {(activeTelemetry?.totalCacheReadTokens || 0) > 0 && (
+        <span className="flex items-center gap-0.5 text-emerald-300" title="Tokens leídos de la caché">
+          <span>{formatTokens(activeTelemetry?.totalCacheReadTokens)} caché</span>
+        </span>
+      )}
       {(activeTelemetry?.totalThinkingTokens || 0) > 0 && (
         <span className="flex items-center gap-0.5 text-purple-300" title="Tokens de razonamiento">
           <Brain className="w-3 h-3 text-purple-400" />

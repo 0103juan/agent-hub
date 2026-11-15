@@ -10,6 +10,9 @@ export interface HubServerOptions {
   onClientConnected?: () => void;
 }
 
+const HEARTBEAT_MS = 25_000;
+const MAX_BODY_BYTES = 48 * 1024 * 1024;
+
 /**
  * El servidor ejecuta comandos en tu máquina: solo se aceptan peticiones de la propia interfaz.
  * `Host` frena el DNS rebinding; `Origin`, a cualquier web abierta en el navegador.
@@ -54,11 +57,15 @@ export class HubServer {
           }
 
           const url = new URL(req.url ?? '/', `http://localhost:${port}`);
+          // Esta página nunca debe abrirse dentro de otra, ni adivinarse su tipo, ni filtrar su origen.
+          res.setHeader('X-Content-Type-Options', 'nosniff');
+          res.setHeader('X-Frame-Options', 'DENY');
+          res.setHeader('Referrer-Policy', 'no-referrer');
 
           // Health / Status endpoint
           if (url.pathname === '/api/status' && req.method === 'GET') {
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ status: 'running', port, clients: this.sseClients.size }));
+            res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+            res.end(JSON.stringify({ status: 'running', port, clients: this.sseClients.size, uptimeSeconds: Math.round(process.uptime()) }));
             return;
           }
 
@@ -72,7 +79,10 @@ export class HubServer {
             res.write(': connected\n\n');
             this.sseClients.add(res);
 
+            // Un comentario SSE cada 25 s mantiene viva la conexión y deja detectar clientes caídos.
+            const heartbeat = setInterval(() => res.write(': ping\n\n'), HEARTBEAT_MS);
             req.on('close', () => {
+              clearInterval(heartbeat);
               this.sseClients.delete(res);
             });
 
@@ -83,10 +93,19 @@ export class HubServer {
           // API message endpoint
           if (url.pathname === '/api/message' && req.method === 'POST') {
             let body = '';
+            let tooLarge = false;
             req.on('data', (chunk) => {
               body += chunk;
+              // Un mensaje legítimo (con archivos pegados) cabe de sobra; más que esto es un error o un abuso.
+              if (body.length > MAX_BODY_BYTES && !tooLarge) {
+                tooLarge = true;
+                res.writeHead(413, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Mensaje demasiado grande' }));
+                req.destroy();
+              }
             });
             req.on('end', async () => {
+              if (tooLarge) return;
               try {
                 const message = JSON.parse(body) as WebviewMessage;
                 res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -160,9 +179,14 @@ export class HubServer {
     } catch {}
     let filePath = path.join(root, decoded);
 
-    if (!filePath.startsWith(root + path.sep) || !fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
-      filePath = path.join(this.options.staticDir, 'index.html');
+    const missing = !filePath.startsWith(root + path.sep) || !fs.existsSync(filePath) || fs.statSync(filePath).isDirectory();
+    // Una ruta con extensión que no existe es un 404, no la página principal (evita errores de script confusos).
+    if (missing && path.extname(decoded) && filePath.startsWith(root + path.sep)) {
+      res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+      res.end('No encontrado');
+      return;
     }
+    if (missing) filePath = path.join(this.options.staticDir, 'index.html');
 
     if (!fs.existsSync(filePath)) {
       res.writeHead(404, { 'Content-Type': 'text/plain' });
@@ -183,7 +207,12 @@ export class HubServer {
     };
 
     const contentType = mimeTypes[ext] ?? 'application/octet-stream';
-    res.writeHead(200, { 'Content-Type': contentType });
+    // Los archivos de /assets/ llevan hash en el nombre: pueden cachearse para siempre. La página, nunca.
+    // Solo un nombre con hash (app-1a2b3c4d.js) cambia cuando cambia el contenido y puede cachearse para siempre.
+    // `index.js` sin hash debe revalidarse siempre, o una compilación nueva no se vería.
+    const hashed = /[-.][A-Za-z0-9_]{8,}\.[a-z0-9]+$/i.test(path.basename(filePath)) && /\d/.test(path.basename(filePath));
+    const cacheControl = hashed ? 'public, max-age=31536000, immutable' : 'no-cache';
+    res.writeHead(200, { 'Content-Type': contentType, 'Cache-Control': cacheControl });
     fs.createReadStream(filePath).pipe(res);
   }
 }

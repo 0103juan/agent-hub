@@ -1,3 +1,4 @@
+import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
@@ -32,16 +33,32 @@ function squadLocation(hub: HubContext, name: string | undefined, folder: string
 export function sessionHandlers(hub: HubContext): HandlerMap<
   | 'createSession' | 'switchSession' | 'deleteSession' | 'moveSession' | 'renameProject' | 'deleteProject' | 'spawnAgents'
   | 'updateSession' | 'sendPrompt' | 'stopTurn' | 'prewarmSession' | 'removeQueued' | 'resumeQueue' | 'startPipeline' | 'failoverSession' | 'exportSession'
-  | 'compareModels' | 'revertFile' | 'searchSessions' | 'finishSquad' | 'teamReport' | 'squadDiff' | 'restoreStage' | 'queueAction' | 'crossReview' | 'forkSession' | 'generateCommit' | 'auditBranch' | 'setWorkspaceDir'
+  | 'compareModels' | 'revertFile' | 'searchSessions' | 'finishSquad' | 'teamReport' | 'squadDiff' | 'restoreStage' | 'queueAction' | 'crossReview' | 'forkSession' | 'generateCommit' | 'auditBranch' | 'setSessionDir' | 'chooseSessionDir' | 'setVisibleSessions'
   | 'startLoop' | 'stopLoop' | 'finishLoop'
 > {
+  const applySessionDir = (sessionId: string, dir: string) => {
+    if (!hub.sessions.get(sessionId) || !fs.existsSync(dir) || !fs.statSync(dir).isDirectory()) return;
+    hub.sessions.update(sessionId, { projectPath: dir, projectName: path.basename(dir) });
+    hub.chat.publishSessions();
+  };
+
   return {
-    setWorkspaceDir: ({ dir }: { dir: string }) => {
-      const active = hub.sessions.getActive();
-      if (active) {
-        hub.sessions.update(active.id, { projectPath: dir, projectName: path.basename(dir) });
-        hub.chat.publishSessions();
-      }
+    // Apunta una conversación a otra carpeta; los siguientes turnos del agente corren ahí.
+    setSessionDir: ({ sessionId, dir }) => applySessionDir(sessionId, dir),
+
+    setVisibleSessions: ({ clientId, sessionIds }) => hub.chat.setVisible(String(clientId), Array.isArray(sessionIds) ? sessionIds.map(String) : []),
+
+    chooseSessionDir: async ({ sessionId }) => {
+      let dir: string | undefined;
+      try {
+        if (process.versions?.electron) {
+          const result = await require('electron').dialog.showOpenDialog({ title: 'Carpeta de esta conversación', properties: ['openDirectory', 'createDirectory'] });
+          dir = result.canceled ? undefined : result.filePaths?.[0];
+        } else {
+          dir = (await vscode.window.showOpenDialog({ canSelectFiles: false, canSelectFolders: true, canSelectMany: false, openLabel: 'Usar carpeta' }))?.[0]?.fsPath;
+        }
+      } catch {}
+      if (dir) applySessionDir(sessionId, dir);
     },
 
     createSession: ({ projectName, taskSlug, protocolRole }) => {
@@ -129,9 +146,11 @@ export function sessionHandlers(hub: HubContext): HandlerMap<
       if (patch.profileId && patch.profileId !== session.profileId) {
         hub.sessions.changeAccount(sessionId, patch.profileId);
       }
-      const { profileId: _profileId, protocolRole, budgetUSD, loopConfig, ...settings } = patch; // `permission` viaja en settings
+      const { profileId: _profileId, protocolRole, budgetUSD, loopConfig, title, ...settings } = patch; // `permission` viaja en settings
+      const cleanTitle = title?.trim().slice(0, 80);
       hub.sessions.update(sessionId, {
         ...settings,
+        ...(cleanTitle && { title: cleanTitle }),
         ...(protocolRole !== undefined && { protocolRole: protocolRole ?? undefined }),
         ...(budgetUSD !== undefined && { budgetUSD: budgetUSD ?? undefined }),
         ...(loopConfig !== undefined && { loopConfig: loopConfig ?? undefined })

@@ -12,8 +12,20 @@ export interface TeamTemplate {
 
 export const TEAM_TEMPLATES: TeamTemplate[] = [
   {
+    id: 'odd',
+    label: 'ODD (Organic Driven Development)',
+    description: 'Explorador (investiga sin tokens) → Coordinador (clasifica/resuelve) → Desarrollador → Revisor (RDD)',
+    roles: ['explorador', 'coordinador', 'desarrollador', 'revisor'],
+    handoffs: {
+      explorador: ['coordinador'],
+      coordinador: ['desarrollador'],
+      desarrollador: ['revisor'],
+      revisor: []
+    }
+  },
+  {
     id: 'feature',
-    label: 'Feature completa',
+    label: 'Feature completa (SDD / Cascada)',
     description: 'Arquitecto → Tester → Desarrollador → Revisor → Documentador',
     roles: ['arquitecto', 'tester', 'desarrollador', 'revisor', 'documentador']
   },
@@ -26,19 +38,26 @@ export const TEAM_TEMPLATES: TeamTemplate[] = [
   },
   {
     id: 'bug',
-    label: 'Bug',
+    label: 'Bug (Depurador)',
     description: 'Depurador → Desarrollador → Revisor',
     roles: ['depurador', 'desarrollador', 'revisor']
   },
   {
+    id: 'edd',
+    label: 'EDD (Evidence-Driven Development)',
+    description: 'Depurador (reproduce con prueba) → Desarrollador (corrige) → Tester (valida evidencia)',
+    roles: ['depurador', 'desarrollador', 'tester'],
+    handoffs: { depurador: ['desarrollador'], desarrollador: ['tester'], tester: [] }
+  },
+  {
     id: 'revision',
-    label: 'Revisión',
+    label: 'Revisión / Auditoría',
     description: 'Explorador → Revisor',
     roles: ['explorador', 'revisor']
   }
 ];
 
-export const DEFAULT_TEMPLATE = TEAM_TEMPLATES[0];
+export const DEFAULT_TEMPLATE = TEAM_TEMPLATES.find((t) => t.id === 'feature') ?? TEAM_TEMPLATES[0];
 
 export function templateById(id: string | undefined): TeamTemplate {
   return TEAM_TEMPLATES.find((template) => template.id === id) ?? DEFAULT_TEMPLATE;
