@@ -25,7 +25,7 @@ export const ProfileCard: React.FC<Props> = ({ profile, isActive, onSelect, onLo
 
   return (
     <div
-      className={`p-2.5 rounded-lg border transition-all ${
+      className={`hub-lift p-2.5 rounded-lg border ${
         isActive
           ? 'bg-zinc-800/90 border-indigo-500 shadow-md shadow-indigo-500/10 ring-1 ring-indigo-500/30'
           : 'bg-zinc-900/50 border-zinc-800 hover:border-zinc-700'

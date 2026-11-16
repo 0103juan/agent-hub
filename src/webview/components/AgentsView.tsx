@@ -256,7 +256,7 @@ const Board: React.FC<{ agents: ConversationSession[]; state: HubState; onOpenCh
                 key={session.id}
                 type="button"
                 onClick={() => onOpenChat(session.id)}
-                className="w-full text-left p-2 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-600 transition text-[11px] min-w-0"
+                className="hub-lift w-full text-left p-2 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-600 text-[11px] min-w-0"
               >
                 <span className="block font-semibold text-zinc-100 truncate">{agentName(session)}</span>
                 <span className="block text-zinc-400 truncate">

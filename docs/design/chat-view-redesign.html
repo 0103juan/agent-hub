@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AgentHub · Rediseño de la vista de chat (maqueta)</title>
+<style>
+  :root {
+    --bg: #07090e; --s1: #0e131f; --s2: #131a29; --s3: #1a2334; --line: #202b3f; --line-hi: #2a3750;
+    --t1: #f3f6fc; --t2: #dde4ef; --t3: #c5cfde; --t4: #a3b0c5; --t5: #8593ab;
+    --indigo: #6366f1; --indigo-d: #4f46e5; --amber: #f59e0b; --cyan: #38bdf8; --emerald: #34d399; --rose: #fb7185;
+    --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+    --sans: Inter, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --prose: 860px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { background: var(--bg); color: var(--t2); font: 13px/1.5 var(--sans); overflow: hidden; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  svg.i { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .app { display: flex; flex-direction: column; height: 100vh; }
+
+  /* ---------- 1ª fila: marca, carpeta, pestañas y herramientas agrupadas ---------- */
+  .topbar { display: flex; align-items: center; gap: 10px; padding: 6px 12px; border-bottom: 1px solid var(--line); }
+  .brand { display: flex; align-items: center; gap: 7px; font-weight: 800; color: var(--t1); padding-right: 10px; border-right: 1px solid var(--line); }
+  .brand small { font: 500 10px var(--mono); color: var(--t5); }
+  .picker { display: flex; align-items: center; gap: 6px; padding: 4px 9px; border: 1px solid var(--line); border-radius: 8px; background: var(--s1); font: 600 12px var(--mono); color: var(--t2); }
+  .tabs { position: relative; display: flex; gap: 2px; }
+  .tab { position: relative; z-index: 1; display: flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 7px; font-size: 12px; font-weight: 500; color: var(--t4); transition: color .2s, background .2s; }
+  .tab:hover { color: var(--t1); background: rgba(255,255,255,.04); }
+  .tab[aria-current] { color: #fff; background: none; }
+  .tab .count { font: 600 10px var(--mono); color: inherit; opacity: .75; }
+  .tab-pill { position: absolute; top: 0; height: 100%; border-radius: 7px; background: var(--indigo-d); box-shadow: 0 4px 14px -4px rgba(99,102,241,.6); transition: left .4s cubic-bezier(.16,1,.3,1), width .4s cubic-bezier(.16,1,.3,1); }
+  .spacer { flex: 1; }
+  .group { display: flex; align-items: center; gap: 1px; padding: 2px; border: 1px solid var(--line); border-radius: 9px; background: var(--s1); }
+  .ib { position: relative; display: grid; place-items: center; width: 28px; height: 26px; border-radius: 6px; color: var(--t4); }
+  .ib:hover { color: var(--t1); background: var(--s3); }
+  .ib .badge { position: absolute; top: -4px; right: -4px; min-width: 15px; padding: 0 3px; border-radius: 99px; background: var(--amber); color: #0b0b0b; font: 700 9px/15px var(--mono); text-align: center; }
+  .branch { display: flex; align-items: center; gap: 5px; height: 26px; padding: 0 8px; border-radius: 6px; font: 600 11px var(--mono); color: var(--emerald); }
+  .branch:hover { background: var(--s3); }
+  .branch .dirty { padding: 0 5px; border-radius: 99px; background: rgba(245,158,11,.15); color: var(--amber); font-size: 10px; }
+  details.menu { position: relative; }
+  details.menu > summary { list-style: none; display: flex; align-items: center; gap: 4px; height: 26px; padding: 0 8px; border-radius: 6px; font-size: 12px; color: var(--t3); cursor: pointer; }
+  details.menu > summary::-webkit-details-marker { display: none; }
+  details.menu > summary:hover, details.menu[open] > summary { background: var(--s3); color: var(--t1); }
+  .menu-pop { position: absolute; right: 0; top: calc(100% + 6px); z-index: 30; min-width: 250px; padding: 5px; border: 1px solid var(--line-hi); border-radius: 10px; background: var(--s2); box-shadow: 0 18px 40px -12px rgba(0,0,0,.8); }
+  .menu-pop button { display: flex; align-items: center; gap: 8px; width: 100%; padding: 6px 8px; border-radius: 6px; font-size: 12px; color: var(--t3); text-align: left; }
+  .menu-pop button:hover { background: var(--s3); color: var(--t1); }
+  .menu-pop kbd { margin-left: auto; font: 10px var(--mono); color: var(--t5); }
+  .menu-pop .label { padding: 6px 8px 3px; font: 700 10px var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--t5); }
+  .btn2 { display: flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--s1); font-size: 12px; color: var(--t3); }
+  .btn2:hover { border-color: var(--line-hi); color: var(--t1); }
+
+  /* ---------- 2ª fila: chat activo (antes eran dos filas: Columnas/Pendientes + título) ---------- */
+  .sessionbar { display: flex; align-items: center; gap: 8px; padding: 7px 12px; border-bottom: 1px solid var(--line); }
+  .accent-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 0 3px rgba(56,189,248,.18); }
+  .crumb { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 13px; }
+  .crumb .dir { font: 600 11px var(--mono); color: var(--t4); }
+  .crumb .title { font-weight: 600; color: var(--t1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 420px; }
+  .sep { width: 1px; height: 18px; background: var(--line); }
+  .btn-primary { display: flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px; border-radius: 8px; background: var(--indigo-d); color: #fff; font-size: 12px; font-weight: 600; box-shadow: 0 6px 16px -8px rgba(99,102,241,.8); }
+  .btn-primary:hover { background: var(--indigo); }
+  select.sel { height: 28px; padding: 0 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--s1); color: var(--t2); font: 12px var(--sans); }
+
+  /* ---------- 3ª fila: cuenta, modelo, rol, contexto y gasto ---------- */
+  .modelbar { display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-bottom: 1px solid var(--line); }
+  .chip { display: flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--s1); font-size: 12px; color: var(--t2); }
+  .chip .pb { display: grid; place-items: center; width: 18px; height: 18px; border-radius: 5px; background: rgba(217,119,6,.2); color: #fdba74; font: 700 10px var(--mono); }
+  .chip.role { border-color: rgba(244,63,94,.45); color: #fda4af; background: rgba(244,63,94,.08); }
+  .meter { width: 54px; height: 4px; border-radius: 9px; background: var(--s3); overflow: hidden; }
+  .meter > i { display: block; width: 10%; height: 100%; background: var(--cyan); }
+  .cost { color: var(--emerald); font: 600 12px var(--mono); }
+
+  /* ---------- Conversación ---------- */
+  .stage { position: relative; flex: 1; min-height: 0; }
+  .list { height: 100%; overflow-y: auto; padding: 18px 24px 90px; scrollbar-gutter: stable; }
+  .turn { max-width: var(--prose); margin: 0 auto 18px; }
+  /* Las tablas, diffs y código pueden salir del ancho de lectura */
+  .wide { max-width: min(1180px, 100%); margin-left: auto; margin-right: auto; }
+
+  .msg-user { position: relative; padding: 9px 14px 10px; border-left: 3px solid var(--indigo); border-radius: 4px 10px 10px 4px; background: rgba(99,102,241,.07); }
+  .meta { display: flex; align-items: center; gap: 7px; font: 500 11px var(--mono); color: var(--t5); }
+  .meta b { font-family: var(--sans); color: var(--t2); }
+  .msg-user p { margin: 3px 0 0; color: var(--t1); font-size: 14px; }
+
+  .msg-ai { position: relative; padding: 2px 0 6px; }
+  .tag { padding: 1px 6px; border: 1px solid rgba(244,63,94,.45); border-radius: 4px; font: 700 10px var(--mono); color: #fda4af; letter-spacing: .04em; }
+  .avatar { display: grid; place-items: center; width: 20px; height: 20px; border-radius: 6px; background: rgba(217,119,6,.2); color: #fdba74; font: 700 10px var(--mono); }
+  .steps { display: inline-flex; align-items: center; gap: 6px; margin: 10px 0 4px; padding: 5px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--s1); font-size: 12px; color: var(--t3); }
+  .prose { font-size: 14px; line-height: 1.65; color: var(--t2); }
+  .prose p { margin: 10px 0; }
+  .prose strong { color: var(--t1); }
+  .prose code { padding: 1px 5px; border-radius: 4px; background: var(--s3); font: 12px var(--mono); color: var(--t1); }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  th { text-align: left; padding: 8px 12px; background: var(--s2); color: var(--t1); font-weight: 600; border-bottom: 1px solid var(--line); }
+  td { padding: 8px 12px; border-bottom: 1px solid var(--line); color: var(--t3); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  td:first-child { color: var(--t1); font-weight: 600; white-space: nowrap; }
+
+  /* Acciones del mensaje: aparecen al pasar el cursor o con el foco; en el último quedan fijas */
+  .actions { position: absolute; top: -2px; right: 0; display: flex; gap: 2px; padding: 2px; border: 1px solid var(--line); border-radius: 8px; background: var(--s2); opacity: 0; transform: translateY(3px); transition: opacity .18s, transform .18s; }
+  .msg-user .actions { top: 6px; right: 8px; }
+  .msg-user:hover .actions, .msg-ai:hover .actions, .actions:focus-within, .is-last .actions { opacity: 1; transform: none; }
+  .actions button { display: flex; align-items: center; gap: 4px; height: 24px; padding: 0 7px; border-radius: 6px; font-size: 11px; color: var(--t4); }
+  .actions button:hover { background: var(--s3); color: var(--t1); }
+
+  /* Archivos modificados en una línea que se despliega */
+  details.files { margin-top: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--s1); }
+  details.files > summary { list-style: none; display: flex; align-items: center; gap: 8px; padding: 8px 12px; cursor: pointer; font-size: 12px; color: var(--t3); }
+  details.files > summary::-webkit-details-marker { display: none; }
+  details.files > summary .chev { transition: transform .2s; }
+  details.files[open] > summary .chev { transform: rotate(90deg); }
+  details.files > summary .undo { margin-left: auto; display: flex; align-items: center; gap: 5px; color: var(--amber); font-size: 12px; }
+  .file-grid { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 12px 12px; }
+  .file { display: flex; align-items: center; gap: 6px; padding: 4px 8px; border: 1px solid var(--line); border-radius: 7px; background: var(--bg); font: 11px var(--mono); color: var(--t3); }
+  .file .r { color: var(--amber); }
+
+  /* Controles flotantes: juntos en la esquina, sin tapar el texto */
+  .floaters { position: absolute; right: 22px; bottom: 14px; display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+  .fbtn { display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border: 1px solid var(--line-hi); border-radius: 99px; background: rgba(19,26,41,.92); backdrop-filter: blur(8px); font-size: 12px; color: var(--t2); box-shadow: 0 10px 24px -10px rgba(0,0,0,.9); }
+  .fbtn.new { border-color: rgba(99,102,241,.6); background: var(--indigo-d); color: #fff; animation: nudge .6s cubic-bezier(.16,1,.3,1) 2; }
+  @keyframes nudge { 50% { transform: translateY(-4px); } }
+
+  /* ---------- Compositor ---------- */
+  .composer-wrap { padding: 8px 12px 12px; border-top: 1px solid var(--line); }
+  .toolbar { display: flex; align-items: center; gap: 6px; max-width: 1180px; margin: 0 auto 8px; }
+  .tb { display: flex; align-items: center; gap: 5px; height: 26px; padding: 0 9px; border: 1px solid var(--line); border-radius: 7px; background: var(--s1); font-size: 12px; color: var(--t3); }
+  .tb:hover { border-color: var(--line-hi); color: var(--t1); }
+  .tb .n { min-width: 16px; padding: 0 4px; border-radius: 99px; background: rgba(245,158,11,.18); color: var(--amber); font: 700 10px/16px var(--mono); text-align: center; }
+  .tb.warn { border-color: rgba(245,158,11,.45); color: #fcd34d; }
+  .tb .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--emerald); }
+  .composer { position: relative; max-width: 1180px; margin: 0 auto; border: 1px solid var(--line-hi); border-radius: 12px; background: var(--s1); overflow: hidden; }
+  .composer textarea { display: block; width: 100%; height: 64px; padding: 11px 14px 0; border: 0; outline: 0; resize: none; background: transparent; color: var(--t1); font: 14px var(--sans); }
+  .composer textarea::placeholder { color: var(--t5); }
+  .composer .row { display: flex; align-items: center; gap: 6px; padding: 6px 10px 8px; }
+  .composer kbd { padding: 1px 6px; border: 1px solid var(--line-hi); border-radius: 5px; background: var(--s3); font: 11px var(--mono); color: var(--t4); }
+  .hint { font-size: 11px; color: var(--t5); }
+  .send { display: flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px; border-radius: 8px; background: var(--indigo-d); color: #fff; font-weight: 600; font-size: 12px; }
+  @property --ang { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+  @keyframes spin { to { --ang: 360deg; } }
+  .composer::before { content: ''; position: absolute; inset: 0; padding: 1.5px; border-radius: inherit; pointer-events: none; background: conic-gradient(from var(--ang), transparent 0 50%, #6366f1 68%, #f59e0b 84%, #38bdf8 94%, transparent); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; opacity: 0; transition: opacity .3s; }
+  .composer:focus-within::before { opacity: 1; animation: spin 4s linear infinite; }
+
+  /* ---------- Notas de diseño ---------- */
+  .n-badge { display: none; position: absolute; z-index: 40; width: 20px; height: 20px; border-radius: 50%; background: var(--amber); color: #111; font: 800 11px/20px var(--sans); text-align: center; box-shadow: 0 0 0 3px rgba(245,158,11,.25); pointer-events: none; }
+  body.notes .n-badge { display: block; }
+  .rel { position: relative; }
+  .notes-toggle { position: fixed; left: 14px; bottom: 14px; z-index: 50; }
+  .notes-panel { display: none; position: fixed; left: 14px; bottom: 56px; z-index: 50; width: 360px; max-height: 70vh; overflow: auto; padding: 12px 14px; border: 1px solid var(--line-hi); border-radius: 12px; background: rgba(14,19,31,.97); box-shadow: 0 20px 50px -10px #000; font-size: 12px; }
+  body.notes .notes-panel { display: block; }
+  .notes-panel h3 { margin: 0 0 8px; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--amber); }
+  .notes-panel ol { margin: 0; padding-left: 18px; color: var(--t3); }
+  .notes-panel li { margin: 0 0 6px; }
+  .notes-panel b { color: var(--t1); }
+
+  @media (prefers-reduced-motion: reduce) { *, *::before { animation: none !important; transition: none !important; } }
+  .tab, .picker, .btn2, details.menu > summary { white-space: nowrap; }
+  .tab .lbl { display: inline-flex; align-items: center; gap: 4px; }
+  /* Como en la app: en anchos medios solo la pestaña activa muestra su nombre */
+  @media (max-width: 1560px) { .tab:not([aria-current]) .lbl { display: none; } }
+  @media (max-width: 1360px) { details.menu .lbl, .btn2 .lbl-vs { display: none; } .brand small { display: none; } }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="msg" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="bot" viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M12 8V4M9 14h.01M15 14h.01"/></symbol>
+  <symbol id="brain" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></symbol>
+  <symbol id="file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></symbol>
+  <symbol id="wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></symbol>
+  <symbol id="chart" viewBox="0 0 24 24"><path d="M3 3v18h18M8 17V10M13 17V6M18 17v-4"/></symbol>
+  <symbol id="users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M16 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-4-6.3"/></symbol>
+  <symbol id="spark" viewBox="0 0 24 24"><path d="M12 3l1.9 5.6L19.5 10l-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.4zM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></symbol>
+  <symbol id="folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="git" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="8" r="2.5"/><path d="M6 8.5v7M18 10.5c0 4-6 3-11 5.5"/></symbol>
+  <symbol id="term" viewBox="0 0 24 24"><path d="M4 17l6-5-6-5M12 19h8"/></symbol>
+  <symbol id="zap" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></symbol>
+  <symbol id="shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M12 8v4M12 16h.01"/></symbol>
+  <symbol id="note" viewBox="0 0 24 24"><path d="M5 3h10l4 4v14H5z"/><path d="M9 12h6M9 16h4"/></symbol>
+  <symbol id="bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21h4"/></symbol>
+  <symbol id="vol" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4zM15.5 8.5a5 5 0 0 1 0 7"/></symbol>
+  <symbol id="refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-15.5 6.3L3 16M3 12a9 9 0 0 1 15.5-6.3L21 8M21 3v5h-5M3 21v-5h5"/></symbol>
+  <symbol id="eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="window" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></symbol>
+  <symbol id="cols" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16M15 4v16"/></symbol>
+  <symbol id="clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="hist" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 2"/></symbol>
+  <symbol id="down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="right" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+  <symbol id="up" viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></symbol>
+  <symbol id="copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></symbol>
+  <symbol id="pin" viewBox="0 0 24 24"><path d="M12 17v5M8 3h8l-1 6 3 4H6l3-4z"/></symbol>
+  <symbol id="edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></symbol>
+  <symbol id="fork" viewBox="0 0 24 24"><circle cx="6" cy="5" r="2"/><circle cx="18" cy="5" r="2"/><circle cx="12" cy="19" r="2"/><path d="M6 7v2a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V7M12 12v5"/></symbol>
+  <symbol id="undo" viewBox="0 0 24 24"><path d="M9 14L4 9l5-5M4 9h11a5 5 0 0 1 0 10h-3"/></symbol>
+  <symbol id="send" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></symbol>
+  <symbol id="mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></symbol>
+  <symbol id="loop" viewBox="0 0 24 24"><path d="M17 2l4 4-4 4M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4M21 13v2a3 3 0 0 1-3 3H3"/></symbol>
+  <symbol id="play" viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></symbol>
+  <symbol id="clip" viewBox="0 0 24 24"><path d="M21 11l-9 9a5 5 0 0 1-7-7l9-9a3.5 3.5 0 0 1 5 5l-9 9a2 2 0 0 1-3-3l8-8"/></symbol>
+  <symbol id="diff" viewBox="0 0 24 24"><path d="M12 3v12M6 9h12M6 21h12"/></symbol>
+  <symbol id="warn" viewBox="0 0 24 24"><path d="M12 3L2 21h20zM12 10v4M12 18h.01"/></symbol>
+  <symbol id="commit" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M3 12h6M15 12h6"/></symbol>
+  <symbol id="flow" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><path d="M9 6h6a3 3 0 0 1 3 3v6"/></symbol>
+  <symbol id="list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></symbol>
+  <symbol id="dl" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></symbol>
+  <symbol id="code" viewBox="0 0 24 24"><path d="M8 6l-6 6 6 6M16 6l6 6-6 6"/></symbol>
+  <symbol id="globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></symbol>
+  <symbol id="sliders" viewBox="0 0 24 24"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></symbol>
+  <symbol id="cpu" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/></symbol>
+</svg>
+
+<div class="app">
+  <!-- 1ª FILA -->
+  <header class="topbar rel">
+    <span class="n-badge" style="left:300px;top:-2px">9</span>
+    <div class="brand">
+      <svg width="20" height="20" viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#0a0a0f"/><circle cx="256" cy="116" r="36" fill="#38bdf8"/><circle cx="132" cy="330" r="36" fill="#06b6d4"/><circle cx="380" cy="330" r="36" fill="#c084fc"/><path d="M256 128L140 326M256 128L372 326M188 238h136" stroke="#6366f1" stroke-width="32" stroke-linecap="round"/><polygon points="256,204 286,221 286,255 256,272 226,255 226,221" fill="#fff"/></svg>
+      AgentHub <small>v0.1.0</small>
+    </div>
+    <button class="picker"><svg class="i"><use href="#folder"/></svg>agent-hub<svg class="i" style="width:12px"><use href="#down"/></svg></button>
+
+    <nav class="tabs" id="tabs" aria-label="Vistas">
+      <span class="tab-pill" id="pill"></span>
+      <button class="tab"><svg class="i" style="color:var(--amber)"><use href="#spark"/></svg><span class="lbl">HUD Center</span></button>
+      <button class="tab" aria-current="page"><svg class="i"><use href="#msg"/></svg><span class="lbl">Chat</span></button>
+      <button class="tab"><svg class="i"><use href="#bot"/></svg><span class="lbl">Agentes <span class="count">0</span></span></button>
+      <button class="tab"><svg class="i"><use href="#brain"/></svg><span class="lbl">Memoria</span></button>
+      <button class="tab"><svg class="i"><use href="#file"/></svg><span class="lbl">Documentos</span></button>
+      <button class="tab"><svg class="i"><use href="#wrench"/></svg><span class="lbl">MCPs <span class="count">13</span></span></button>
+      <button class="tab"><svg class="i"><use href="#chart"/></svg><span class="lbl">Métricas</span></button>
+      <button class="tab"><svg class="i"><use href="#users"/></svg><span class="lbl">Cuentas <span class="count">8</span></span></button>
+    </nav>
+
+    <div class="spacer"></div>
+
+    <!-- Trabajo: lo que se usa a diario, siempre a la vista -->
+    <div class="group rel" title="Trabajo">
+      <span class="n-badge" style="left:-10px;top:-12px">3</span>
+      <button class="ib" title="Archivos y cambios Git"><svg class="i"><use href="#folder"/></svg><span class="badge">19</span></button>
+      <button class="ib" title="Terminal (Ctrl+`)"><svg class="i"><use href="#term"/></svg></button>
+      <button class="branch" title="Ramas Git"><svg class="i" style="width:13px"><use href="#git"/></svg>main <span class="dirty">19</span></button>
+      <button class="ib" title="Lanzador rápido (Alt+Espacio)"><svg class="i"><use href="#zap"/></svg></button>
+      <button class="ib" title="Auditar seguridad, entorno y SQL"><svg class="i"><use href="#shield"/></svg></button>
+      <button class="ib" title="Borrador de trabajo (Ctrl+E)"><svg class="i"><use href="#note"/></svg></button>
+    </div>
+
+    <!-- Vista: cambia cómo se ve el espacio de trabajo -->
+    <details class="menu">
+      <summary title="Vista"><svg class="i"><use href="#eye"/></svg><span class="lbl">Vista</span><svg class="i" style="width:12px"><use href="#down"/></svg></summary>
+      <div class="menu-pop">
+        <div class="label">Vista</div>
+        <button><svg class="i"><use href="#eye"/></svg>Modo enfoque<kbd>Ctrl Shift F</kbd></button>
+        <button><svg class="i"><use href="#window"/></svg>Modo central<kbd>Ctrl Alt M</kbd></button>
+        <button><svg class="i"><use href="#cols"/></svg>Ver varios chats en columnas</button>
+        <button><svg class="i"><use href="#cols"/></svg>Panel lateral dividido<kbd>Ctrl Alt B</kbd></button>
+        <button><svg class="i"><use href="#list"/></svg>Densidad: cómoda / compacta</button>
+      </div>
+    </details>
+
+    <!-- Ventana: abrir AgentHub en otro sitio -->
+    <details class="menu">
+      <summary title="Ventana"><svg class="i"><use href="#window"/></svg><span class="lbl">Ventana</span><svg class="i" style="width:12px"><use href="#down"/></svg></summary>
+      <div class="menu-pop">
+        <div class="label">Abrir en</div>
+        <button><svg class="i"><use href="#window"/></svg>Ventana flotante<kbd>Ctrl Alt W</kbd></button>
+        <button><svg class="i"><use href="#globe"/></svg>Navegador (localhost:3710)</button>
+        <button><svg class="i"><use href="#code"/></svg><span class="lbl-vs">VS Code</span></button>
+      </div>
+    </details>
+
+    <div class="sep"></div>
+    <button class="ib" title="Avisos"><svg class="i"><use href="#bell"/></svg><span class="badge">19</span></button>
+    <button class="ib" title="Alertas sonoras"><svg class="i"><use href="#vol"/></svg></button>
+    <button class="ib" title="Refrescar estado"><svg class="i"><use href="#refresh"/></svg></button>
+    <button class="btn2 rel" title="Abrir este proyecto en VS Code"><span class="n-badge" style="left:-12px;top:-12px">8</span><svg class="i"><use href="#code"/></svg><span class="lbl-vs">VS Code</span></button>
+  </header>
+
+  <!-- 2ª FILA: chat activo -->
+  <div class="sessionbar rel">
+    <span class="n-badge" style="left:4px;top:-8px">10</span>
+    <span class="accent-dot" title="Color del proyecto agent-hub (clic para cambiar)"></span>
+    <div class="crumb">
+      <span class="dir">agent-hub /</span>
+      <span class="title">Quiero mejorar la terminal integrada, generar una vista…</span>
+      <svg class="i" style="width:12px;color:var(--t5)"><use href="#down"/></svg>
+    </div>
+    <div class="sep"></div>
+    <span class="rel"><span class="n-badge" style="left:-14px;top:-12px">2</span><button class="btn2"><svg class="i"><use href="#cols"/></svg>Columnas <span class="mono" style="color:var(--t5)">1</span></button></span>
+    <button class="btn2"><svg class="i"><use href="#clock"/></svg>Pendientes</button>
+    <div class="spacer"></div>
+    <button class="ib" title="Renombrar"><svg class="i"><use href="#edit"/></svg></button>
+    <select class="sel" aria-label="Permisos"><option>Completo</option><option>Solo lectura</option></select>
+    <button class="ib" title="Índice de la conversación"><svg class="i"><use href="#list"/></svg></button>
+    <button class="ib" title="Exportar"><svg class="i"><use href="#dl"/></svg></button>
+    <button class="btn2"><svg class="i"><use href="#hist"/></svg>Historial <span class="mono" style="color:var(--t5)">28</span></button>
+    <button class="btn-primary"><svg class="i"><use href="#plus"/></svg>Nueva tarea</button>
+  </div>
+
+  <!-- 3ª FILA: modelo -->
+  <div class="modelbar">
+    <button class="chip"><span class="pb">C</span>Claude (Principal)<svg class="i" style="width:12px"><use href="#down"/></svg></button>
+    <button class="chip">🔥 Claude Opus 5.5<svg class="i" style="width:12px"><use href="#down"/></svg></button>
+    <button class="chip" title="Añadir otro modelo"><svg class="i" style="width:13px"><use href="#plus"/></svg></button>
+    <button class="chip role">Diseñador<svg class="i" style="width:12px"><use href="#down"/></svg></button>
+    <div class="spacer"></div>
+    <span class="chip" title="Contexto usado"><svg class="i" style="width:13px;color:var(--cyan)"><use href="#cpu"/></svg><span class="meter"><i></i></span><span class="mono">10%</span></span>
+    <span class="chip" title="Gasto del chat"><span class="cost">$13.46</span></span>
+    <button class="chip"><svg class="i" style="width:13px"><use href="#sliders"/></svg>Desplegar<svg class="i" style="width:12px"><use href="#down"/></svg></button>
+  </div>
+
+  <!-- CONVERSACIÓN -->
+  <main class="stage">
+    <div class="list" id="list">
+      <div class="turn msg-ai rel">
+        <div class="prose" style="color:var(--t4)"><p>…tarjetas que se elevan al pasar el cursor, barras que crecen y un borde animado en el compositor.</p></div>
+        <details class="files rel">
+          <summary class="rel">
+            <span class="n-badge" style="left:-40px;top:6px">11</span>
+            <svg class="i chev" style="width:13px"><use href="#right"/></svg>
+            <b style="color:var(--t1)">8 archivos modificados</b>
+            <span class="mono" style="color:var(--t5)">+412 −96</span>
+            <span class="undo"><svg class="i" style="width:13px"><use href="#undo"/></svg>Deshacer turno</span>
+          </summary>
+          <div class="file-grid">
+            <span class="file">.agent-hub/experience.md <span class="r">↺</span></span>
+            <span class="file">src/electron/main.ts <span class="r">↺</span></span>
+            <span class="file">src/webview/App.tsx <span class="r">↺</span></span>
+            <span class="file">components/ShortcutsModal.tsx <span class="r">↺</span></span>
+            <span class="file">components/TacticalHudView.tsx <span class="r">↺</span></span>
+            <span class="file">src/webview/index.html <span class="r">↺</span></span>
+            <span class="file">src/webview/styles.css <span class="r">↺</span></span>
+            <span class="file">tailwind.config.js <span class="r">↺</span></span>
+          </div>
+        </details>
+      </div>
+
+      <div class="turn msg-user rel">
+        <span class="n-badge" style="left:-28px;top:6px">7</span>
+        <div class="meta"><b>Tú</b> 18:30</div>
+        <p>Pero solo se añadió los colores, no veo mejoras en las interacciones</p>
+        <div class="actions"><button><svg class="i" style="width:12px"><use href="#copy"/></svg>Copiar</button><button><svg class="i" style="width:12px"><use href="#pin"/></svg></button><button><svg class="i" style="width:12px"><use href="#edit"/></svg>Editar</button><button><svg class="i" style="width:12px"><use href="#fork"/></svg>Bifurcar</button></div>
+      </div>
+
+      <div class="turn msg-ai is-last rel">
+        <span class="n-badge" style="left:-28px;top:0">5</span>
+        <div class="meta"><span class="avatar">C</span><b>Claude Opus 5.5</b><span class="tag">DISEÑADOR</span>405 palabras · 3 min 37 s · $5.45</div>
+        <div class="actions"><button><svg class="i" style="width:12px"><use href="#copy"/></svg>Copiar</button><button><svg class="i" style="width:12px"><use href="#pin"/></svg></button><button><svg class="i" style="width:12px"><use href="#shield"/></svg>Segunda opinión</button><button><svg class="i" style="width:12px"><use href="#refresh"/></svg>Regenerar</button><button><svg class="i" style="width:12px"><use href="#fork"/></svg>Bifurcar</button></div>
+        <button class="steps"><svg class="i" style="width:12px"><use href="#right"/></svg><b style="color:var(--t1)">Proceso de ejecución</b> · 22 pasos · razonamiento</button>
+        <div class="prose rel">
+          <span class="n-badge" style="left:-28px;top:12px">1</span>
+          <p>Tenías razón: lo anterior se quedó en un brillo de 1 px en los bordes y una entrada de medio segundo, y eso no se nota. Ahora cada vista tiene interacciones visibles. Las comprobé en el navegador capturando a mitad de cada animación, y la compilación y las 199 pruebas pasan.</p>
+        </div>
+      </div>
+      <div class="turn wide">
+        <table>
+          <thead><tr><th>Dónde</th><th>Interacción</th><th>Comprobado</th></tr></thead>
+          <tbody>
+            <tr><td>Todas las vistas</td><td>La píldora índigo de la pestaña activa se desliza hasta la nueva en lugar de saltar.</td><td>La píldora pasó de x=290 a 743 a los 150 ms y terminó en 780.</td></tr>
+            <tr><td>Métricas</td><td>Los 4 KPIs ruedan hasta su valor. Las barras crecen desde la izquierda al entrar.</td><td>A mitad de la animación los tokens iban en 10.075k de 21.220k.</td></tr>
+            <tr><td>Chat</td><td>Mientras escribes, un borde de color recorre el contorno del compositor.</td><td>Visto en captura; Enviar se movió 6 px hacia el puntero.</td></tr>
+            <tr><td>Cuentas, MCPs y Agentes</td><td>Las tarjetas se elevan 2 px con sombra y un filo ámbar.</td><td>Elevación de 2 px medida.</td></tr>
+            <tr><td>Documentos</td><td>Los archivos del árbol se desplazan a la derecha al pasar el cursor.</td><td>Desplazamiento de 3 px medido.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="turn prose">
+        <p>Cada movimiento responde a algo: el puntero, una pestaña nueva, una cifra que cambia o que estás escribiendo. Con "reducir movimiento" activado en Windows se anula todo.</p>
+        <p><strong>Para verlo en la app instalada:</strong> ejecuta <code>npm run update</code>. Si alguna interacción te molesta, en la bandeja está <strong>"Volver a una versión anterior"</strong>.</p>
+      </div>
+    </div>
+
+    <div class="floaters">
+      <span class="n-badge" style="left:-26px;top:4px">4</span>
+      <button class="fbtn"><svg class="i" style="width:13px"><use href="#up"/></svg>Inicio</button>
+      <button class="fbtn new"><svg class="i" style="width:13px"><use href="#down"/></svg>1 mensaje nuevo</button>
+    </div>
+  </main>
+
+  <!-- COMPOSITOR -->
+  <footer class="composer-wrap">
+    <div class="toolbar rel">
+      <span class="n-badge" style="right:-28px;top:2px">6</span>
+      <button class="tb"><svg class="i" style="width:13px"><use href="#clip"/></svg>Contexto</button>
+      <button class="tb"><svg class="i" style="width:13px"><use href="#folder"/></svg>Archivos</button>
+      <button class="tb"><svg class="i" style="width:13px"><use href="#diff"/></svg>Diff</button>
+      <button class="tb warn" title="2 errores del compilador"><svg class="i" style="width:13px"><use href="#warn"/></svg>Problemas <span class="n">2</span></button>
+      <div class="spacer"></div>
+      <button class="tb" title="Último resultado: 199/199"><span class="dot"></span><svg class="i" style="width:12px"><use href="#play"/></svg>Test</button>
+      <button class="tb"><svg class="i" style="width:13px"><use href="#commit"/></svg>Commit</button>
+      <button class="tb"><svg class="i" style="width:13px"><use href="#flow"/></svg>Flujos <span class="n" style="background:rgba(99,102,241,.25);color:#c7d2fe">1</span></button>
+      <button class="tb"><svg class="i" style="width:13px"><use href="#wrench"/></svg>Acciones</button>
+    </div>
+    <div class="composer">
+      <textarea placeholder="Pregunta a Claude (Principal), @ para agentes y archivos, / para comandos…" aria-label="Mensaje"></textarea>
+      <div class="row">
+        <kbd>⏎ Enviar</kbd><span class="hint">·</span><kbd>⇧⏎ Salto</kbd><button class="hint" style="text-decoration:underline">cambiar</button>
+        <div class="spacer"></div>
+        <button class="tb"><svg class="i" style="width:13px"><use href="#loop"/></svg>Loop</button>
+        <button class="tb"><svg class="i" style="width:13px"><use href="#mic"/></svg>Dictar</button>
+        <button class="send">Enviar<svg class="i" style="width:13px"><use href="#send"/></svg></button>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<button class="btn2 notes-toggle" id="notesBtn" aria-pressed="false"><svg class="i"><use href="#note"/></svg>Notas de diseño</button>
+<aside class="notes-panel" aria-label="Notas de diseño">
+  <h3>Qué cambia respecto a la vista actual</h3>
+  <ol>
+    <li><b>Ancho de lectura:</b> la prosa se limita a 860 px (~85 caracteres por línea). Las tablas, el código y los diffs pueden ensancharse hasta 1180 px.</li>
+    <li><b>Una fila menos:</b> "Columnas" y "Pendientes" pasan a la fila del título.</li>
+    <li><b>Herramientas agrupadas:</b> las de uso diario (Git, terminal, rama, lanzador, auditoría, borrador) quedan a la vista en un grupo; las de vista y ventana van en dos menús. No se quita ninguna.</li>
+    <li><b>Controles flotantes en la esquina:</b> "Inicio" y "mensaje nuevo" juntos encima del compositor, sin tapar el texto; el rebote solo al llegar un mensaje.</li>
+    <li><b>Acciones al pasar el cursor:</b> Copiar, Fijar, Segunda opinión, Regenerar y Bifurcar aparecen al pasar el cursor o con el foco del teclado; en el último mensaje quedan fijas.</li>
+    <li><b>Color con significado:</b> los botones del compositor son neutros; Problemas se pone ámbar solo cuando hay errores y Test lleva un punto con el último resultado.</li>
+    <li><b>Tu mensaje se distingue:</b> filo índigo a la izquierda y fondo tenue, para encontrar cada turno al desplazarte.</li>
+    <li><b>Una sola acción destacada:</b> "VS Code" pasa a secundario; "Nueva tarea" es el único botón relleno.</li>
+    <li><b>Sin adorno duplicado:</b> "HUD Center" lleva solo el icono, sin el símbolo ✦.</li>
+    <li><b>Color del proyecto visible:</b> el círculo vacío pasa a ser el color del proyecto.</li>
+    <li><b>Archivos en una línea:</b> "8 archivos modificados · +412 −96" se despliega para ver cada uno y revertirlo.</li>
+    <li><b>Texto legible:</b> nada por debajo de 11 px; se quita "desplazamiento horizontal".</li>
+  </ol>
+</aside>
+
+<script>
+  // Píldora de pestaña deslizante (igual que en la app)
+  const tabs = document.getElementById('tabs');
+  const pill = document.getElementById('pill');
+  const place = () => {
+    const active = tabs.querySelector('[aria-current]');
+    pill.style.left = active.offsetLeft + 'px';
+    pill.style.width = active.offsetWidth + 'px';
+  };
+  tabs.addEventListener('click', (e) => {
+    const tab = e.target.closest('.tab');
+    if (!tab) return;
+    tabs.querySelector('[aria-current]')?.removeAttribute('aria-current');
+    tab.setAttribute('aria-current', 'page');
+    place();
+  });
+  place();
+  addEventListener('resize', place);
+  // Solo un menú abierto a la vez
+  document.querySelectorAll('details.menu').forEach((menu) => menu.addEventListener('toggle', () => {
+    if (menu.open) document.querySelectorAll('details.menu').forEach((other) => other !== menu && (other.open = false));
+  }));
+  const notesBtn = document.getElementById('notesBtn');
+  notesBtn.addEventListener('click', () => {
+    const on = document.body.classList.toggle('notes');
+    notesBtn.setAttribute('aria-pressed', on);
+  });
+  document.getElementById('list').scrollTop = 0;
+</script>
+</body>
+</html>

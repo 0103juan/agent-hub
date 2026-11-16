@@ -121,7 +121,7 @@ export const MCPManagerView: React.FC<Props> = ({ mcps, isSyncing, onSync, onTog
                 {portfolioMcps.map((mcp) => (
                   <div
                     key={mcp.id}
-                    className="p-3 rounded-lg bg-zinc-900/80 border border-zinc-800 space-y-2 hover:border-zinc-700 transition"
+                    className="hub-lift p-3 rounded-lg bg-zinc-900/80 border border-zinc-800 space-y-2 hover:border-zinc-700"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <div className="min-w-0">
@@ -171,7 +171,7 @@ export const MCPManagerView: React.FC<Props> = ({ mcps, isSyncing, onSync, onTog
               {cloudMcps.map((mcp) => (
                 <div
                   key={mcp.id}
-                  className="flex items-center justify-between p-2.5 rounded-lg bg-zinc-900/60 border border-zinc-800 text-xs"
+                  className="hub-lift flex items-center justify-between p-2.5 rounded-lg bg-zinc-900/60 border border-zinc-800 text-xs"
                 >
                   <div className="truncate mr-2 min-w-0 flex-1">
                     <div className="font-mono text-zinc-200 truncate flex items-center gap-1.5">

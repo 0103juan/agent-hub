@@ -28,7 +28,9 @@ import {
 } from 'lucide-react';
 import { PROTOCOL_ROLES } from '../../../shared/protocol-roles';
 import { TEAM_TEMPLATES } from '../../../shared/team-templates';
+import { ROLE_COLORS } from '../SquadCanvas';
 import { filterActions } from '../../../shared/workspace-actions';
+import { magnet } from '../motion';
 import { DEFAULT_LOOP_INSTRUCTION, FileContextAttachment, ProtocolRole, QueuedMessage } from '../../../shared/types';
 import { HubAction } from '../../state/hub-state';
 import { postToHost } from '../../vscode-api';
@@ -704,12 +706,12 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
                 : 'bg-zinc-800/90 hover:bg-zinc-750 text-zinc-300 border-zinc-700/70'
             }`}
             aria-expanded={toolsExpanded}
-            title={toolsExpanded ? 'Plegar herramientas de flujo y automatización' : 'Desplegar flujos de trabajo (Pipeline TDD, Worktree, Aprobación de traspasos)'}
+            title={toolsExpanded ? 'Plegar los flujos' : 'Lanzar un equipo de agentes (ODD, SDD, EDD…), plan primero o auditar la rama'}
           >
             <Workflow className="w-3 h-3 text-purple-400" />
             <span>Flujos</span>
             {activeOptionsCount > 0 && (
-              <span className="w-4 h-4 rounded-full bg-purple-600 text-white text-[9px] flex items-center justify-center font-bold">
+              <span title={`${activeOptionsCount} opción(es) activa(s)`} className="w-4 h-4 rounded-full bg-purple-600 text-white text-[9px] flex items-center justify-center font-bold">
                 {activeOptionsCount}
               </span>
             )}
@@ -728,71 +730,112 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
         </div>
       </div>
 
-      {/* Bandeja Desplegable de Automatización y Opciones de Flujo */}
-      {toolsExpanded && (
-        <div className="p-2.5 rounded-xl bg-zinc-900/95 border border-purple-500/30 shadow-lg space-y-2 text-xs animate-message-fade">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-800 pb-2">
-            <div className="flex items-center gap-2">
+      {/* Bandeja de flujos: lanzar un equipo de agentes, opciones del próximo mensaje y revisión de la rama */}
+      {toolsExpanded && (() => {
+        const chosen = TEAM_TEMPLATES.find((item) => item.id === template) ?? TEAM_TEMPLATES[0];
+        const shortName = chosen.label.replace(/\s*\(.*\)$/, '');
+        // Roles que trabajan a la vez (p. ej. Revisor + Documentador) se dibujan juntos en un mismo paso.
+        const parallel = Object.values(chosen.handoffs ?? {}).find((targets) => (targets?.length ?? 0) > 1) ?? [];
+        const steps = chosen.roles.reduce<ProtocolRole[][]>((acc, role) => {
+          if (parallel.includes(role) && acc.some((step) => step.some((r) => parallel.includes(r)))) return acc;
+          acc.push(parallel.includes(role) ? (parallel as ProtocolRole[]) : [role]);
+          return acc;
+        }, []);
+        const hasRequirement = Boolean(prompt.trim());
+        return (
+          <div className="rounded-xl bg-zinc-900/95 border border-purple-500/30 shadow-lg text-xs animate-message-fade grid gap-px bg-[linear-gradient(#2a3750,#2a3750)] overflow-hidden min-[1100px]:grid-cols-[minmax(0,2.2fr)_minmax(0,1fr)_minmax(0,1fr)]">
+            {/* 1. Equipo */}
+            <section className="bg-zinc-900 p-3 space-y-2.5 min-w-0">
+              <div className="flex items-baseline justify-between gap-2">
+                <h3 className="text-[11px] font-bold uppercase tracking-[0.12em] text-purple-300 flex items-center gap-1.5"><Workflow className="w-3.5 h-3.5" aria-hidden />Lanzar un equipo de agentes</h3>
+              </div>
+              <p className="text-[11.5px] text-zinc-400 leading-relaxed">
+                Escribe el requerimiento en el cuadro de abajo y lánzalo: cada agente hace su parte y le pasa el resultado al siguiente. Los ves trabajar en <b className="text-zinc-200">Agentes</b>.
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <label className="text-[11px] text-zinc-400" htmlFor="flow-template">Metodología</label>
+                <select
+                  id="flow-template"
+                  value={template}
+                  onChange={(event) => setTemplate(event.target.value)}
+                  className="text-[11.5px] px-2 py-1 rounded-md bg-zinc-800 text-zinc-100 border border-zinc-700 focus:outline-none focus:border-purple-500"
+                >
+                  {TEAM_TEMPLATES.map((item) => (
+                    <option key={item.id} value={item.id}>{item.label}</option>
+                  ))}
+                </select>
+              </div>
+              {/* La cadena de agentes de la metodología elegida */}
+              <ol className="flex flex-wrap items-center gap-1.5" aria-label={`Orden de trabajo: ${chosen.description}`}>
+                {steps.map((step, index) => (
+                  <li key={step.join('+')} className="flex items-center gap-1.5">
+                    <span className="font-mono text-[10px] text-zinc-500">{index + 1}</span>
+                    <span className="flex items-center gap-1">
+                      {step.map((role) => (
+                        <span key={role} className={`px-2 py-0.5 rounded-md border text-[11px] font-medium ${ROLE_COLORS[role] ?? 'border-zinc-700 text-zinc-300'}`}>{PROTOCOL_ROLES[role]?.label ?? role}</span>
+                      ))}
+                      {step.length > 1 && <span className="text-[10px] text-zinc-400">a la vez</span>}
+                    </span>
+                    {index < steps.length - 1 && <span className="text-zinc-500" aria-hidden>→</span>}
+                  </li>
+                ))}
+              </ol>
+              <div className="flex flex-wrap gap-x-4 gap-y-1.5 pt-0.5">
+                <label className="flex items-start gap-1.5 cursor-pointer max-w-[280px]">
+                  <input type="checkbox" checked={isolate} onChange={(event) => setIsolate(event.target.checked)} className="mt-0.5 rounded border-zinc-700 text-purple-600 focus:ring-purple-500" />
+                  <span><span className="font-medium text-zinc-200">Trabajar en una copia aparte</span><span className="block text-[10.5px] text-zinc-400">Rama y carpeta propias (worktree). Al final fusionas o descartas.</span></span>
+                </label>
+                <label className="flex items-start gap-1.5 cursor-pointer max-w-[280px]">
+                  <input type="checkbox" checked={requireApproval} onChange={(event) => setRequireApproval(event.target.checked)} className="mt-0.5 rounded border-zinc-700 text-purple-600 focus:ring-purple-500" />
+                  <span><span className="font-medium text-zinc-200">Aprobar cada traspaso</span><span className="block text-[10.5px] text-zinc-400">El equipo se detiene entre agentes hasta que apruebes.</span></span>
+                </label>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 pt-0.5">
+                <button
+                  type="button"
+                  disabled={!hasRequirement}
+                  onClick={() => {
+                    startPipeline(prompt.trim());
+                    setPrompt('');
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-purple-600 hover:bg-purple-500 disabled:opacity-40 disabled:hover:bg-purple-600 text-white font-semibold transition shadow-sm"
+                >
+                  <Workflow className="w-3.5 h-3.5" aria-hidden />
+                  Lanzar equipo {shortName}
+                </button>
+                <span className={`text-[11px] ${hasRequirement ? 'text-emerald-300' : 'text-amber-300'}`}>
+                  {hasRequirement ? `Requerimiento listo: «${prompt.trim().slice(0, 60)}${prompt.trim().length > 60 ? '…' : ''}»` : '↓ Primero escribe el requerimiento abajo'}
+                </span>
+              </div>
+            </section>
+
+            {/* 2. Próximo mensaje */}
+            <section className="bg-zinc-900 p-3 space-y-2 min-w-0">
+              <h3 className="text-[11px] font-bold uppercase tracking-[0.12em] text-zinc-300">Próximo mensaje</h3>
+              <p className="text-[11.5px] text-zinc-400 leading-relaxed">Se aplica al botón <b className="text-zinc-200">Enviar</b> de este chat, sin equipo.</p>
+              <label className="flex items-start gap-1.5 cursor-pointer">
+                <input type="checkbox" checked={planFirst} onChange={(event) => setPlanFirst(event.target.checked)} className="mt-0.5 rounded border-zinc-700 text-purple-600 focus:ring-purple-500" />
+                <span><span className="font-medium text-zinc-200">Plan primero</span><span className="block text-[10.5px] text-zinc-400">El agente propone un plan sin tocar archivos; luego decides si lo ejecuta.</span></span>
+              </label>
+            </section>
+
+            {/* 3. Revisión */}
+            <section className="bg-zinc-900 p-3 space-y-2 min-w-0">
+              <h3 className="text-[11px] font-bold uppercase tracking-[0.12em] text-zinc-300">Revisar la rama</h3>
+              <p className="text-[11.5px] text-zinc-400 leading-relaxed">Un agente revisa todo lo que cambió en esta rama frente a <code className="font-mono text-zinc-200">main</code> (errores, riesgos, secretos).</p>
               <button
                 type="button"
-                onClick={() => {
-                  if (!prompt.trim()) {
-                    postToHost({ command: 'runAction', actionId: 'tests', sessionId, input: '' });
-                    return;
-                  }
-                  startPipeline(prompt.trim());
-                  setPrompt('');
-                }}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-purple-600 hover:bg-purple-500 text-white font-medium transition shadow-sm"
-                title="Ejecutar Pipeline Autónomo TDD (Arquitecto -> Tester -> Desarrollador -> Revisor)"
+                onClick={() => postToHost({ command: 'auditBranch', sessionId })}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-teal-500/10 hover:bg-teal-500/20 text-teal-300 border border-teal-500/30 transition font-medium"
+                title="git diff main...HEAD"
               >
-                <Workflow className="w-3.5 h-3.5" />
-                <span>Ejecutar Pipeline TDD</span>
+                <GitBranch className="w-3.5 h-3.5 text-teal-400" aria-hidden />
+                Auditar rama vs main
               </button>
-
-              <select
-                value={template}
-                onChange={(event) => setTemplate(event.target.value)}
-                aria-label="Plantilla de equipo"
-                title={TEAM_TEMPLATES.find((item) => item.id === template)?.description}
-                className="text-[11px] px-2 py-1 rounded bg-zinc-800 text-zinc-200 border border-zinc-700 focus:outline-none focus:border-purple-500"
-              >
-                {TEAM_TEMPLATES.map((item) => (
-                  <option key={item.id} value={item.id}>{item.label}</option>
-                ))}
-              </select>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => postToHost({ command: 'auditBranch', sessionId })}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-teal-500/10 hover:bg-teal-500/20 text-teal-300 border border-teal-500/30 transition font-medium"
-              title="Auditar rama completa contra main (git diff main...HEAD)"
-            >
-              <GitBranch className="w-3.5 h-3.5 text-teal-400" />
-              <span>Auditar rama vs main</span>
-            </button>
+            </section>
           </div>
-
-          {/* Opciones de aislamiento y supervisión */}
-          <div className="flex flex-wrap items-center gap-4 text-[11px] text-zinc-300 pt-0.5">
-            <label className="flex items-center gap-1.5 cursor-pointer hover:text-white transition" title="El equipo trabaja en una rama y carpeta aparte (git worktree); al terminar fusionas o descartas">
-              <input type="checkbox" checked={isolate} onChange={(event) => setIsolate(event.target.checked)} className="rounded border-zinc-700 text-purple-600 focus:ring-purple-500" />
-              <span className="font-medium">Copia aparte (Worktree aislado)</span>
-            </label>
-
-            <label className="flex items-center gap-1.5 cursor-pointer hover:text-white transition" title="Cada traspaso entre agentes del equipo espera tu aprobación explícita antes de continuar">
-              <input type="checkbox" checked={requireApproval} onChange={(event) => setRequireApproval(event.target.checked)} className="rounded border-zinc-700 text-purple-600 focus:ring-purple-500" />
-              <span>Aprobar cada traspaso</span>
-            </label>
-
-            <label className="flex items-center gap-1.5 cursor-pointer hover:text-white transition" title="El agente propone un plan detallado sin editar archivos; tú lo ejecutas después">
-              <input type="checkbox" checked={planFirst} onChange={(event) => setPlanFirst(event.target.checked)} className="rounded border-zinc-700 text-purple-600 focus:ring-purple-500" />
-              <span>Plan primero (solo lectura inicial)</span>
-            </label>
-          </div>
-        </div>
-      )}
+        );
+      })()}
 
       <form
         onSubmit={(event) => {
@@ -817,7 +860,7 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
             }
           });
         }}
-        className={`relative rounded-xl border bg-zinc-900/90 focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500/30 transition shadow-sm overflow-hidden ${
+        className={`hub-glow relative rounded-xl border bg-zinc-900/90 focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500/30 transition shadow-sm overflow-hidden ${
           isDragging ? 'border-dashed border-indigo-400 bg-indigo-950/30 ring-2 ring-indigo-500/40' : 'border-zinc-700/80'
         }`}
       >
@@ -952,7 +995,8 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
             <button
               type="submit"
               disabled={!prompt.trim()}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-indigo-600 hover:bg-indigo-500 disabled:opacity-30 disabled:hover:bg-indigo-600 text-white font-medium transition shadow-sm"
+              {...magnet}
+              className="hud-magnet flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-indigo-600 hover:bg-indigo-500 disabled:opacity-30 disabled:hover:bg-indigo-600 text-white font-medium transition shadow-sm"
               title={isRunning ? 'Dejar en cola; se envía al terminar el turno' : 'Enviar prompt'}
             >
               <span className="text-[11px]">{isRunning ? 'En cola' : 'Enviar'}</span>

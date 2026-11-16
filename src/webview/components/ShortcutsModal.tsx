@@ -6,7 +6,7 @@ export const SHORTCUTS: Array<{ keys: string; label: string }> = [
   { keys: 'Ctrl K', label: 'Paleta de comandos' },
   { keys: 'Ctrl /', label: 'Esta ayuda de atajos' },
   { keys: 'Ctrl N', label: 'Nueva conversación' },
-  { keys: 'Ctrl 1 – 7', label: 'Cambiar de pestaña (4: Documentos)' },
+  { keys: 'Ctrl 1 – 8', label: 'Cambiar de pestaña (1: HUD Center, 2: Chat, 5: Documentos)' },
   { keys: 'Alt ↑ / ↓', label: 'Conversación anterior / siguiente' },
   { keys: 'Ctrl Alt 1 – 4', label: 'Enfocar una columna (vista en columnas)' },
   { keys: 'Ctrl Alt ← / →', label: 'Pasar a la columna vecina' },

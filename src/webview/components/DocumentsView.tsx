@@ -400,7 +400,7 @@ export const DocumentsView: React.FC<Props> = ({ openRequest, active }) => {
           onClick={() => open(doc.path)}
           aria-current={selected ? 'true' : undefined}
           style={{ paddingLeft: `${depth * 12 + 6}px` }}
-          className={`w-full flex items-center gap-1.5 py-1 pr-2 rounded text-left text-[11px] transition ${selected ? 'bg-indigo-600/20 border border-indigo-500/40' : 'border border-transparent hover:bg-zinc-800'}`}
+          className={`hub-slide w-full flex items-center gap-1.5 py-1 pr-2 rounded text-left text-[11px] transition ${selected ? 'bg-indigo-600/20 border border-indigo-500/40' : 'border border-transparent hover:bg-zinc-800'}`}
           title={`${doc.path} · ${formatSize(doc.size)}`}
         >
           <FileText className={`w-3 h-3 shrink-0 ${isMarkdown(doc.path) ? 'text-indigo-400' : isHtml(doc.path) ? 'text-amber-400' : 'text-zinc-500'}`} />
@@ -425,7 +425,7 @@ export const DocumentsView: React.FC<Props> = ({ openRequest, active }) => {
             aria-expanded={open}
             onClick={() => toggleFolder(folder, depth)}
             style={{ paddingLeft: `${depth * 12 + 2}px` }}
-            className="w-full flex items-center gap-1 py-1 pr-2 rounded text-left text-[11px] text-zinc-300 hover:bg-zinc-800"
+            className="hub-slide w-full flex items-center gap-1 py-1 pr-2 rounded text-left text-[11px] text-zinc-300 hover:bg-zinc-800"
             title={folder.path}
           >
             {open ? <ChevronDown className="w-3 h-3 shrink-0 text-zinc-500" /> : <ChevronRight className="w-3 h-3 shrink-0 text-zinc-500" />}

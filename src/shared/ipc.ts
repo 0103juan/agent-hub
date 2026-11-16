@@ -125,6 +125,7 @@ export type WebviewMessage =
   | { command: 'checkoutBranch'; branch: string; dir?: string; sessionId?: string }
   | { command: 'createBranch'; branch: string; dir?: string; sessionId?: string }
   | { command: 'deleteBranch'; branch: string; dir?: string; sessionId?: string }
+  | { command: 'initGitRepo'; dir?: string; sessionId?: string }
   | { command: 'runSecurityAudit' }
   | { command: 'loadScratchpad' }
   | { command: 'saveScratchpad'; content: string }
@@ -178,6 +179,7 @@ export type HostMessage =
       gitFiles: Array<{ path: string; status: 'M' | 'A' | 'D' | '?' | 'R' }>;
       projectTree: Array<{ path: string; name: string; isDir: boolean }>;
       currentBranch?: string;
+      isGit?: boolean;
     }
   | {
       type: 'dirGitStatus';
@@ -198,6 +200,7 @@ export type HostMessage =
   | {
       type: 'gitBranches';
       dir?: string;
+      isGit?: boolean;
       currentBranch: string;
       branches: string[];
       squadBranches: string[];

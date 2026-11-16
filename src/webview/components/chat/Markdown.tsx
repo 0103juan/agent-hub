@@ -274,6 +274,11 @@ function parseFileLinkTarget(rawLabel: string, href: string): FileLinkInfo | nul
   };
 }
 
+/** Ruta a un archivo escrita como `código`: absoluta (`C:/…`, `/…`) o relativa con carpeta (`docs/x.html`). */
+export function isInlineFilePath(text: string): boolean {
+  return /^(?:[a-zA-Z]:[\\/]|\/)[^\r\n]*\.[A-Za-z0-9]{1,8}$/.test(text) || /^(?:\.{1,2}[\\/])?(?:[\w@.-]+[\\/])+[\w@.-]+\.[A-Za-z0-9]{1,8}$/.test(text);
+}
+
 const FileLinkChip: React.FC<{ fileInfo: FileLinkInfo }> = ({ fileInfo }) => {
   const { cleanPath, displayName, lineBadge, startLine, endLine, fileType } = fileInfo;
 
@@ -288,7 +293,7 @@ const FileLinkChip: React.FC<{ fileInfo: FileLinkInfo }> = ({ fileInfo }) => {
       <FileText className="w-3.5 h-3.5 text-indigo-400 group-hover:text-indigo-300 shrink-0" />
     );
 
-  const canOpenInDocuments = /\.(md|markdown|mdx|txt|rst|adoc|log|csv|json|ya?ml|toml|ini|xml|html?|sql|sh|ps1|bat|py|[jt]sx?|css|java|go|rs|cs|php|rb|cpp?|hpp?)$/i.test(cleanPath) && (/^[a-zA-Z]:\//.test(cleanPath) || cleanPath.startsWith('/'));
+  const canOpenInDocuments = /\.(md|markdown|mdx|txt|rst|adoc|log|csv|json|ya?ml|toml|ini|xml|html?|sql|sh|ps1|bat|py|[jt]sx?|css|java|go|rs|cs|php|rb|cpp?|hpp?)$/i.test(cleanPath);
 
   return (
     <span className="inline-flex items-center align-middle">
@@ -340,9 +345,9 @@ function renderInline(text: string): React.ReactNode[] {
     if (!part) return null;
 
     if (part.startsWith('`') && part.endsWith('`') && part.length > 1) {
-      // Una ruta absoluta a un archivo dentro de `código` también se puede abrir.
+      // Una ruta a un archivo dentro de `código` (absoluta o relativa con carpeta) también se puede abrir.
       const inner = part.slice(1, -1).trim();
-      if (/^(?:[a-zA-Z]:[\\/]|\/)[^\r\n]*\.[A-Za-z0-9]{1,8}$/.test(inner)) {
+      if (isInlineFilePath(inner)) {
         const fileInfo = parseFileLinkTarget(inner, inner);
         if (fileInfo) return <FileLinkChip key={index} fileInfo={fileInfo} />;
       }

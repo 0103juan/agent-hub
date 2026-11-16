@@ -3,6 +3,8 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
 import { startStandalone, StandaloneInstance } from '../server/standalone';
+import { formatBuildStamp } from '../host/build-info';
+import { DistVersion, listVersions, restoreVersion, snapshotDist } from './dist-versions';
 
 // Registro del proceso principal en ~/.agent-hub/logs/main.log (rota a main.log.1 al pasar de 1 MB).
 const LOG_FILE = path.join(os.homedir(), '.agent-hub', 'logs', 'main.log');
@@ -83,6 +85,41 @@ let tray: Tray | null = null;
 let standalone: StandaloneInstance | null = null;
 let isQuitting = false;
 
+// Cada compilación que arranca queda guardada para poder volver a ella desde la bandeja.
+const DIST_DIR = path.resolve(__dirname, '..');
+const VERSIONS_DIR = path.join(os.homedir(), '.agent-hub', 'versions');
+let currentDistHash = '';
+
+async function confirmRestore(version: DistVersion) {
+  const { response } = await dialog.showMessageBox({
+    type: 'question',
+    buttons: ['Volver a esta versión', 'Cancelar'],
+    defaultId: 1,
+    cancelId: 1,
+    title: 'AgentHub',
+    message: `¿Volver a la compilación del ${formatBuildStamp(version.builtAt)}?`,
+    detail: 'AgentHub se reiniciará y los agentes en curso se detendrán. La versión actual queda guardada en este mismo menú.\n'
+      + 'El código fuente del repo no cambia: la próxima compilación vuelve a incluir los cambios (usa git para descartarlos).'
+  });
+  if (response !== 0) return;
+  try {
+    restoreVersion(DIST_DIR, VERSIONS_DIR, version.id);
+  } catch (err) {
+    dialog.showErrorBox('AgentHub', `No se pudo restaurar la versión: ${(err as Error).message}`);
+    return;
+  }
+  isQuitting = true;
+  // app.exit no emite before-quit: se limpia a mano y se espera antes de salir, o los agentes quedan huérfanos.
+  try {
+    globalShortcut.unregisterAll();
+    await standalone?.cleanup();
+  } catch (err) {
+    console.warn('[AgentHub Electron] Error durante cleanup:', err);
+  }
+  app.relaunch();
+  app.exit(0);
+}
+
 function createDetachedWindow(targetUrl?: string): BrowserWindow {
   const iconPath = getAppIconPath();
   const isSolo = Boolean(targetUrl && targetUrl.includes('solo='));
@@ -93,7 +130,7 @@ function createDetachedWindow(targetUrl?: string): BrowserWindow {
     minHeight: 450,
     title: isSolo ? 'AgentHub (Chat Flotante · Fijado)' : 'AgentHub (Ventana Secundaria)',
     icon: iconPath || undefined,
-    backgroundColor: '#09090b',
+    backgroundColor: '#07090e',
     autoHideMenuBar: true,
     alwaysOnTop: isSolo,
     webPreferences: {
@@ -265,6 +302,23 @@ function createTray(iconPath: string) {
       },
       { type: 'separator' },
       {
+        label: 'Volver a una versión anterior',
+        submenu: [
+          ...listVersions(VERSIONS_DIR).map((version): Electron.MenuItemConstructorOptions => ({
+            label: `${formatBuildStamp(version.builtAt)}${version.commit ? ` · ${version.commit}` : ''}${version.hash === currentDistHash ? '  (en uso)' : ''}`,
+            type: 'radio',
+            checked: version.hash === currentDistHash,
+            click: () => {
+              if (version.hash !== currentDistHash) void confirmRestore(version);
+              updateContextMenu(); // el radio no debe moverse si se cancela
+            }
+          })),
+          { type: 'separator' },
+          { label: 'Abrir carpeta de versiones', click: () => shell.openPath(VERSIONS_DIR) }
+        ]
+      },
+      { type: 'separator' },
+      {
         label: 'Salir de AgentHub',
         click: () => {
           isQuitting = true;
@@ -306,6 +360,12 @@ async function createWindow() {
 
   console.log(`[AgentHub Electron] Usando webview estático desde: ${staticDir}`);
   console.log(`[AgentHub Electron] Ícono: ${iconPath}`);
+
+  try {
+    currentDistHash = snapshotDist(DIST_DIR, VERSIONS_DIR);
+  } catch (err) {
+    console.warn('[AgentHub Electron] No se pudo guardar la versión en uso:', err);
+  }
 
   // Iniciar el servidor local Daemon
   try {
@@ -356,7 +416,7 @@ async function createWindow() {
     minHeight: 640,
     title: 'AgentHub',
     icon: iconPath || undefined,
-    backgroundColor: '#09090b',
+    backgroundColor: '#07090e',
     autoHideMenuBar: true,
     show: false,
     webPreferences: {

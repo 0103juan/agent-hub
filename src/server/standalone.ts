@@ -277,7 +277,9 @@ export function startStandalone(options: StandaloneOptions = {}): Promise<Standa
 }
 
 // Auto-run if executed directly as main script (never inside Electron runtime)
-if (require.main === module && !process.versions.electron) {
+// bin/agent-hub.js lo carga con require, así que require.main es bin y no este módulo.
+const launchedFromCli = require.main === module || /[\\/]bin[\\/]agent-hub\.js$/.test(require.main?.filename ?? '');
+if (launchedFromCli && !process.versions.electron) {
   const args = process.argv.slice(2);
   const portArg = args.indexOf('--port');
   const port = portArg !== -1 ? parseInt(args[portArg + 1], 10) : 3710;

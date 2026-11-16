@@ -18,7 +18,8 @@ const TEXT_STEPS = new Set(['500', '400', '300', '200']);
 const zinc = Object.fromEntries(
   Object.entries(ZINC_FOREGROUND_PERCENT).map(([step, percent]) => [
     step,
-    themed(`color-mix(in srgb, ${TEXT_STEPS.has(step) ? EDITOR_FG : FG} ${percent}%, ${BG})`)
+    // Fuera de VS Code manda la paleta del HUD (`--hub-zinc-*` en styles.css); dentro, la mezcla con el tema.
+    themed(`var(--hub-zinc-${step}, color-mix(in srgb, ${TEXT_STEPS.has(step) ? EDITOR_FG : FG} ${percent}%, ${BG}))`)
   ])
 );
 
@@ -27,7 +28,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        zinc: { ...zinc, 50: themed(EDITOR_FG), 100: themed(EDITOR_FG), 950: themed(BG) },
+        zinc: { ...zinc, 50: themed(`var(--hub-zinc-100, ${EDITOR_FG})`), 100: themed(`var(--hub-zinc-100, ${EDITOR_FG})`), 950: themed(`var(--hub-zinc-950, ${BG})`) },
         // Acento: el color de botón del tema; solo los tonos de fondo, los de texto quedan como están.
         indigo: {
           500: themed('var(--vscode-button-hoverBackground, #6366f1)'),

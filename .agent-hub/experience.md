@@ -43,3 +43,19 @@ Evidencia: captura `1794418709315-image.png` (solo salía `main` de agent-hub), 
 Señal: Agentes (ej. rol Coordinador) que delegan y prometen "cuando reporte te aviso" o "te aviso luego".
 Lección: Cada turno termina con la respuesta del modelo y el proceso se apaga; el modelo no se queda en segundo plano. El prompt debe prohibir promesas a futuro de avisar, forzar reporte del estado actual o ejecución síncrona, y advertir si no hay squad activo en el chat.
 Evidencia: captura `1794418842850-image.png` y conversación SESV-121 en `sessions.json`, resuelto en `src/shared/protocol-roles.ts` y `src/agents/prompt-composer.ts`.
+
+Señal: Al copiar, borrar o restaurar `dist` de AgentHub desde código (versiones, rollback, empaquetado).
+Lección: En la app instalada `resources/app/dist` es un junction al `dist` del repo: hay que hacer `realpathSync` antes de `cpSync` (si no, copia el enlace) y vaciar dist por dentro en vez de borrarlo (borrarlo rompe el junction).
+Evidencia: `src/electron/dist-versions.ts` (`snapshotDist`, `restoreVersion`) y `actualizar.ps1`.
+
+Señal: Al añadir una franja o tarjeta nueva dentro de una vista `flex flex-col overflow-y-auto` (HUD, paneles con scroll).
+Lección: Los hijos de un flex-col con `min-h-0` se encogen hasta casi desaparecer (la cinta del HUD quedó en 14 px); las franjas de alto fijo necesitan `shrink-0`. Y una animación de entrada con `fill-mode: both` deja `transform` fijo y anula los `hover:translate`; usar `backwards`.
+Evidencia: `src/webview/components/TacticalHudView.tsx` (`.hud-ticker`) y `.hud-rise` en `src/webview/styles.css`.
+
+Señal: Al cambiar colores de toda la webview (paleta, tema, rediseño).
+Lección: Los tonos zinc de Tailwind se leen de `--hub-zinc-*` (styles.css) con la mezcla del tema de VS Code como respaldo; dentro de VS Code se ponen a `initial` para que gane el tema del editor. Cambia la paleta ahí, no clase por clase.
+Evidencia: `tailwind.config.js` (`var(--hub-zinc-${step}, color-mix(...))`) y `:root`/`body[class*='vscode-']` en `src/webview/styles.css`.
+
+Señal: Al citar en el chat un archivo para que el usuario lo abra (maquetas HTML, specs, informes).
+Lección: Solo los enlaces markdown y las rutas en `código` con carpeta (`docs/x.html`) o absolutas se vuelven fichas clicables que abren Documentos; un nombre suelto (`x.html`) queda como texto copiable. Cita siempre la ruta con carpeta.
+Evidencia: `isInlineFilePath` y `FileLinkChip` en `src/webview/components/chat/Markdown.tsx`; test "Rutas en `código` dentro del chat".

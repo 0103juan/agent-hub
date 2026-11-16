@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import { AppWindow, BarChart3, Bot, Brain, Clock, Code2, Columns3, FileText, FolderGit2, GitBranch, Globe, Loader2, Maximize, Maximize2, MessageSquare, Minimize2, Pin, Rows3, RefreshCw, Rows4, ShieldAlert, SplitSquareVertical, Terminal, Users, Volume2, VolumeX, Wrench, Zap } from 'lucide-react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useRef, useState } from 'react';
+import { AppWindow, BarChart3, Bot, Brain, Clock, Code2, Columns3, FileText, FolderGit2, GitBranch, Globe, Loader2, Maximize, Maximize2, MessageSquare, Minimize2, Pin, Rows3, RefreshCw, Rows4, ShieldAlert, Sparkles, SplitSquareVertical, Terminal, Users, Volume2, VolumeX, Wrench, Zap } from 'lucide-react';
 import { agentName } from '../shared/agent-name';
 import { PROTOCOL_ROLES } from '../shared/protocol-roles';
 import { HostMessage } from '../shared/ipc';
@@ -38,7 +38,6 @@ type Tab = 'hud' | 'chat' | 'agents' | 'memory' | 'documents' | 'mcps' | 'teleme
 type Density = 'comfortable' | 'compact';
 const DENSITY_KEY = 'agent-hub.density';
 const FOCUS_KEY = 'agent-hub.focus';
-const TAB_KEY = 'agent-hub.tab';
 /** Identifica esta ventana ante el servidor, que manda los mensajes de los chats que cada ventana tiene a la vista. */
 const CLIENT_ID = Math.random().toString(36).slice(2);
 const TAB_ORDER: Tab[] = ['hud', 'chat', 'agents', 'memory', 'documents', 'mcps', 'telemetry', 'accounts'];
@@ -54,18 +53,26 @@ export const App: React.FC = () => {
   const session = state.sessions.find((candidate) => candidate.id === activeSessionId);
   const sessionRef = useRef(session);
   sessionRef.current = session;
-  const [activeTab, setActiveTabState] = useState<Tab>(() => {
-    const saved = localStorage.getItem(TAB_KEY);
-    return (TAB_ORDER as string[]).includes(saved ?? '') ? (saved as Tab) : 'chat';
-  });
-  // Se recuerda la última pestaña para reabrir donde se dejó.
-  const setActiveTab = useCallback((tab: Tab) => {
-    localStorage.setItem(TAB_KEY, tab);
-    setActiveTabState(tab);
-  }, []);
+  // La app siempre abre en el HUD Center.
+  const [activeTab, setActiveTab] = useState<Tab>('hud');
   // En anchos estrechos la franja de pestañas se desplaza: la activa debe quedar a la vista.
   useEffect(() => {
     document.querySelector('[aria-current="page"]')?.scrollIntoView({ inline: 'nearest', block: 'nearest' });
+  }, [activeTab]);
+  // Píldora de la pestaña activa: se desliza de una pestaña a otra en vez de saltar.
+  const tabStripRef = useRef<HTMLDivElement>(null);
+  const [tabPill, setTabPill] = useState<React.CSSProperties>();
+  useLayoutEffect(() => {
+    const strip = tabStripRef.current;
+    if (!strip) return;
+    const place = () => {
+      const active = strip.querySelector<HTMLElement>('[aria-current="page"]');
+      setTabPill(active ? { left: active.offsetLeft, top: active.offsetTop, width: active.offsetWidth, height: active.offsetHeight } : undefined);
+    };
+    place();
+    const observer = new ResizeObserver(place);
+    strip.querySelectorAll('button').forEach((button) => observer.observe(button));
+    return () => observer.disconnect();
   }, [activeTab]);
   const [drawerMode, setDrawerMode] = useState<DrawerMode>('closed');
   const [isSyncing, setIsSyncing] = useState(false);
@@ -161,7 +168,7 @@ export const App: React.FC = () => {
       } else if ((event.ctrlKey || event.metaKey) && event.key === '/') {
         event.preventDefault();
         setIsShortcutsOpen((open) => !open);
-      } else if ((event.ctrlKey || event.metaKey) && !event.shiftKey && /^[1-7]$/.test(event.key)) {
+      } else if ((event.ctrlKey || event.metaKey) && !event.shiftKey && /^[1-8]$/.test(event.key)) {
         event.preventDefault();
         setActiveTab(TAB_ORDER[Number(event.key) - 1]);
       } else if ((event.ctrlKey || event.metaKey) && !event.shiftKey && event.key.toLowerCase() === 'n') {
@@ -468,7 +475,8 @@ export const App: React.FC = () => {
   };
 
   const terminalQuickCommands = useMemo<QuickCommand[]>(() => {
-    const names = new Set(workspaceOverview.projectTree.map((item) => item.name.toLowerCase()));
+    // Solo la raíz decide el tipo de proyecto: un src-tauri/Cargo.toml no convierte en Rust a un proyecto Node.
+    const names = new Set(workspaceOverview.projectTree.filter((item) => !item.path.includes('/')).map((item) => item.name.toLowerCase()));
     const gitTail: QuickCommand[] = [
       { label: 'git status', cmd: 'git status' },
       { label: 'git log', cmd: 'git log -n 5 --oneline' }
@@ -591,7 +599,8 @@ export const App: React.FC = () => {
       const norm = (value: string) => value.replace(/\\/g, '/').toLowerCase();
       const isAbsolute = /^[a-z]:[\\/]/i.test(file) || file.startsWith('/');
       const chatRoot = stateRef.current.sessions.find((s) => s.id === stateRef.current.activeSessionId)?.projectPath;
-      const root = !isAbsolute ? undefined : chatRoot && norm(file).startsWith(norm(chatRoot).replace(/\/$/, '') + '/') ? chatRoot : file.replace(/[\\/][^\\/]*$/, '') || undefined;
+      // Una ruta relativa es de la carpeta del chat activo, no de la que tenga abierta Documentos.
+      const root = !isAbsolute ? chatRoot : chatRoot && norm(file).startsWith(norm(chatRoot).replace(/\/$/, '') + '/') ? chatRoot : file.replace(/[\\/][^\\/]*$/, '') || undefined;
       setDocumentsMounted(true);
       setDocumentRequest((previous) => ({ file, root, tick: (previous?.tick ?? 0) + 1 }));
       setPreviewFileModal(null);
@@ -821,7 +830,8 @@ export const App: React.FC = () => {
             />
           </div>
           )}
-          <div className="flex items-center gap-1.5 min-w-0 overflow-x-auto no-scrollbar max-[900px]:[mask-image:linear-gradient(to_right,#000_calc(100%-14px),transparent)]">
+          <div ref={tabStripRef} className="relative flex items-center gap-1.5 min-w-0 overflow-x-auto no-scrollbar max-[900px]:[mask-image:linear-gradient(to_right,#000_calc(100%-14px),transparent)]">
+          {tabPill && <span aria-hidden className="hub-tab-pill absolute rounded-md bg-indigo-600 shadow shadow-indigo-500/30" style={tabPill} />}
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
             return (
@@ -831,8 +841,8 @@ export const App: React.FC = () => {
                 aria-label={tab.label}
                 aria-current={isActive ? 'page' : undefined}
                 title={tab.label}
-                className={`flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition shrink-0 ${
-                  isActive ? 'bg-indigo-600 text-white shadow' : 'text-zinc-400 hover:text-zinc-200'
+                className={`relative z-10 flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-colors shrink-0 ${
+                  isActive ? 'text-white' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60'
                 }`}
               >
                 {tab.icon}
@@ -1046,7 +1056,15 @@ export const App: React.FC = () => {
 
       {!focusMode && shownTab === 'chat' && session && <SplitBar state={state} session={session} sp={sp} switchSession={switchSession} onOpenHistory={() => setDrawerMode('history')} onNewTask={() => setDrawerMode('newTask')} />}
 
-      <div className={`flex-1 min-h-0 flex overflow-hidden relative ${shownTab === 'chat' || shownTab === 'hud' ? '' : density === 'compact' ? 'p-1.5 overflow-y-auto' : 'p-2.5 overflow-y-auto'}`}>
+      {/* Fuera del chat las vistas comparten el lenguaje del HUD: brillo bajo el puntero y entrada escalonada.
+          El chat queda sin brillo: su lista puede tener miles de nodos y es donde se lee con calma. */}
+      <div
+        onPointerMove={shownTab === 'chat' ? undefined : (event) => {
+          event.currentTarget.style.setProperty('--mx', `${event.clientX}px`);
+          event.currentTarget.style.setProperty('--my', `${event.clientY}px`);
+        }}
+        className={`flex-1 min-h-0 flex overflow-hidden relative ${shownTab === 'chat' ? '' : shownTab === 'hud' ? 'hub-view' : 'hub-view hub-stagger'} ${shownTab === 'chat' || shownTab === 'hud' ? '' : density === 'compact' ? 'p-1.5 overflow-y-auto' : 'p-2.5 overflow-y-auto'}`}
+      >
         {shownTab === 'hud' && (
           <TacticalHudView
             state={state}
@@ -1054,7 +1072,7 @@ export const App: React.FC = () => {
             workspaceDir={session?.projectPath || workspaceOverview.workspaceDir}
             gitFilesCount={workspaceOverview.gitFiles.length}
             currentBranch={branchesData.currentBranch}
-            terminalRunning={terminalTabs.some((t) => t.running)}
+            terminal={terminalTabs.find((t) => t.id === activeTerminalId)}
             terminalBadge={terminalBadge}
             onOpenChat={(sessionId) => {
               switchSession(sessionId);

@@ -39,6 +39,7 @@ import { buildTeamReport } from '../src/shared/team-report';
 import { nextRoles } from '../src/shared/protocol-roles';
 import { createSquadWorktree, mainRepoOf, mergeSquadWorktree, removeSquadWorktree } from '../src/host/git-worktree';
 import { isInsideWorkspace } from '../src/host/safe-path';
+import { listVersions, restoreVersion, snapshotDist } from '../src/electron/dist-versions';
 import { templateById } from '../src/shared/team-templates';
 import { summarizeCosts } from '../src/shared/cost-summary';
 import { terminalHistoryKey } from '../src/shared/terminal-history';
@@ -52,7 +53,7 @@ import { filterActions, normalizeText, WORKSPACE_ACTIONS } from '../src/shared/w
 import { ACTION_ICONS } from '../src/webview/components/chat/action-icons';
 import { migrateSession, SessionStore } from '../src/storage/session-store';
 import { TelemetryStore } from '../src/storage/telemetry-store';
-import { parseMarkdownBlocks, resolveImageSrc } from '../src/webview/components/chat/Markdown';
+import { isInlineFilePath, parseMarkdownBlocks, resolveImageSrc } from '../src/webview/components/chat/Markdown';
 import { splitTurn } from '../src/webview/components/chat/MessageList';
 import { hubReducer, INITIAL_HUB_STATE } from '../src/webview/state/hub-state';
 import { HubServer } from '../src/server/hub-server';
@@ -2622,6 +2623,61 @@ describe('Documentos del editor', () => {
     assert.strictEqual(saveDocument(root, '.agent-hub/notas.md', '# notas\n').ok, true);
     assert.strictEqual(fs.readFileSync(path.join(root, '.agent-hub', 'notas.md'), 'utf8'), '# notas\n');
     assert.deepStrictEqual(fs.readdirSync(path.join(root, '.agent-hub')), ['notas.md']);
+  });
+});
+
+describe('Versiones guardadas de la app (volver atrás desde la bandeja)', () => {
+  it('guarda cada compilación una sola vez y restaura una anterior exacta', () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'agenthub-versions-'));
+    const dist = path.join(root, 'dist');
+    const versions = path.join(root, 'versions');
+    fs.mkdirSync(path.join(dist, 'electron'), { recursive: true });
+    fs.writeFileSync(path.join(dist, 'electron', 'main.js'), 'v1');
+    const first = snapshotDist(dist, versions);
+    assert.strictEqual(snapshotDist(dist, versions), first);
+    assert.strictEqual(listVersions(versions).length, 1);
+
+    fs.writeFileSync(path.join(dist, 'electron', 'main.js'), 'v2');
+    fs.writeFileSync(path.join(dist, 'nuevo.js'), 'roto');
+    assert.notStrictEqual(snapshotDist(dist, versions), first);
+    assert.strictEqual(listVersions(versions).length, 2);
+
+    restoreVersion(dist, versions, listVersions(versions).find((v) => v.hash === first)!.id);
+    assert.strictEqual(fs.readFileSync(path.join(dist, 'electron', 'main.js'), 'utf8'), 'v1');
+    assert.ok(!fs.existsSync(path.join(dist, 'nuevo.js')));
+    assert.throws(() => restoreVersion(dist, versions, '../no-existe'));
+    fs.rmSync(root, { recursive: true, force: true });
+  });
+
+  it('el id sale del nombre de la carpeta y una copia dañada no toca dist', () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'agenthub-versions-'));
+    const dist = path.join(root, 'dist');
+    const versions = path.join(root, 'versions');
+    fs.mkdirSync(path.join(dist, 'electron'), { recursive: true });
+    fs.writeFileSync(path.join(dist, 'electron', 'main.js'), 'v1');
+    snapshotDist(dist, versions);
+    const [saved] = listVersions(versions);
+    const jsonPath = path.join(versions, saved.id, 'version.json');
+    fs.writeFileSync(jsonPath, JSON.stringify({ ...saved, id: '../../dist' }));
+    assert.strictEqual(listVersions(versions)[0].id, saved.id);
+
+    fs.writeFileSync(path.join(dist, 'electron', 'main.js'), 'v2');
+    fs.writeFileSync(path.join(versions, saved.id, 'dist', 'electron', 'main.js'), 'corrupto');
+    assert.throws(() => restoreVersion(dist, versions, saved.id), /dañada/);
+    assert.strictEqual(fs.readFileSync(path.join(dist, 'electron', 'main.js'), 'utf8'), 'v2');
+    assert.deepStrictEqual(fs.readdirSync(root).sort(), ['dist', 'versions']);
+    fs.rmSync(root, { recursive: true, force: true });
+  });
+});
+
+describe('Rutas en `código` dentro del chat', () => {
+  it('abre rutas absolutas y relativas con carpeta, pero no comandos ni nombres sueltos', () => {
+    for (const path of ['docs/design/chat-view-redesign.html', 'src/webview/App.tsx', './README.md', 'C:/Users/x/a.md', '/tmp/a.html']) {
+      assert.ok(isInlineFilePath(path), path);
+    }
+    for (const text of ['npm run update', 'tailwind.config.js', 'git diff main...HEAD', 'docs/design', 'v0.1.0']) {
+      assert.ok(!isInlineFilePath(text), text);
+    }
   });
 });
 

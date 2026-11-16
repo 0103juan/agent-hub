@@ -3,6 +3,7 @@ import { CostSummary, TelemetryRegistry, ModelAccountTelemetry } from '../../sha
 import { BarChart3, Activity, Brain, DollarSign, RotateCcw, Filter, Layers, AlertTriangle, X, Download } from 'lucide-react';
 import { ProviderBadge } from './ProviderBadge';
 import { downloadText } from '../utils/format';
+import { CountUp } from './motion';
 
 interface Props {
   telemetryRegistry: TelemetryRegistry;
@@ -149,52 +150,52 @@ export const TelemetryDashboard: React.FC<Props> = ({ telemetryRegistry, costs, 
 
       {/* Global Summary Cards */}
       <div className="grid grid-cols-2 min-[520px]:grid-cols-4 gap-2 text-xs">
-        <div className="p-2.5 bg-zinc-900 border border-zinc-800 rounded-lg space-y-1">
+        <div className="hub-lift p-2.5 bg-zinc-900 border border-zinc-800 rounded-lg space-y-1">
           <div className="text-[11px] text-zinc-400 flex items-center gap-1">
             <Layers className="w-3 h-3 text-indigo-400" />
             <span>Tokens totales</span>
           </div>
           <div className="font-mono font-bold text-zinc-100 text-sm">
-            {(totalTokens / 1000).toFixed(1)}k
+            <CountUp value={totalTokens} format={(n) => `${(n / 1000).toFixed(1)}k`} />
           </div>
           <div className="text-[11px] text-zinc-400 font-mono">
             {((totalIn) / 1000).toFixed(1)}k in • {((totalOut) / 1000).toFixed(1)}k out
           </div>
         </div>
 
-        <div className="p-2.5 bg-zinc-900 border border-zinc-800 rounded-lg space-y-1">
+        <div className="hub-lift p-2.5 bg-zinc-900 border border-zinc-800 rounded-lg space-y-1">
           <div className="text-[11px] text-zinc-400 flex items-center gap-1">
             <Brain className="w-3 h-3 text-purple-400" />
             <span>Razonamiento</span>
           </div>
           <div className="font-mono font-bold text-purple-300 text-sm">
-            {(totalThink / 1000).toFixed(1)}k
+            <CountUp value={totalThink} format={(n) => `${(n / 1000).toFixed(1)}k`} />
           </div>
           <div className="text-[11px] text-zinc-400">
             Tokens de pensamiento
           </div>
         </div>
 
-        <div className="p-2.5 bg-zinc-900 border border-zinc-800 rounded-lg space-y-1">
+        <div className="hub-lift p-2.5 bg-zinc-900 border border-zinc-800 rounded-lg space-y-1">
           <div className="text-[11px] text-zinc-400 flex items-center gap-1">
             <DollarSign className="w-3 h-3 text-emerald-400" />
             <span>Costo estimado</span>
           </div>
           <div className="font-mono font-bold text-emerald-400 text-sm">
-            ${totalCost.toFixed(3)}
+            <CountUp value={totalCost} format={(n) => `$${n.toFixed(3)}`} />
           </div>
           <div className="text-[11px] text-emerald-500/80">
             {totalTurns > 0 ? `$${(totalCost / totalTurns).toFixed(3)} por turno` : 'Acumulado reportado por las CLIs'}
           </div>
         </div>
 
-        <div className="p-2.5 bg-zinc-900 border border-zinc-800 rounded-lg space-y-1">
+        <div className="hub-lift p-2.5 bg-zinc-900 border border-zinc-800 rounded-lg space-y-1">
           <div className="text-[11px] text-zinc-400 flex items-center gap-1">
             <Activity className="w-3 h-3 text-cyan-400" />
             <span>Turnos totales</span>
           </div>
           <div className="font-mono font-bold text-zinc-100 text-sm">
-            {totalTurns}
+            <CountUp value={totalTurns} format={(n) => String(Math.round(n))} />
           </div>
           <div className="text-[11px] text-zinc-400 font-mono">
             {entries.length} modelos activos
@@ -240,7 +241,7 @@ export const TelemetryDashboard: React.FC<Props> = ({ telemetryRegistry, costs, 
                 <div key={d.day} className="flex items-center gap-2 text-[11px] font-mono">
                   <span className="w-24 shrink-0 text-zinc-400">{d.day} <span className="text-zinc-500">{label}</span></span>
                   <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
-                    <div className="h-full rounded-full bg-emerald-500" style={{ width: `${maxDayCost > 0 ? Math.max(2, (d.costUSD / maxDayCost) * 100) : 0}%` }} />
+                    <div className="hub-bar h-full rounded-full bg-emerald-500" style={{ width: `${maxDayCost > 0 ? Math.max(2, (d.costUSD / maxDayCost) * 100) : 0}%` }} />
                   </div>
                   <span className="w-16 shrink-0 text-right text-zinc-200 font-mono">{usd(d.costUSD)}</span>
                   <span className={`w-9 shrink-0 text-right ${delta === null ? 'text-zinc-600' : delta > 0 ? 'text-amber-400' : 'text-emerald-400'}`} title="Cambio frente al día anterior">
@@ -256,7 +257,7 @@ export const TelemetryDashboard: React.FC<Props> = ({ telemetryRegistry, costs, 
                 <div key={a.name} className="flex items-center gap-2 text-[11px] font-mono">
                   <span className="w-24 shrink-0 truncate text-zinc-300" title={a.name}>{a.name}</span>
                   <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
-                    <div className="h-full rounded-full bg-indigo-500" style={{ width: `${maxAgentCost > 0 ? Math.max(2, (a.costUSD / maxAgentCost) * 100) : 0}%` }} />
+                    <div className="hub-bar h-full rounded-full bg-indigo-500" style={{ width: `${maxAgentCost > 0 ? Math.max(2, (a.costUSD / maxAgentCost) * 100) : 0}%` }} />
                   </div>
                   <span className="w-16 shrink-0 text-right text-zinc-200">{usd(a.costUSD)}</span>
                   <span className="w-9 shrink-0 text-right text-zinc-500" title="Parte del gasto total por agente">
@@ -371,7 +372,7 @@ export const TelemetryDashboard: React.FC<Props> = ({ telemetryRegistry, costs, 
                     {weekly !== null && (
                       <div className="w-full bg-zinc-800 rounded-full h-1.5 overflow-hidden">
                         <div
-                          className={`h-full rounded-full ${weekly > 85 ? 'bg-amber-500' : 'bg-indigo-500'}`}
+                          className={`hub-bar h-full rounded-full ${weekly > 85 ? 'bg-amber-500' : 'bg-indigo-500'}`}
                           style={{ width: `${weekly}%` }}
                         />
                       </div>
@@ -388,7 +389,7 @@ export const TelemetryDashboard: React.FC<Props> = ({ telemetryRegistry, costs, 
                     {session !== null && (
                       <div className="w-full bg-zinc-800 rounded-full h-1.5 overflow-hidden">
                         <div
-                          className="bg-cyan-500 h-full rounded-full"
+                          className="hub-bar bg-cyan-500 h-full rounded-full"
                           style={{ width: `${session}%` }}
                         />
                       </div>
