@@ -41,6 +41,7 @@ import { createSquadWorktree, mainRepoOf, mergeSquadWorktree, removeSquadWorktre
 import { isInsideWorkspace } from '../src/host/safe-path';
 import { templateById } from '../src/shared/team-templates';
 import { summarizeCosts } from '../src/shared/cost-summary';
+import { terminalHistoryKey } from '../src/shared/terminal-history';
 import { searchSessions } from '../src/shared/session-search';
 import { HostMessage } from '../src/shared/ipc';
 import { closestEffort, recommendedFor, resolveSelection } from '../src/shared/model-selection';
@@ -2621,5 +2622,15 @@ describe('Documentos del editor', () => {
     assert.strictEqual(saveDocument(root, '.agent-hub/notas.md', '# notas\n').ok, true);
     assert.strictEqual(fs.readFileSync(path.join(root, '.agent-hub', 'notas.md'), 'utf8'), '# notas\n');
     assert.deepStrictEqual(fs.readdirSync(path.join(root, '.agent-hub')), ['notas.md']);
+  });
+});
+
+describe('Historial de la terminal por proyecto', () => {
+  it('normaliza la ruta: minúsculas, barras `/` y sin barra final', () => {
+    const key = terminalHistoryKey('C:/Users/X/App');
+    assert.equal(terminalHistoryKey('c:\\users\\x\\app\\'), key);
+    assert.equal(terminalHistoryKey('C:/Users/X/App/'), key);
+    assert.notEqual(terminalHistoryKey('C:/Users/X/Otro'), key);
+    assert.equal(terminalHistoryKey(), 'agent-hub.terminalHistory');
   });
 });

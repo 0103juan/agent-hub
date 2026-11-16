@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { terminalHistoryKey } from '../../shared/terminal-history';
 import { downloadText } from '../utils/format';
 import {
   Terminal as TerminalIcon,
@@ -69,7 +70,6 @@ interface Props {
   onAskAI?: (command: string, exitCode: number, tailOutput: string) => void;
 }
 
-const TERMINAL_HISTORY_KEY = 'agent-hub.terminalHistory';
 const TERMINAL_HEIGHT_KEY = 'agent-hub.terminalHeight';
 const HISTORY_MAX = 100;
 const MAX_TERMINAL_LINES = 3000;
@@ -269,14 +269,20 @@ export const TerminalDrawer: React.FC<Props> = ({
   const effectiveQuickCommands = quickCommands && quickCommands.length > 0 ? quickCommands : DEFAULT_QUICK_COMMANDS;
 
   const [command, setCommand] = useState('');
-  const [history, setHistory] = useState<string[]>(() => {
+  const historyKey = terminalHistoryKey(defaultCwd);
+  const readHistory = (key: string): string[] => {
     try {
-      const saved = JSON.parse(localStorage.getItem(TERMINAL_HISTORY_KEY) ?? '[]');
+      const saved = JSON.parse(localStorage.getItem(key) ?? '[]');
       return Array.isArray(saved) ? saved.filter((item) => typeof item === 'string') : [];
     } catch {
       return [];
     }
-  });
+  };
+  const [history, setHistory] = useState<string[]>(() => readHistory(historyKey));
+  useEffect(() => {
+    setHistory(readHistory(historyKey));
+    setHistoryIndex(-1);
+  }, [historyKey]);
   const [height, setHeight] = useState<number>(() => {
     try {
       const saved = Number(localStorage.getItem(TERMINAL_HEIGHT_KEY));
@@ -417,7 +423,7 @@ export const TerminalDrawer: React.FC<Props> = ({
     setHistory((prev) => {
       const next = [...prev.filter((item) => item !== trimmed), trimmed].slice(-HISTORY_MAX);
       try {
-        localStorage.setItem(TERMINAL_HISTORY_KEY, JSON.stringify(next));
+        localStorage.setItem(historyKey, JSON.stringify(next));
       } catch {}
       return next;
     });
