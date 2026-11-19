@@ -92,23 +92,23 @@ export const SecurityAuditorModal: React.FC<Props> = ({
       <div className="p-4 space-y-4 text-xs">
         {/* Banner Resumen */}
         <div
-          className={`p-3 rounded-xl border flex items-center justify-between ${
+          className={`p-3.5 rounded-xl border flex items-center justify-between gap-3 ${
             totalIssues === 0
-              ? 'bg-emerald-950/20 border-emerald-500/30 text-emerald-300'
-              : 'bg-amber-950/20 border-amber-500/30 text-amber-300'
+              ? 'bg-emerald-950/20 border-emerald-500/40 text-emerald-300 shadow-sm'
+              : 'bg-amber-950/25 border-amber-500/40 text-amber-300 shadow-sm'
           }`}
         >
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             {totalIssues === 0 ? (
               <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0" />
             ) : (
               <ShieldAlert className="w-5 h-5 text-amber-400 shrink-0" />
             )}
             <div>
-              <div className="font-semibold text-sm">
+              <div className="font-bold text-sm tracking-wide">
                 {totalIssues === 0 ? 'Sin riesgos detectados' : `${totalIssues} hallazgo(s) encontrado(s)`}
               </div>
-              <div className="text-[11px] text-zinc-400">
+              <div className="text-[11px] text-slate-400 mt-0.5 font-mono">
                 {totalIssues === 0
                   ? 'No se encontraron secretos expuestos, variables huérfanas ni DDL destructivo.'
                   : `${data.secretIssues.length} secretos · ${data.undocumentedEnvVars.length} variables sin documentar · ${data.sqlIssues.length} sentencias SQL de riesgo`}
@@ -116,53 +116,53 @@ export const SecurityAuditorModal: React.FC<Props> = ({
             </div>
           </div>
 
-          {totalIssues > 0 && (
-            <button
-              type="button"
-              onClick={handleCopyReport}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 mr-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 font-medium transition cursor-pointer"
-              title="Copiar el informe en Markdown"
-            >
-              {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-              <span>{copied ? 'Copiado' : 'Copiar informe'}</span>
-            </button>
-          )}
-          {totalIssues > 0 && (
-            <button
-              type="button"
-              onClick={handleFixWithAgent}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium transition cursor-pointer shadow-sm"
-            >
-              <Send className="w-3.5 h-3.5" />
-              <span>Corregir con Agente</span>
-            </button>
-          )}
+          <div className="flex items-center gap-2 shrink-0">
+            {totalIssues > 0 && (
+              <button
+                type="button"
+                onClick={handleCopyReport}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#0c1220] hover:bg-[#162035] text-slate-300 hover:text-white border border-[#202b3f] font-mono text-xs font-medium transition cursor-pointer shadow-xs"
+                title="Copiar el informe en Markdown"
+              >
+                {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copied ? 'Copiado' : 'Copiar informe'}</span>
+              </button>
+            )}
+            {totalIssues > 0 && (
+              <button
+                type="button"
+                onClick={handleFixWithAgent}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-slate-950 font-bold transition cursor-pointer shadow-md shadow-cyan-600/30 text-xs"
+              >
+                <Send className="w-3.5 h-3.5" />
+                <span>Corregir con Agente</span>
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Secretos detectados */}
         {data.secretIssues.length > 0 && (
           <div className="space-y-1.5">
-            <div className="flex items-center gap-1.5 font-semibold text-rose-300 px-1">
+            <div className="flex items-center gap-1.5 font-bold font-mono text-rose-400 px-1 uppercase tracking-wide">
               <Key className="w-3.5 h-3.5 text-rose-400" />
               <span>Secretos y Tokens Expuestos ({data.secretIssues.length})</span>
             </div>
-            <div className="space-y-1 max-h-48 overflow-y-auto">
+            <div className="space-y-1.5 max-h-48 overflow-y-auto">
               {data.secretIssues.map((item, idx) => (
                 <div
                   key={idx}
-                  className="p-2 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-between gap-2 hover:bg-zinc-850 transition cursor-pointer"
+                  className="p-2.5 rounded-xl bg-[#07090e] border border-[#202b3f] hover:border-rose-500/40 hover:bg-[#0c1220]/80 transition cursor-pointer group"
                   onClick={() => onPreviewFile(item.file, item.line)}
                 >
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 text-[11px]">
-                      <span className="font-mono text-indigo-300 font-semibold">{item.file}:{item.line}</span>
-                      <span className="px-1.5 py-0.2 rounded bg-rose-500/15 text-rose-400 text-[10px] border border-rose-500/30">
-                        {item.type}
-                      </span>
-                    </div>
-                    <div className="font-mono text-[10.5px] text-zinc-400 truncate mt-0.5">
-                      {item.snippet}
-                    </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-mono text-cyan-300 font-bold group-hover:underline text-xs">{item.file}:{item.line}</span>
+                    <span className="px-2 py-0.5 rounded-md bg-rose-950/60 text-rose-400 text-[9px] font-mono font-bold border border-rose-500/40 uppercase">
+                      {item.type}
+                    </span>
+                  </div>
+                  <div className="font-mono text-[10.5px] text-slate-400 truncate mt-1 bg-[#07090e] p-1.5 rounded-lg border border-[#202b3f]">
+                    {item.snippet}
                   </div>
                 </div>
               ))}
@@ -173,13 +173,13 @@ export const SecurityAuditorModal: React.FC<Props> = ({
         {/* Variables de entorno no documentadas */}
         {data.undocumentedEnvVars.length > 0 && (
           <div className="space-y-1.5">
-            <div className="flex items-center gap-1.5 font-semibold text-amber-300 px-1">
+            <div className="flex items-center gap-1.5 font-bold font-mono text-amber-400 px-1 uppercase tracking-wide">
               <Sliders className="w-3.5 h-3.5 text-amber-400" />
               <span>Variables de Entorno no declaradas en .env.example ({data.undocumentedEnvVars.length})</span>
             </div>
-            <div className="p-2 rounded-lg bg-zinc-900 border border-zinc-800 flex flex-wrap gap-1.5">
+            <div className="p-3 rounded-xl bg-[#07090e] border border-amber-500/30 flex flex-wrap gap-2">
               {data.undocumentedEnvVars.map((v) => (
-                <span key={v} className="px-2 py-0.5 rounded bg-zinc-800 text-amber-300 font-mono text-[11px] border border-zinc-700">
+                <span key={v} className="px-2.5 py-1 rounded-md bg-amber-950/50 text-amber-300 font-mono text-xs font-bold border border-amber-500/40 shadow-xs">
                   {v}
                 </span>
               ))}
@@ -190,20 +190,20 @@ export const SecurityAuditorModal: React.FC<Props> = ({
         {/* Consultas SQL destructivas */}
         {data.sqlIssues.length > 0 && (
           <div className="space-y-1.5">
-            <div className="flex items-center gap-1.5 font-semibold text-purple-300 px-1">
-              <Database className="w-3.5 h-3.5 text-purple-400" />
+            <div className="flex items-center gap-1.5 font-bold font-mono text-violet-400 px-1 uppercase tracking-wide">
+              <Database className="w-3.5 h-3.5 text-violet-400" />
               <span>Riesgos de Consultas y Sentencias SQL ({data.sqlIssues.length})</span>
             </div>
-            <div className="space-y-1 max-h-48 overflow-y-auto">
+            <div className="space-y-1.5 max-h-48 overflow-y-auto">
               {data.sqlIssues.map((item, idx) => (
                 <div
                   key={idx}
-                  className="p-2 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-between gap-2 hover:bg-zinc-850 transition cursor-pointer"
+                  className="p-2.5 rounded-xl bg-[#07090e] border border-[#202b3f] hover:border-violet-500/40 hover:bg-[#0c1220]/80 transition cursor-pointer group"
                   onClick={() => onPreviewFile(item.file, item.line)}
                 >
                   <div className="min-w-0 flex-1">
-                    <span className="font-mono text-indigo-300 font-semibold">{item.file}:{item.line}</span>
-                    <div className="text-zinc-300 text-[11px] mt-0.5">{item.issue}</div>
+                    <span className="font-mono text-cyan-300 font-bold group-hover:underline text-xs">{item.file}:{item.line}</span>
+                    <div className="text-slate-200 text-xs mt-1 font-mono">{item.issue}</div>
                   </div>
                 </div>
               ))}

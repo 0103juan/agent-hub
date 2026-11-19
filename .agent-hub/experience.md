@@ -59,3 +59,19 @@ Evidencia: `tailwind.config.js` (`var(--hub-zinc-${step}, color-mix(...))`) y `:
 Señal: Al citar en el chat un archivo para que el usuario lo abra (maquetas HTML, specs, informes).
 Lección: Solo los enlaces markdown y las rutas en `código` con carpeta (`docs/x.html`) o absolutas se vuelven fichas clicables que abren Documentos; un nombre suelto (`x.html`) queda como texto copiable. Cita siempre la ruta con carpeta.
 Evidencia: `isInlineFilePath` y `FileLinkChip` en `src/webview/components/chat/Markdown.tsx`; test "Rutas en `código` dentro del chat".
+
+Señal: Al colapsar etiquetas de texto de pestañas o navegación superior con Tailwind responsive.
+Lección: Evitar breakpoints ultra-anchos como `min-[1360px]` para ocultar texto de navegación; en laptops y monitores estándar (1080p-1200p) convierte las pestañas en iconos misteriosos sin rotulado. Usar `hidden lg:inline` (1024px) para mantener contexto legible.
+Evidencia: `src/webview/App.tsx:849` (ajuste de `min-[1360px]:inline` a `lg:inline`).
+
+Señal: Al unificar la identidad visual multiplataforma de AgentHub (Electron, Standalone y VS Code).
+Lección: Declarar `backgroundColor: '#07090e'` en el host de Electron y `<body class="bg-[#07090e] text-[#f1f5f9]">` en el HTML raíz garantiza arranque Zero-Flash; los componentes reactivos deben emplear la triada táctica HUD (#07090e base, #0a0e17 superficie, #172238 bordes, con acentos cian #06b6d4 y esmeralda #10b981) cumpliendo contraste WCAG AA ≥ 4.5:1 en todos los estados.
+Evidencia: `src/electron/main.ts`, `src/webview/index.html`, `src/webview/styles.css` y las 25 maquetas de arquitectura en `docs/design/`.
+
+Señal: Al renderizar bloques de código en el visor Markdown sin penalizar peso de bundle ni tiempo de arranque.
+Lección: Evitar librerías AST pesadas (>1.5MB como Prism o Shiki); un tokenizador léxico ligero con lookahead contextual (`nextToken === '('` para funciones `.syn-fn`, constantes en mayúsculas `.syn-const`, operadores cian `.syn-op` y Sets O(1) para keywords y tipos) ejecuta en <1ms por bloque y mantiene el bundle ultra-ligero y reactivo.
+Evidencia: `src/webview/components/chat/syntax-highlighter.tsx`, `src/webview/styles.css` y `docs/design/syntax-highlighter-engine-architecture.svg`.
+
+Señal: un componente que se repite por columna o por chat muestra rama, cambios git o carpeta.
+Lección: `branchesData` y `workspaceOverview` de App son solo los del chat activo; pasarlos a cada columna pinta la misma rama en todas. Pide `getDirGitStatus` por `projectPath` y guarda las respuestas `gitBranches`/`dirGitStatus` por `msg.dir` (el host devuelve el mismo `dir` que recibió).
+Evidencia: src/webview/components/SplitWorkspace.tsx (useDirGit); antes recibía `currentBranch` global con 'main' por defecto.

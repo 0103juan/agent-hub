@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-[#05070c] text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentHub HUD // Git Branch & Shortcuts Showcase (Card #38)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes modalPop {
+      0% { opacity: 0; transform: scale(0.96) translateY(6px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.08); }
+    }
+    .animate-modal-pop {
+      animation: modalPop 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .tactile-keycap {
+      background: linear-gradient(180deg, #162238 0%, #0b1120 100%);
+      box-shadow: inset 0 -2px 0 #162035, 0 2px 4px rgba(0, 0, 0, 0.4);
+      transition: all 0.08s ease;
+    }
+    .tactile-keycap:active {
+      transform: translateY(2px);
+      box-shadow: inset 0 -1px 0 #162035, 0 1px 1px rgba(0, 0, 0, 0.6);
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #07090e;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1a2438;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #06b6d4;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[#05070c] text-slate-100 font-sans p-6 flex flex-col justify-between">
+  <!-- Top Global Bar -->
+  <header class="max-w-7xl mx-auto w-full mb-6 pb-4 border-b border-[#162035] flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-indigo-600 flex items-center justify-center font-mono font-bold text-slate-950 shadow-md shadow-cyan-500/20">
+        AH
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-base font-bold text-slate-100">Tactical Dark HUD // Git Workspaces &amp; Shortcuts Engine</h1>
+          <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-950/80 text-cyan-300 border border-cyan-500/40 uppercase">
+            Spec Card #38
+          </span>
+        </div>
+        <p class="text-xs text-slate-400">Micro-interacciones a 60 FPS, keycaps táctiles 3D y aislamiento de worktrees</p>
+      </div>
+    </div>
+
+    <!-- Right Controls -->
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 bg-[#0c1220] border border-[#202b3f] px-3 py-1.5 rounded-lg text-xs font-mono">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="text-slate-400">Safe CWD:</span>
+        <span class="text-emerald-300 font-bold">Protegido (Sin System32)</span>
+      </div>
+      <button onclick="toggleView()" id="viewToggleBtn" class="px-3 py-1.5 rounded-lg bg-[#0e1628] hover:bg-[#162238] border border-cyan-500/40 text-cyan-300 text-xs font-mono font-semibold transition cursor-pointer">
+        Vista: Lado a Lado
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Showcase Container -->
+  <main class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1" id="mainContainer">
+    
+    <!-- ==================== LEFT MODAL: GIT BRANCH MANAGER ==================== -->
+    <section class="flex flex-col bg-[#070a12] border border-[#202b3f] rounded-2xl shadow-2xl overflow-hidden animate-modal-pop">
+      <!-- Modal Header -->
+      <div class="px-4 py-3 bg-[#0c1220] border-b border-[#202b3f] flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="6" y1="3" x2="6" y2="15"></line>
+            <circle cx="18" cy="6" r="3"></circle>
+            <circle cx="6" cy="18" r="3"></circle>
+            <path d="M18 9a9 9 0 0 1-9 9"></path>
+          </svg>
+          <span class="font-bold text-sm text-slate-100">Gestor de Ramas Git y Worktrees</span>
+        </div>
+        <span class="text-[10px] font-mono text-slate-400 bg-[#162035] px-2 py-0.5 rounded border border-[#202b3f]">ESC para cerrar</span>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-4 space-y-4 text-xs flex-1 flex flex-col justify-between">
+        <div class="space-y-4">
+          <!-- Active Branch Banner -->
+          <div class="flex items-center justify-between p-3.5 rounded-xl bg-[#0a0d16] border border-emerald-500/40 shadow-sm">
+            <div class="flex items-center gap-2.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
+              <span class="text-slate-400 font-mono text-[11px] uppercase font-semibold">Rama activa:</span>
+              <span id="activeBranchTag" class="px-2.5 py-0.5 rounded-md bg-emerald-950/60 text-emerald-300 font-mono font-bold border border-emerald-800/40 flex items-center gap-1.5">
+                <svg class="w-3 h-3 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span id="activeBranchName">main</span>
+              </span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="simulateRefresh()" class="p-1.5 rounded-lg bg-[#131927] hover:bg-slate-700 text-slate-300 hover:text-white border border-[#202b3f] transition cursor-pointer" title="Refrescar lista">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+              </button>
+              <button onclick="toggleNewBranchForm()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-slate-950 font-bold transition cursor-pointer shadow-md shadow-cyan-950/50">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>Nueva Rama</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Create Branch Inline Form -->
+          <form id="createBranchForm" onsubmit="handleCreateBranch(event)" class="hidden flex items-center gap-2 p-3 rounded-xl bg-[#07090e] border border-cyan-500/50 shadow-inner animate-modal-pop">
+            <svg class="w-4 h-4 text-cyan-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>
+            <input type="text" id="branchInput" placeholder="feature/nueva-funcionalidad" class="flex-1 bg-transparent border-none text-xs text-slate-100 placeholder-slate-500 focus:outline-none font-mono" />
+            <button type="submit" class="px-3 py-1.5 bg-gradient-to-r from-cyan-500 to-cyan-400 hover:brightness-110 text-slate-950 rounded-lg text-xs font-bold transition cursor-pointer shadow-sm shadow-cyan-950/40">
+              Crear y Cambiar
+            </button>
+            <button type="button" onclick="toggleNewBranchForm()" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-[#131927]">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+          </form>
+
+          <!-- Branch Filter & Header -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between gap-2 px-1">
+              <span class="font-bold text-slate-200 tracking-wide" id="branchCountLabel">Ramas Locales (4)</span>
+              <div class="relative">
+                <svg class="w-3.5 h-3.5 text-cyan-400 absolute left-2.5 top-1/2 -translate-y-1/2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input id="branchFilterInput" oninput="filterBranches()" placeholder="Filtrar ramas…" class="w-48 bg-[#07090e] border border-[#202b3f] rounded-lg pl-8 pr-2.5 py-1 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-mono transition" />
+              </div>
+            </div>
+
+            <!-- Branch List Container -->
+            <div id="branchList" class="max-h-56 overflow-y-auto space-y-1.5 p-1">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <!-- Squad Branches Isolated Section -->
+          <div class="space-y-2 pt-3 border-t border-[#202b3f]">
+            <div class="flex items-center gap-1.5 font-bold text-purple-300 px-1">
+              <svg class="w-3.5 h-3.5 text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="6" height="6" rx="1"></rect><rect x="15" y="15" width="6" height="6" rx="1"></rect><path d="M6 9v3a3 3 0 0 0 3 3h6"></path></svg>
+              <span>Ramas Aisladas de Agentes / Squads (Worktrees)</span>
+            </div>
+            <div id="squadBranchList" class="max-h-36 overflow-y-auto space-y-1.5 p-1">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-[#202b3f] flex items-center justify-between text-[11px] font-mono text-slate-500">
+          <span>Git v2.43.0 // Worktree isolation verified</span>
+          <span class="text-emerald-400">Zero Git Collisions</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== RIGHT MODAL: SHORTCUTS HUD ==================== -->
+    <section class="flex flex-col bg-[#070a12] border border-[#202b3f] rounded-2xl shadow-2xl overflow-hidden animate-modal-pop">
+      <!-- Modal Header -->
+      <div class="px-4 py-3 bg-[#0c1220] border-b border-[#202b3f] flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <svg class="w-4 h-4 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+            <path d="M6 8h.001M10 8h.001M14 8h.001M18 8h.001M8 12h.001M12 12h.001M16 12h.001M7 16h10"></path>
+          </svg>
+          <span class="font-bold text-sm text-slate-100">Atajos de Teclado del HUD</span>
+        </div>
+        <span class="text-[10px] font-mono text-cyan-400 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/40">22 atajos activos</span>
+      </div>
+
+      <!-- Filter Controls & Search -->
+      <div class="p-3 border-b border-[#202b3f] bg-[#07090e]/80 space-y-2.5">
+        <div class="relative">
+          <svg class="w-3.5 h-3.5 text-cyan-400 absolute left-3 top-1/2 -translate-y-1/2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input id="shortcutSearchInput" oninput="filterShortcuts()" type="text" placeholder="Buscar por atajo o acción (ej. Ctrl K, terminal, plan)..." class="w-full bg-[#0a0e17] border border-[#202b3f] focus:border-cyan-500 rounded-lg pl-9 pr-8 py-1.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none font-mono transition" />
+          <button id="clearSearchBtn" onclick="clearShortcutSearch()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-100 transition cursor-pointer">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+
+        <!-- Category Pills -->
+        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5" id="categoryPillContainer">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+
+      <!-- Shortcuts List -->
+      <ul id="shortcutsList" class="p-3 overflow-y-auto space-y-1.5 flex-1 max-h-[380px]" role="list">
+        <!-- Rendered via JS -->
+      </ul>
+
+      <!-- Footer -->
+      <div class="p-3 border-t border-[#202b3f] bg-[#0a0d16] flex items-center justify-between text-[10px] font-mono text-slate-400">
+        <span id="shortcutStatsLabel">22 de 22 atajos mapeados</span>
+        <span class="text-cyan-400 font-semibold">Presiona cualquier tecla para probar efecto</span>
+      </div>
+    </section>
+  </main>
+
+  <!-- Keypress Toast Feedback -->
+  <div id="keyToast" class="fixed bottom-6 right-6 pointer-events-none opacity-0 transform translate-y-4 transition-all duration-200 bg-[#0c1424] border border-cyan-500/60 text-cyan-200 px-4 py-2 rounded-xl shadow-2xl flex items-center gap-2 font-mono text-xs">
+    <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+    <span id="keyToastText">Tecla presionada</span>
+  </div>
+
+  <script>
+    // State
+    let currentBranch = 'main';
+    let branches = ['main', 'design/tactical-hud', 'fix/windows-path-safety', 'feature/telemetry-v2'];
+    let squadBranches = ['squad/coder-alpha-4029', 'squad/tester-beta-8812'];
+    let activeCategory = 'Todos';
+
+    const SHORTCUTS = [
+      { keys: 'Ctrl K', label: 'Paleta global de comandos', group: 'Navegación' },
+      { keys: 'Ctrl /', label: 'Esta ayuda de atajos', group: 'Navegación' },
+      { keys: 'Ctrl N', label: 'Nueva conversación', group: 'Chat' },
+      { keys: 'Ctrl 1 – 8', label: 'Cambiar de pestaña (1: HUD Center, 2: Chat, 5: Docs)', group: 'Navegación' },
+      { keys: 'Alt ↑ / ↓', label: 'Conversación anterior / siguiente', group: 'Chat' },
+      { keys: 'Ctrl Alt 1 – 4', label: 'Enfocar una columna (vista en columnas)', group: 'Ventanas' },
+      { keys: 'Ctrl Alt ← / →', label: 'Pasar a la columna vecina', group: 'Ventanas' },
+      { keys: 'Ctrl Shift F', label: 'Modo enfoque (Focus Mode)', group: 'Ventanas' },
+      { keys: 'Alt Espacio', label: 'Lanzador rápido flotante', group: 'Navegación' },
+      { keys: 'Ctrl `', label: 'Terminal integrada CRT', group: 'Herramientas' },
+      { keys: 'Ctrl F', label: 'Buscar en la conversación activa', group: 'Chat' },
+      { keys: 'Ctrl B', label: 'Panel de archivos y cambios Git', group: 'Herramientas' },
+      { keys: 'Ctrl E', label: 'Borrador de notas y tareas (scratchpad.md)', group: 'Herramientas' },
+      { keys: 'Ctrl Shift D', label: 'Iniciar o detener el dictado por voz', group: 'Entrada' },
+      { keys: 'Ctrl Shift C', label: 'Copiar la última respuesta del agente', group: 'Chat' },
+      { keys: 'Ctrl Shift P', label: 'Activar o desactivar «Plan primero»', group: 'Agente' },
+      { keys: 'Mayús + clic en Copiar', label: 'Copiar un mensaje con encabezado y hora', group: 'Chat' },
+      { keys: 'Ctrl + / Ctrl −', label: 'Acercar / alejar la interfaz (Ctrl 0 restablece)', group: 'Ventanas' },
+      { keys: '↑ / ↓ en cuadro vacío', label: 'Recorrer los mensajes que enviaste', group: 'Chat' },
+      { keys: 'Esc en cuadro vacío', label: 'Detener el turno en curso', group: 'Chat' },
+      { keys: 'Enter / Shift Enter', label: 'Enviar / salto de línea', group: 'Chat' },
+      { keys: 'F11 / F12 / Ctrl R', label: 'Pantalla completa / DevTools / recargar', group: 'Sistema' }
+    ];
+
+    const GROUP_STYLES = {
+      'Navegación': 'text-cyan-300 bg-cyan-950/40 border-cyan-500/40',
+      'Chat': 'text-blue-300 bg-blue-950/40 border-blue-500/40',
+      'Ventanas': 'text-amber-300 bg-amber-950/40 border-amber-500/40',
+      'Herramientas': 'text-emerald-300 bg-emerald-950/40 border-emerald-500/40',
+      'Agente': 'text-purple-300 bg-purple-950/40 border-purple-500/40',
+      'Entrada': 'text-rose-300 bg-rose-950/40 border-rose-500/40',
+      'Sistema': 'text-slate-300 bg-slate-800/40 border-slate-600/40'
+    };
+
+    // Render Branches
+    function renderBranches() {
+      document.getElementById('activeBranchName').innerText = currentBranch;
+      const filter = document.getElementById('branchFilterInput').value.toLowerCase().trim();
+      const list = document.getElementById('branchList');
+      list.innerHTML = '';
+
+      const visible = branches
+        .filter(b => b.toLowerCase().includes(filter))
+        .sort((a, b) => a === currentBranch ? -1 : b === currentBranch ? 1 : a.localeCompare(b));
+
+      document.getElementById('branchCountLabel').innerText = `Ramas Locales (${visible.length} de ${branches.length})`;
+
+      visible.forEach(b => {
+        const isCurrent = b === currentBranch;
+        const item = document.createElement('div');
+        item.className = `flex items-center justify-between px-3 py-2 rounded-xl border transition ${
+          isCurrent
+            ? 'bg-[#0e1626] border-emerald-500/50 text-emerald-300 font-bold shadow-[0_0_12px_rgba(16,185,129,0.15)]'
+            : 'bg-[#0a0d16] border-[#202b3f] text-slate-200 hover:border-cyan-500/30 hover:bg-[#162035]'
+        }`;
+
+        item.innerHTML = `
+          <div class="flex items-center gap-2 min-w-0">
+            <svg class="w-3.5 h-3.5 shrink-0 ${isCurrent ? 'text-emerald-400' : 'text-slate-400'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>
+            <span class="font-mono truncate">${b}</span>
+            ${isCurrent ? '<span class="text-[9px] font-mono font-bold bg-emerald-950/80 text-emerald-400 px-1.5 py-0.2 rounded border border-emerald-800/80 uppercase">actual</span>' : ''}
+          </div>
+          <div class="flex items-center gap-1.5">
+            ${!isCurrent ? `
+              <button onclick="checkoutBranch('${b}')" class="px-2.5 py-1 rounded-lg bg-cyan-950/40 hover:bg-cyan-900/60 text-cyan-200 hover:text-white border border-cyan-500/35 hover:border-cyan-400 text-xs font-mono font-medium transition cursor-pointer">
+                Cambiar
+              </button>
+              <button onclick="deleteBranch('${b}')" class="p-1.5 rounded-lg hover:bg-rose-950/40 text-slate-400 hover:text-rose-400 transition cursor-pointer" title="Eliminar rama">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              </button>
+            ` : ''}
+          </div>
+        `;
+        list.appendChild(item);
+      });
+
+      // Render Squad branches
+      const squadList = document.getElementById('squadBranchList');
+      squadList.innerHTML = '';
+      squadBranches.forEach(sb => {
+        const isCurrent = sb === currentBranch;
+        const item = document.createElement('div');
+        item.className = 'flex items-center justify-between px-3 py-2 rounded-xl bg-purple-950/20 border border-purple-800/40 text-purple-200 hover:border-purple-600/40 transition';
+        item.innerHTML = `
+          <span class="font-mono text-xs truncate">${sb}</span>
+          <div class="flex items-center gap-1.5">
+            ${!isCurrent ? `
+              <button onclick="checkoutBranch('${sb}')" class="px-2.5 py-1 rounded-lg bg-purple-950/40 hover:bg-purple-900/60 text-purple-200 border border-purple-500/40 hover:border-purple-400 text-xs font-mono font-medium transition cursor-pointer">
+                Checkout
+              </button>
+            ` : '<span class="text-[9px] font-mono text-purple-300 font-bold uppercase">Worktree Activo</span>'}
+            <button onclick="deleteSquadBranch('${sb}')" class="p-1 text-slate-400 hover:text-rose-400 rounded hover:bg-rose-950/30 transition">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            </button>
+          </div>
+        `;
+        squadList.appendChild(item);
+      });
+    }
+
+    function checkoutBranch(name) {
+      currentBranch = name;
+      showToast(`Cambiado a rama "${name}"`);
+      renderBranches();
+    }
+
+    function deleteBranch(name) {
+      if (confirm(`¿Eliminar rama local "${name}"?`)) {
+        branches = branches.filter(b => b !== name);
+        showToast(`Rama "${name}" eliminada`);
+        renderBranches();
+      }
+    }
+
+    function deleteSquadBranch(name) {
+      if (confirm(`¿Podar rama aislada de squad "${name}"?`)) {
+        squadBranches = squadBranches.filter(b => b !== name);
+        showToast(`Worktree de squad podado`);
+        renderBranches();
+      }
+    }
+
+    function toggleNewBranchForm() {
+      const form = document.getElementById('createBranchForm');
+      form.classList.toggle('hidden');
+      if (!form.classList.contains('hidden')) {
+        document.getElementById('branchInput').focus();
+      }
+    }
+
+    function handleCreateBranch(e) {
+      e.preventDefault();
+      const val = document.getElementById('branchInput').value.trim().replace(/\s+/g, '-');
+      if (!val) return;
+      if (branches.includes(val)) {
+        alert('Esa rama ya existe');
+        return;
+      }
+      branches.push(val);
+      currentBranch = val;
+      document.getElementById('branchInput').value = '';
+      toggleNewBranchForm();
+      showToast(`Rama "${val}" creada y activada`);
+      renderBranches();
+    }
+
+    function filterBranches() {
+      renderBranches();
+    }
+
+    function simulateRefresh() {
+      showToast('Lista de ramas sincronizada');
+      renderBranches();
+    }
+
+    // Render Categories & Shortcuts
+    function initShortcuts() {
+      const categories = ['Todos', 'Navegación', 'Chat', 'Ventanas', 'Herramientas', 'Agente', 'Entrada', 'Sistema'];
+      const catContainer = document.getElementById('categoryPillContainer');
+      catContainer.innerHTML = '';
+      categories.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.onclick = () => selectCategory(cat);
+        btn.id = `catBtn-${cat}`;
+        btn.className = `px-2.5 py-0.5 rounded-md text-[10.5px] font-mono font-medium transition cursor-pointer whitespace-nowrap ${
+          cat === activeCategory
+            ? 'bg-cyan-500/20 text-cyan-200 border border-cyan-400/50 shadow-[0_0_8px_rgba(6,182,212,0.25)] font-bold'
+            : 'text-slate-400 hover:text-slate-200 hover:bg-[#131927] border border-[#202b3f]'
+        }`;
+        btn.innerText = cat;
+        catContainer.appendChild(btn);
+      });
+      renderShortcuts();
+    }
+
+    function selectCategory(cat) {
+      activeCategory = cat;
+      initShortcuts();
+    }
+
+    function renderShortcuts() {
+      const q = document.getElementById('shortcutSearchInput').value.toLowerCase().trim();
+      const clearBtn = document.getElementById('clearSearchBtn');
+      if (q) clearBtn.classList.remove('hidden');
+      else clearBtn.classList.add('hidden');
+
+      const filtered = SHORTCUTS.filter(s => {
+        const matchesCategory = activeCategory === 'Todos' || s.group === activeCategory;
+        if (!matchesCategory) return false;
+        if (!q) return true;
+        return s.label.toLowerCase().includes(q) || s.keys.toLowerCase().includes(q) || s.group.toLowerCase().includes(q);
+      });
+
+      const list = document.getElementById('shortcutsList');
+      list.innerHTML = '';
+
+      if (filtered.length === 0) {
+        list.innerHTML = `<li class="p-8 text-center text-slate-500 text-xs font-mono">No se encontraron atajos para "${q}"</li>`;
+      } else {
+        filtered.forEach(s => {
+          const item = document.createElement('li');
+          item.className = 'flex items-center justify-between gap-3 p-2.5 rounded-xl bg-[#0a0d16] hover:bg-[#131927] border border-[#202b3f] hover:border-cyan-500/30 transition-colors shadow-xs';
+          item.innerHTML = `
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="px-1.5 py-0.2 rounded font-mono text-[9px] font-bold border uppercase shrink-0 ${GROUP_STYLES[s.group] || 'text-slate-400 bg-[#131927] border-[#202b3f]'}">
+                ${s.group}
+              </span>
+              <span class="text-xs text-slate-200 font-medium truncate">${s.label}</span>
+            </div>
+            <kbd class="tactile-keycap shrink-0 px-2.5 py-1 rounded-md border border-[#202b3f] font-mono text-[11px] text-cyan-300 font-bold cursor-pointer select-none" onclick="triggerKeycap('${s.keys}')">
+              ${s.keys}
+            </kbd>
+          `;
+          list.appendChild(item);
+        });
+      }
+
+      document.getElementById('shortcutStatsLabel').innerText = `${filtered.length} de ${SHORTCUTS.length} atajos mapeados`;
+    }
+
+    function filterShortcuts() {
+      renderShortcuts();
+    }
+
+    function clearShortcutSearch() {
+      document.getElementById('shortcutSearchInput').value = '';
+      renderShortcuts();
+    }
+
+    function triggerKeycap(keyText) {
+      showToast(`Atajo ejecutado: ${keyText}`);
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('keyToast');
+      document.getElementById('keyToastText').innerText = msg;
+      toast.classList.remove('opacity-0', 'translate-y-4');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'translate-y-4');
+      }, 2000);
+    }
+
+    window.addEventListener('keydown', (e) => {
+      let combo = '';
+      if (e.ctrlKey) combo += 'Ctrl ';
+      if (e.altKey) combo += 'Alt ';
+      if (e.shiftKey) combo += 'Shift ';
+      combo += e.key.toUpperCase();
+      showToast(`Keypress detectado: ${combo}`);
+    });
+
+    function toggleView() {
+      const container = document.getElementById('mainContainer');
+      const btn = document.getElementById('viewToggleBtn');
+      if (container.classList.contains('lg:grid-cols-2')) {
+        container.classList.remove('lg:grid-cols-2');
+        btn.innerText = 'Vista: Columnas';
+      } else {
+        container.classList.add('lg:grid-cols-2');
+        btn.innerText = 'Vista: Lado a Lado';
+      }
+    }
+
+    // Initial setup
+    renderBranches();
+    initShortcuts();
+  </script>
+</body>
+</html>

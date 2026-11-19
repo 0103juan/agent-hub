@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentHub HUD • Telemetry &amp; Spotlight Palette Showcase</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            tactical: {
+              bg: '#05070c',
+              card: '#0a0e17',
+              surface: '#0e131f',
+              border: '#162035',
+              borderHover: '#202b3f',
+              cyan: '#06b6d4',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              rose: '#f43f5e',
+              violet: '#8b5cf6'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Fira Code', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #05070c;
+      color: #f1f5f9;
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(6, 182, 212, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.04) 0%, transparent 40%),
+        linear-gradient(to right, rgba(22, 32, 53, 0.15) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(22, 32, 53, 0.15) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+    }
+    .hud-glow {
+      box-shadow: 0 0 20px -3px rgba(6, 182, 212, 0.25);
+    }
+    .hud-bar {
+      transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #07090e;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #1f2d45;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans selection:bg-cyan-500/30 selection:text-cyan-200">
+
+  <!-- Top Header Navigation -->
+  <header class="border-b border-[#162035] bg-[#07090e]/90 backdrop-blur-md sticky top-0 z-40 px-6 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center font-bold text-slate-950 font-mono shadow-md shadow-cyan-500/20">
+        AH
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-sm font-bold text-slate-100">AgentHub HUD Showcase</h1>
+          <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-950/60 text-cyan-300 border border-cyan-500/30 font-semibold">CARD #41</span>
+        </div>
+        <p class="text-[11px] text-slate-400">Telemetry Analytics Dashboard &amp; Spotlight Palette Hub</p>
+      </div>
+    </div>
+
+    <!-- Active View Selector -->
+    <div class="flex items-center gap-2">
+      <div class="flex items-center p-1 rounded-xl bg-[#0e131f] border border-[#202b3f] text-xs">
+        <button id="tabTelemetryBtn" onclick="switchMainTab('telemetry')" class="px-3 py-1 rounded-lg font-bold bg-cyan-500 text-slate-950 shadow-sm transition">
+          📊 Telemetría &amp; Costos
+        </button>
+        <button id="tabSpotlightBtn" onclick="switchMainTab('spotlight')" class="px-3 py-1 rounded-lg font-medium text-slate-400 hover:text-slate-200 transition">
+          ⚡ Spotlight &amp; Command Palette
+        </button>
+      </div>
+
+      <!-- Global Alt+Space Simulator Button -->
+      <button onclick="toggleSpotlightModal()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#131927] hover:bg-slate-800 text-cyan-300 border border-cyan-500/40 text-xs font-mono transition shadow-sm cursor-pointer hover:border-cyan-400">
+        <span>Alt + Espacio</span>
+        <span class="text-[10px] text-slate-400">Abrir HUD</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
+
+    <!-- ================= VIEW 1: TELEMETRY DASHBOARD ================= -->
+    <section id="viewTelemetry" class="space-y-6">
+
+      <!-- Header Banner -->
+      <div class="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-[#0e131f]/95 border border-[#202b3f] shadow-lg backdrop-blur-md">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-sm font-bold text-slate-100">Métricas por Cuenta y Modelo</h2>
+              <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                VENTANA ACTIVA
+              </span>
+            </div>
+            <p class="text-xs text-slate-400">Cuotas de 5 horas, tokens consolidados, proyección mensual y gastos por rol</p>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center gap-2">
+          <button onclick="simulateTurn()" class="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-slate-950 transition shadow-sm cursor-pointer shadow-cyan-500/20">
+            <span>+ Simular Turno (+4.2k tokens)</span>
+          </button>
+          <button onclick="exportJSON()" class="flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg bg-[#131927] hover:bg-slate-800 text-slate-300 border border-[#202b3f] transition">
+            <span>Exportar JSON</span>
+          </button>
+          <button onclick="resetTelemetry()" class="flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg bg-[#131927] hover:bg-red-950/30 text-slate-400 hover:text-red-400 border border-[#202b3f] transition">
+            <span>Reiniciar</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- KPI Summary 4-Cards Grid -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Card 1 -->
+        <div class="p-4 rounded-xl bg-gradient-to-b from-[#131927]/90 to-[#0e131f]/95 border border-[#202b3f] hover:border-cyan-500/40 transition shadow-sm space-y-1.5">
+          <div class="flex items-center justify-between text-xs text-slate-400 font-medium">
+            <span>Tokens Totales</span>
+            <span class="text-[10px] font-mono px-1 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">VOL</span>
+          </div>
+          <div id="kpiTokens" class="font-mono text-2xl font-extrabold text-slate-100">482.6k</div>
+          <div class="text-[11px] font-mono text-slate-400 flex items-center gap-2 pt-1 border-t border-[#182030]">
+            <span id="kpiIn" class="text-emerald-400">310.2k in</span>
+            <span class="text-slate-600">•</span>
+            <span id="kpiOut" class="text-cyan-400">172.4k out</span>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="p-4 rounded-xl bg-gradient-to-b from-[#131927]/90 to-[#0e131f]/95 border border-[#202b3f] hover:border-emerald-500/40 transition shadow-sm space-y-1.5">
+          <div class="flex items-center justify-between text-xs text-slate-400 font-medium">
+            <span>Gasto Acumulado</span>
+            <span class="text-[10px] font-mono px-1 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">USD</span>
+          </div>
+          <div id="kpiCost" class="font-mono text-2xl font-extrabold text-emerald-400">$1.4280</div>
+          <div class="text-[11px] font-mono text-slate-400 flex items-center justify-between pt-1 border-t border-[#182030]">
+            <span>Promedio:</span>
+            <span id="kpiCostPerTurn" class="text-slate-200 font-bold">$0.0152 / turno</span>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="p-4 rounded-xl bg-gradient-to-b from-[#131927]/90 to-[#0e131f]/95 border border-[#202b3f] hover:border-purple-500/40 transition shadow-sm space-y-1.5">
+          <div class="flex items-center justify-between text-xs text-slate-400 font-medium">
+            <span>Turnos Ejecutados</span>
+            <span class="text-[10px] font-mono px-1 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/20">AGENT</span>
+          </div>
+          <div id="kpiTurns" class="font-mono text-2xl font-extrabold text-slate-100">94</div>
+          <div class="text-[11px] font-mono text-slate-400 flex items-center justify-between pt-1 border-t border-[#182030]">
+            <span>Agentes activos:</span>
+            <span class="text-purple-300 font-bold">4 en paralelo</span>
+          </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="p-4 rounded-xl bg-gradient-to-b from-[#131927]/90 to-[#0e131f]/95 border border-[#202b3f] hover:border-teal-500/40 transition shadow-sm space-y-1.5">
+          <div class="flex items-center justify-between text-xs text-slate-400 font-medium">
+            <span>Caché Reusada</span>
+            <span class="text-[10px] font-mono px-1 py-0.5 rounded bg-teal-500/10 text-teal-300 border border-teal-500/20">EFF</span>
+          </div>
+          <div class="font-mono text-2xl font-extrabold text-teal-300">68.4%</div>
+          <div class="text-[11px] font-mono text-slate-400 flex items-center justify-between pt-1 border-t border-[#182030]">
+            <span>Ahorro estimado:</span>
+            <span class="text-emerald-400 font-bold">≈ -42% costo</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Columns: Quotas & Cost History -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Quota & Rate Limit Engine -->
+        <div class="p-5 rounded-2xl bg-[#0e131f] border border-[#202b3f] shadow-md space-y-5">
+          <div class="flex items-center justify-between border-b border-[#182030] pb-3">
+            <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider font-mono">Consumo de Cuotas &amp; Ventanas</h3>
+            <span class="text-[10px] text-cyan-400 font-mono">Límites de Proveedor</span>
+          </div>
+
+          <!-- Weekly Meter -->
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between text-xs font-medium">
+              <span class="text-slate-300">Cuota Semanal (Claude 3.7 Sonnet)</span>
+              <span id="weeklyPercentText" class="font-mono font-bold text-cyan-300">42%</span>
+            </div>
+            <div class="h-2.5 rounded-full bg-[#090d16] border border-[#1c2638] overflow-hidden">
+              <div id="weeklyMeterBar" class="hud-bar h-full rounded-full bg-gradient-to-r from-cyan-500 to-teal-400 shadow-[0_0_8px_rgba(6,182,212,0.4)]" style="width: 42%;"></div>
+            </div>
+            <div class="flex justify-between text-[10px] text-slate-500 font-mono">
+              <span>0%</span>
+              <span>Alerta: 85%</span>
+              <span>100%</span>
+            </div>
+          </div>
+
+          <!-- 5-Hour Sliding Window Meter -->
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between text-xs font-medium">
+              <span class="text-slate-300">Ventana Deslizante 5 Horas</span>
+              <span id="slidingPercentText" class="font-mono font-bold text-cyan-300">78%</span>
+            </div>
+            <div class="h-2.5 rounded-full bg-[#090d16] border border-[#1c2638] overflow-hidden">
+              <div id="slidingMeterBar" class="hud-bar h-full rounded-full bg-cyan-400" style="width: 78%;"></div>
+            </div>
+            <div class="flex justify-between text-[10px] text-slate-500 font-mono">
+              <span>0%</span>
+              <span class="text-amber-500">Cerca de límite (85%)</span>
+              <span class="text-red-500">Crítico (95%)</span>
+            </div>
+          </div>
+
+          <!-- Cost by Protocol Role -->
+          <div class="pt-3 border-t border-[#182030] space-y-3">
+            <div class="text-xs font-semibold text-slate-300">Gasto Consolidado por Rol de Agente</div>
+            <div class="space-y-2 text-xs font-mono">
+              <!-- Role 1 -->
+              <div class="flex items-center gap-3">
+                <span class="w-28 text-slate-300 truncate font-sans">Desarrollador</span>
+                <div class="flex-1 h-2 rounded-full bg-[#090d16] border border-[#1c2638] overflow-hidden">
+                  <div class="h-full rounded-full bg-gradient-to-r from-cyan-500 to-teal-400" style="width: 58%;"></div>
+                </div>
+                <span class="w-14 text-right text-slate-100 font-bold">$0.84</span>
+                <span class="w-10 text-right text-slate-400">58%</span>
+              </div>
+              <!-- Role 2 -->
+              <div class="flex items-center gap-3">
+                <span class="w-28 text-slate-300 truncate font-sans">Arquitecto</span>
+                <div class="flex-1 h-2 rounded-full bg-[#090d16] border border-[#1c2638] overflow-hidden">
+                  <div class="h-full rounded-full bg-gradient-to-r from-purple-500 to-cyan-400" style="width: 31%;"></div>
+                </div>
+                <span class="w-14 text-right text-slate-100 font-bold">$0.45</span>
+                <span class="w-10 text-right text-slate-400">31%</span>
+              </div>
+              <!-- Role 3 -->
+              <div class="flex items-center gap-3">
+                <span class="w-28 text-slate-300 truncate font-sans">Tester QA</span>
+                <div class="flex-1 h-2 rounded-full bg-[#090d16] border border-[#1c2638] overflow-hidden">
+                  <div class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400" style="width: 11%;"></div>
+                </div>
+                <span class="w-14 text-right text-slate-100 font-bold">$0.14</span>
+                <span class="w-10 text-right text-slate-400">11%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Daily Cost History & Projection -->
+        <div class="p-5 rounded-2xl bg-[#0e131f] border border-[#202b3f] shadow-md space-y-4">
+          <div class="flex items-center justify-between border-b border-[#182030] pb-3">
+            <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider font-mono">Historial Diario &amp; Ritmo Mensual</h3>
+            <!-- Range Selector Pills -->
+            <div class="flex items-center gap-1 bg-[#131927] p-0.5 rounded-lg border border-[#202b3f] text-xs">
+              <button onclick="setRange(7)" id="range7Btn" class="px-2.5 py-0.5 rounded-md font-bold bg-cyan-500 text-slate-950 shadow-sm transition">7d</button>
+              <button onclick="setRange(14)" id="range14Btn" class="px-2.5 py-0.5 rounded-md text-slate-400 hover:text-slate-200 transition">14d</button>
+              <button onclick="setRange(30)" id="range30Btn" class="px-2.5 py-0.5 rounded-md text-slate-400 hover:text-slate-200 transition">30d</button>
+            </div>
+          </div>
+
+          <!-- Projection Banner -->
+          <div class="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs flex items-center justify-between">
+            <span class="text-amber-200 font-medium">Ritmo proyectado según los últimos 7 días:</span>
+            <span id="projText" class="font-mono font-bold text-amber-300">≈ $14.20 / mes</span>
+          </div>
+
+          <!-- Daily Bars -->
+          <div id="dailyBarsContainer" class="space-y-2 pt-1 font-mono text-xs">
+            <!-- Day 1 -->
+            <div class="flex items-center gap-3 group hover:bg-[#131927]/40 p-1 rounded-lg transition">
+              <span class="w-24 text-slate-400">2026-11-13</span>
+              <div class="flex-1 h-2.5 bg-[#090d16] border border-[#1c2638] rounded-full overflow-hidden">
+                <div class="hud-bar h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400" style="width: 45%;"></div>
+              </div>
+              <span class="w-14 text-right text-slate-100 font-bold">$0.24</span>
+              <span class="w-10 text-right text-slate-500">—</span>
+            </div>
+            <!-- Day 2 -->
+            <div class="flex items-center gap-3 group hover:bg-[#131927]/40 p-1 rounded-lg transition">
+              <span class="w-24 text-slate-400">2026-11-14</span>
+              <div class="flex-1 h-2.5 bg-[#090d16] border border-[#1c2638] rounded-full overflow-hidden">
+                <div class="hud-bar h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400" style="width: 85%;"></div>
+              </div>
+              <span class="w-14 text-right text-slate-100 font-bold">$0.48</span>
+              <span class="w-10 text-right text-amber-400 font-semibold">▲100%</span>
+            </div>
+            <!-- Day 3 -->
+            <div class="flex items-center gap-3 group hover:bg-[#131927]/40 p-1 rounded-lg transition">
+              <span class="w-24 text-slate-400">2026-11-15</span>
+              <div class="flex-1 h-2.5 bg-[#090d16] border border-[#1c2638] rounded-full overflow-hidden">
+                <div class="hud-bar h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400" style="width: 65%;"></div>
+              </div>
+              <span class="w-14 text-right text-slate-100 font-bold">$0.35</span>
+              <span class="w-10 text-right text-emerald-400 font-semibold">▼27%</span>
+            </div>
+            <!-- Day 4 (Today) -->
+            <div class="flex items-center gap-3 group hover:bg-[#131927]/40 p-1 rounded-lg transition">
+              <span class="w-24 text-cyan-300 font-bold">2026-11-16 (hoy)</span>
+              <div class="flex-1 h-2.5 bg-[#090d16] border border-[#1c2638] rounded-full overflow-hidden">
+                <div id="todayCostBar" class="hud-bar h-full rounded-full bg-gradient-to-r from-cyan-500 to-teal-400 shadow-sm" style="width: 95%;"></div>
+              </div>
+              <span id="todayCostText" class="w-14 text-right text-cyan-300 font-bold">$0.52</span>
+              <span class="w-10 text-right text-amber-400 font-semibold">▲48%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= VIEW 2: SPOTLIGHT & COMMAND PALETTE ================= -->
+    <section id="viewSpotlight" class="space-y-6 hidden">
+
+      <div class="p-4 rounded-2xl bg-[#0e131f]/95 border border-[#202b3f] shadow-lg flex items-center justify-between">
+        <div>
+          <h2 class="text-sm font-bold text-slate-100">Spotlight &amp; Command Palette Interactive Lab</h2>
+          <p class="text-xs text-slate-400">Simulador de paleta táctica HUD con filtrado difuso, selector de categorías y atajos rápidos</p>
+        </div>
+        <button onclick="toggleSpotlightModal()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-slate-950 font-bold text-xs transition cursor-pointer shadow-md shadow-cyan-500/20">
+          ⚡ Probar en Modal (Alt+Espacio)
+        </button>
+      </div>
+
+      <!-- In-Page Command Palette Preview -->
+      <div class="max-w-3xl mx-auto rounded-2xl bg-[#0a0f1d] border border-cyan-500/30 p-5 shadow-2xl shadow-cyan-950/20 space-y-4">
+        
+        <!-- Search Input -->
+        <div class="relative flex items-center">
+          <div class="w-8 h-8 rounded-lg bg-cyan-950/60 border border-cyan-500/40 flex items-center justify-center text-cyan-400 shrink-0 mr-3">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+          </div>
+          <input
+            id="inlineCmdInput"
+            type="text"
+            oninput="filterCommands(this.value)"
+            placeholder="Escribe para buscar comandos, cambiar modelo o /goal..."
+            class="flex-1 bg-transparent border-none text-sm text-slate-100 placeholder-slate-500 focus:outline-none font-sans"
+          >
+          <span class="text-xs font-mono text-slate-500">ESC cerrar</span>
+        </div>
+
+        <!-- Category Tags -->
+        <div class="flex items-center gap-1.5 pt-2 border-t border-[#182030] text-xs">
+          <span class="text-slate-500 text-[11px] font-mono mr-1">Filtrar:</span>
+          <button onclick="filterCategory('all')" id="cat-all" class="px-2.5 py-0.5 rounded-lg font-bold bg-cyan-500 text-slate-950 shadow-sm transition">Todos</button>
+          <button onclick="filterCategory('model')" id="cat-model" class="px-2.5 py-0.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-[#131927] transition">Modelos</button>
+          <button onclick="filterCategory('session')" id="cat-session" class="px-2.5 py-0.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-[#131927] transition">Sesiones</button>
+          <button onclick="filterCategory('view')" id="cat-view" class="px-2.5 py-0.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-[#131927] transition">Vistas</button>
+          <button onclick="filterCategory('action')" id="cat-action" class="px-2.5 py-0.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-[#131927] transition">Acciones</button>
+        </div>
+
+        <!-- Command List -->
+        <div id="commandResultsList" class="space-y-1.5 pt-2 custom-scrollbar max-h-80 overflow-y-auto font-sans">
+          <!-- Dynamically generated items -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= FLOATING SPOTLIGHT MODAL OVERLAY ================= -->
+  <div id="spotlightModalOverlay" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-start justify-center pt-24 px-4 hidden transition-opacity duration-150">
+    <div class="w-full max-w-2xl bg-[#0e131f] border border-[#202b3f] rounded-2xl shadow-2xl shadow-black/90 overflow-hidden ring-1 ring-cyan-500/30">
+      
+      <!-- Modal Top Input Bar -->
+      <div class="flex items-center px-4 py-3.5 gap-3 border-b border-[#202b3f] bg-[#07090e]">
+        <div class="w-8 h-8 rounded-lg bg-cyan-950/60 border border-cyan-500/40 flex items-center justify-center shrink-0 shadow-sm shadow-cyan-500/10">
+          <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+        </div>
+        <input
+          id="modalSpotlightInput"
+          type="text"
+          placeholder="Escribe una instrucción rápida, /goal [objetivo], o presiona Enter..."
+          class="flex-1 bg-transparent border-none text-sm text-slate-100 placeholder-slate-500 focus:outline-none font-sans"
+        >
+        <button onclick="executeModalCommand()" class="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-slate-950 font-bold rounded-lg text-xs transition cursor-pointer shadow-md shadow-cyan-500/20">
+          <span>Enviar</span>
+        </button>
+        <button onclick="toggleSpotlightModal()" class="text-slate-500 hover:text-slate-300 text-xs font-mono ml-1">
+          ESC
+        </button>
+      </div>
+
+      <!-- Quick Action Chips -->
+      <div class="p-3 bg-[#0a0e17] space-y-2">
+        <div class="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-bold">Acciones Rápidas del HUD</div>
+        <div class="grid grid-cols-3 gap-2">
+          <button onclick="quickActionTrigger('Nuevo Agente')" class="flex items-center gap-2 p-2 rounded-xl bg-[#0c1220] hover:bg-[#162035] border border-[#202b3f] hover:border-cyan-500/50 text-left transition cursor-pointer group">
+            <div class="w-7 h-7 rounded-lg bg-cyan-950/60 border border-cyan-500/40 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform text-cyan-300">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            </div>
+            <div class="min-w-0">
+              <div class="text-xs font-semibold text-slate-200">Nuevo Agente</div>
+              <div class="text-[10px] text-slate-400 truncate">Crear sub-sesión</div>
+            </div>
+          </button>
+
+          <button onclick="quickActionTrigger('Correr Tests')" class="flex items-center gap-2 p-2 rounded-xl bg-[#0c1220] hover:bg-[#162035] border border-[#202b3f] hover:border-cyan-500/50 text-left transition cursor-pointer group">
+            <div class="w-7 h-7 rounded-lg bg-cyan-950/60 border border-cyan-500/40 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform text-cyan-300">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+            </div>
+            <div class="min-w-0">
+              <div class="text-xs font-semibold text-slate-200">Correr Tests</div>
+              <div class="text-[10px] text-slate-400 truncate">npm test (14/14)</div>
+            </div>
+          </button>
+
+          <button onclick="quickActionTrigger('Auditar Rama')" class="flex items-center gap-2 p-2 rounded-xl bg-[#0c1220] hover:bg-[#162035] border border-[#202b3f] hover:border-cyan-500/50 text-left transition cursor-pointer group">
+            <div class="w-7 h-7 rounded-lg bg-cyan-950/60 border border-cyan-500/40 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform text-cyan-300">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+            </div>
+            <div class="min-w-0">
+              <div class="text-xs font-semibold text-slate-200">Auditar Rama</div>
+              <div class="text-[10px] text-slate-400 truncate">Seguridad diffs</div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="px-4 py-2.5 bg-[#07090e] border-t border-[#202b3f] flex items-center justify-between text-[11px] text-slate-400 font-mono">
+        <div class="flex items-center gap-2">
+          <span class="text-slate-500">Atajo global:</span>
+          <kbd class="px-1.5 py-0.5 rounded bg-[#0c1220] border border-[#202b3f] text-slate-300">Alt + Espacio</kbd>
+        </div>
+        <span class="text-slate-500">AgentHub Desktop v0.1.0 • Tactical HUD</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Logic Script -->
+  <script>
+    // State
+    let totalTokens = 482600;
+    let totalIn = 310200;
+    let totalOut = 172400;
+    let totalCost = 1.4280;
+    let totalTurns = 94;
+    let weeklyPercent = 42;
+    let slidingPercent = 78;
+    let activeRange = 7;
+    let activeCategory = 'all';
+
+    const commandsData = [
+      { id: '1', title: 'Claude 3.7 Sonnet (Thinking Active)', subtitle: 'MODELO • 200k context • Claude Native', category: 'model', hotkey: '↵ Enter' },
+      { id: '2', title: 'Antigravity 2.0 Flash Lite', subtitle: 'MODELO • 1M context • Google DeepMind', category: 'model', hotkey: '' },
+      { id: '3', title: 'Copilot GPT-4o Agent', subtitle: 'MODELO • 128k context • OpenAI Backend', category: 'model', hotkey: '' },
+      { id: '4', title: 'Ir a Vista de Telemetría & Métricas', subtitle: 'VISTA • Monitoreo de cuotas y costos en tiempo real', category: 'view', hotkey: '' },
+      { id: '5', title: 'Ir a Vista de Documentos & Terminal', subtitle: 'VISTA • Split Markdown y consola CRT', category: 'view', hotkey: '' },
+      { id: '6', title: 'Crear Nuevo Agente en Sub-sesión', subtitle: 'SESIONES • Despacho de flujo en paralelo', category: 'session', hotkey: '' },
+      { id: '7', title: 'Auditar Diff de Git Worktree', subtitle: 'ACCIÓN • Verificación de aislamiento de rama', category: 'action', hotkey: '' },
+      { id: '8', title: 'Limpiar Todo el Historial de Consolas', subtitle: 'ACCIÓN • Reinicia buffer de logs de terminal', category: 'action', hotkey: '' }
+    ];
+
+    function renderCommands(query = '', category = 'all') {
+      const container = document.getElementById('commandResultsList');
+      const filtered = commandsData.filter(cmd => {
+        const matchesCategory = category === 'all' || cmd.category === category;
+        const matchesQuery = cmd.title.toLowerCase().includes(query.toLowerCase()) || 
+                             cmd.subtitle.toLowerCase().includes(query.toLowerCase());
+        return matchesCategory && matchesQuery;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="p-6 text-center text-xs text-slate-500 font-mono">No se encontraron comandos para "${query}"</div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map((cmd, idx) => `
+        <div onclick="executeCommand('${cmd.title}')" class="group flex items-center justify-between p-3 rounded-xl border ${idx === 0 ? 'bg-[#131e33] border-cyan-500/40' : 'bg-[#0b101c] border-[#182338] hover:bg-[#131927] hover:border-slate-700'} transition cursor-pointer relative overflow-hidden">
+          ${idx === 0 ? '<div class="absolute left-0 top-1.5 bottom-1.5 w-1 bg-cyan-400 rounded-r shadow-[0_0_8px_rgba(6,182,212,0.8)]"></div>' : ''}
+          <div class="min-w-0 pl-1.5">
+            <div class="text-xs font-semibold text-slate-100">${cmd.title}</div>
+            <div class="text-[10px] font-mono text-slate-400 mt-0.5">${cmd.subtitle}</div>
+          </div>
+          ${cmd.hotkey ? `<kbd class="px-2 py-0.5 rounded bg-[#070c18] border border-[#1f2d45] text-[10px] font-mono text-cyan-300 font-bold">${cmd.hotkey}</kbd>` : ''}
+        </div>
+      `).join('');
+    }
+
+    function switchMainTab(tab) {
+      const viewTel = document.getElementById('viewTelemetry');
+      const viewSpot = document.getElementById('viewSpotlight');
+      const btnTel = document.getElementById('tabTelemetryBtn');
+      const btnSpot = document.getElementById('tabSpotlightBtn');
+
+      if (tab === 'telemetry') {
+        viewTel.classList.remove('hidden');
+        viewSpot.classList.add('hidden');
+        btnTel.className = 'px-3 py-1 rounded-lg font-bold bg-cyan-500 text-slate-950 shadow-sm transition';
+        btnSpot.className = 'px-3 py-1 rounded-lg font-medium text-slate-400 hover:text-slate-200 transition';
+      } else {
+        viewTel.classList.add('hidden');
+        viewSpot.classList.remove('hidden');
+        btnTel.className = 'px-3 py-1 rounded-lg font-medium text-slate-400 hover:text-slate-200 transition';
+        btnSpot.className = 'px-3 py-1 rounded-lg font-bold bg-cyan-500 text-slate-950 shadow-sm transition';
+        renderCommands();
+      }
+    }
+
+    function filterCommands(query) {
+      renderCommands(query, activeCategory);
+    }
+
+    function filterCategory(cat) {
+      activeCategory = cat;
+      ['all', 'model', 'session', 'view', 'action'].forEach(c => {
+        const btn = document.getElementById(`cat-${c}`);
+        if (c === cat) {
+          btn.className = 'px-2.5 py-0.5 rounded-lg font-bold bg-cyan-500 text-slate-950 shadow-sm transition';
+        } else {
+          btn.className = 'px-2.5 py-0.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-[#131927] transition';
+        }
+      });
+      const input = document.getElementById('inlineCmdInput');
+      renderCommands(input.value, cat);
+    }
+
+    function simulateTurn() {
+      const deltaIn = 2800;
+      const deltaOut = 1400;
+      const deltaTokens = deltaIn + deltaOut;
+      const deltaCost = 0.0165;
+
+      totalTokens += deltaTokens;
+      totalIn += deltaIn;
+      totalOut += deltaOut;
+      totalCost += deltaCost;
+      totalTurns += 1;
+
+      slidingPercent = Math.min(100, slidingPercent + 3);
+      weeklyPercent = Math.min(100, weeklyPercent + 1);
+
+      document.getElementById('kpiTokens').innerText = (totalTokens / 1000).toFixed(1) + 'k';
+      document.getElementById('kpiIn').innerText = (totalIn / 1000).toFixed(1) + 'k in';
+      document.getElementById('kpiOut').innerText = (totalOut / 1000).toFixed(1) + 'k out';
+      document.getElementById('kpiCost').innerText = '$' + totalCost.toFixed(4);
+      document.getElementById('kpiTurns').innerText = totalTurns;
+      document.getElementById('kpiCostPerTurn').innerText = '$' + (totalCost / totalTurns).toFixed(4) + ' / turno';
+
+      document.getElementById('slidingPercentText').innerText = slidingPercent + '%';
+      document.getElementById('slidingMeterBar').style.width = slidingPercent + '%';
+      document.getElementById('weeklyPercentText').innerText = weeklyPercent + '%';
+      document.getElementById('weeklyMeterBar').style.width = weeklyPercent + '%';
+
+      if (slidingPercent > 85) {
+        document.getElementById('slidingMeterBar').className = 'hud-bar h-full rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]';
+        document.getElementById('slidingPercentText').className = 'font-mono font-bold text-amber-400';
+      }
+    }
+
+    function resetTelemetry() {
+      totalTokens = 12000;
+      totalIn = 8000;
+      totalOut = 4000;
+      totalCost = 0.042;
+      totalTurns = 3;
+      slidingPercent = 15;
+      weeklyPercent = 8;
+
+      document.getElementById('kpiTokens').innerText = '12.0k';
+      document.getElementById('kpiIn').innerText = '8.0k in';
+      document.getElementById('kpiOut').innerText = '4.0k out';
+      document.getElementById('kpiCost').innerText = '$0.0420';
+      document.getElementById('kpiTurns').innerText = '3';
+      document.getElementById('kpiCostPerTurn').innerText = '$0.0140 / turno';
+
+      document.getElementById('slidingPercentText').innerText = '15%';
+      document.getElementById('slidingMeterBar').style.width = '15%';
+      document.getElementById('slidingMeterBar').className = 'hud-bar h-full rounded-full bg-cyan-400';
+      document.getElementById('slidingPercentText').className = 'font-mono font-bold text-cyan-300';
+      document.getElementById('weeklyPercentText').innerText = '8%';
+      document.getElementById('weeklyMeterBar').style.width = '8%';
+    }
+
+    function setRange(days) {
+      activeRange = days;
+      [7, 14, 30].forEach(d => {
+        const btn = document.getElementById(`range${d}Btn`);
+        if (d === days) {
+          btn.className = 'px-2.5 py-0.5 rounded-md font-bold bg-cyan-500 text-slate-950 shadow-sm transition';
+        } else {
+          btn.className = 'px-2.5 py-0.5 rounded-md text-slate-400 hover:text-slate-200 transition';
+        }
+      });
+      document.getElementById('projText').innerText = days === 7 ? '≈ $14.20 / mes' : days === 14 ? '≈ $13.80 / mes' : '≈ $14.90 / mes';
+    }
+
+    function exportJSON() {
+      const data = {
+        exportedAt: new Date().toISOString(),
+        totalTokens,
+        totalCost,
+        totalTurns,
+        weeklyPercent,
+        slidingPercent,
+        status: 'TACTICAL_HUD_ACTIVE'
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `agenthub-telemetry-${Date.now()}.json`;
+      a.click();
+    }
+
+    function toggleSpotlightModal() {
+      const modal = document.getElementById('spotlightModalOverlay');
+      if (modal.classList.contains('hidden')) {
+        modal.classList.remove('hidden');
+        document.getElementById('modalSpotlightInput').focus();
+      } else {
+        modal.classList.add('hidden');
+      }
+    }
+
+    function executeModalCommand() {
+      const val = document.getElementById('modalSpotlightInput').value;
+      if (val) {
+        alert(`Comando despachado al HUD: "${val}"`);
+        document.getElementById('modalSpotlightInput').value = '';
+        toggleSpotlightModal();
+      }
+    }
+
+    function quickActionTrigger(actionName) {
+      alert(`Acción rápida ejecutada: ${actionName}`);
+      toggleSpotlightModal();
+    }
+
+    function executeCommand(name) {
+      alert(`Ejecutando: ${name}`);
+    }
+
+    // Global Keydown Listener
+    window.addEventListener('keydown', (e) => {
+      if (e.altKey && e.code === 'Space') {
+        e.preventDefault();
+        toggleSpotlightModal();
+      }
+      if (e.key === 'Escape') {
+        const modal = document.getElementById('spotlightModalOverlay');
+        if (!modal.classList.contains('hidden')) {
+          modal.classList.add('hidden');
+        }
+      }
+    });
+
+    // Initial render
+    renderCommands();
+  </script>
+</body>
+</html>

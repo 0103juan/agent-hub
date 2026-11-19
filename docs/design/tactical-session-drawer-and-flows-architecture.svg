@@ -1,0 +1,332 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" style="background:#07090e; font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;">
+  <defs>
+    <!-- Background Grid -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#162035" stroke-width="0.8" opacity="0.4"/>
+    </pattern>
+    <radialGradient id="cyan-glow" cx="50%" cy="0%" r="70%">
+      <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#07090e" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow-drop" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.65"/>
+    </filter>
+    <linearGradient id="active-session-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#083344" stop-opacity="0.5"/>
+      <stop offset="60%" stop-color="#0a0e17"/>
+      <stop offset="100%" stop-color="#0a0e17"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="1600" height="900" fill="#07090e"/>
+  <rect width="1600" height="900" fill="url(#grid)"/>
+  <rect width="1600" height="500" fill="url(#cyan-glow)"/>
+
+  <!-- Master Header -->
+  <g transform="translate(48, 36)">
+    <!-- Brand / Badge -->
+    <rect x="0" y="0" width="132" height="26" rx="6" fill="#0c1220" stroke="#06b6d4" stroke-width="1.2"/>
+    <text x="12" y="17" fill="#22d3ee" font-size="11" font-weight="700" letter-spacing="1.5" font-family="ui-monospace, monospace">SPEC CARD #72</text>
+
+    <text x="148" y="18" fill="#64748b" font-size="12" font-family="ui-monospace, monospace">|</text>
+    <text x="164" y="18" fill="#94a3b8" font-size="12" font-weight="600" letter-spacing="0.5">SECTION 2.Y TACTICAL SESSION DRAWER &amp; FLOW HIERARCHY</text>
+
+    <!-- Master Title -->
+    <text x="0" y="62" fill="#f8fafc" font-size="28" font-weight="800" letter-spacing="-0.5">Cajón Táctico de Sesiones, Jerarquía de Flujos y Árbol de Proyectos</text>
+    <text x="0" y="86" fill="#94a3b8" font-size="14">Agrupación en escuadrones (groupByFlow), proyectos colapsables, fijación de favoritos, búsqueda de mensajes y purga asistida</text>
+
+    <!-- Top Right Telemetry Badges -->
+    <g transform="translate(1120, 10)">
+      <rect x="0" y="0" width="384" height="64" rx="10" fill="#0a0e17" stroke="#202b3f" stroke-width="1.2" filter="url(#shadow-drop)"/>
+      <circle cx="24" cy="32" r="6" fill="#06b6d4"/>
+      <circle cx="24" cy="32" r="10" fill="none" stroke="#06b6d4" stroke-width="1.5" opacity="0.4"/>
+      <text x="42" y="27" fill="#f8fafc" font-size="12" font-weight="700">SESSION DRAWER: ACTIVE</text>
+      <text x="42" y="45" fill="#64748b" font-size="10" font-family="ui-monospace, monospace">Squad Flows • Project Folders • Safe Delete</text>
+      <rect x="300" y="16" width="70" height="32" rx="6" fill="#0c1220" stroke="#06b6d4" stroke-width="1"/>
+      <text x="314" y="36" fill="#22d3ee" font-size="12" font-weight="800" font-family="ui-monospace, monospace">60 FPS</text>
+    </g>
+  </g>
+
+  <!-- Three Architecture Pillars -->
+
+  <!-- ================= PILLAR 1: SQUAD FLOWS & PROJECT FOLDERS ================= -->
+  <g transform="translate(48, 150)">
+    <rect x="0" y="0" width="470" height="540" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.4" filter="url(#shadow-drop)"/>
+    <rect x="0" y="0" width="470" height="48" rx="14" fill="#0c1220"/>
+    <path d="M 0 48 L 470 48" stroke="#202b3f" stroke-width="1.2"/>
+
+    <!-- Pillar 1 Header -->
+    <rect x="16" y="12" width="24" height="24" rx="6" fill="#06b6d4" fill-opacity="0.15" stroke="#06b6d4" stroke-width="1"/>
+    <path d="M 22 20 L 34 20 M 22 24 L 30 24 M 22 28 L 32 28" stroke="#22d3ee" stroke-width="1.5" stroke-linecap="round"/>
+    <text x="48" y="28" fill="#f8fafc" font-size="14" font-weight="700">1. Árbol de Proyectos &amp; Escuadrones</text>
+    <rect x="330" y="14" width="124" height="20" rx="4" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+    <text x="342" y="28" fill="#22d3ee" font-size="10" font-family="ui-monospace, monospace">groupByFlow()</text>
+
+    <!-- Content 1 -->
+    <g transform="translate(20, 68)">
+      <!-- Project Header Card -->
+      <rect x="0" y="0" width="430" height="42" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+      <text x="14" y="26" fill="#22d3ee" font-size="12">📁</text>
+      <text x="36" y="26" fill="#f8fafc" font-size="12" font-weight="800">AgentHub Core System</text>
+      <rect x="340" y="10" width="76" height="20" rx="4" fill="#07090e" stroke="#202b3f" stroke-width="1"/>
+      <text x="352" y="24" fill="#94a3b8" font-size="10" font-family="ui-monospace, monospace">4 chats</text>
+
+      <!-- Squad Flow Card (Active) -->
+      <g transform="translate(0, 52)">
+        <rect x="0" y="0" width="430" height="136" rx="10" fill="url(#active-session-grad)" stroke="#06b6d4" stroke-width="1.4"/>
+        <g transform="translate(14, 14)">
+          <rect x="0" y="0" width="68" height="20" rx="4" fill="#06b6d4" fill-opacity="0.15" stroke="#06b6d4" stroke-width="0.8"/>
+          <text x="8" y="14" fill="#22d3ee" font-size="10" font-weight="800" font-family="ui-monospace, monospace">SQUAD</text>
+          <text x="78" y="15" fill="#f8fafc" font-size="13" font-weight="800">Auditoría Táctica de Seguridad</text>
+
+          <rect x="340" y="0" width="62" height="20" rx="10" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="0.8"/>
+          <text x="350" y="14" fill="#34d399" font-size="9.5" font-weight="800" font-family="ui-monospace, monospace">ACTIVO</text>
+        </g>
+
+        <!-- Squad Members Nested -->
+        <g transform="translate(14, 46)">
+          <!-- Member 1 Arquitecto (Active) -->
+          <rect x="0" y="0" width="402" height="34" rx="6" fill="#0c1220" stroke="#06b6d4" stroke-width="1"/>
+          <circle cx="16" cy="17" r="4" fill="#06b6d4"/>
+          <text x="28" y="21" fill="#22d3ee" font-size="11" font-weight="700">Arquitecto</text>
+          <text x="96" y="21" fill="#cbd5e1" font-size="10.5">· Diseño de parches y safe-cwd</text>
+          <text x="350" y="21" fill="#94a3b8" font-size="10" font-family="ui-monospace, monospace">12 msgs</text>
+
+          <!-- Member 2 Revisor -->
+          <rect x="0" y="40" width="402" height="34" rx="6" fill="#07090e" stroke="#202b3f" stroke-width="0.8"/>
+          <circle cx="16" cy="17" r="4" fill="#10b981"/>
+          <text x="28" y="21" fill="#34d399" font-size="11" font-weight="700">Revisor</text>
+          <text x="80" y="21" fill="#94a3b8" font-size="10.5">· Auditoría estricta WCAG AAA</text>
+          <text x="350" y="21" fill="#64748b" font-size="10" font-family="ui-monospace, monospace">4 msgs</text>
+        </g>
+      </g>
+
+      <!-- Secondary Standalone Session -->
+      <g transform="translate(0, 200)">
+        <rect x="0" y="0" width="430" height="64" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="26" fill="#94a3b8" font-size="12">💬</text>
+        <text x="34" y="26" fill="#f8fafc" font-size="12" font-weight="700">Refactor de Handlers IPC</text>
+        <text x="380" y="26" fill="#f59e0b" font-size="12">★</text>
+        <text x="34" y="48" fill="#64748b" font-size="10.5" font-family="ui-monospace, monospace">hace 14 min · 28 mensajes · branch: main</text>
+      </g>
+
+      <!-- Unassigned Projects Group -->
+      <g transform="translate(0, 276)">
+        <rect x="0" y="0" width="430" height="42" rx="8" fill="#07090e" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="26" fill="#64748b" font-size="12">📁</text>
+        <text x="36" y="26" fill="#94a3b8" font-size="12" font-weight="700">Sin proyecto (UNASSIGNED)</text>
+        <rect x="340" y="10" width="76" height="20" rx="4" fill="#162035"/>
+        <text x="352" y="24" fill="#64748b" font-size="10" font-family="ui-monospace, monospace">1 chat</text>
+      </g>
+
+      <!-- Algorithm Guarantee Note -->
+      <g transform="translate(0, 332)">
+        <rect x="0" y="0" width="430" height="122" rx="8" fill="#07090e" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#22d3ee" font-size="11" font-weight="700" font-family="ui-monospace, monospace">ORDENAMIENTO DETERMINISTA DE FLUJOS</text>
+        
+        <circle cx="22" cy="44" r="3.5" fill="#10b981"/>
+        <text x="32" y="48" fill="#e2e8f0" font-size="10.5">Agrupa miembros de escuadrón según su orden de rol</text>
+
+        <circle cx="22" cy="68" r="3.5" fill="#10b981"/>
+        <text x="32" y="72" fill="#e2e8f0" font-size="10.5">Flujos individuales se muestran como chats independientes</text>
+
+        <circle cx="22" cy="92" r="3.5" fill="#10b981"/>
+        <text x="32" y="96" fill="#e2e8f0" font-size="10.5">Prioriza sesiones con actividad reciente o mensajes no leídos</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ================= PILLAR 2: SEARCH, FILTERS & FAVORITES ================= -->
+  <g transform="translate(565, 150)">
+    <rect x="0" y="0" width="470" height="540" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.4" filter="url(#shadow-drop)"/>
+    <rect x="0" y="0" width="470" height="48" rx="14" fill="#0c1220"/>
+    <path d="M 0 48 L 470 48" stroke="#202b3f" stroke-width="1.2"/>
+
+    <!-- Pillar 2 Header -->
+    <rect x="16" y="12" width="24" height="24" rx="6" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="1"/>
+    <circle cx="28" cy="24" r="5" fill="none" stroke="#34d399" stroke-width="1.5"/>
+    <line x1="32" y1="28" x2="36" y2="32" stroke="#34d399" stroke-width="1.5"/>
+    <text x="48" y="28" fill="#f8fafc" font-size="14" font-weight="700">2. Búsqueda en Vivo &amp; Favoritos</text>
+    <rect x="330" y="14" width="124" height="20" rx="4" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+    <text x="342" y="28" fill="#34d399" font-size="10" font-family="ui-monospace, monospace">searchHits[]</text>
+
+    <!-- Content 2 -->
+    <g transform="translate(20, 68)">
+      <!-- Search Input Simulation -->
+      <rect x="0" y="0" width="430" height="42" rx="8" fill="#07090e" stroke="#06b6d4" stroke-width="1.2"/>
+      <text x="14" y="26" fill="#64748b" font-size="12">🔍</text>
+      <text x="36" y="26" fill="#f8fafc" font-size="11.5" font-family="ui-monospace, monospace">auditoría tokens</text>
+      <rect x="360" y="10" width="58" height="22" rx="4" fill="#162035"/>
+      <text x="368" y="25" fill="#22d3ee" font-size="10" font-family="ui-monospace, monospace">2 hits</text>
+
+      <!-- Message Search Hit Card -->
+      <g transform="translate(0, 52)">
+        <rect x="0" y="0" width="430" height="116" rx="8" fill="#0c1220" stroke="#10b981" stroke-width="1"/>
+        <text x="14" y="22" fill="#34d399" font-size="10.5" font-weight="700" font-family="ui-monospace, monospace">COINCIDENCIA EN MENSAJE (DEBOUNCE 250MS)</text>
+        <text x="14" y="44" fill="#f8fafc" font-size="12" font-weight="700">En: Auditoría Táctica de Seguridad</text>
+
+        <rect x="14" y="56" width="402" height="46" rx="4" fill="#07090e" stroke="#202b3f" stroke-width="1"/>
+        <text x="24" y="74" fill="#94a3b8" font-size="10.5">...se verificó que la <tspan fill="#38bdf8" font-weight="700">auditoría tokens</tspan> arroja 0 fugas...</text>
+        <text x="24" y="90" fill="#64748b" font-size="10" font-family="ui-monospace, monospace">Turno #14 · Agente Revisor · 14:32</text>
+      </g>
+
+      <!-- Filter & Sort Bar -->
+      <g transform="translate(0, 180)">
+        <rect x="0" y="0" width="430" height="74" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#f8fafc" font-size="11" font-weight="700">CONTROLES DE ORDEN Y PROYECTO</text>
+
+        <g transform="translate(14, 34)">
+          <!-- Sort pills -->
+          <rect x="0" y="0" width="76" height="24" rx="6" fill="#06b6d4" stroke="#22d3ee" stroke-width="1"/>
+          <text x="12" y="16" fill="#07090e" font-size="10.5" font-weight="800">Recientes</text>
+
+          <rect x="84" y="0" width="70" height="24" rx="6" fill="#07090e" stroke="#202b3f" stroke-width="1"/>
+          <text x="96" y="16" fill="#94a3b8" font-size="10.5">Nombre</text>
+
+          <rect x="162" y="0" width="76" height="24" rx="6" fill="#07090e" stroke="#202b3f" stroke-width="1"/>
+          <text x="172" y="16" fill="#94a3b8" font-size="10.5">Mensajes</text>
+
+          <!-- Filter project select -->
+          <rect x="254" y="0" width="148" height="24" rx="6" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+          <text x="264" y="16" fill="#cbd5e1" font-size="10">Todos los proyectos ▾</text>
+        </g>
+      </g>
+
+      <!-- Favorites Section Card -->
+      <g transform="translate(0, 266)">
+        <rect x="0" y="0" width="430" height="96" rx="8" fill="#07090e" stroke="#f59e0b" stroke-width="1" stroke-opacity="0.4"/>
+        <text x="14" y="24" fill="#fbbf24" font-size="11" font-weight="700" font-family="ui-monospace, monospace">★ FAVORITOS FIJADOS (LOCALSTORAGE)</text>
+
+        <rect x="14" y="36" width="402" height="46" rx="6" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="24" y="54" fill="#f8fafc" font-size="11" font-weight="700">Refactor de Handlers IPC</text>
+        <text x="24" y="70" fill="#f59e0b" font-size="10" font-family="ui-monospace, monospace">Fijado arriba del listado general con 1-clic</text>
+      </g>
+
+      <!-- Fast Action Shortcut -->
+      <g transform="translate(0, 374)">
+        <rect x="0" y="0" width="430" height="80" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="24" fill="#f8fafc" font-size="11" font-weight="700">CREACIÓN CON ROLES PRECONFIGURADOS</text>
+        <text x="14" y="44" fill="#94a3b8" font-size="10.5">Inyecta rol inicial (`Arquitecto`, `Desarrollador`, `Diseñador`) en 1-clic</text>
+        <text x="14" y="64" fill="#38bdf8" font-size="10" font-family="ui-monospace, monospace">onCreateSession(project, taskSlug, role)</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ================= PILLAR 3: SAFEGUARDS & DESTRUCTIVE FSM ================= -->
+  <g transform="translate(1082, 150)">
+    <rect x="0" y="0" width="470" height="540" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.4" filter="url(#shadow-drop)"/>
+    <rect x="0" y="0" width="470" height="48" rx="14" fill="#0c1220"/>
+    <path d="M 0 48 L 470 48" stroke="#202b3f" stroke-width="1.2"/>
+
+    <!-- Pillar 3 Header -->
+    <rect x="16" y="12" width="24" height="24" rx="6" fill="#ef4444" fill-opacity="0.15" stroke="#ef4444" stroke-width="1"/>
+    <path d="M 23 28 L 33 18 M 23 18 L 33 28" stroke="#f87171" stroke-width="1.8" stroke-linecap="round"/>
+    <text x="48" y="28" fill="#f8fafc" font-size="14" font-weight="700">3. Salvaguardas &amp; FSM Destructiva</text>
+    <rect x="340" y="14" width="114" height="20" rx="4" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+    <text x="352" y="28" fill="#f87171" font-size="10" font-family="ui-monospace, monospace">pendingDelete</text>
+
+    <!-- Content 3 -->
+    <g transform="translate(20, 68)">
+      <!-- Empty Sessions Cleaner Card -->
+      <rect x="0" y="0" width="430" height="136" rx="8" fill="#07090e" stroke="#ef4444" stroke-width="1.2"/>
+      <text x="14" y="22" fill="#f87171" font-size="11" font-weight="700" font-family="ui-monospace, monospace">LIMPIADOR ASISTIDO DE CHATS VACÍOS</text>
+      <text x="14" y="40" fill="#e2e8f0" font-size="11">Detecta sesiones inactivas sin mensajes para depurar la lista:</text>
+
+      <!-- Confirm step box -->
+      <g transform="translate(14, 52)">
+        <rect x="0" y="0" width="402" height="70" rx="6" fill="#450a0a" stroke="#ef4444" stroke-width="1"/>
+        <text x="14" y="22" fill="#fca5a5" font-size="11" font-weight="700">¿Eliminar 3 conversaciones vacías?</text>
+        
+        <g transform="translate(14, 34)">
+          <rect x="0" y="0" width="80" height="24" rx="4" fill="#ef4444"/>
+          <text x="12" y="16" fill="#fff" font-size="10.5" font-weight="800">Sí, limpiar</text>
+
+          <rect x="90" y="0" width="70" height="24" rx="4" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+          <text x="104" y="16" fill="#cbd5e1" font-size="10.5">Cancelar</text>
+        </g>
+      </g>
+
+      <!-- Single Session Delete Latch -->
+      <g transform="translate(0, 148)">
+        <rect x="0" y="0" width="430" height="110" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#f8fafc" font-size="11" font-weight="700">CONFIRMACIÓN INDIVIDUAL DE DOS PASOS</text>
+        <text x="14" y="42" fill="#94a3b8" font-size="10.5">Evita borrado accidental con pestillo interactivo en línea:</text>
+
+        <g transform="translate(14, 54)">
+          <rect x="0" y="0" width="402" height="42" rx="4" fill="#162035"/>
+          <text x="14" y="26" fill="#fca5a5" font-size="11" font-weight="700">¿Eliminar chat? [Confirmar] [X]</text>
+          <text x="260" y="26" fill="#94a3b8" font-size="10" font-family="ui-monospace, monospace">setPendingDelete(id)</text>
+        </g>
+      </g>
+
+      <!-- Project Rename Safeguard -->
+      <g transform="translate(0, 270)">
+        <rect x="0" y="0" width="430" height="90" rx="8" fill="#07090e" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#f8fafc" font-size="11" font-weight="700">RENOMBRADO EN LÍNEA DE PROYECTO</text>
+        <text x="14" y="42" fill="#94a3b8" font-size="10.5">Actualiza el tag de proyecto en todas las sesiones hijas en bloque:</text>
+        <text x="14" y="68" fill="#38bdf8" font-size="10" font-family="ui-monospace, monospace">onRenameProject(oldName, newName)</text>
+      </g>
+
+      <!-- Archive Shelf -->
+      <g transform="translate(0, 372)">
+        <rect x="0" y="0" width="430" height="82" rx="8" fill="#0c1220" stroke="#06b6d4" stroke-width="1" stroke-opacity="0.4"/>
+        <text x="14" y="24" fill="#22d3ee" font-size="11" font-weight="700" font-family="ui-monospace, monospace">ESTANTE DE SESIONES ARCHIVADAS</text>
+        <text x="14" y="44" fill="#cbd5e1" font-size="10.5">Acceso a transcripciones históricas sin saturar la barra activa</text>
+        <text x="14" y="64" fill="#94a3b8" font-size="10" font-family="ui-monospace, monospace">archive: ArchivedSessionInfo[]</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ================= BOTTOM ARCHITECTURE LIFECYCLE BAR ================= -->
+  <g transform="translate(48, 710)">
+    <rect x="0" y="0" width="1504" height="154" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.4" filter="url(#shadow-drop)"/>
+
+    <rect x="16" y="14" width="310" height="24" rx="6" fill="#0c1220" stroke="#06b6d4" stroke-width="1"/>
+    <text x="26" y="30" fill="#22d3ee" font-size="11" font-weight="700" font-family="ui-monospace, monospace">PIPELINE DE SINCRONIZACIÓN REACTIVA DE SESIONES</text>
+
+    <!-- 4 Step Pipeline -->
+    <g transform="translate(24, 48)">
+      <!-- Step 1 -->
+      <rect x="0" y="0" width="330" height="90" rx="8" fill="#07090e" stroke="#202b3f" stroke-width="1"/>
+      <circle cx="20" cy="24" r="10" fill="#06b6d4" fill-opacity="0.2"/>
+      <text x="17" y="28" fill="#22d3ee" font-size="11" font-weight="800">1</text>
+      <text x="38" y="28" fill="#f8fafc" font-size="12" font-weight="700">Host Session Ingestion</text>
+      <text x="14" y="52" fill="#94a3b8" font-size="10.5">El host sincroniza ConversationSession[] con metadatos de escuadrón, proyecto, mensajes y CWD.</text>
+      <text x="14" y="74" fill="#38bdf8" font-size="10" font-family="ui-monospace, monospace">ipc: sessionStore sync</text>
+
+      <!-- Arrow 1 -->
+      <path d="M 342 45 L 362 45" stroke="#06b6d4" stroke-width="2"/>
+
+      <!-- Step 2 -->
+      <rect x="374" y="0" width="330" height="90" rx="8" fill="#07090e" stroke="#202b3f" stroke-width="1"/>
+      <circle cx="20" cy="24" r="10" fill="#10b981" fill-opacity="0.2"/>
+      <text x="17" y="28" fill="#34d399" font-size="11" font-weight="800">2</text>
+      <text x="38" y="28" fill="#f8fafc" font-size="12" font-weight="700">groupByFlow Partitioning</text>
+      <text x="14" y="52" fill="#94a3b8" font-size="10.5">Agrupa sesiones en squads según su plantilla y ordena los flujos por recencia y actividad.</text>
+      <text x="14" y="74" fill="#a7f3d0" font-size="10" font-family="ui-monospace, monospace">groupByFlow(sessions)</text>
+
+      <!-- Arrow 2 -->
+      <path d="M 716 45 L 736 45" stroke="#10b981" stroke-width="2"/>
+
+      <!-- Step 3 -->
+      <rect x="748" y="0" width="330" height="90" rx="8" fill="#07090e" stroke="#202b3f" stroke-width="1"/>
+      <circle cx="20" cy="24" r="10" fill="#f59e0b" fill-opacity="0.2"/>
+      <text x="17" y="28" fill="#fbbf24" font-size="11" font-weight="800">3</text>
+      <text x="38" y="28" fill="#f8fafc" font-size="12" font-weight="700">Filter, Search &amp; Favorites</text>
+      <text x="14" y="52" fill="#94a3b8" font-size="10.5">Cruza favoritos fijados, query de búsqueda en vivo con debounce de 250ms y filtros por proyecto.</text>
+      <text x="14" y="74" fill="#fde68a" font-size="10" font-family="ui-monospace, monospace">favorites &amp; searchHits</text>
+
+      <!-- Arrow 3 -->
+      <path d="M 1090 45 L 1110 45" stroke="#f59e0b" stroke-width="2"/>
+
+      <!-- Step 4 -->
+      <rect x="1122" y="0" width="334" height="90" rx="8" fill="#07090e" stroke="#06b6d4" stroke-width="1.2"/>
+      <circle cx="20" cy="24" r="10" fill="#06b6d4" fill-opacity="0.2"/>
+      <text x="17" y="28" fill="#22d3ee" font-size="11" font-weight="800">4</text>
+      <text x="38" y="28" fill="#f8fafc" font-size="12" font-weight="700">Atomic Dispatch &amp; Switch</text>
+      <text x="14" y="52" fill="#94a3b8" font-size="10.5">Conmutación de sesión en 1-clic con preservación estricta de CWD y cierre suave del drawer.</text>
+      <text x="14" y="74" fill="#22d3ee" font-size="10" font-family="ui-monospace, monospace">onSelectSession(id)</text>
+    </g>
+  </g>
+</svg>

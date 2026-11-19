@@ -1,0 +1,284 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 640" width="100%" height="100%" style="background:#07090e; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b0f19"/>
+      <stop offset="50%" stop-color="#07090e"/>
+      <stop offset="100%" stop-color="#05070a"/>
+    </linearGradient>
+
+    <!-- Card Gradient -->
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#141c2e"/>
+      <stop offset="100%" stop-color="#0e131f"/>
+    </linearGradient>
+
+    <!-- Glowing Filters -->
+    <filter id="glowIndigo" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <filter id="shadowBox" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.75"/>
+    </filter>
+  </defs>
+
+  <!-- Background Grid -->
+  <rect width="1000" height="640" fill="url(#bgGrad)"/>
+  <g opacity="0.08" stroke="#38bdf8" stroke-width="1">
+    <path d="M0,80 H1000 M0,160 H1000 M0,240 H1000 M0,320 H1000 M0,400 H1000 M0,480 H1000 M0,560 H1000" />
+    <path d="M100,0 V640 M200,0 V640 M300,0 V640 M400,0 V640 M500,0 V640 M600,0 V640 M700,0 V640 M800,0 V640 M900,0 V640" />
+  </g>
+
+  <!-- Header -->
+  <g transform="translate(40, 36)">
+    <rect x="0" y="0" width="14" height="14" fill="#6366f1" rx="2" />
+    <text x="24" y="12" fill="#f8fafc" font-size="14" font-weight="700" letter-spacing="0.1em">AGENTHUB // ARCHITECTURE</text>
+    <text x="260" y="12" fill="#6366f1" font-size="12" font-weight="600">MODEL CATALOG, QUOTA TELEMETRY &amp; FAILOVER</text>
+    <text x="0" y="30" fill="#94a3b8" font-size="11">Tactical Dark HUD Protocol: Model Routing, Family Categorization, Quota Thresholds &amp; Account Binding</text>
+  </g>
+
+  <!-- Top Badges / Status -->
+  <g transform="translate(740, 36)">
+    <rect x="0" y="0" width="100" height="22" rx="4" fill="#162035" stroke="#202b3f" />
+    <circle cx="12" cy="11" r="3" fill="#10b981" />
+    <text x="22" y="15" fill="#e2e8f0" font-size="10">ROUTER: READY</text>
+
+    <rect x="110" y="0" width="110" height="22" rx="4" fill="#162035" stroke="#202b3f" />
+    <text x="120" y="15" fill="#38bdf8" font-size="10">AUTO-FAILOVER</text>
+  </g>
+
+  <!-- Panel 1: Model Families & Taxonomy (Left) -->
+  <g transform="translate(40, 90)" filter="url(#shadowBox)">
+    <rect width="280" height="250" rx="10" fill="url(#cardGrad)" stroke="#202b3f" stroke-width="1.5"/>
+    <rect width="280" height="32" rx="10" fill="#111827"/>
+    <rect x="12" y="10" width="8" height="12" fill="#a855f7" rx="1.5"/>
+    <text x="28" y="21" fill="#f1f5f9" font-size="11" font-weight="700">01. MODEL FAMILIES &amp; CLUSTERS</text>
+
+    <g transform="translate(16, 44)">
+      <!-- Argon -->
+      <rect width="248" height="34" rx="6" fill="#090d16" stroke="#ec4899" stroke-opacity="0.4"/>
+      <circle cx="18" cy="17" r="6" fill="#ec4899" fill-opacity="0.2"/>
+      <text x="14" y="21" fill="#f472b6" font-size="10">🧠</text>
+      <text x="32" y="18" fill="#fdf2f8" font-size="10" font-weight="700">Argon (Gemini 2.5)</text>
+      <text x="32" y="28" fill="#9d174d" font-size="8">Deep reasoning &amp; multi-modal</text>
+
+      <!-- Flash -->
+      <g transform="translate(0, 40)">
+        <rect width="248" height="34" rx="6" fill="#090d16" stroke="#eab308" stroke-opacity="0.4"/>
+        <text x="14" y="21" fill="#fde047" font-size="10">⚡</text>
+        <text x="32" y="18" fill="#fefce8" font-size="10" font-weight="700">Flash (Gemini 2.0)</text>
+        <text x="32" y="28" fill="#854d0e" font-size="8">Ultra-low latency code synthesis</text>
+      </g>
+
+      <!-- Opus -->
+      <g transform="translate(0, 80)">
+        <rect width="248" height="34" rx="6" fill="#090d16" stroke="#f97316" stroke-opacity="0.4"/>
+        <text x="14" y="21" fill="#fdba74" font-size="10">🔥</text>
+        <text x="32" y="18" fill="#fff7ed" font-size="10" font-weight="700">Opus (Claude 3 / 3.7)</text>
+        <text x="32" y="28" fill="#9a3412" font-size="8">Complex multi-file refactoring</text>
+      </g>
+
+      <!-- Sonnet & Haiku -->
+      <g transform="translate(0, 120)">
+        <rect width="248" height="34" rx="6" fill="#090d16" stroke="#6366f1" stroke-opacity="0.4"/>
+        <text x="14" y="21" fill="#a5b4fc" font-size="10">💎</text>
+        <text x="32" y="18" fill="#eef2ff" font-size="10" font-weight="700">Sonnet 3.5 / Haiku 3.5</text>
+        <text x="32" y="28" fill="#3730a3" font-size="8">Daily driver speed &amp; precision</text>
+      </g>
+
+      <!-- Ollama Local -->
+      <g transform="translate(0, 160)">
+        <rect width="248" height="32" rx="6" fill="#090d16" stroke="#10b981" stroke-opacity="0.4"/>
+        <text x="14" y="20" fill="#6ee7b7" font-size="10">🦙</text>
+        <text x="32" y="17" fill="#ecfdf5" font-size="10" font-weight="700">Ollama Local LLMs</text>
+        <text x="32" y="27" fill="#065f46" font-size="8">Zero-cost offline inference</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Panel 2: Account Mesh & Quota Guard (Center) -->
+  <g transform="translate(360, 90)" filter="url(#shadowBox)">
+    <rect width="320" height="250" rx="10" fill="url(#cardGrad)" stroke="#202b3f" stroke-width="1.5"/>
+    <rect width="320" height="32" rx="10" fill="#111827"/>
+    <rect x="12" y="10" width="8" height="12" fill="#06b6d4" rx="1.5"/>
+    <text x="28" y="21" fill="#f1f5f9" font-size="11" font-weight="700">02. TELEMETRY &amp; QUOTA GAUGES</text>
+
+    <g transform="translate(16, 44)">
+      <!-- 5-Hour Rolling Window -->
+      <rect width="288" height="60" rx="6" fill="#090d16" stroke="#202b3f"/>
+      <text x="12" y="18" fill="#cbd5e1" font-size="10" font-weight="600">5-Hour Utilization Window</text>
+      <rect x="12" y="26" width="264" height="8" rx="4" fill="#202b3f"/>
+      <rect x="12" y="26" width="224" height="8" rx="4" fill="#f59e0b"/>
+      <text x="12" y="48" fill="#fbbf24" font-size="10" font-weight="700">85%</text>
+      <text x="44" y="48" fill="#94a3b8" font-size="9">Threshold: 90% (Warning at 80%)</text>
+
+      <!-- Weekly Quota -->
+      <g transform="translate(0, 68)">
+        <rect width="288" height="60" rx="6" fill="#090d16" stroke="#202b3f"/>
+        <text x="12" y="18" fill="#cbd5e1" font-size="10" font-weight="600">Weekly Quota Consumption</text>
+        <rect x="12" y="26" width="264" height="8" rx="4" fill="#202b3f"/>
+        <rect x="12" y="26" width="118" height="8" rx="4" fill="#10b981"/>
+        <text x="12" y="48" fill="#34d399" font-size="10" font-weight="700">45%</text>
+        <text x="44" y="48" fill="#94a3b8" font-size="9">Status: Healthy (18h left in cycle)</text>
+      </g>
+
+      <!-- Failover trigger -->
+      <g transform="translate(0, 136)">
+        <rect width="288" height="56" rx="6" fill="#1c0f13" stroke="#991b1b"/>
+        <text x="12" y="18" fill="#f87171" font-size="10" font-weight="700">AUTO-FAILOVER CIRCUIT</text>
+        <text x="12" y="32" fill="#fca5a5" font-size="9">If worst utilization &gt; 90% → Trigger Notice</text>
+        <text x="12" y="44" fill="#94a3b8" font-size="9">One-click failover to secondary connected provider</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Panel 3: Protocol Role Matrix (Right) -->
+  <g transform="translate(720, 90)" filter="url(#shadowBox)">
+    <rect width="240" height="250" rx="10" fill="url(#cardGrad)" stroke="#202b3f" stroke-width="1.5"/>
+    <rect width="240" height="32" rx="10" fill="#111827"/>
+    <rect x="12" y="10" width="8" height="12" fill="#10b981" rx="1.5"/>
+    <text x="28" y="21" fill="#f1f5f9" font-size="11" font-weight="700">03. PROTOCOL ROLES</text>
+
+    <g transform="translate(16, 44)">
+      <!-- Role 1 -->
+      <rect width="208" height="36" rx="6" fill="#090d16" stroke="#0891b2"/>
+      <text x="10" y="16" fill="#22d3ee" font-size="10" font-weight="700">🧭 Explorador</text>
+      <text x="10" y="28" fill="#94a3b8" font-size="8">Recolecta mapa &amp; dependencias</text>
+
+      <!-- Role 2 -->
+      <g transform="translate(0, 42)">
+        <rect width="208" height="36" rx="6" fill="#090d16" stroke="#9333ea"/>
+        <text x="10" y="16" fill="#c084fc" font-size="10" font-weight="700">📐 Arquitecto</text>
+        <text x="10" y="28" fill="#94a3b8" font-size="8">Plan y diseño modular del sistema</text>
+      </g>
+
+      <!-- Role 3 -->
+      <g transform="translate(0, 84)">
+        <rect width="208" height="36" rx="6" fill="#090d16" stroke="#059669"/>
+        <text x="10" y="16" fill="#34d399" font-size="10" font-weight="700">🧪 Tester</text>
+        <text x="10" y="28" fill="#94a3b8" font-size="8">Crea pruebas y criterios de parada</text>
+      </g>
+
+      <!-- Role 4 -->
+      <g transform="translate(0, 126)">
+        <rect width="208" height="36" rx="6" fill="#090d16" stroke="#db2777"/>
+        <text x="10" y="16" fill="#f472b6" font-size="10" font-weight="700">🎨 Diseñador</text>
+        <text x="10" y="28" fill="#94a3b8" font-size="8">UI/UX, SVG, jerarquía &amp; tokens</text>
+      </g>
+
+      <!-- Role 5 -->
+      <g transform="translate(0, 168)">
+        <rect width="208" height="30" rx="6" fill="#090d16" stroke="#2563eb"/>
+        <text x="10" y="15" fill="#60a5fa" font-size="10" font-weight="700">⚡ Desarrollador</text>
+        <text x="10" y="25" fill="#94a3b8" font-size="8">Implementa código según tests</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Connectors -->
+  <g stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="4 2" fill="none" opacity="0.6">
+    <path d="M 320, 180 L 360, 180" />
+    <path d="M 680, 180 L 720, 180" />
+  </g>
+
+  <!-- Bottom Detailed Specification (Full Width) -->
+  <g transform="translate(40, 365)" filter="url(#shadowBox)">
+    <rect width="920" height="235" rx="10" fill="url(#cardGrad)" stroke="#202b3f" stroke-width="1.5"/>
+    <rect width="920" height="32" rx="10" fill="#111827"/>
+    <rect x="12" y="10" width="8" height="12" fill="#f59e0b" rx="1.5"/>
+    <text x="28" y="21" fill="#f1f5f9" font-size="11" font-weight="700">MODEL CATALOG // TACTICAL UI &amp; FAILOVER INTERFACES SPEC</text>
+    <text x="640" y="21" fill="#94a3b8" font-size="10">PALETTE: #07090e / #0e131f / #202b3f | WCAG AAA</text>
+
+    <!-- Sub-block 1: Model Catalog Modal Card Structure -->
+    <g transform="translate(20, 46)">
+      <rect width="270" height="170" rx="8" fill="#080c14" stroke="#202b3f"/>
+      <text x="14" y="22" fill="#c7d2fe" font-size="10" font-weight="700">MODEL CATALOG MODAL</text>
+
+      <g transform="translate(14, 32)">
+        <!-- Search bar -->
+        <rect width="242" height="22" rx="4" fill="#05070a" stroke="#334155"/>
+        <text x="8" y="15" fill="#64748b" font-size="9">🔍 Buscar modelo (argon, opus, flash)...</text>
+
+        <!-- Filters -->
+        <g transform="translate(0, 28)">
+          <rect width="36" height="16" rx="8" fill="#4338ca"/>
+          <text x="6" y="12" fill="#e0e7ff" font-size="8" font-weight="700">Todos</text>
+          <rect x="42" y="0" width="38" height="16" rx="8" fill="#202b3f"/>
+          <text x="48" y="12" fill="#94a3b8" font-size="8">Argon</text>
+          <rect x="86" y="0" width="36" height="16" rx="8" fill="#202b3f"/>
+          <text x="92" y="12" fill="#94a3b8" font-size="8">Flash</text>
+          <rect x="128" y="0" width="36" height="16" rx="8" fill="#202b3f"/>
+          <text x="134" y="12" fill="#94a3b8" font-size="8">Opus</text>
+          <rect x="170" y="0" width="40" height="16" rx="8" fill="#202b3f"/>
+          <text x="176" y="12" fill="#94a3b8" font-size="8">Sonnet</text>
+        </g>
+
+        <!-- Model Item 1 -->
+        <g transform="translate(0, 52)">
+          <rect width="242" height="34" rx="5" fill="#0d1424" stroke="#3730a3"/>
+          <text x="8" y="16" fill="#818cf8" font-size="9" font-weight="700">★ Claude 3.7 Sonnet</text>
+          <text x="8" y="27" fill="#64748b" font-size="8">claude-3-7-sonnet • Vía Claude CLI</text>
+          <circle cx="228" cy="17" r="7" fill="#10b981" fill-opacity="0.2"/>
+          <text x="224" y="21" fill="#10b981" font-size="10">✓</text>
+        </g>
+
+        <!-- Model Item 2 -->
+        <g transform="translate(0, 92)">
+          <rect width="242" height="34" rx="5" fill="#090d16" stroke="#202b3f"/>
+          <text x="8" y="16" fill="#e2e8f0" font-size="9" font-weight="700">☆ Gemini 2.5 Pro (Argon)</text>
+          <text x="8" y="27" fill="#64748b" font-size="8">gemini-2.5-pro • Vía Antigravity</text>
+          <text x="200" y="21" fill="#94a3b8" font-size="8">Elegir →</text>
+        </g>
+      </g>
+    </g>
+
+    <!-- Sub-block 2: Quota Alert Banner Spec -->
+    <g transform="translate(310, 46)">
+      <rect width="280" height="170" rx="8" fill="#080c14" stroke="#202b3f"/>
+      <text x="14" y="22" fill="#fde68a" font-size="10" font-weight="700">QUOTA NOTICE ALERT BANNER</text>
+
+      <g transform="translate(14, 32)">
+        <rect width="252" height="56" rx="6" fill="#2d170a" stroke="#d97706"/>
+        <text x="10" y="18" fill="#fbbf24" font-size="9" font-weight="700">🛡️ Alerta de cuota (92%):</text>
+        <text x="10" y="30" fill="#fed7aa" font-size="8">Ventana de 5 h saturada en cuenta activa.</text>
+
+        <rect x="10" y="36" width="128" height="16" rx="4" fill="#f59e0b"/>
+        <text x="16" y="48" fill="#000000" font-size="8" font-weight="700">⇄ Cambiar a Antigravity</text>
+
+        <!-- Telemetry Breakdown -->
+        <g transform="translate(0, 64)">
+          <rect width="252" height="62" rx="6" fill="#090d16" stroke="#202b3f"/>
+          <text x="10" y="16" fill="#94a3b8" font-size="8">METRICS REPORT:</text>
+          <text x="10" y="30" fill="#e2e8f0" font-size="8">• Claude CLI: 92% (5h) | 48% (Semana)</text>
+          <text x="10" y="42" fill="#e2e8f0" font-size="8">• Antigravity: 12% (5h) | 8% (Semana)</text>
+          <text x="10" y="54" fill="#10b981" font-size="8">✓ Failover target disponible sin reconexión</text>
+        </g>
+      </g>
+    </g>
+
+    <!-- Sub-block 3: Protocol Role Tooltip & Selector -->
+    <g transform="translate(610, 46)">
+      <rect width="290" height="170" rx="8" fill="#080c14" stroke="#202b3f"/>
+      <text x="14" y="22" fill="#a7f3d0" font-size="10" font-weight="700">PROTOCOL ROLE SELECTOR</text>
+
+      <g transform="translate(14, 32)">
+        <rect width="262" height="30" rx="6" fill="#1e1026" stroke="#9333ea"/>
+        <text x="10" y="19" fill="#f0abfc" font-size="9" font-weight="700">🎨 Rol: Diseñador</text>
+        <text x="210" y="19" fill="#c084fc" font-size="8">▼ Cambiar</text>
+
+        <!-- Tooltip Card -->
+        <g transform="translate(0, 36)">
+          <rect width="262" height="88" rx="6" fill="#0d111c" stroke="#24324a"/>
+          <text x="10" y="16" fill="#f8fafc" font-size="9" font-weight="700">Diseñador Gráfico</text>
+          <text x="10" y="28" fill="#94a3b8" font-size="8">Jerarquía visual, identidad, SVG &amp; prototipos</text>
+          <line x1="10" y1="36" x2="252" y2="36" stroke="#202b3f" />
+          <text x="10" y="48" fill="#64748b" font-size="8">Modelo: <tspan fill="#e2e8f0">Gemini 2.5 Flash / Argon</tspan></text>
+          <text x="10" y="60" fill="#64748b" font-size="8">Esfuerzo: <tspan fill="#e2e8f0">Medio</tspan> | Acceso: <tspan fill="#10b981">Puede editar</tspan></text>
+          <text x="10" y="74" fill="#64748b" font-size="8">Traspaso a: <tspan fill="#818cf8">Tester / Documentador</tspan></text>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

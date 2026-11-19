@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentHub - Telemetría y Dashboard de Costos HUD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            hub: {
+              void: '#07090e',
+              surface: '#0e131f',
+              panel: '#131927',
+              border: '#202b3f',
+              'border-subtle': '#182030',
+              accent: '#6366f1',
+              cyan: '#06b6d4',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              purple: '#a855f7'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #07090e;
+      color: #e2e8f0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .hud-glow {
+      box-shadow: 0 0 25px -5px rgba(99, 102, 241, 0.12);
+    }
+    .hud-card {
+      background: linear-gradient(180deg, rgba(19, 25, 39, 0.85) 0%, rgba(14, 19, 31, 0.95) 100%);
+      border: 1px solid #202b3f;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .hud-card:hover {
+      border-color: #334460;
+      transform: translateY(-1px);
+    }
+    .hud-bar-track {
+      background: #090d16;
+      border: 1px solid #1c2638;
+    }
+    .pulse-dot {
+      animation: pulseGlow 2s infinite ease-in-out;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+  </style>
+</head>
+<body class="p-6 md:p-8 max-w-6xl mx-auto space-y-6">
+
+  <!-- Header & Toolbar -->
+  <header class="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-hub-surface/90 border border-hub-border backdrop-blur-md shadow-xl">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shadow-inner">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="text-base font-bold text-slate-100 flex items-center gap-2">
+          Telemetría y Control de Costos
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-medium bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-dot"></span> EN VIVO
+          </span>
+        </h1>
+        <p class="text-xs text-slate-400">Consumo de tokens, cuotas de ventana y gastos reales por agente y cuenta</p>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex flex-wrap items-center gap-2">
+      <button class="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg bg-hub-panel hover:bg-slate-800 text-slate-300 border border-hub-border hover:border-slate-600 transition shadow-sm">
+        <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+        Copiar Resumen
+      </button>
+      <button class="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg bg-hub-panel hover:bg-slate-800 text-slate-300 border border-hub-border hover:border-slate-600 transition shadow-sm">
+        <svg class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+        JSON
+      </button>
+      <button class="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg bg-hub-panel hover:bg-slate-800 text-slate-300 border border-hub-border hover:border-slate-600 transition shadow-sm">
+        <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        CSV
+      </button>
+      <button class="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg bg-red-950/20 hover:bg-red-950/40 text-red-400 hover:text-red-300 border border-red-900/30 transition">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+        Limpiar
+      </button>
+    </div>
+  </header>
+
+  <!-- Global KPI HUD Grid -->
+  <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+    <!-- Total Tokens -->
+    <div class="hud-card p-4 rounded-xl space-y-2">
+      <div class="flex items-center justify-between text-xs text-slate-400">
+        <span class="flex items-center gap-1.5 font-medium">
+          <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+          Tokens Totales
+        </span>
+        <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">7d</span>
+      </div>
+      <div class="font-mono text-2xl font-bold text-slate-100">
+        1,482.6k
+      </div>
+      <div class="text-[11px] font-mono text-slate-400 flex items-center justify-between pt-1 border-t border-hub-border-subtle">
+        <span class="text-emerald-400">894.2k in</span>
+        <span class="text-slate-500">•</span>
+        <span class="text-cyan-400">588.4k out</span>
+      </div>
+    </div>
+
+    <!-- Reasoning Tokens -->
+    <div class="hud-card p-4 rounded-xl space-y-2">
+      <div class="flex items-center justify-between text-xs text-slate-400">
+        <span class="flex items-center gap-1.5 font-medium">
+          <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+          Razonamiento
+        </span>
+        <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20">Deep Thinking</span>
+      </div>
+      <div class="font-mono text-2xl font-bold text-purple-300">
+        324.8k
+      </div>
+      <div class="text-[11px] text-slate-400 pt-1 border-t border-hub-border-subtle flex items-center justify-between">
+        <span>21.9% del volumen total</span>
+        <span class="text-purple-400 font-mono">claude/gemini</span>
+      </div>
+    </div>
+
+    <!-- Estimated Cost -->
+    <div class="hud-card p-4 rounded-xl space-y-2">
+      <div class="flex items-center justify-between text-xs text-slate-400">
+        <span class="flex items-center gap-1.5 font-medium">
+          <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          Costo Estimado
+        </span>
+        <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">USD</span>
+      </div>
+      <div class="font-mono text-2xl font-bold text-emerald-400">
+        $1.842
+      </div>
+      <div class="text-[11px] text-slate-400 pt-1 border-t border-hub-border-subtle flex items-center justify-between">
+        <span class="text-emerald-300 font-mono">$0.0079 / turno</span>
+        <span class="text-slate-500">232 turnos</span>
+      </div>
+    </div>
+
+    <!-- Total Turns & Activity -->
+    <div class="hud-card p-4 rounded-xl space-y-2">
+      <div class="flex items-center justify-between text-xs text-slate-400">
+        <span class="flex items-center gap-1.5 font-medium">
+          <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          Actividad de Modelos
+        </span>
+        <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">4 Cuentas</span>
+      </div>
+      <div class="font-mono text-2xl font-bold text-slate-100">
+        232 <span class="text-xs font-normal text-slate-400">turnos</span>
+      </div>
+      <div class="text-[11px] text-slate-400 pt-1 border-t border-hub-border-subtle flex items-center justify-between">
+        <span class="text-cyan-400 font-medium">100% operativos</span>
+        <span class="text-slate-500">0 rate-limits</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Timeline & Breakdown Split Section -->
+  <section class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+    <!-- Daily Cost Chart (7 cols) -->
+    <div class="lg:col-span-7 hud-card p-5 rounded-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xs font-bold text-slate-100 flex items-center gap-2">
+            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            Historial de Gasto por Día
+          </h2>
+          <p class="text-[11px] text-slate-400">Distribución temporal y variación porcentual día a día</p>
+        </div>
+        <div class="flex items-center gap-1 bg-hub-surface p-1 rounded-lg border border-hub-border text-[11px]">
+          <button class="px-2 py-0.5 rounded bg-indigo-600 text-white font-medium shadow-sm">7d</button>
+          <button class="px-2 py-0.5 rounded text-slate-400 hover:text-slate-200">14d</button>
+          <button class="px-2 py-0.5 rounded text-slate-400 hover:text-slate-200">30d</button>
+        </div>
+      </div>
+
+      <!-- Projection Banner -->
+      <div class="px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-slate-300 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+          <span>Ritmo semanal proyectado: <strong class="text-amber-300 font-mono">≈ $7.89 / mes</strong></span>
+        </div>
+        <span class="text-[11px] font-mono text-slate-400">Total rango: <strong class="text-emerald-400">$1.842</strong></span>
+      </div>
+
+      <!-- Daily Bars -->
+      <div class="space-y-2 pt-1 font-mono text-xs">
+        <!-- Day Item -->
+        <div class="flex items-center gap-2.5">
+          <span class="w-24 shrink-0 text-slate-400">2026-11-15 <span class="text-indigo-400 font-medium">hoy</span></span>
+          <div class="flex-1 h-3 hud-bar-track rounded-full overflow-hidden">
+            <div class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 shadow-sm" style="width: 82%"></div>
+          </div>
+          <span class="w-16 shrink-0 text-right text-slate-100 font-bold">$0.412</span>
+          <span class="w-12 shrink-0 text-right text-amber-400 text-[11px]">▲14%</span>
+        </div>
+
+        <div class="flex items-center gap-2.5">
+          <span class="w-24 shrink-0 text-slate-400">2026-11-14 <span class="text-slate-500">vie</span></span>
+          <div class="flex-1 h-3 hud-bar-track rounded-full overflow-hidden">
+            <div class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400" style="width: 71%"></div>
+          </div>
+          <span class="w-16 shrink-0 text-right text-slate-100 font-bold">$0.361</span>
+          <span class="w-12 shrink-0 text-right text-emerald-400 text-[11px]">▼8%</span>
+        </div>
+
+        <div class="flex items-center gap-2.5">
+          <span class="w-24 shrink-0 text-slate-400">2026-11-13 <span class="text-slate-500">jue</span></span>
+          <div class="flex-1 h-3 hud-bar-track rounded-full overflow-hidden">
+            <div class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400" style="width: 78%"></div>
+          </div>
+          <span class="w-16 shrink-0 text-right text-slate-100 font-bold">$0.395</span>
+          <span class="w-12 shrink-0 text-right text-amber-400 text-[11px]">▲22%</span>
+        </div>
+
+        <div class="flex items-center gap-2.5">
+          <span class="w-24 shrink-0 text-slate-400">2026-11-12 <span class="text-slate-500">mié</span></span>
+          <div class="flex-1 h-3 hud-bar-track rounded-full overflow-hidden">
+            <div class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400" style="width: 64%"></div>
+          </div>
+          <span class="w-16 shrink-0 text-right text-slate-100 font-bold">$0.324</span>
+          <span class="w-12 shrink-0 text-right text-emerald-400 text-[11px]">▼12%</span>
+        </div>
+
+        <div class="flex items-center gap-2.5">
+          <span class="w-24 shrink-0 text-slate-400">2026-11-11 <span class="text-slate-500">mar</span></span>
+          <div class="flex-1 h-3 hud-bar-track rounded-full overflow-hidden">
+            <div class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400" style="width: 100%"></div>
+          </div>
+          <span class="w-16 shrink-0 text-right text-slate-100 font-bold">$0.505</span>
+          <span class="w-12 shrink-0 text-right text-amber-400 text-[11px]">▲45%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Agent Cost Breakdown (5 cols) -->
+    <div class="lg:col-span-5 hud-card p-5 rounded-2xl space-y-4">
+      <div>
+        <h2 class="text-xs font-bold text-slate-100 flex items-center gap-2">
+          <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+          Gasto por Agente
+        </h2>
+        <p class="text-[11px] text-slate-400">Consumo proporcional de los agentes del enjambre</p>
+      </div>
+
+      <div class="space-y-3 font-mono text-xs pt-1">
+        <!-- Agent Row -->
+        <div class="space-y-1">
+          <div class="flex items-center justify-between text-slate-300">
+            <span class="font-sans font-semibold text-slate-100">Arquitecto Principal</span>
+            <span class="text-slate-100 font-bold">$0.820 <span class="text-slate-500 font-normal text-[11px]">(44%)</span></span>
+          </div>
+          <div class="h-2.5 hud-bar-track rounded-full overflow-hidden">
+            <div class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-indigo-400" style="width: 100%"></div>
+          </div>
+        </div>
+
+        <div class="space-y-1">
+          <div class="flex items-center justify-between text-slate-300">
+            <span class="font-sans font-semibold text-slate-100">Diseñador Gráfico</span>
+            <span class="text-slate-100 font-bold">$0.450 <span class="text-slate-500 font-normal text-[11px]">(24%)</span></span>
+          </div>
+          <div class="h-2.5 hud-bar-track rounded-full overflow-hidden">
+            <div class="h-full rounded-full bg-gradient-to-r from-purple-500 to-pink-500" style="width: 55%"></div>
+          </div>
+        </div>
+
+        <div class="space-y-1">
+          <div class="flex items-center justify-between text-slate-300">
+            <span class="font-sans font-semibold text-slate-100">Revisor de Código</span>
+            <span class="text-slate-100 font-bold">$0.340 <span class="text-slate-500 font-normal text-[11px]">(18%)</span></span>
+          </div>
+          <div class="h-2.5 hud-bar-track rounded-full overflow-hidden">
+            <div class="h-full rounded-full bg-gradient-to-r from-cyan-500 to-blue-500" style="width: 41%"></div>
+          </div>
+        </div>
+
+        <div class="space-y-1">
+          <div class="flex items-center justify-between text-slate-300">
+            <span class="font-sans font-semibold text-slate-100">Auditor de Seguridad</span>
+            <span class="text-slate-100 font-bold">$0.232 <span class="text-slate-500 font-normal text-[11px]">(14%)</span></span>
+          </div>
+          <div class="h-2.5 hud-bar-track rounded-full overflow-hidden">
+            <div class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400" style="width: 28%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Model Detail & Filters -->
+  <section class="space-y-4">
+    <!-- Filter bar -->
+    <div class="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-hub-surface border border-hub-border">
+      <div class="flex items-center gap-2">
+        <span class="text-xs text-slate-400 font-medium">Filtrar:</span>
+        <div class="flex items-center gap-1">
+          <button class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-600 text-white shadow-sm">Todos (4)</button>
+          <button class="px-2.5 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200">Claude</button>
+          <button class="px-2.5 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200">Antigravity</button>
+          <button class="px-2.5 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200">Copilot</button>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 text-xs">
+        <span class="text-slate-400">Ordenar por:</span>
+        <button class="px-2 py-0.5 rounded bg-hub-panel text-slate-200 border border-hub-border font-medium">Costo</button>
+        <button class="px-2 py-0.5 rounded text-slate-400 hover:text-slate-200">Turnos</button>
+        <button class="px-2 py-0.5 rounded text-slate-400 hover:text-slate-200">Cuenta</button>
+      </div>
+    </div>
+
+    <!-- Model Card 1: Claude 3.5 Sonnet -->
+    <div class="hud-card p-4 rounded-xl space-y-3">
+      <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-hub-border-subtle">
+        <div class="flex items-center gap-2.5">
+          <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">Anthropic</span>
+          <div>
+            <div class="font-bold text-xs text-slate-100 flex items-center gap-2">
+              <span>Producción Dev</span>
+              <span class="font-mono text-[11px] px-2 py-0.5 rounded bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">claude-3-5-sonnet-20241022</span>
+            </div>
+            <div class="text-[11px] text-slate-400">124 turnos ejecutados · Latencia media 1.4s</div>
+          </div>
+        </div>
+
+        <div class="text-right">
+          <span class="text-sm font-mono font-bold text-emerald-400">$1.1200</span>
+          <span class="block text-[11px] text-slate-400 font-mono">$0.0090/turno</span>
+        </div>
+      </div>
+
+      <!-- Meter Row -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono">
+        <div class="space-y-1">
+          <div class="flex items-center justify-between text-slate-400">
+            <span>Cuota Semanal</span>
+            <span class="text-indigo-300 font-bold">42%</span>
+          </div>
+          <div class="w-full h-2 hud-bar-track rounded-full overflow-hidden">
+            <div class="h-full rounded-full bg-indigo-500" style="width: 42%"></div>
+          </div>
+        </div>
+        <div class="space-y-1">
+          <div class="flex items-center justify-between text-slate-400">
+            <span>Ventana 5 Horas</span>
+            <span class="text-cyan-300 font-bold">68%</span>
+          </div>
+          <div class="w-full h-2 hud-bar-track rounded-full overflow-hidden">
+            <div class="h-full rounded-full bg-cyan-400" style="width: 68%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Token Grid -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-xs font-mono">
+        <div class="p-2 rounded-lg bg-hub-surface border border-hub-border-subtle">
+          <span class="text-[10px] text-slate-400 block font-sans">Entrada</span>
+          <span class="text-slate-100 font-bold text-sm">540,210</span>
+        </div>
+        <div class="p-2 rounded-lg bg-hub-surface border border-hub-border-subtle">
+          <span class="text-[10px] text-slate-400 block font-sans">Salida</span>
+          <span class="text-cyan-300 font-bold text-sm">312,400</span>
+        </div>
+        <div class="p-2 rounded-lg bg-hub-surface border border-hub-border-subtle">
+          <span class="text-[10px] text-slate-400 block font-sans">Pensamiento</span>
+          <span class="text-purple-300 font-bold text-sm">184,000</span>
+        </div>
+        <div class="p-2 rounded-lg bg-hub-surface border border-hub-border-subtle">
+          <span class="text-[10px] text-slate-400 block font-sans">Caché Reusada</span>
+          <span class="text-emerald-400 font-bold text-sm">421,000</span>
+          <span class="block text-[10px] text-emerald-500/80 font-sans">44% de entrada</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Model Card 2: Gemini 2.5 Pro -->
+    <div class="hud-card p-4 rounded-xl space-y-3">
+      <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-hub-border-subtle">
+        <div class="flex items-center gap-2.5">
+          <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">Google</span>
+          <div>
+            <div class="font-bold text-xs text-slate-100 flex items-center gap-2">
+              <span>Antigravity Pro</span>
+              <span class="font-mono text-[11px] px-2 py-0.5 rounded bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">gemini-2.5-pro</span>
+            </div>
+            <div class="text-[11px] text-slate-400">76 turnos ejecutados · Ventana 2M tokens</div>
+          </div>
+        </div>
+
+        <div class="text-right">
+          <span class="text-sm font-mono font-bold text-emerald-400">$0.5840</span>
+          <span class="block text-[11px] text-slate-400 font-mono">$0.0076/turno</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono">
+        <div class="space-y-1">
+          <div class="flex items-center justify-between text-slate-400">
+            <span>Cuota Semanal</span>
+            <span class="text-indigo-300 font-bold">25%</span>
+          </div>
+          <div class="w-full h-2 hud-bar-track rounded-full overflow-hidden">
+            <div class="h-full rounded-full bg-indigo-500" style="width: 25%"></div>
+          </div>
+        </div>
+        <div class="space-y-1">
+          <div class="flex items-center justify-between text-slate-400">
+            <span>Ventana 5 Horas</span>
+            <span class="text-cyan-300 font-bold">34%</span>
+          </div>
+          <div class="w-full h-2 hud-bar-track rounded-full overflow-hidden">
+            <div class="h-full rounded-full bg-cyan-400" style="width: 34%"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-xs font-mono">
+        <div class="p-2 rounded-lg bg-hub-surface border border-hub-border-subtle">
+          <span class="text-[10px] text-slate-400 block font-sans">Entrada</span>
+          <span class="text-slate-100 font-bold text-sm">310,000</span>
+        </div>
+        <div class="p-2 rounded-lg bg-hub-surface border border-hub-border-subtle">
+          <span class="text-[10px] text-slate-400 block font-sans">Salida</span>
+          <span class="text-cyan-300 font-bold text-sm">220,100</span>
+        </div>
+        <div class="p-2 rounded-lg bg-hub-surface border border-hub-border-subtle">
+          <span class="text-[10px] text-slate-400 block font-sans">Pensamiento</span>
+          <span class="text-purple-300 font-bold text-sm">140,800</span>
+        </div>
+        <div class="p-2 rounded-lg bg-hub-surface border border-hub-border-subtle">
+          <span class="text-[10px] text-slate-400 block font-sans">Caché Reusada</span>
+          <span class="text-emerald-400 font-bold text-sm">180,500</span>
+          <span class="block text-[10px] text-emerald-500/80 font-sans">36% de entrada</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>

@@ -97,39 +97,41 @@ export const WorkspacePicker: React.FC<WorkspacePickerProps> = ({ currentDir, re
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 hover:text-zinc-100 border border-zinc-800 hover:border-zinc-700 transition cursor-pointer max-w-[180px] sm:max-w-[220px]"
+        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-[#0a0e17] hover:bg-[#162035] text-slate-300 hover:text-slate-100 border border-[#202b3f] hover:border-cyan-500/50 transition cursor-pointer max-w-[180px] sm:max-w-[220px] shadow-sm ${
+          open ? 'border-cyan-500/60 bg-[#162035] ring-1 ring-cyan-500/30 text-cyan-200' : ''
+        }`}
         title={`Proyecto actual: ${currentDir ?? 'Sin carpeta asignada'}\nClic para cambiar de carpeta o ver proyectos recientes`}
       >
-        <FolderGit2 className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+        <FolderGit2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
         <span className="truncate font-mono text-[11px] font-semibold">{folderName}</span>
-        <ChevronDown className="w-2.5 h-2.5 text-zinc-500 shrink-0 ml-auto" />
+        <ChevronDown className={`w-2.5 h-2.5 text-slate-500 shrink-0 ml-auto transition-transform duration-150 ${open ? 'rotate-180 text-cyan-400' : ''}`} />
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full mt-1.5 z-50 w-72 p-2 rounded-xl bg-zinc-900 border border-zinc-800 shadow-2xl space-y-2 text-xs animate-message-fade">
-          <div className="space-y-0.5 pb-1 border-b border-zinc-800">
-            <span className="text-[10px] uppercase font-mono font-semibold text-zinc-400 tracking-wider">Espacio de Trabajo Activo</span>
-            <div className="text-[11px] font-mono text-zinc-200 break-all p-1.5 rounded bg-zinc-950 border border-zinc-850">
+        <div className="absolute left-0 top-full mt-1.5 z-50 w-84 sm:w-96 p-2.5 rounded-xl bg-[#0a0e17] border border-[#202b3f] shadow-2xl shadow-black/80 space-y-2.5 text-xs animate-modal-pop">
+          <div className="space-y-1 pb-1.5 border-b border-[#202b3f]">
+            <span className="text-[10px] uppercase font-mono font-semibold text-slate-400 tracking-wider">Espacio de Trabajo Activo</span>
+            <div className="text-[11px] font-mono text-cyan-300 break-all p-2 rounded-lg bg-[#07090e] border border-[#202b3f]">
               {currentDir ?? 'Ninguno (Modo global)'}
             </div>
           </div>
 
-          <div className="space-y-1">
+          <div className="space-y-1.5">
             <button
               type="button"
               onClick={chooseDir}
-              className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-200 border border-indigo-500/30 transition text-left cursor-pointer"
+              className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg bg-cyan-950/40 hover:bg-cyan-900/50 text-cyan-200 border border-cyan-500/40 transition text-left cursor-pointer shadow-sm shadow-cyan-500/10"
             >
-              <FolderOpen className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-              <span className="font-medium text-xs">Abrir otra carpeta...</span>
+              <FolderOpen className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+              <span className="font-semibold text-xs">Abrir otra carpeta...</span>
             </button>
 
             {currentDir && (
-              <div className="grid grid-cols-2 gap-1 pt-0.5">
+              <div className="grid grid-cols-3 gap-1 pt-0.5">
                 <button
                   type="button"
                   onClick={openInExplorer}
-                  className="flex items-center gap-1.5 px-2 py-1 rounded bg-zinc-800/80 hover:bg-zinc-750 text-zinc-300 text-[11px] transition text-left cursor-pointer"
+                  className="flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg bg-[#0c1220] hover:bg-[#162035] text-slate-300 text-[11px] transition cursor-pointer border border-[#202b3f]"
                   title="Abrir en el Explorador de archivos de Windows"
                 >
                   <ExternalLink className="w-3 h-3 text-cyan-400 shrink-0" />
@@ -141,7 +143,7 @@ export const WorkspacePicker: React.FC<WorkspacePickerProps> = ({ currentDir, re
                     openInVsCode(currentDir);
                     setOpen(false);
                   }}
-                  className="flex items-center gap-1.5 px-2 py-1 rounded bg-zinc-800/80 hover:bg-zinc-750 text-zinc-300 text-[11px] transition text-left cursor-pointer"
+                  className="flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg bg-[#0c1220] hover:bg-[#162035] text-slate-300 text-[11px] transition cursor-pointer border border-[#202b3f]"
                   title="Abrir este repositorio en VS Code"
                 >
                   <Code2 className="w-3 h-3 text-emerald-400 shrink-0" />
@@ -153,21 +155,21 @@ export const WorkspacePicker: React.FC<WorkspacePickerProps> = ({ currentDir, re
                     navigator.clipboard.writeText(currentDir).catch(() => {});
                     setOpen(false);
                   }}
-                  className="col-span-2 flex items-center gap-1.5 px-2 py-1 rounded bg-zinc-800/80 hover:bg-zinc-750 text-zinc-300 text-[11px] transition text-left cursor-pointer"
+                  className="flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg bg-[#0c1220] hover:bg-[#162035] text-slate-300 text-[11px] transition cursor-pointer border border-[#202b3f]"
                   title="Copiar la ruta de la carpeta actual"
                 >
-                  <Copy className="w-3 h-3 text-zinc-400 shrink-0" />
-                  <span>Copiar ruta</span>
+                  <Copy className="w-3 h-3 text-slate-400 shrink-0" />
+                  <span>Copiar</span>
                 </button>
               </div>
             )}
           </div>
 
           {favorites.length > 0 && (
-            <div className="space-y-1 pt-1 border-t border-zinc-800">
-              <span className="text-[10px] uppercase font-mono font-semibold text-zinc-400 tracking-wider flex items-center gap-1">
-                <Star className="w-3 h-3 text-amber-400" />
-                Favoritos
+            <div className="space-y-1 pt-1 border-t border-[#202b3f]">
+              <span className="text-[10px] uppercase font-mono font-semibold text-slate-400 tracking-wider flex items-center gap-1.5">
+                <Star className="w-3 h-3 text-amber-400 fill-amber-400/30" />
+                Carpetas Favoritas
               </span>
               <div className="max-h-24 overflow-y-auto space-y-0.5 no-scrollbar">
                 {favorites.map((dir) => (
@@ -175,7 +177,7 @@ export const WorkspacePicker: React.FC<WorkspacePickerProps> = ({ currentDir, re
                     key={dir}
                     type="button"
                     onClick={() => selectDir(dir)}
-                    className="w-full truncate text-left px-2 py-1 rounded text-[11px] text-zinc-300 hover:bg-zinc-800 hover:text-white cursor-pointer"
+                    className="w-full truncate text-left px-2 py-1.5 rounded-lg text-[11px] text-slate-300 hover:bg-[#162035] hover:text-white transition cursor-pointer"
                     title={dir}
                   >
                     {dir.split(/[\\/]/).filter(Boolean).pop() ?? dir}
@@ -186,69 +188,79 @@ export const WorkspacePicker: React.FC<WorkspacePickerProps> = ({ currentDir, re
           )}
 
           {listing && (
-            <div className="space-y-1 pt-1 border-t border-zinc-800">
-              <div className="flex items-center gap-1">
+            <div className="space-y-1.5 pt-1.5 border-t border-[#202b3f]">
+              <div className="flex items-center gap-1.5">
                 <button
                   type="button"
                   disabled={atRoot}
                   onClick={() => browse(parentDir)}
-                  className="p-1 rounded hover:bg-zinc-800 text-zinc-400 disabled:opacity-30 cursor-pointer disabled:cursor-default"
+                  className="p-1 rounded-lg hover:bg-[#162035] text-slate-400 hover:text-slate-200 disabled:opacity-30 cursor-pointer disabled:cursor-default transition border border-transparent hover:border-[#202b3f]"
                   title="Subir un nivel"
                 >
                   <ArrowUp className="w-3 h-3" />
                 </button>
-                <span className="flex-1 truncate text-[11px] font-mono text-zinc-300" title={listing.dir}>
+                <span className="flex-1 truncate text-[11px] font-mono text-slate-300" title={listing.dir}>
                   {breadcrumb}
                 </span>
                 <button
                   type="button"
                   onClick={() => selectDir(listing.dir)}
-                  className="px-1.5 py-0.5 rounded bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-200 border border-indigo-500/30 text-[10px] cursor-pointer"
+                  className="px-2 py-0.5 rounded-md bg-cyan-600/25 hover:bg-cyan-600/40 text-cyan-200 border border-cyan-500/40 text-[10px] font-medium transition cursor-pointer"
                 >
                   Usar esta
                 </button>
               </div>
-              <div className="flex items-center gap-1">
+
+              <div className="flex items-center gap-1.5">
                 <div className="relative flex-1">
-                  <Search className="w-3 h-3 text-zinc-500 absolute left-1.5 top-1/2 -translate-y-1/2" />
+                  <Search className="w-3 h-3 text-slate-500 absolute left-2 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     value={filter}
                     onChange={(e) => setFilter(e.target.value)}
                     placeholder="Filtrar carpetas…"
                     aria-label="Filtrar carpetas"
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded pl-6 pr-2 py-0.5 text-[11px] text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#07090e] border border-[#202b3f] rounded-lg pl-7 pr-2 py-1 text-[11px] text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500"
                   />
                 </div>
                 <button
                   type="button"
                   onClick={() => setReposOnly((on) => !on)}
                   aria-pressed={reposOnly}
-                  className={`p-1 rounded border text-[10px] cursor-pointer ${reposOnly ? 'bg-emerald-600/20 border-emerald-500/40 text-emerald-300' : 'border-zinc-800 text-zinc-400 hover:text-zinc-200'}`}
+                  className={`p-1.5 rounded-lg border text-[10px] cursor-pointer transition ${
+                    reposOnly
+                      ? 'bg-emerald-950/40 border-emerald-500/50 text-emerald-300'
+                      : 'border-[#202b3f] text-slate-400 hover:text-slate-200 hover:bg-[#162035]'
+                  }`}
                   title="Mostrar solo repositorios git"
                 >
-                  <FolderGit2 className="w-3 h-3" />
+                  <FolderGit2 className="w-3.5 h-3.5" />
                 </button>
               </div>
+
               <div className="max-h-48 overflow-y-auto space-y-0.5 no-scrollbar">
-                {visibleEntries.length === 0 && <div className="px-2 py-1 text-[11px] text-zinc-500">{listing.entries.length === 0 ? 'Sin subcarpetas' : 'Nada coincide'}</div>}
+                {visibleEntries.length === 0 && (
+                  <div className="px-2 py-2 text-[11px] text-slate-500 font-mono text-center">
+                    {listing.entries.length === 0 ? 'Sin subcarpetas' : 'Nada coincide'}
+                  </div>
+                )}
                 {visibleEntries.map((entry) => (
-                  <div key={entry.path} className="flex items-center gap-1 rounded hover:bg-zinc-800 text-zinc-300 hover:text-white">
+                  <div key={entry.path} className="flex items-center gap-1 rounded-lg hover:bg-[#162035] text-slate-300 hover:text-white transition">
                     <button
                       type="button"
                       onClick={() => browse(entry.path)}
-                      className="flex-1 min-w-0 flex items-center gap-1.5 px-2 py-1 text-left text-[11px] cursor-pointer"
+                      className="flex-1 min-w-0 flex items-center gap-2 px-2 py-1.5 text-left text-[11px] cursor-pointer"
                       title={`Entrar a ${entry.path}`}
                     >
-                      {entry.isGit ? <FolderGit2 className="w-3 h-3 text-emerald-400 shrink-0" /> : <Folder className="w-3 h-3 text-zinc-400 shrink-0" />}
+                      {entry.isGit ? <FolderGit2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> : <Folder className="w-3.5 h-3.5 text-slate-400 shrink-0" />}
                       <span className="truncate">{entry.name}</span>
-                      <ChevronRight className="w-3 h-3 text-zinc-500 shrink-0 ml-auto" />
+                      <ChevronRight className="w-3 h-3 text-slate-500 shrink-0 ml-auto" />
                     </button>
                     <button
                       type="button"
                       onClick={() => toggleFavorite(entry.path)}
                       aria-pressed={favorites.includes(entry.path)}
-                      className="p-1 rounded text-zinc-500 hover:text-amber-300 cursor-pointer"
+                      className="p-1 rounded text-slate-500 hover:text-amber-300 cursor-pointer"
                       title={favorites.includes(entry.path) ? 'Quitar de favoritos' : 'Añadir a favoritos'}
                     >
                       <Star className={`w-3 h-3 ${favorites.includes(entry.path) ? 'text-amber-400 fill-amber-400' : ''}`} />
@@ -256,7 +268,7 @@ export const WorkspacePicker: React.FC<WorkspacePickerProps> = ({ currentDir, re
                     <button
                       type="button"
                       onClick={() => selectDir(entry.path)}
-                      className="p-1 mr-1 rounded text-zinc-400 hover:text-indigo-300 cursor-pointer"
+                      className="p-1 mr-1 rounded text-slate-400 hover:text-cyan-300 cursor-pointer"
                       title="Seleccionar esta carpeta como proyecto"
                     >
                       <Check className="w-3 h-3" />
@@ -268,9 +280,9 @@ export const WorkspacePicker: React.FC<WorkspacePickerProps> = ({ currentDir, re
           )}
 
           {recentDirs.length > 0 && (
-            <div className="space-y-1 pt-1 border-t border-zinc-800">
-              <span className="text-[10px] uppercase font-mono font-semibold text-zinc-400 tracking-wider flex items-center gap-1">
-                <Clock className="w-3 h-3 text-zinc-400" />
+            <div className="space-y-1 pt-1.5 border-t border-[#202b3f]">
+              <span className="text-[10px] uppercase font-mono font-semibold text-slate-400 tracking-wider flex items-center gap-1.5">
+                <Clock className="w-3 h-3 text-slate-400" />
                 Proyectos Recientes
               </span>
               <div className="max-h-40 overflow-y-auto space-y-0.5 no-scrollbar">
@@ -282,18 +294,18 @@ export const WorkspacePicker: React.FC<WorkspacePickerProps> = ({ currentDir, re
                       key={dir}
                       type="button"
                       onClick={() => selectDir(dir)}
-                      className={`w-full flex items-center justify-between gap-1.5 px-2 py-1 rounded text-left transition cursor-pointer text-[11px] ${
+                      className={`w-full flex items-center justify-between gap-1.5 px-2.5 py-1.5 rounded-lg text-left transition cursor-pointer text-[11px] ${
                         isCurrent
-                          ? 'bg-zinc-800 text-indigo-300 font-semibold border border-indigo-500/20'
-                          : 'hover:bg-zinc-800 text-zinc-300 hover:text-white'
+                          ? 'bg-[#0c1220] text-cyan-300 font-semibold border border-cyan-500/30'
+                          : 'hover:bg-[#162035] text-slate-300 hover:text-white'
                       }`}
                       title={dir}
                     >
                       <div className="truncate">
                         <div className="font-medium truncate">{name}</div>
-                        <div className="text-[9px] font-mono text-zinc-400 truncate">{dir}</div>
+                        <div className="text-[9px] font-mono text-slate-500 truncate">{dir}</div>
                       </div>
-                      {isCurrent && <Check className="w-3 h-3 text-indigo-400 shrink-0 ml-1" />}
+                      {isCurrent && <Check className="w-3 h-3 text-cyan-400 shrink-0 ml-1" />}
                     </button>
                   );
                 })}

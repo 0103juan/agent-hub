@@ -1,0 +1,302 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720" fill="none">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bg-grad" x1="0" y1="0" x2="1280" y2="720" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#07090e" />
+      <stop offset="60%" stop-color="#0a0e17" />
+      <stop offset="100%" stop-color="#0c1220" />
+    </linearGradient>
+
+    <!-- Accent Glows -->
+    <radialGradient id="cyan-glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(300, 200) rotate(45) scale(350)">
+      <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.12" />
+      <stop offset="100%" stop-color="#06b6d4" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="purple-glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(980, 520) rotate(45) scale(350)">
+      <stop offset="0%" stop-color="#c084fc" stop-opacity="0.10" />
+      <stop offset="100%" stop-color="#c084fc" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Filter Dropshadows -->
+    <filter id="hud-shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.7" />
+    </filter>
+    <filter id="neon-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <!-- Grid Pattern -->
+    <pattern id="grid-pattern" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#202b3f" stroke-width="0.5" stroke-opacity="0.45" />
+      <circle cx="40" cy="40" r="1" fill="#06b6d4" fill-opacity="0.25" />
+    </pattern>
+  </defs>
+
+  <!-- Canvas Background -->
+  <rect width="1280" height="720" fill="url(#bg-grad)" />
+  <rect width="1280" height="720" fill="url(#cyan-glow)" />
+  <rect width="1280" height="720" fill="url(#purple-glow)" />
+  <rect width="1280" height="720" fill="url(#grid-pattern)" />
+
+  <!-- Outer HUD Frame -->
+  <rect x="24" y="24" width="1232" height="672" rx="16" stroke="#202b3f" stroke-width="1.5" />
+  <path d="M 24 64 L 1256 64" stroke="#202b3f" stroke-width="1" />
+  <path d="M 24 656 L 1256 656" stroke="#202b3f" stroke-width="1" />
+
+  <!-- Corner Brackets -->
+  <path d="M 24 44 L 44 24" stroke="#06b6d4" stroke-width="2" />
+  <path d="M 1256 44 L 1236 24" stroke="#06b6d4" stroke-width="2" />
+  <path d="M 24 636 L 44 656" stroke="#06b6d4" stroke-width="2" />
+  <path d="M 1256 636 L 1236 656" stroke="#06b6d4" stroke-width="2" />
+
+  <!-- Header Section -->
+  <g transform="translate(48, 44)">
+    <circle cx="6" cy="0" r="4" fill="#06b6d4" filter="url(#neon-glow)" />
+    <text x="20" y="4" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="700" fill="#06b6d4" letter-spacing="1.5">AGENTHUB HUD CORE // SYNTAX ENGINE ARCHITECTURE</text>
+    <text x="960" y="4" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="500" fill="#94a3b8">Zero-Dependency · AST-Free · Tokenizer Lookahead</text>
+  </g>
+
+  <!-- Flow Stages (3-Column Architecture) -->
+  
+  <!-- STAGE 1: Markdown Codeblock Ingestion -->
+  <g transform="translate(56, 92)" filter="url(#hud-shadow)">
+    <rect width="340" height="536" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.5" />
+    <rect width="340" height="42" rx="14" fill="#0c1220" />
+    <path d="M 0 42 L 340 42" stroke="#202b3f" stroke-width="1" />
+    
+    <circle cx="24" cy="21" r="5" fill="#f43f5e" />
+    <circle cx="42" cy="21" r="5" fill="#fbbf24" />
+    <circle cx="60" cy="21" r="5" fill="#10b981" />
+    <text x="80" y="25" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="#f1f5f9">1. Ingestión y Normalización</text>
+
+    <!-- Card Body -->
+    <g transform="translate(20, 60)">
+      <text x="0" y="16" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600" fill="#94a3b8">Entrada cruda de bloques Markdown:</text>
+      
+      <!-- Code Sample Box -->
+      <rect y="28" width="300" height="150" rx="8" fill="#07090e" stroke="#202b3f" stroke-width="1" />
+      <text x="14" y="52" font-family="'JetBrains Mono', monospace" font-size="11" fill="#64748b">```typescript</text>
+      <text x="14" y="74" font-family="'JetBrains Mono', monospace" font-size="11" fill="#cbd5e1">const MAX = 42;</text>
+      <text x="14" y="96" font-family="'JetBrains Mono', monospace" font-size="11" fill="#cbd5e1">async function fetchUser(id) {</text>
+      <text x="14" y="118" font-family="'JetBrains Mono', monospace" font-size="11" fill="#cbd5e1">  return await db.query(id);</text>
+      <text x="14" y="140" font-family="'JetBrains Mono', monospace" font-size="11" fill="#cbd5e1">}</text>
+      <text x="14" y="162" font-family="'JetBrains Mono', monospace" font-size="11" fill="#64748b">```</text>
+
+      <!-- Parsing Logic Details -->
+      <g transform="translate(0, 200)">
+        <rect width="300" height="96" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1" />
+        <text x="14" y="24" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#06b6d4">Separación de Lenguaje</text>
+        <text x="14" y="44" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" fill="#94a3b8">Detección de alias: <tspan fill="#38bdf8">ts, js, py, sql, diff, rs</tspan></text>
+        <text x="14" y="64" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" fill="#94a3b8">Control de overflow y colapsabilidad.</text>
+        <text x="14" y="84" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" fill="#94a3b8">Modo Diff rápido si <tspan fill="#6ee7b7">lang === 'diff'</tspan></text>
+      </g>
+
+      <g transform="translate(0, 314)">
+        <rect width="300" height="136" rx="8" fill="#08101a" stroke="#06b6d4" stroke-opacity="0.3" stroke-width="1" />
+        <text x="14" y="26" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#06b6d4">Ventaja Arquitectónica</text>
+        <text x="14" y="48" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" fill="#cbd5e1">Cero dependencias externas pesadas</text>
+        <text x="14" y="66" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" fill="#94a3b8">(evita cargar 1.5MB de Prism/Shiki).</text>
+        <text x="14" y="90" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" fill="#cbd5e1">Tiempo de compilación: <tspan fill="#10b981">~2.2s</tspan></text>
+        <text x="14" y="110" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" fill="#cbd5e1">Render en tiempo real: <tspan fill="#10b981">&lt;1ms por bloque</tspan></text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Connecting Arrow 1 -> 2 -->
+  <g transform="translate(406, 360)">
+    <line x1="0" y1="0" x2="52" y2="0" stroke="#06b6d4" stroke-width="2" stroke-dasharray="4 4" />
+    <polygon points="58,0 50,-5 50,5" fill="#06b6d4" />
+    <text x="26" y="-12" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" fill="#06b6d4">TOKENIZE</text>
+  </g>
+
+  <!-- STAGE 2: Lexical Tokenizer & Lookahead -->
+  <g transform="translate(470, 92)" filter="url(#hud-shadow)">
+    <rect width="340" height="536" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.5" />
+    <rect width="340" height="42" rx="14" fill="#0c1220" />
+    <path d="M 0 42 L 340 42" stroke="#202b3f" stroke-width="1" />
+    
+    <circle cx="24" cy="21" r="5" fill="#6366f1" />
+    <text x="40" y="25" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="#f1f5f9">2. Tokenizer &amp; Lookahead</text>
+
+    <!-- Card Body -->
+    <g transform="translate(20, 60)">
+      <text x="0" y="16" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600" fill="#94a3b8">Expresión Regular Multipatrón:</text>
+
+      <rect y="28" width="300" height="74" rx="8" fill="#07090e" stroke="#202b3f" stroke-width="1" />
+      <text x="12" y="50" font-family="'JetBrains Mono', monospace" font-size="9.5" fill="#c084fc">TOKEN_REGEX = /(\/\/[^\n]*|#[^\n]*|...</text>
+      <text x="12" y="68" font-family="'JetBrains Mono', monospace" font-size="9.5" fill="#38bdf8">|===|!==|=>|&amp;&amp;|\|\||\?\?|<=|>=|\+=...</text>
+      <text x="12" y="86" font-family="'JetBrains Mono', monospace" font-size="9.5" fill="#fde047">|[a-zA-Z0-9_$]+|[^\s\w])/g</text>
+
+      <!-- Lookahead Logic Matrix -->
+      <g transform="translate(0, 116)">
+        <text x="0" y="14" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="600" fill="#f1f5f9">Clasificación Semántica por Contexto:</text>
+
+        <!-- Item 1: Functions -->
+        <g transform="translate(0, 24)">
+          <rect width="300" height="48" rx="6" fill="#0c1220" stroke="#202b3f" stroke-width="1" />
+          <text x="12" y="20" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#60a5fa">Identificador + Lookahead '('</text>
+          <text x="12" y="38" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" fill="#94a3b8">Clasifica como <tspan font-family="'JetBrains Mono', monospace" fill="#60a5fa">.syn-fn</tspan> (función/método)</text>
+        </g>
+
+        <!-- Item 2: Constants -->
+        <g transform="translate(0, 80)">
+          <rect width="300" height="48" rx="6" fill="#0c1220" stroke="#202b3f" stroke-width="1" />
+          <text x="12" y="20" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#fbbf24">/^[A-Z_][A-Z0-9_]{1,}$/</text>
+          <text x="12" y="38" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" fill="#94a3b8">Clasifica como <tspan font-family="'JetBrains Mono', monospace" fill="#fbbf24">.syn-const</tspan> (constante/enum)</text>
+        </g>
+
+        <!-- Item 3: Operators -->
+        <g transform="translate(0, 136)">
+          <rect width="300" height="48" rx="6" fill="#0c1220" stroke="#202b3f" stroke-width="1" />
+          <text x="12" y="20" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#06b6d4">Set(['=>', '===', '!==', '??', ...])</text>
+          <text x="12" y="38" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" fill="#94a3b8">Clasifica como <tspan font-family="'JetBrains Mono', monospace" fill="#06b6d4">.syn-op</tspan> (operador HUD cian)</text>
+        </g>
+
+        <!-- Item 4: Decorators & Annotations -->
+        <g transform="translate(0, 192)">
+          <rect width="300" height="48" rx="6" fill="#0c1220" stroke="#202b3f" stroke-width="1" />
+          <text x="12" y="20" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#f59e0b">token.startsWith('@')</text>
+          <text x="12" y="38" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" fill="#94a3b8">Anotaciones de Python, TypeScript y Java</text>
+        </g>
+
+        <!-- Item 5: Keywords & Types -->
+        <g transform="translate(0, 248)">
+          <rect width="300" height="48" rx="6" fill="#0c1220" stroke="#202b3f" stroke-width="1" />
+          <text x="12" y="20" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#c084fc">KEYWORDS &amp; TYPES Hash Sets</text>
+          <text x="12" y="38" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" fill="#94a3b8">Búsqueda <tspan font-family="'JetBrains Mono', monospace" fill="#10b981">O(1)</tspan> ultra veloz en memoria</text>
+        </g>
+      </g>
+    </g>
+  </g>
+
+  <!-- Connecting Arrow 2 -> 3 -->
+  <g transform="translate(820, 360)">
+    <line x1="0" y1="0" x2="52" y2="0" stroke="#06b6d4" stroke-width="2" stroke-dasharray="4 4" />
+    <polygon points="58,0 50,-5 50,5" fill="#06b6d4" />
+    <text x="26" y="-12" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" fill="#06b6d4">RENDER</text>
+  </g>
+
+  <!-- STAGE 3: Tactical Dark HUD Color Palette -->
+  <g transform="translate(884, 92)" filter="url(#hud-shadow)">
+    <rect width="340" height="536" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.5" />
+    <rect width="340" height="42" rx="14" fill="#0c1220" />
+    <path d="M 0 42 L 340 42" stroke="#202b3f" stroke-width="1" />
+    
+    <circle cx="24" cy="21" r="5" fill="#06b6d4" />
+    <text x="40" y="25" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="#f1f5f9">3. Espectro Visual HUD</text>
+
+    <!-- Card Body -->
+    <g transform="translate(20, 60)">
+      <text x="0" y="16" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600" fill="#94a3b8">Tokens de Color WCAG AA (≥ 4.8:1):</text>
+
+      <!-- Color Swatches Grid -->
+      <g transform="translate(0, 30)">
+        
+        <!-- Swatch: Keywords -->
+        <g transform="translate(0, 0)">
+          <rect width="300" height="34" rx="6" fill="#07090e" stroke="#202b3f" stroke-width="1" />
+          <rect x="8" y="8" width="18" height="18" rx="4" fill="#c084fc" />
+          <text x="36" y="20" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="600" fill="#c084fc">.syn-kw</text>
+          <text x="120" y="20" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" fill="#94a3b8">Keywords (#c084fc)</text>
+          <text x="250" y="20" font-family="'JetBrains Mono', monospace" font-size="9.5" fill="#10b981">6.8:1</text>
+        </g>
+
+        <!-- Swatch: Functions -->
+        <g transform="translate(0, 40)">
+          <rect width="300" height="34" rx="6" fill="#07090e" stroke="#202b3f" stroke-width="1" />
+          <rect x="8" y="8" width="18" height="18" rx="4" fill="#60a5fa" />
+          <text x="36" y="20" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="600" fill="#60a5fa">.syn-fn</text>
+          <text x="120" y="20" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" fill="#94a3b8">Funciones (#60a5fa)</text>
+          <text x="250" y="20" font-family="'JetBrains Mono', monospace" font-size="9.5" fill="#10b981">5.9:1</text>
+        </g>
+
+        <!-- Swatch: Types -->
+        <g transform="translate(0, 80)">
+          <rect width="300" height="34" rx="6" fill="#07090e" stroke="#202b3f" stroke-width="1" />
+          <rect x="8" y="8" width="18" height="18" rx="4" fill="#38bdf8" />
+          <text x="36" y="20" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="600" fill="#38bdf8">.syn-type</text>
+          <text x="120" y="20" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" fill="#94a3b8">Tipos (#38bdf8)</text>
+          <text x="250" y="20" font-family="'JetBrains Mono', monospace" font-size="9.5" fill="#10b981">7.4:1</text>
+        </g>
+
+        <!-- Swatch: Constants -->
+        <g transform="translate(0, 120)">
+          <rect width="300" height="34" rx="6" fill="#07090e" stroke="#202b3f" stroke-width="1" />
+          <rect x="8" y="8" width="18" height="18" rx="4" fill="#fbbf24" />
+          <text x="36" y="20" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="600" fill="#fbbf24">.syn-const</text>
+          <text x="120" y="20" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" fill="#94a3b8">Constantes (#fbbf24)</text>
+          <text x="250" y="20" font-family="'JetBrains Mono', monospace" font-size="9.5" fill="#10b981">8.2:1</text>
+        </g>
+
+        <!-- Swatch: Operators -->
+        <g transform="translate(0, 160)">
+          <rect width="300" height="34" rx="6" fill="#07090e" stroke="#202b3f" stroke-width="1" />
+          <rect x="8" y="8" width="18" height="18" rx="4" fill="#06b6d4" />
+          <text x="36" y="20" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="600" fill="#06b6d4">.syn-op</text>
+          <text x="120" y="20" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" fill="#94a3b8">Operadores (#06b6d4)</text>
+          <text x="250" y="20" font-family="'JetBrains Mono', monospace" font-size="9.5" fill="#10b981">6.5:1</text>
+        </g>
+
+        <!-- Swatch: Strings -->
+        <g transform="translate(0, 200)">
+          <rect width="300" height="34" rx="6" fill="#07090e" stroke="#202b3f" stroke-width="1" />
+          <rect x="8" y="8" width="18" height="18" rx="4" fill="#86efac" />
+          <text x="36" y="20" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="600" fill="#86efac">.syn-str</text>
+          <text x="120" y="20" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" fill="#94a3b8">Cadenas (#86efac)</text>
+          <text x="250" y="20" font-family="'JetBrains Mono', monospace" font-size="9.5" fill="#10b981">9.1:1</text>
+        </g>
+
+        <!-- Swatch: Numbers -->
+        <g transform="translate(0, 240)">
+          <rect width="300" height="34" rx="6" fill="#07090e" stroke="#202b3f" stroke-width="1" />
+          <rect x="8" y="8" width="18" height="18" rx="4" fill="#fde047" />
+          <text x="36" y="20" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="600" fill="#fde047">.syn-num</text>
+          <text x="120" y="20" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" fill="#94a3b8">Números (#fde047)</text>
+          <text x="250" y="20" font-family="'JetBrains Mono', monospace" font-size="9.5" fill="#10b981">10.4:1</text>
+        </g>
+
+        <!-- Swatch: Comments -->
+        <g transform="translate(0, 280)">
+          <rect width="300" height="34" rx="6" fill="#07090e" stroke="#202b3f" stroke-width="1" />
+          <rect x="8" y="8" width="18" height="18" rx="4" fill="#64748b" />
+          <text x="36" y="20" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="600" fill="#64748b">.syn-com</text>
+          <text x="120" y="20" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" fill="#94a3b8">Comentarios (#64748b)</text>
+          <text x="250" y="20" font-family="'JetBrains Mono', monospace" font-size="9.5" fill="#10b981">4.9:1</text>
+        </g>
+
+        <!-- Swatch: Diffs -->
+        <g transform="translate(0, 320)">
+          <rect width="300" height="34" rx="6" fill="#07090e" stroke="#202b3f" stroke-width="1" />
+          <rect x="8" y="8" width="8" height="18" rx="2" fill="#10b981" />
+          <rect x="18" y="8" width="8" height="18" rx="2" fill="#f43f5e" />
+          <text x="36" y="20" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="600" fill="#10b981">.syn-diff</text>
+          <text x="120" y="20" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" fill="#94a3b8">Git Diffs (+/-)</text>
+          <text x="250" y="20" font-family="'JetBrains Mono', monospace" font-size="9.5" fill="#10b981">AA Pass</text>
+        </g>
+
+        <!-- Swatch: Tags -->
+        <g transform="translate(0, 360)">
+          <rect width="300" height="34" rx="6" fill="#07090e" stroke="#202b3f" stroke-width="1" />
+          <rect x="8" y="8" width="18" height="18" rx="4" fill="#f43f5e" />
+          <text x="36" y="20" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="600" fill="#f43f5e">.syn-tag</text>
+          <text x="120" y="20" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" fill="#94a3b8">HTML/JSX Tags (#f43f5e)</text>
+          <text x="250" y="20" font-family="'JetBrains Mono', monospace" font-size="9.5" fill="#10b981">5.4:1</text>
+        </g>
+
+      </g>
+    </g>
+  </g>
+
+  <!-- Footer Status Bar -->
+  <g transform="translate(48, 672)">
+    <circle cx="6" cy="0" r="3.5" fill="#10b981" />
+    <text x="18" y="3.5" font-family="'JetBrains Mono', monospace" font-size="11" fill="#94a3b8">Status: <tspan fill="#10b981" font-weight="600">Active in MessageList &amp; Markdown Renderer</tspan></text>
+    <text x="460" y="3.5" font-family="'JetBrains Mono', monospace" font-size="11" fill="#64748b">|</text>
+    <text x="480" y="3.5" font-family="'JetBrains Mono', monospace" font-size="11" fill="#94a3b8">File: <tspan fill="#cbd5e1">src/webview/components/chat/syntax-highlighter.tsx</tspan></text>
+    <text x="960" y="3.5" font-family="'JetBrains Mono', monospace" font-size="11" fill="#64748b">Tactical Dark HUD v0.1.2</text>
+  </g>
+</svg>

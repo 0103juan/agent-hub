@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentHub // Markdown, CodeBlock &amp; Table HUD Redesign</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #07090e;
+      color: #e2e8f0;
+    }
+    code, kbd, pre, .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .hud-card {
+      background: linear-gradient(180deg, #101625 0%, #0c101a 100%);
+      border: 1px solid #202b3f;
+    }
+    .glow-indigo {
+      box-shadow: 0 0 25px -5px rgba(99, 102, 241, 0.25);
+    }
+    .glow-cyan {
+      box-shadow: 0 0 25px -5px rgba(6, 182, 212, 0.25);
+    }
+    .syn-kw { color: #c084fc; font-weight: 600; }
+    .syn-str { color: #86efac; }
+    .syn-com { color: #64748b; font-style: italic; }
+    .syn-num { color: #fde047; }
+    .syn-fn { color: #60a5fa; }
+    .syn-type { color: #38bdf8; }
+  </style>
+</head>
+<body class="p-6 max-w-7xl mx-auto space-y-8">
+
+  <!-- Header -->
+  <header class="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-[#202b3f]">
+    <div>
+      <div class="flex items-center gap-2 mb-1">
+        <span class="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-pulse"></span>
+        <span class="text-xs font-mono font-semibold tracking-wider text-indigo-400 uppercase">Design System // Iteration 17</span>
+      </div>
+      <h1 class="text-2xl font-bold text-white tracking-tight">Tactical HUD // Markdown, CodeBlock &amp; Tables</h1>
+      <p class="text-xs text-slate-400 mt-0.5">High-Fidelity Rendering Specification for Code Toolbars, GFM Tables, Diagram Viewport &amp; Callouts</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="px-2.5 py-1 rounded bg-[#0e131f] border border-[#202b3f] text-xs font-mono text-cyan-400">WCAG AA 4.5:1+</span>
+      <span class="px-2.5 py-1 rounded bg-indigo-950/40 border border-indigo-500/30 text-xs font-mono text-indigo-300">Markdown v2</span>
+    </div>
+  </header>
+
+  <!-- Showcase 1: CodeBlock with Action Toolbar -->
+  <section class="space-y-3">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="text-sm font-bold text-slate-200">01. Elevated CodeBlock with Tactical Toolbar</span>
+        <span class="text-xs text-slate-500 font-mono">Syntax Highlighting &amp; Actions</span>
+      </div>
+      <span class="text-[11px] font-mono text-cyan-400">Interactive Preview</span>
+    </div>
+
+    <!-- CodeBlock Mockup -->
+    <div class="rounded-xl overflow-hidden border border-[#202b3f] bg-[#07090e] shadow-xl glow-indigo">
+      <!-- Toolbar -->
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#202b3f] px-3 py-1.5 text-xs text-slate-400 bg-[#0e131f]">
+        <div class="flex items-center gap-2">
+          <span class="font-mono font-bold text-cyan-400 uppercase text-[11px]">typescript</span>
+          <span class="text-slate-500 font-mono text-[10px]">· 12 líneas</span>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center gap-1">
+          <button class="px-2 py-0.5 rounded-md hover:bg-[#162035] hover:text-white transition text-[11px] font-mono cursor-pointer border border-transparent hover:border-[#202b3f]">
+            Ajustar
+          </button>
+          <button class="px-2 py-0.5 rounded-md hover:bg-[#162035] hover:text-white transition text-[11px] font-mono cursor-pointer border border-transparent hover:border-[#202b3f]">
+            Líneas
+          </button>
+          <button class="px-2 py-0.5 rounded-md hover:bg-[#162035] hover:text-white transition text-[11px] font-mono cursor-pointer border border-transparent hover:border-[#202b3f]">
+            Descargar
+          </button>
+          <div class="h-3 w-[1px] bg-[#202b3f] mx-1"></div>
+          <button onclick="this.innerText = '✓ Copiado'; setTimeout(() => this.innerText = 'Copiar', 1500)" class="flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 border border-indigo-500/40 transition text-[11px] font-semibold cursor-pointer">
+            <span>Copiar</span>
+          </button>
+          <button class="flex items-center gap-1 px-2 py-0.5 rounded-md hover:bg-[#162035] text-emerald-400 hover:text-emerald-300 transition text-[11px] font-medium cursor-pointer border border-transparent hover:border-[#202b3f]">
+            <span>Inline</span>
+          </button>
+          <button class="flex items-center gap-1 px-2 py-0.5 rounded-md hover:bg-[#162035] text-slate-300 hover:text-white transition text-[11px] font-medium cursor-pointer border border-transparent hover:border-[#202b3f]">
+            <span>Guardar</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Code Interior -->
+      <pre class="p-3.5 text-xs font-mono leading-relaxed bg-[#05070a] overflow-x-auto select-text space-y-0.5">
+<span class="syn-com">// Implementación del orquestador táctico para AgentHub</span>
+<span class="syn-kw">import</span> { <span class="syn-type">useMemo</span>, <span class="syn-type">useState</span> } <span class="syn-kw">from</span> <span class="syn-str">'react'</span>;
+<span class="syn-kw">import</span> { <span class="syn-type">ModelSelection</span> } <span class="syn-kw">from</span> <span class="syn-str">'../../shared/types'</span>;
+
+<span class="syn-kw">export const</span> <span class="syn-fn">TacticalDispatcher</span> = ({ <span class="syn-type">model</span>, <span class="syn-type">payload</span> }) => {
+  <span class="syn-kw">const</span> [<span class="syn-type">active</span>, <span class="syn-fn">setActive</span>] = <span class="syn-fn">useState</span>(<span class="syn-num">true</span>);
+  <span class="syn-kw">const</span> <span class="syn-type">tokens</span> = <span class="syn-fn">useMemo</span>(() => <span class="syn-type">payload</span>.length / <span class="syn-num">4</span>, [<span class="syn-type">payload</span>]);
+
+  <span class="syn-kw">return</span> (
+    &lt;<span class="syn-type">div</span> <span class="syn-str">className</span>=<span class="syn-str">"hud-panel glow-indigo"</span>&gt;
+      &lt;<span class="syn-type">span</span>&gt;Total Tokens: {<span class="syn-type">tokens</span>}&lt;/<span class="syn-type">span</span>&gt;
+    &lt;/<span class="syn-type">div</span>&gt;
+  );
+};</pre>
+    </div>
+  </section>
+
+  <!-- Showcase 2: Tactical Markdown Table -->
+  <section class="space-y-3">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="text-sm font-bold text-slate-200">02. Tactical GFM Table Engine</span>
+        <span class="text-xs text-slate-500 font-mono">Alternating Navy Rows &amp; TSV Export</span>
+      </div>
+      <span class="text-[11px] font-mono text-emerald-400">Spreadsheet Compatible</span>
+    </div>
+
+    <!-- Table Container -->
+    <div class="group/table relative overflow-hidden rounded-xl border border-[#202b3f] bg-[#0e131f] shadow-xl">
+      <button
+        onclick="this.innerText = '✓ Copiada'; setTimeout(() => this.innerText = 'Copiar tabla', 1500)"
+        class="absolute right-2 top-2 z-10 flex items-center gap-1.5 rounded-lg bg-[#07090e] border border-[#202b3f] px-2.5 py-1 text-xs text-slate-300 opacity-0 transition group-hover/table:opacity-100 hover:text-white cursor-pointer shadow-md"
+      >
+        <span>Copiar tabla</span>
+      </button>
+
+      <table class="w-full border-collapse text-xs leading-normal">
+        <thead class="bg-[#07090e] text-cyan-300 font-mono text-[11px] uppercase tracking-wider border-b border-[#202b3f]">
+          <tr>
+            <th class="px-3.5 py-2.5 text-left font-bold">Módulo / Vista</th>
+            <th class="px-3.5 py-2.5 text-left font-bold">Acentos HUD</th>
+            <th class="px-3.5 py-2.5 text-left font-bold">Atajos Globales</th>
+            <th class="px-3.5 py-2.5 text-left font-bold">Estado de Calidad</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-[#1e2a40]/60 font-sans">
+          <tr class="hover:bg-[#162035] transition">
+            <td class="px-3.5 py-2 font-semibold text-white font-mono">SpotlightBar</td>
+            <td class="px-3.5 py-2 text-indigo-400">Índigo / Violeta</td>
+            <td class="px-3.5 py-2 font-mono text-slate-400">Alt + Espacio</td>
+            <td class="px-3.5 py-2 text-emerald-400 font-medium">✓ 100% WCAG AAA</td>
+          </tr>
+          <tr class="bg-[#111726]/40 hover:bg-[#162035] transition">
+            <td class="px-3.5 py-2 font-semibold text-white font-mono">ModelCatalog</td>
+            <td class="px-3.5 py-2 text-cyan-400">Cian / Rosa</td>
+            <td class="px-3.5 py-2 font-mono text-slate-400">Alt + M</td>
+            <td class="px-3.5 py-2 text-emerald-400 font-medium">✓ 100% WCAG AAA</td>
+          </tr>
+          <tr class="hover:bg-[#162035] transition">
+            <td class="px-3.5 py-2 font-semibold text-white font-mono">ActionPalette</td>
+            <td class="px-3.5 py-2 text-amber-400">Ámbar / Oro</td>
+            <td class="px-3.5 py-2 font-mono text-slate-400">Alt + K</td>
+            <td class="px-3.5 py-2 text-emerald-400 font-medium">✓ 100% WCAG AAA</td>
+          </tr>
+          <tr class="bg-[#111726]/40 hover:bg-[#162035] transition">
+            <td class="px-3.5 py-2 font-semibold text-white font-mono">QuotaNotice</td>
+            <td class="px-3.5 py-2 text-rose-400">Carmesí / Naranja</td>
+            <td class="px-3.5 py-2 font-mono text-slate-400">Automático (&gt;90%)</td>
+            <td class="px-3.5 py-2 text-emerald-400 font-medium">✓ Failover Listo</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Showcase 3: Callout Blockquote & Headings -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Callout Blockquote -->
+    <div class="hud-card p-5 rounded-xl space-y-4">
+      <div class="flex items-center justify-between border-b border-[#202b3f] pb-3">
+        <span class="text-sm font-bold text-slate-200">03. Tactical Callout Blockquotes</span>
+        <span class="px-2 py-0.5 rounded bg-indigo-950/50 border border-indigo-500/40 text-[10px] font-mono text-indigo-300">CALLOUT HUD</span>
+      </div>
+
+      <div class="space-y-3">
+        <!-- Callout 1 -->
+        <blockquote class="border-l-3 border-indigo-500 pl-3.5 py-2 my-1 bg-[#0e131f]/80 rounded-r-xl text-slate-200 text-xs shadow-xs">
+          <div class="font-bold text-indigo-300 text-xs mb-0.5 flex items-center gap-1.5">
+            <span>💡</span>
+            <span>PRINCIPIO DE DISEÑO TÁCTICO</span>
+          </div>
+          Cada elemento interactivo debe presentar un estado hover diferenciado, bordes definidos en retícula (#202b3f) y contraste superior a 4.5:1.
+        </blockquote>
+
+        <!-- Callout 2 -->
+        <blockquote class="border-l-3 border-amber-500 pl-3.5 py-2 my-1 bg-amber-950/20 rounded-r-xl text-amber-200 text-xs shadow-xs">
+          <div class="font-bold text-amber-300 text-xs mb-0.5 flex items-center gap-1.5">
+            <span>⚠️</span>
+            <span>VERIFICACIÓN OBLIGATORIA</span>
+          </div>
+          Todo cambio visual debe validarse mediante compilación limpia de Webview y ejecución completa de los 11 tests de flujos.
+        </blockquote>
+      </div>
+    </div>
+
+    <!-- Heading Scale -->
+    <div class="hud-card p-5 rounded-xl space-y-4">
+      <div class="flex items-center justify-between border-b border-[#202b3f] pb-3">
+        <span class="text-sm font-bold text-slate-200">04. Visual Hierarchy &amp; Heading Scale</span>
+        <span class="px-2 py-0.5 rounded bg-cyan-950/50 border border-cyan-500/40 text-[10px] font-mono text-cyan-300">TYPOGRAPHY</span>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div class="p-2.5 rounded-lg bg-[#07090e] border border-[#202b3f]">
+          <span class="text-[10px] font-mono text-slate-500 block">H1 (16px / font-bold)</span>
+          <h1 class="text-base font-bold text-white tracking-tight mt-0.5">Arquitectura de Agentes y Control de Flujos</h1>
+        </div>
+
+        <div class="p-2.5 rounded-lg bg-[#07090e] border border-[#202b3f]">
+          <span class="text-[10px] font-mono text-slate-500 block">H2 (14px / font-semibold)</span>
+          <h2 class="text-sm font-semibold text-slate-100 mt-0.5">Orquestación de Memoria y Protocol Roles</h2>
+        </div>
+
+        <div class="p-2.5 rounded-lg bg-[#07090e] border border-[#202b3f]">
+          <span class="text-[10px] font-mono text-slate-500 block">H3 (12px / font-semibold)</span>
+          <h3 class="text-xs font-semibold text-slate-200 mt-0.5">Parámetros de Inferencia y Límites de Tokens</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Showcase 4: Color & Contrast Verification Token Board -->
+  <section class="hud-card p-5 rounded-xl space-y-4">
+    <div class="flex items-center justify-between border-b border-[#202b3f] pb-3">
+      <h2 class="text-sm font-bold text-slate-200 uppercase tracking-wider font-mono">05. Design Token Matrix &amp; Contrast Validation</h2>
+      <span class="text-xs font-mono text-emerald-400">ALL PASS WCAG AA / AAA</span>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
+      <div class="p-3 rounded-lg bg-[#07090e] border border-[#202b3f]">
+        <div class="text-[10px] font-mono text-slate-500">Surface Root</div>
+        <div class="text-xs font-bold text-slate-200 mt-1">#07090e</div>
+        <div class="text-[10px] text-emerald-400 mt-2 font-mono">15.8:1 vs text</div>
+      </div>
+      <div class="p-3 rounded-lg bg-[#0e131f] border border-[#202b3f]">
+        <div class="text-[10px] font-mono text-slate-500">Surface Panel</div>
+        <div class="text-xs font-bold text-slate-200 mt-1">#0e131f</div>
+        <div class="text-[10px] text-emerald-400 mt-2 font-mono">14.1:1 vs text</div>
+      </div>
+      <div class="p-3 rounded-lg bg-[#05070a] border border-[#202b3f]">
+        <div class="text-[10px] font-mono text-slate-500">Surface Code</div>
+        <div class="text-xs font-bold text-slate-200 mt-1">#05070a</div>
+        <div class="text-[10px] text-emerald-400 mt-2 font-mono">16.4:1 vs text</div>
+      </div>
+      <div class="p-3 rounded-lg bg-[#6366f1]/20 border border-[#6366f1]/40">
+        <div class="text-[10px] font-mono text-indigo-300">Accent Indigo</div>
+        <div class="text-xs font-bold text-indigo-400 mt-1">#6366f1</div>
+        <div class="text-[10px] text-emerald-400 mt-2 font-mono">Focus / Action</div>
+      </div>
+      <div class="p-3 rounded-lg bg-[#06b6d4]/20 border border-[#06b6d4]/40">
+        <div class="text-[10px] font-mono text-cyan-300">Accent Cyan</div>
+        <div class="text-xs font-bold text-cyan-400 mt-1">#06b6d4</div>
+        <div class="text-[10px] text-emerald-400 mt-2 font-mono">Table Headers</div>
+      </div>
+      <div class="p-3 rounded-lg bg-[#10b981]/20 border border-[#10b981]/40">
+        <div class="text-[10px] font-mono text-emerald-300">Accent Emerald</div>
+        <div class="text-xs font-bold text-emerald-400 mt-1">#10b981</div>
+        <div class="text-[10px] text-emerald-400 mt-2 font-mono">Pass &amp; Inline</div>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>

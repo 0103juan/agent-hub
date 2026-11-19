@@ -341,7 +341,7 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
   const runAction = (actionId: string) =>
     postToHost({ command: 'runAction', actionId, sessionId, input: prompt });
 
-  const startPipeline = (text: string) => postToHost({ command: 'startPipeline', prompt: text, requireApproval, template, isolate });
+  const startPipeline = (text: string) => postToHost({ command: 'startPipeline', sessionId, prompt: text, requireApproval, template, isolate });
   const selectRole = (protocolRole: ProtocolRole) =>
     postToHost({ command: 'updateSession', sessionId, patch: { protocolRole } });
 
@@ -472,13 +472,13 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
             <span className="font-semibold text-rose-300">
               Grabando voz ({Math.floor(recordingSeconds / 60)}:{(recordingSeconds % 60).toString().padStart(2, '0')})
             </span>
-            <span className="text-zinc-400 text-[11px] hidden sm:inline">• Habla con naturalidad</span>
+            <span className="text-slate-400 text-[11px] font-mono hidden sm:inline">• Habla con naturalidad</span>
           </div>
           <div className="flex items-center gap-1.5">
             <button
               type="button"
               onClick={stopVoiceRecording}
-              className="flex items-center gap-1 px-2.5 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs transition cursor-pointer"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs transition cursor-pointer font-mono"
             >
               <Check className="w-3 h-3" />
               <span>Listo</span>
@@ -486,7 +486,7 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
             <button
               type="button"
               onClick={cancelVoiceRecording}
-              className="p-1 text-zinc-400 hover:text-zinc-200 cursor-pointer"
+              className="p-1 text-slate-400 hover:text-slate-200 cursor-pointer"
               title="Cancelar grabación"
             >
               <X className="w-4 h-4" />
@@ -498,18 +498,18 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
       {/* Cola de mensajes enriquecida con archivos adjuntos */}
       {queue.length > 0 && (
         <div className="space-y-1.5" aria-label="Mensajes en cola">
-          <div className="flex items-center justify-between text-[11px] text-zinc-400 px-1">
+          <div className="flex items-center justify-between text-[11px] text-slate-400 px-1 font-mono">
             <span className="font-semibold flex items-center gap-1.5 text-amber-300">
               <Clock className="w-3.5 h-3.5" />
               Mensajes en cola ({queue.length})
             </span>
-            <span className="text-[10px] text-zinc-500">Se envían automáticamente al terminar el turno actual</span>
+            <span className="text-[10px] text-slate-400">Se envían automáticamente al terminar el turno actual</span>
           </div>
           <div className="space-y-1.5 max-h-48 overflow-y-auto pr-0.5">
             {queue.map((queued, idx) => (
               <div
                 key={queued.id}
-                className="flex flex-col gap-1.5 p-2 rounded-lg bg-zinc-900/90 border border-zinc-800 hover:border-zinc-700 transition text-xs text-zinc-200 group"
+                className="flex flex-col gap-1.5 p-2 rounded-xl bg-[#0a0e17] border border-[#202b3f] hover:border-cyan-500/40 transition text-xs text-slate-200 group hub-lift"
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1.5 min-w-0">
@@ -517,11 +517,11 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
                       #{idx + 1}
                     </span>
                     {queued.from && (
-                      <span className="text-[11px] text-purple-400 font-semibold truncate shrink-0">
+                      <span className="text-[11px] text-cyan-400 font-semibold truncate shrink-0 font-mono">
                         @{queued.from}:
                       </span>
                     )}
-                    <span className="text-[11px] text-zinc-300 font-medium truncate" title={queued.prompt}>
+                    <span className="text-[11px] text-slate-200 font-medium truncate" title={queued.prompt}>
                       {queued.prompt}
                     </span>
                   </div>
@@ -534,7 +534,7 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
                         postToHost({ command: 'removeQueued', sessionId, queuedId: queued.id });
                         textareaRef.current?.focus();
                       }}
-                      className="p-1 rounded text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition"
+                      className="p-1 rounded text-slate-400 hover:text-cyan-300 hover:bg-[#162035] transition"
                     >
                       <ArrowUpRight className="w-3 h-3" />
                     </button>
@@ -542,7 +542,7 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
                       type="button"
                       aria-label="Quitar de la cola"
                       onClick={() => postToHost({ command: 'removeQueued', sessionId, queuedId: queued.id })}
-                      className="p-1 rounded text-zinc-400 hover:text-rose-400 hover:bg-zinc-800 transition"
+                      className="p-1 rounded text-slate-400 hover:text-rose-400 hover:bg-[#162035] transition"
                     >
                       <X className="w-3 h-3" />
                     </button>
@@ -551,20 +551,20 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
 
                 {/* Vista de Archivos y Capturas Adjuntas en la Cola */}
                 {queued.attachments && queued.attachments.length > 0 && (
-                  <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-zinc-800/60">
+                  <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-[#202b3f]">
                     {queued.attachments.map((att, aIdx) => {
                       const src = att.thumbnailUri || att.mediaUri;
                       const isImg = att.mediaType === 'image' || src?.startsWith('data:image/');
                       return (
                         <div
                           key={aIdx}
-                          className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-zinc-950 border border-zinc-800 text-[10px] text-zinc-300 max-w-[200px]"
+                          className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#07090e] border border-[#202b3f] text-[10px] text-slate-300 max-w-[200px] font-mono"
                           title={att.file}
                         >
                           {isImg && src ? (
                             <img src={src} alt={att.file} className="w-4 h-4 rounded object-cover shrink-0" />
                           ) : (
-                            <FileText className="w-3 h-3 text-indigo-400 shrink-0" />
+                            <FileText className="w-3 h-3 text-cyan-400 shrink-0" />
                           )}
                           <span className="truncate">{att.file.split(/[\\/]/).pop()}</span>
                         </div>
@@ -579,7 +579,7 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
             <button
               type="button"
               onClick={() => postToHost({ command: 'resumeQueue', sessionId })}
-              className="w-full text-center py-1 text-xs text-indigo-300 hover:text-indigo-200 bg-indigo-950/40 hover:bg-indigo-900/50 rounded-lg border border-indigo-700/50 transition font-medium"
+              className="w-full text-center py-1.5 text-xs text-cyan-300 hover:text-white bg-[#0c1220] hover:bg-[#162035] rounded-xl border border-[#202b3f] hover:border-cyan-500/50 transition font-mono font-medium"
             >
               Reanudar cola ({queue.length} mensaje{queue.length === 1 ? '' : 's'})
             </button>
@@ -588,33 +588,33 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
       )}
 
       {slashItems.length > 0 && (
-        <div className="max-h-48 overflow-y-auto rounded-lg border border-zinc-800 bg-zinc-900/95 p-1 shadow-lg" role="listbox" aria-label="Comandos">
+        <div className="max-h-48 overflow-y-auto rounded-xl border border-[#202b3f] bg-[#0a0e17] p-1.5 shadow-2xl font-mono" role="listbox" aria-label="Comandos">
           {slashItems.map((item) => (
             <button
               key={item.key}
               type="button"
               onClick={item.run}
-              className="flex w-full items-center gap-2 text-left px-2 py-1 text-[11px] text-zinc-300 hover:bg-zinc-800 rounded"
+              className="flex w-full items-center gap-2 text-left px-2.5 py-1.5 text-[11px] text-slate-200 hover:text-white hover:bg-[#162035] rounded-lg transition"
             >
-              <span className="font-mono text-indigo-300 shrink-0">{item.label}</span>
-              <span className="truncate text-zinc-400">{item.hint}</span>
+              <span className="font-mono text-cyan-400 shrink-0 font-semibold">{item.label}</span>
+              <span className="truncate text-slate-400">{item.hint}</span>
             </button>
           ))}
         </div>
       )}
 
       {isSearchingFiles && (mentionMatches.length > 0 || workspaceFiles.length > 0) && (
-        <div className="max-h-40 overflow-y-auto rounded-lg border border-zinc-800 bg-zinc-900/95 p-1 shadow-lg">
+        <div className="max-h-40 overflow-y-auto rounded-xl border border-[#202b3f] bg-[#0a0e17] p-1.5 shadow-2xl font-mono">
           {mentionMatches.map((agent) => (
             <button
               key={agent.id}
               type="button"
               onClick={() => mentionAgent(agent.name)}
-              className="flex w-full items-center gap-1.5 text-left px-2 py-1 text-[11px] text-purple-300 hover:bg-zinc-800 rounded"
+              className="flex w-full items-center gap-1.5 text-left px-2.5 py-1.5 text-[11px] text-violet-300 hover:text-white hover:bg-[#162035] rounded-lg transition"
             >
-              <Bot className="w-3 h-3 shrink-0" />
-              <span className="truncate">@{agent.name}</span>
-              <span className="ml-auto text-zinc-500">agente</span>
+              <Bot className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+              <span className="truncate font-semibold">@{agent.name}</span>
+              <span className="ml-auto text-slate-400 text-[10px]">agente</span>
             </button>
           ))}
           {workspaceFiles.slice(0, 8).map((file) => (
@@ -622,7 +622,7 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
               key={file}
               type="button"
               onClick={() => attachFile(file)}
-              className="block w-full text-left px-2 py-1 text-[11px] font-mono text-zinc-300 hover:bg-zinc-800 rounded truncate"
+              className="block w-full text-left px-2.5 py-1.5 text-[11px] font-mono text-slate-300 hover:text-cyan-300 hover:bg-[#162035] rounded-lg truncate transition"
             >
               {file}
             </button>
@@ -630,47 +630,47 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
         </div>
       )}
 
-      {/* Barra de herramientas compacta del compositor en una sola fila */}
-      <div className="flex items-center justify-between gap-1 px-0.5 relative z-20 text-[11px] overflow-x-auto no-scrollbar py-0.5">
+      {/* Barra del compositor: en columnas estrechas se parte en dos filas en vez de esconder botones tras un scroll oculto. */}
+      <div className="flex flex-wrap items-center justify-between gap-1 px-0.5 relative z-20 text-[11px] py-0.5">
         {/* Grupo de adjuntos y contexto */}
-        <div className="flex items-center gap-1 min-w-0 overflow-x-auto">
+        <div className="flex flex-wrap items-center gap-1 min-w-0">
           <button
             type="button"
             onClick={() => postToHost({ command: 'attachActiveEditor', sessionId })}
-            className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-zinc-800/90 hover:bg-zinc-750 text-zinc-300 hover:text-indigo-300 border border-zinc-700/70 transition shrink-0 font-medium"
+            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#0c1220] hover:bg-[#162035] text-slate-300 hover:text-white border border-[#202b3f] transition shrink-0 font-medium text-[11px]"
             title="Adjuntar selección o archivo actual del editor"
           >
-            <Paperclip className="w-3 h-3 text-indigo-400" />
+            <Paperclip className="w-3 h-3 text-cyan-400" />
             <span>Contexto</span>
           </button>
 
           <button
             type="button"
             onClick={() => postToHost({ command: 'attachFiles', sessionId })}
-            className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-pink-950/40 hover:bg-pink-900/50 text-pink-300 hover:text-pink-200 border border-pink-700/50 transition shrink-0 font-medium"
+            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#0c1220] hover:bg-[#162035] text-slate-300 hover:text-white border border-[#202b3f] transition shrink-0 font-medium text-[11px]"
             title="Adjuntar cualquier archivo del proyecto"
           >
-            <FolderUp className="w-3 h-3 text-pink-400" />
+            <FolderUp className="w-3 h-3 text-cyan-400" />
             <span>Archivos</span>
           </button>
 
           <button
             type="button"
             onClick={() => postToHost({ command: 'attachGit', sessionId })}
-            className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-zinc-800/90 hover:bg-zinc-750 text-zinc-300 hover:text-indigo-300 border border-zinc-700/70 transition shrink-0 font-medium"
+            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#0c1220] hover:bg-[#162035] text-slate-300 hover:text-white border border-[#202b3f] transition shrink-0 font-medium text-[11px]"
             title="Adjuntar el diff de git actual"
           >
-            <GitCompare className="w-3 h-3 text-indigo-400" />
+            <GitCompare className="w-3 h-3 text-cyan-400" />
             <span className="hidden min-[400px]:inline">Diff</span>
           </button>
 
           <button
             type="button"
             onClick={() => postToHost({ command: 'attachProblems', sessionId })}
-            className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-950/30 hover:bg-amber-900/40 text-amber-300 hover:text-amber-200 border border-amber-700/40 transition shrink-0 font-medium"
+            className="flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 hover:text-amber-200 border border-amber-500/30 transition shrink-0 font-medium text-[11px]"
             title="Adjuntar los errores y avisos del editor (Problemas)"
           >
-            <AlertTriangle className="w-3 h-3" />
+            <AlertTriangle className="w-3 h-3 text-amber-400" />
             <span className="hidden min-[440px]:inline">Problemas</span>
           </button>
         </div>
@@ -680,7 +680,7 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
           <button
             type="button"
             onClick={() => runAction('tests')}
-            className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 transition font-medium"
+            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 transition font-semibold text-[11px]"
             title="Ejecutar los tests del proyecto"
           >
             <Play className="w-2.5 h-2.5 fill-current" />
@@ -690,28 +690,28 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
           <button
             type="button"
             onClick={() => postToHost({ command: 'generateCommit', sessionId })}
-            className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/30 transition font-medium"
+            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 transition font-medium text-[11px]"
             title="Generar mensaje Conventional Commits a partir de git diff"
           >
-            <GitCommit className="w-3 h-3 text-blue-400" />
+            <GitCommit className="w-3 h-3 text-cyan-400" />
             <span className="hidden min-[440px]:inline">Commit</span>
           </button>
 
           <button
             type="button"
             onClick={toggleTools}
-            className={`flex items-center gap-1 px-2 py-0.5 rounded-md border font-medium transition cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg border font-semibold text-[11px] transition cursor-pointer ${
               toolsExpanded
-                ? 'bg-purple-950/60 text-purple-200 border-purple-500/50 shadow-xs'
-                : 'bg-zinc-800/90 hover:bg-zinc-750 text-zinc-300 border-zinc-700/70'
+                ? 'bg-violet-950/60 text-violet-200 border-violet-500/50 shadow-sm'
+                : 'bg-[#0c1220] hover:bg-[#162035] text-slate-300 border-[#202b3f]'
             }`}
             aria-expanded={toolsExpanded}
             title={toolsExpanded ? 'Plegar los flujos' : 'Lanzar un equipo de agentes (ODD, SDD, EDD…), plan primero o auditar la rama'}
           >
-            <Workflow className="w-3 h-3 text-purple-400" />
+            <Workflow className="w-3.5 h-3.5 text-violet-400" />
             <span>Flujos</span>
             {activeOptionsCount > 0 && (
-              <span title={`${activeOptionsCount} opción(es) activa(s)`} className="w-4 h-4 rounded-full bg-purple-600 text-white text-[9px] flex items-center justify-center font-bold">
+              <span title={`${activeOptionsCount} opción(es) activa(s)`} className="w-4 h-4 rounded-full bg-violet-600 text-white text-[9px] flex items-center justify-center font-bold">
                 {activeOptionsCount}
               </span>
             )}
@@ -721,10 +721,10 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
           <button
             type="button"
             onClick={() => setIsPaletteOpen(true)}
-            className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-zinc-800/90 hover:bg-zinc-750 text-zinc-300 border border-zinc-700/70 transition font-medium"
+            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#0c1220] hover:bg-[#162035] text-slate-300 border border-[#202b3f] transition font-medium text-[11px]"
             title="Buscar y ejecutar acciones del workspace"
           >
-            <Wrench className="w-3 h-3 text-indigo-400" />
+            <Wrench className="w-3 h-3 text-cyan-400" />
             <span className="hidden min-[480px]:inline">Acciones</span>
           </button>
         </div>
@@ -743,22 +743,22 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
         }, []);
         const hasRequirement = Boolean(prompt.trim());
         return (
-          <div className="rounded-xl bg-zinc-900/95 border border-purple-500/30 shadow-lg text-xs animate-message-fade grid gap-px bg-[linear-gradient(#2a3750,#2a3750)] overflow-hidden min-[1100px]:grid-cols-[minmax(0,2.2fr)_minmax(0,1fr)_minmax(0,1fr)]">
+          <div className="rounded-xl bg-[#0a0e17] border border-[#202b3f] shadow-2xl text-xs animate-message-fade grid gap-px bg-[#202b3f] overflow-hidden min-[1100px]:grid-cols-[minmax(0,2.2fr)_minmax(0,1fr)_minmax(0,1fr)]">
             {/* 1. Equipo */}
-            <section className="bg-zinc-900 p-3 space-y-2.5 min-w-0">
+            <section className="bg-[#0c1220] p-3.5 space-y-2.5 min-w-0">
               <div className="flex items-baseline justify-between gap-2">
-                <h3 className="text-[11px] font-bold uppercase tracking-[0.12em] text-purple-300 flex items-center gap-1.5"><Workflow className="w-3.5 h-3.5" aria-hidden />Lanzar un equipo de agentes</h3>
+                <h3 className="text-[11px] font-bold uppercase tracking-[0.12em] text-cyan-300 flex items-center gap-1.5 font-mono"><Workflow className="w-3.5 h-3.5" aria-hidden />Lanzar un equipo de agentes</h3>
               </div>
-              <p className="text-[11.5px] text-zinc-400 leading-relaxed">
-                Escribe el requerimiento en el cuadro de abajo y lánzalo: cada agente hace su parte y le pasa el resultado al siguiente. Los ves trabajar en <b className="text-zinc-200">Agentes</b>.
+              <p className="text-[11.5px] text-slate-400 leading-relaxed">
+                Escribe el requerimiento en el cuadro de abajo y lánzalo: cada agente hace su parte y le pasa el resultado al siguiente. Los ves trabajar en <b className="text-slate-200">Agentes</b>.
               </p>
               <div className="flex flex-wrap items-center gap-2">
-                <label className="text-[11px] text-zinc-400" htmlFor="flow-template">Metodología</label>
+                <label className="text-[11px] text-slate-400 font-mono" htmlFor="flow-template">Metodología</label>
                 <select
                   id="flow-template"
                   value={template}
                   onChange={(event) => setTemplate(event.target.value)}
-                  className="text-[11.5px] px-2 py-1 rounded-md bg-zinc-800 text-zinc-100 border border-zinc-700 focus:outline-none focus:border-purple-500"
+                  className="text-[11.5px] px-2.5 py-1 rounded-md bg-[#07090e] text-slate-100 border border-[#202b3f] focus:outline-none focus:border-cyan-500 font-mono"
                 >
                   {TEAM_TEMPLATES.map((item) => (
                     <option key={item.id} value={item.id}>{item.label}</option>
@@ -769,25 +769,25 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
               <ol className="flex flex-wrap items-center gap-1.5" aria-label={`Orden de trabajo: ${chosen.description}`}>
                 {steps.map((step, index) => (
                   <li key={step.join('+')} className="flex items-center gap-1.5">
-                    <span className="font-mono text-[10px] text-zinc-500">{index + 1}</span>
+                    <span className="font-mono text-[10px] text-slate-500">{index + 1}</span>
                     <span className="flex items-center gap-1">
                       {step.map((role) => (
-                        <span key={role} className={`px-2 py-0.5 rounded-md border text-[11px] font-medium ${ROLE_COLORS[role] ?? 'border-zinc-700 text-zinc-300'}`}>{PROTOCOL_ROLES[role]?.label ?? role}</span>
+                        <span key={role} className={`px-2 py-0.5 rounded-md border text-[11px] font-medium font-mono ${ROLE_COLORS[role] ?? 'border-[#202b3f] text-slate-300'}`}>{PROTOCOL_ROLES[role]?.label ?? role}</span>
                       ))}
-                      {step.length > 1 && <span className="text-[10px] text-zinc-400">a la vez</span>}
+                      {step.length > 1 && <span className="text-[10px] text-slate-400 font-mono">a la vez</span>}
                     </span>
-                    {index < steps.length - 1 && <span className="text-zinc-500" aria-hidden>→</span>}
+                    {index < steps.length - 1 && <span className="text-slate-500" aria-hidden>→</span>}
                   </li>
                 ))}
               </ol>
               <div className="flex flex-wrap gap-x-4 gap-y-1.5 pt-0.5">
                 <label className="flex items-start gap-1.5 cursor-pointer max-w-[280px]">
-                  <input type="checkbox" checked={isolate} onChange={(event) => setIsolate(event.target.checked)} className="mt-0.5 rounded border-zinc-700 text-purple-600 focus:ring-purple-500" />
-                  <span><span className="font-medium text-zinc-200">Trabajar en una copia aparte</span><span className="block text-[10.5px] text-zinc-400">Rama y carpeta propias (worktree). Al final fusionas o descartas.</span></span>
+                  <input type="checkbox" checked={isolate} onChange={(event) => setIsolate(event.target.checked)} className="mt-0.5 rounded border-[#202b3f] bg-[#07090e] text-cyan-600 focus:ring-cyan-500" />
+                  <span><span className="font-medium text-slate-200">Trabajar en una copia aparte</span><span className="block text-[10.5px] text-slate-400">Rama y carpeta propias (worktree). Al final fusionas o descartas.</span></span>
                 </label>
                 <label className="flex items-start gap-1.5 cursor-pointer max-w-[280px]">
-                  <input type="checkbox" checked={requireApproval} onChange={(event) => setRequireApproval(event.target.checked)} className="mt-0.5 rounded border-zinc-700 text-purple-600 focus:ring-purple-500" />
-                  <span><span className="font-medium text-zinc-200">Aprobar cada traspaso</span><span className="block text-[10.5px] text-zinc-400">El equipo se detiene entre agentes hasta que apruebes.</span></span>
+                  <input type="checkbox" checked={requireApproval} onChange={(event) => setRequireApproval(event.target.checked)} className="mt-0.5 rounded border-[#202b3f] bg-[#07090e] text-cyan-600 focus:ring-cyan-500" />
+                  <span><span className="font-medium text-slate-200">Aprobar cada traspaso</span><span className="block text-[10.5px] text-slate-400">El equipo se detiene entre agentes hasta que apruebes.</span></span>
                 </label>
               </div>
               <div className="flex flex-wrap items-center gap-2 pt-0.5">
@@ -798,38 +798,38 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
                     startPipeline(prompt.trim());
                     setPrompt('');
                   }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-purple-600 hover:bg-purple-500 disabled:opacity-40 disabled:hover:bg-purple-600 text-white font-semibold transition shadow-sm"
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-md bg-cyan-600 hover:bg-cyan-500 disabled:opacity-40 disabled:hover:bg-cyan-600 text-white font-mono font-semibold transition shadow-sm cursor-pointer"
                 >
                   <Workflow className="w-3.5 h-3.5" aria-hidden />
                   Lanzar equipo {shortName}
                 </button>
-                <span className={`text-[11px] ${hasRequirement ? 'text-emerald-300' : 'text-amber-300'}`}>
+                <span className={`text-[11px] font-mono ${hasRequirement ? 'text-emerald-400' : 'text-amber-400'}`}>
                   {hasRequirement ? `Requerimiento listo: «${prompt.trim().slice(0, 60)}${prompt.trim().length > 60 ? '…' : ''}»` : '↓ Primero escribe el requerimiento abajo'}
                 </span>
               </div>
             </section>
 
             {/* 2. Próximo mensaje */}
-            <section className="bg-zinc-900 p-3 space-y-2 min-w-0">
-              <h3 className="text-[11px] font-bold uppercase tracking-[0.12em] text-zinc-300">Próximo mensaje</h3>
-              <p className="text-[11.5px] text-zinc-400 leading-relaxed">Se aplica al botón <b className="text-zinc-200">Enviar</b> de este chat, sin equipo.</p>
+            <section className="bg-[#0c1220] p-3.5 space-y-2 min-w-0">
+              <h3 className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-300 font-mono">Próximo mensaje</h3>
+              <p className="text-[11.5px] text-slate-400 leading-relaxed">Se aplica al botón <b className="text-slate-200">Enviar</b> de este chat, sin equipo.</p>
               <label className="flex items-start gap-1.5 cursor-pointer">
-                <input type="checkbox" checked={planFirst} onChange={(event) => setPlanFirst(event.target.checked)} className="mt-0.5 rounded border-zinc-700 text-purple-600 focus:ring-purple-500" />
-                <span><span className="font-medium text-zinc-200">Plan primero</span><span className="block text-[10.5px] text-zinc-400">El agente propone un plan sin tocar archivos; luego decides si lo ejecuta.</span></span>
+                <input type="checkbox" checked={planFirst} onChange={(event) => setPlanFirst(event.target.checked)} className="mt-0.5 rounded border-[#202b3f] bg-[#07090e] text-cyan-600 focus:ring-cyan-500" />
+                <span><span className="font-medium text-slate-200">Plan primero</span><span className="block text-[10.5px] text-slate-400">El agente propone un plan sin tocar archivos; luego decides si lo ejecuta.</span></span>
               </label>
             </section>
 
             {/* 3. Revisión */}
-            <section className="bg-zinc-900 p-3 space-y-2 min-w-0">
-              <h3 className="text-[11px] font-bold uppercase tracking-[0.12em] text-zinc-300">Revisar la rama</h3>
-              <p className="text-[11.5px] text-zinc-400 leading-relaxed">Un agente revisa todo lo que cambió en esta rama frente a <code className="font-mono text-zinc-200">main</code> (errores, riesgos, secretos).</p>
+            <section className="bg-[#0c1220] p-3.5 space-y-2 min-w-0">
+              <h3 className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-300 font-mono">Revisar la rama</h3>
+              <p className="text-[11.5px] text-slate-400 leading-relaxed">Un agente revisa todo lo que cambió en esta rama frente a <code className="font-mono text-cyan-300">main</code> (errores, riesgos, secretos).</p>
               <button
                 type="button"
                 onClick={() => postToHost({ command: 'auditBranch', sessionId })}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-teal-500/10 hover:bg-teal-500/20 text-teal-300 border border-teal-500/30 transition font-medium"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 transition font-mono font-medium cursor-pointer"
                 title="git diff main...HEAD"
               >
-                <GitBranch className="w-3.5 h-3.5 text-teal-400" aria-hidden />
+                <GitBranch className="w-3.5 h-3.5 text-cyan-400" aria-hidden />
                 Auditar rama vs main
               </button>
             </section>
@@ -860,8 +860,8 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
             }
           });
         }}
-        className={`hub-glow relative rounded-xl border bg-zinc-900/90 focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500/30 transition shadow-sm overflow-hidden ${
-          isDragging ? 'border-dashed border-indigo-400 bg-indigo-950/30 ring-2 ring-indigo-500/40' : 'border-zinc-700/80'
+        className={`hub-glow relative rounded-2xl border bg-[#07090e] focus-within:border-cyan-500/80 focus-within:ring-2 focus-within:ring-cyan-500/25 transition shadow-inner overflow-hidden ${
+          isDragging ? 'border-dashed border-cyan-400 bg-cyan-950/30 ring-2 ring-cyan-500/40' : 'border-[#202b3f]'
         }`}
       >
         <textarea
@@ -910,20 +910,20 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
               setTimeout(() => setPasteHint(false), 6000);
             }
           }}
-          className="w-full bg-transparent text-zinc-100 text-[13px] p-3 focus:outline-none resize-none placeholder-zinc-400 leading-relaxed font-sans overflow-y-auto"
+          className="w-full bg-transparent text-slate-100 text-[13px] p-3 focus:outline-none resize-none placeholder-slate-500 leading-relaxed font-sans overflow-y-auto"
         />
 
-        <div className="flex items-center justify-between px-3 pb-2 pt-0.5 text-[11px] text-zinc-400">
+        <div className="flex items-center justify-between px-3 pb-2.5 pt-1 border-t border-[#202b3f]/60 text-[11px] text-slate-400">
           <span>
-            <kbd className="px-1 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono text-[11px] text-zinc-400">{ctrlEnter ? 'Ctrl⏎ Enviar' : '⏎ Enviar'}</kbd>
+            <kbd className="px-1.5 py-0.5 rounded-md bg-[#0c1220] border border-[#202b3f] font-mono text-[10px] text-slate-300">{ctrlEnter ? 'Ctrl⏎ Enviar' : '⏎ Enviar'}</kbd>
             <span className="mx-1">·</span>
-            <kbd className="px-1 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono text-[11px] text-zinc-400">{ctrlEnter ? '⏎ Salto' : '⇧⏎ Salto'}</kbd>
-            <button type="button" onClick={toggleCtrlEnter} className="ml-1 text-[10px] text-zinc-500 hover:text-zinc-300 underline decoration-dotted" title="Cambiar la tecla que envía el mensaje">cambiar</button>
+            <kbd className="px-1.5 py-0.5 rounded-md bg-[#0c1220] border border-[#202b3f] font-mono text-[10px] text-slate-300">{ctrlEnter ? '⏎ Salto' : '⇧⏎ Salto'}</kbd>
+            <button type="button" onClick={toggleCtrlEnter} className="ml-1 text-[10px] text-slate-500 hover:text-slate-300 underline decoration-dotted" title="Cambiar la tecla que envía el mensaje">cambiar</button>
             {pasteHint && (
-              <span className="ml-2 text-indigo-300" role="status">Texto largo adjuntado como archivo</span>
+              <span className="ml-2 text-cyan-300 font-mono text-[10.5px]" role="status">Texto largo adjuntado como archivo</span>
             )}
             {dictationHint && (
-              <span className="ml-2 text-indigo-300" role="status">Dictado de Windows activo: habla ahora</span>
+              <span className="ml-2 text-cyan-300 font-mono text-[10.5px]" role="status">Dictado de Windows activo: habla ahora</span>
             )}
             {prompt.includes('\n') && <span className="ml-2 font-mono">{prompt.split('\n').length} líneas</span>}
             {estimatedTokens > 0 && (
@@ -938,7 +938,7 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
               <button
                 type="button"
                 onClick={() => { setPrompt(''); textareaRef.current?.focus(); }}
-                className="flex items-center px-1.5 py-1 rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-red-300 border border-zinc-700/60 transition cursor-pointer"
+                className="flex items-center px-1.5 py-1 rounded-lg bg-[#0c1220] hover:bg-[#162035] text-slate-400 hover:text-red-400 border border-[#202b3f] transition cursor-pointer"
                 title="Borrar el borrador"
                 aria-label="Borrar el borrador"
               >
@@ -956,28 +956,28 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
                   setPrompt('/loop ' + prompt);
                 }
               }}
-              className={`flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium border transition cursor-pointer ${
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium border transition cursor-pointer ${
                 prompt.startsWith('/loop')
-                  ? 'bg-purple-600/30 text-purple-300 border-purple-500/60 shadow-xs'
-                  : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border-zinc-700/60'
+                  ? 'bg-violet-600/30 text-violet-300 border-violet-500/60 shadow-xs'
+                  : 'bg-[#0c1220] hover:bg-[#162035] text-slate-300 border-[#202b3f]'
               }`}
               title="Alternar Modo Loop continuo (/loop)"
             >
-              <Repeat className="w-3.5 h-3.5 text-purple-400" />
+              <Repeat className="w-3.5 h-3.5 text-violet-400" />
               <span className="hidden min-[450px]:inline">Loop</span>
             </button>
 
             <button
               type="button"
               onClick={toggleVoiceDictation}
-              className={`flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium border transition cursor-pointer ${
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium border transition cursor-pointer ${
                 isListening
                   ? 'bg-red-500/20 text-red-300 border-red-500/50 animate-pulse'
-                  : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border-zinc-700/60'
+                  : 'bg-[#0c1220] hover:bg-[#162035] text-slate-300 border-[#202b3f]'
               }`}
               title={isListening ? 'Detener dictado por voz' : 'Dictar mensaje por voz'}
             >
-              {isListening ? <MicOff className="w-3.5 h-3.5 text-red-400" /> : <Mic className="w-3.5 h-3.5 text-indigo-400" />}
+              {isListening ? <MicOff className="w-3.5 h-3.5 text-red-400" /> : <Mic className="w-3.5 h-3.5 text-cyan-400" />}
               <span className="hidden min-[400px]:inline">{isListening ? 'Escuchando...' : 'Dictar'}</span>
             </button>
 
@@ -985,7 +985,7 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
               <button
                 type="button"
                 onClick={() => postToHost({ command: 'stopTurn', sessionId })}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-red-600 hover:bg-red-500 text-white font-medium transition shadow-sm"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-semibold transition shadow-md shadow-rose-950/40"
                 title="Detener generación"
               >
                 <Square className="w-3 h-3 fill-current" />
@@ -996,7 +996,7 @@ export const Composer: React.FC<Props> = ({ attachments, workspaceFiles, compose
               type="submit"
               disabled={!prompt.trim()}
               {...magnet}
-              className="hud-magnet flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-indigo-600 hover:bg-indigo-500 disabled:opacity-30 disabled:hover:bg-indigo-600 text-white font-medium transition shadow-sm"
+              className="hud-magnet flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 disabled:opacity-30 disabled:from-slate-700 disabled:to-slate-800 disabled:text-slate-400 text-slate-950 font-bold transition shadow-md shadow-cyan-950/40 cursor-pointer"
               title={isRunning ? 'Dejar en cola; se envía al terminar el turno' : 'Enviar prompt'}
             >
               <span className="text-[11px]">{isRunning ? 'En cola' : 'Enviar'}</span>

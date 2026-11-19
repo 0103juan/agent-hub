@@ -6,7 +6,7 @@ import * as vscode from 'vscode';
 import { findSecrets } from '../../analysis/secret-scanner';
 import { auditEnvSync } from '../../analysis/code-audits';
 import { findDestructiveStatements, findQueryIssues } from '../../analysis/sql-review';
-import { currentEditor, workspaceDir, setCustomWorkspaceDir, getRecentWorkspaces, getGitStatusFiles, getProjectTree, getGitBranch, getGitBranchSummary } from '../workspace';
+import { currentEditor, workspaceDir, setCustomWorkspaceDir, getRecentWorkspaces, getGitStatusFiles, getProjectTree, getGitBranch, getGitBranchSummary, isSystemOrAppDir } from '../workspace';
 import { rollbackCheckpoint } from '../git-checkpoint';
 import { listDocuments, readDocument, saveDocument } from '../documents';
 import { HubContext } from '../hub-context';
@@ -135,15 +135,16 @@ export function editorHandlers(hub?: HubContext): HandlerMap<
   | 'saveScratchpad'
 > {
   const resolveTargetDir = (dir?: string, sessionId?: string): string => {
-    if (dir && fs.existsSync(dir)) return dir;
+    if (dir && !isSystemOrAppDir(dir) && fs.existsSync(dir)) return dir;
     if (sessionId) {
       const sessionDir = hub?.sessions?.get(sessionId)?.projectPath;
-      if (sessionDir && fs.existsSync(sessionDir)) return sessionDir;
+      if (sessionDir && !isSystemOrAppDir(sessionDir) && fs.existsSync(sessionDir)) return sessionDir;
     }
     const activeDir = hub?.sessions?.getActive()?.projectPath;
-    if (activeDir && fs.existsSync(activeDir)) return activeDir;
-    return workspaceDir() ?? process.cwd();
+    if (activeDir && !isSystemOrAppDir(activeDir) && fs.existsSync(activeDir)) return activeDir;
+    return workspaceDir() ?? os.homedir();
   };
+  const resolveCurrentRoot = () => resolveTargetDir();
 
   const emitGitBranches = (dir?: string) => {
     const root = resolveTargetDir(dir);
@@ -189,7 +190,7 @@ export function editorHandlers(hub?: HubContext): HandlerMap<
   };
 
   const emitWorkspaceOverview = () => {
-    const root = workspaceDir() ?? process.cwd();
+    const root = resolveCurrentRoot();
     const branch = getGitBranch(root);
     const isGit = Boolean(branch);
     hub?.post({
@@ -205,7 +206,7 @@ export function editorHandlers(hub?: HubContext): HandlerMap<
   };
 
   // Documentos puede abrirse sobre la carpeta de una conversación y no la global.
-  const docRoot = (root?: string) => (root && fs.existsSync(root) && fs.statSync(root).isDirectory() ? root : workspaceDir() ?? process.cwd());
+  const docRoot = (root?: string) => (root && !isSystemOrAppDir(root) && fs.existsSync(root) && fs.statSync(root).isDirectory() ? root : resolveCurrentRoot());
 
   return {
     setWorkspaceDir: async ({ dir }: { dir: string }) => {

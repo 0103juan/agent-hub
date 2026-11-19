@@ -1,0 +1,311 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="100%" height="100%" style="background:#07090e; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <defs>
+    <linearGradient id="hud-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0a0e17" />
+      <stop offset="100%" stop-color="#05070a" />
+    </linearGradient>
+    <linearGradient id="cyan-glow" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#06b6d4" />
+      <stop offset="100%" stop-color="#3b82f6" />
+    </linearGradient>
+    <linearGradient id="emerald-glow" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#06b6d4" />
+    </linearGradient>
+    <linearGradient id="purple-glow" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#8b5cf6" />
+      <stop offset="100%" stop-color="#ec4899" />
+    </linearGradient>
+    <linearGradient id="amber-glow" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#ef4444" />
+    </linearGradient>
+    <filter id="neon-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#162035" stroke-width="0.75" stroke-opacity="0.6" />
+      <circle cx="32" cy="32" r="1" fill="#06b6d4" fill-opacity="0.3" />
+    </pattern>
+  </defs>
+
+  <!-- Background Grid & Vignette -->
+  <rect width="1280" height="720" fill="url(#hud-bg)" />
+  <rect width="1280" height="720" fill="url(#grid)" />
+
+  <!-- Top HUD Header Bar -->
+  <rect x="40" y="24" width="1200" height="60" rx="12" fill="#0a0e17" stroke="#202b3f" stroke-width="1.5" />
+  <circle cx="70" cy="54" r="14" fill="#06b6d4" fill-opacity="0.15" stroke="#06b6d4" stroke-width="1.5" />
+  <path d="M64 54 L68 58 L76 49" fill="none" stroke="#06b6d4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  <text x="96" y="48" fill="#f8fafc" font-size="16" font-weight="800" letter-spacing="0.5">AGENTHUB // NEURAL MEMORY &amp; MCP TOOL MATRIX</text>
+  <text x="96" y="66" fill="#94a3b8" font-size="11" font-mono="true">TACTICAL HUD ARCHITECTURE SPEC • SPEC CARD #31 • 0 ZINC RESIDUE</text>
+
+  <rect x="1010" y="38" width="105" height="32" rx="6" fill="#07090e" stroke="#202b3f" />
+  <circle cx="1025" cy="54" r="4" fill="#10b981" filter="url(#neon-glow)" />
+  <text x="1037" y="58" fill="#10b981" font-size="11" font-weight="700" font-mono="true">ONLINE HUD</text>
+
+  <rect x="1125" y="38" width="95" height="32" rx="6" fill="#06b6d4" fill-opacity="0.15" stroke="#06b6d4" stroke-width="1.2" />
+  <text x="1144" y="58" fill="#06b6d4" font-size="11" font-weight="800" font-mono="true">v2.4 TAC</text>
+
+  <!-- 4 Main Architectural Hub Columns -->
+
+  <!-- Card 1: Memory Engine -->
+  <g transform="translate(40, 104)">
+    <rect width="285" height="580" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.5" />
+    <rect x="0" y="0" width="285" height="48" rx="14" fill="#0e131f" />
+    <path d="M 0 48 L 285 48" stroke="#202b3f" stroke-width="1" />
+    <circle cx="24" cy="24" r="6" fill="#8b5cf6" filter="url(#neon-glow)" />
+    <text x="40" y="28" fill="#f8fafc" font-size="13" font-weight="700">01. KNOWLEDGE MEMORY</text>
+    <text x="210" y="28" fill="#8b5cf6" font-size="10" font-mono="true">.agent-hub</text>
+
+    <!-- Tail Injection Gauge -->
+    <rect x="16" y="64" width="253" height="106" rx="10" fill="#07090e" stroke="#202b3f" />
+    <text x="28" y="86" fill="#94a3b8" font-size="11" font-weight="700">TAIL INJECTION WINDOW</text>
+    <text x="28" y="102" fill="#64748b" font-size="10">Active context window: 2,000 chars</text>
+    <rect x="28" y="114" width="229" height="8" rx="4" fill="#202b3f" />
+    <rect x="28" y="114" width="168" height="8" rx="4" fill="url(#cyan-glow)" />
+    <text x="28" y="142" fill="#10b981" font-size="10" font-mono="true">● 1,840 / 2,000 INJECTED</text>
+    <text x="180" y="142" fill="#64748b" font-size="10" font-mono="true">92% FIT</text>
+
+    <!-- Signal-Lesson-Evidence Triplet -->
+    <rect x="16" y="184" width="253" height="160" rx="10" fill="#07090e" stroke="#202b3f" />
+    <rect x="24" y="196" width="60" height="18" rx="4" fill="#f59e0b" fill-opacity="0.15" stroke="#f59e0b" stroke-opacity="0.4" />
+    <text x="32" y="209" fill="#f59e0b" font-size="9" font-weight="800" font-mono="true">SEÑAL</text>
+    <text x="24" y="232" fill="#cbd5e1" font-size="11">Al compilar binarios con electron</text>
+
+    <rect x="24" y="250" width="70" height="18" rx="4" fill="#06b6d4" fill-opacity="0.15" stroke="#06b6d4" stroke-opacity="0.4" />
+    <text x="32" y="263" fill="#06b6d4" font-size="9" font-weight="800" font-mono="true">LECCIÓN</text>
+    <text x="24" y="286" fill="#cbd5e1" font-size="11">require.main === module da true en runtime</text>
+
+    <rect x="24" y="304" width="80" height="18" rx="4" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-opacity="0.4" />
+    <text x="32" y="317" fill="#10b981" font-size="9" font-weight="800" font-mono="true">EVIDENCIA</text>
+    <text x="24" y="338" fill="#94a3b8" font-size="10" font-mono="true">src/server/standalone.ts</text>
+
+    <!-- Action Bar -->
+    <rect x="16" y="356" width="253" height="204" rx="10" fill="#07090e" stroke="#202b3f" />
+    <text x="28" y="378" fill="#94a3b8" font-size="11" font-weight="700">EXPERIENCE ACTIONS</text>
+    <g transform="translate(28, 394)">
+      <rect width="229" height="30" rx="6" fill="#162035" stroke="#202b3f" />
+      <text x="30" y="19" fill="#f8fafc" font-size="11">Podar lecciones antiguas</text>
+      <circle cx="16" cy="15" r="4" fill="#f59e0b" />
+    </g>
+    <g transform="translate(28, 434)">
+      <rect width="229" height="30" rx="6" fill="#162035" stroke="#202b3f" />
+      <text x="30" y="19" fill="#f8fafc" font-size="11">Abrir en editor de Markdown</text>
+      <circle cx="16" cy="15" r="4" fill="#06b6d4" />
+    </g>
+    <g transform="translate(28, 474)">
+      <rect width="229" height="30" rx="6" fill="#162035" stroke="#202b3f" />
+      <text x="30" y="19" fill="#f8fafc" font-size="11">Insertar plantilla canónica</text>
+      <circle cx="16" cy="15" r="4" fill="#8b5cf6" />
+    </g>
+    <g transform="translate(28, 514)">
+      <rect width="229" height="34" rx="6" fill="url(#cyan-glow)" />
+      <text x="114" y="21" fill="#ffffff" font-size="11" font-weight="800" text-anchor="middle">GUARDAR CAMBIOS (Ctrl+S)</text>
+    </g>
+  </g>
+
+  <!-- Card 2: MCP Tool Matrix -->
+  <g transform="translate(345, 104)">
+    <rect width="285" height="580" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.5" />
+    <rect x="0" y="0" width="285" height="48" rx="14" fill="#0e131f" />
+    <path d="M 0 48 L 285 48" stroke="#202b3f" stroke-width="1" />
+    <circle cx="24" cy="24" r="6" fill="#06b6d4" filter="url(#neon-glow)" />
+    <text x="40" y="28" fill="#f8fafc" font-size="13" font-weight="700">02. MCP TOOL MATRIX</text>
+    <text x="210" y="28" fill="#06b6d4" font-size="10" font-mono="true">8 SERVERS</text>
+
+    <!-- Sync status pill -->
+    <rect x="16" y="64" width="253" height="74" rx="10" fill="#07090e" stroke="#202b3f" />
+    <text x="28" y="86" fill="#94a3b8" font-size="11" font-weight="700">CROSS-PLATFORM SYNC</text>
+    <rect x="28" y="98" width="105" height="24" rx="6" fill="#f97316" fill-opacity="0.15" stroke="#f97316" stroke-opacity="0.4" />
+    <text x="40" y="114" fill="#f97316" font-size="10" font-weight="700" font-mono="true">Claude: 8 Sync</text>
+    <rect x="145" y="98" width="112" height="24" rx="6" fill="#06b6d4" fill-opacity="0.15" stroke="#06b6d4" stroke-opacity="0.4" />
+    <text x="157" y="114" fill="#06b6d4" font-size="10" font-weight="700" font-mono="true">Antigravity: 8</text>
+
+    <!-- MCP Server Items -->
+    <!-- Item 1: Filesystem -->
+    <g transform="translate(16, 150)">
+      <rect width="253" height="92" rx="10" fill="#07090e" stroke="#202b3f" />
+      <circle cx="20" cy="22" r="4" fill="#10b981" />
+      <text x="32" y="25" fill="#f8fafc" font-size="12" font-weight="700" font-mono="true">filesystem</text>
+      <rect x="180" y="14" width="58" height="18" rx="4" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-opacity="0.3" />
+      <text x="190" y="26" fill="#10b981" font-size="9" font-weight="700">ACTIVO</text>
+      <text x="20" y="46" fill="#64748b" font-size="10" font-mono="true">stdio • node server.js</text>
+      <rect x="20" y="58" width="62" height="18" rx="4" fill="#162035" stroke="#202b3f" />
+      <text x="26" y="70" fill="#06b6d4" font-size="9" font-mono="true">read_file</text>
+      <rect x="88" y="58" width="64" height="18" rx="4" fill="#162035" stroke="#202b3f" />
+      <text x="94" y="70" fill="#06b6d4" font-size="9" font-mono="true">write_file</text>
+      <rect x="158" y="58" width="52" height="18" rx="4" fill="#162035" stroke="#202b3f" />
+      <text x="164" y="70" fill="#06b6d4" font-size="9" font-mono="true">+12 más</text>
+    </g>
+
+    <!-- Item 2: Playwright -->
+    <g transform="translate(16, 252)">
+      <rect width="253" height="92" rx="10" fill="#07090e" stroke="#202b3f" />
+      <circle cx="20" cy="22" r="4" fill="#10b981" />
+      <text x="32" y="25" fill="#f8fafc" font-size="12" font-weight="700" font-mono="true">playwright</text>
+      <rect x="180" y="14" width="58" height="18" rx="4" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-opacity="0.3" />
+      <text x="190" y="26" fill="#10b981" font-size="9" font-weight="700">ACTIVO</text>
+      <text x="20" y="46" fill="#64748b" font-size="10" font-mono="true">stdio • npx @modelcontextprotocol</text>
+      <rect x="20" y="58" width="70" height="18" rx="4" fill="#162035" stroke="#202b3f" />
+      <text x="26" y="70" fill="#06b6d4" font-size="9" font-mono="true">navigate</text>
+      <rect x="96" y="58" width="70" height="18" rx="4" fill="#162035" stroke="#202b3f" />
+      <text x="102" y="70" fill="#06b6d4" font-size="9" font-mono="true">screenshot</text>
+      <rect x="172" y="58" width="52" height="18" rx="4" fill="#162035" stroke="#202b3f" />
+      <text x="178" y="70" fill="#06b6d4" font-size="9" font-mono="true">+18 más</text>
+    </g>
+
+    <!-- Item 3: BigQuery -->
+    <g transform="translate(16, 354)">
+      <rect width="253" height="92" rx="10" fill="#07090e" stroke="#202b3f" />
+      <circle cx="20" cy="22" r="4" fill="#10b981" />
+      <text x="32" y="25" fill="#f8fafc" font-size="12" font-weight="700" font-mono="true">bigquery</text>
+      <rect x="180" y="14" width="58" height="18" rx="4" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-opacity="0.3" />
+      <text x="190" y="26" fill="#10b981" font-size="9" font-weight="700">ACTIVO</text>
+      <text x="20" y="46" fill="#64748b" font-size="10" font-mono="true">cloud • GCP Enterprise</text>
+      <rect x="20" y="58" width="76" height="18" rx="4" fill="#162035" stroke="#202b3f" />
+      <text x="26" y="70" fill="#06b6d4" font-size="9" font-mono="true">execute_sql</text>
+      <rect x="102" y="58" width="60" height="18" rx="4" fill="#162035" stroke="#202b3f" />
+      <text x="108" y="70" fill="#06b6d4" font-size="9" font-mono="true">forecast</text>
+      <rect x="168" y="58" width="52" height="18" rx="4" fill="#162035" stroke="#202b3f" />
+      <text x="174" y="70" fill="#06b6d4" font-size="9" font-mono="true">+7 más</text>
+    </g>
+
+    <!-- Health check bar -->
+    <g transform="translate(16, 458)">
+      <rect width="253" height="102" rx="10" fill="#07090e" stroke="#202b3f" />
+      <text x="20" y="25" fill="#94a3b8" font-size="11" font-weight="700">HEALTH PROBE STATUS</text>
+      <rect x="20" y="38" width="213" height="26" rx="6" fill="#10b981" fill-opacity="0.1" stroke="#10b981" stroke-opacity="0.3" />
+      <text x="32" y="54" fill="#10b981" font-size="10" font-mono="true">✔ 8/8 Servidores respondiendo OK</text>
+      <rect x="20" y="70" width="213" height="24" rx="6" fill="#162035" stroke="#202b3f" />
+      <text x="75" y="86" fill="#cbd5e1" font-size="10" font-weight="600">Re-ejecutar diagnóstico</text>
+    </g>
+  </g>
+
+  <!-- Card 3: Split Workspace & Git Isolation -->
+  <g transform="translate(650, 104)">
+    <rect width="285" height="580" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.5" />
+    <rect x="0" y="0" width="285" height="48" rx="14" fill="#0e131f" />
+    <path d="M 0 48 L 285 48" stroke="#202b3f" stroke-width="1" />
+    <circle cx="24" cy="24" r="6" fill="#10b981" filter="url(#neon-glow)" />
+    <text x="40" y="28" fill="#f8fafc" font-size="13" font-weight="700">03. SPLIT WORKSPACE</text>
+    <text x="205" y="28" fill="#10b981" font-size="10" font-mono="true">MULTI-COL</text>
+
+    <!-- Workspace Picker HUD -->
+    <rect x="16" y="64" width="253" height="114" rx="10" fill="#07090e" stroke="#202b3f" />
+    <text x="28" y="86" fill="#94a3b8" font-size="11" font-weight="700">CWD RESOLUTION GUARD</text>
+    <rect x="28" y="98" width="229" height="26" rx="6" fill="#162035" stroke="#202b3f" />
+    <circle cx="40" cy="111" r="3.5" fill="#06b6d4" />
+    <text x="50" y="115" fill="#f8fafc" font-size="10" font-mono="true">C:/.../portafolio/agent-hub</text>
+    <rect x="28" y="132" width="229" height="34" rx="6" fill="#10b981" fill-opacity="0.1" stroke="#10b981" stroke-opacity="0.3" />
+    <text x="36" y="146" fill="#10b981" font-size="10" font-weight="700">SYSTEM32 SHIELD: ACTIVE</text>
+    <text x="36" y="158" fill="#64748b" font-size="9">CWD is resolved per session / agent task</text>
+
+    <!-- Git Branch Controller -->
+    <rect x="16" y="190" width="253" height="170" rx="10" fill="#07090e" stroke="#202b3f" />
+    <text x="28" y="212" fill="#94a3b8" font-size="11" font-weight="700">ISOLATED BRANCH DECK</text>
+    <g transform="translate(28, 224)">
+      <rect width="229" height="30" rx="6" fill="#10b981" fill-opacity="0.1" stroke="#10b981" stroke-opacity="0.3" />
+      <circle cx="16" cy="15" r="4" fill="#10b981" />
+      <text x="30" y="19" fill="#10b981" font-size="11" font-mono="true">main (activa)</text>
+      <text x="175" y="19" fill="#10b981" font-size="9" font-weight="700">● 0 DIFF</text>
+    </g>
+    <g transform="translate(28, 262)">
+      <rect width="229" height="30" rx="6" fill="#162035" stroke="#202b3f" />
+      <circle cx="16" cy="15" r="4" fill="#f59e0b" />
+      <text x="30" y="19" fill="#cbd5e1" font-size="11" font-mono="true">feat/squad-canvas</text>
+      <text x="180" y="19" fill="#f59e0b" font-size="9" font-mono="true">+4 files</text>
+    </g>
+    <g transform="translate(28, 300)">
+      <rect width="229" height="30" rx="6" fill="#162035" stroke="#202b3f" />
+      <circle cx="16" cy="15" r="4" fill="#8b5cf6" />
+      <text x="30" y="19" fill="#cbd5e1" font-size="11" font-mono="true">squad/design-v2</text>
+      <text x="180" y="19" fill="#8b5cf6" font-size="9" font-mono="true">wt:share</text>
+    </g>
+
+    <!-- Multi-Column Layout Switcher -->
+    <g transform="translate(16, 372)">
+      <rect width="253" height="188" rx="10" fill="#07090e" stroke="#202b3f" />
+      <text x="20" y="25" fill="#94a3b8" font-size="11" font-weight="700">MULTI-AGENT MATRIX SPLIT</text>
+      <g transform="translate(20, 38)">
+        <rect width="66" height="36" rx="6" fill="url(#cyan-glow)" />
+        <text x="33" y="22" fill="#fff" font-size="11" font-weight="700" text-anchor="middle">COLS</text>
+        <rect x="74" y="0" width="66" height="36" rx="6" fill="#162035" stroke="#202b3f" />
+        <text x="107" y="22" fill="#94a3b8" font-size="11" font-weight="700" text-anchor="middle">ROWS</text>
+        <rect x="148" y="0" width="66" height="36" rx="6" fill="#162035" stroke="#202b3f" />
+        <text x="181" y="22" fill="#94a3b8" font-size="11" font-weight="700" text-anchor="middle">GRID</text>
+      </g>
+      <rect x="20" y="86" width="214" height="88" rx="6" fill="#162035" stroke="#202b3f" />
+      <text x="32" y="108" fill="#cbd5e1" font-size="10" font-weight="700">CONJUNTOS PRE-GUARDADOS</text>
+      <text x="32" y="126" fill="#06b6d4" font-size="10" font-mono="true">● Squad Tríada (Orch+Code+Des)</text>
+      <text x="32" y="144" fill="#94a3b8" font-size="10" font-mono="true">● Par Verificador (Coder+Tester)</text>
+      <text x="32" y="162" fill="#94a3b8" font-size="10" font-mono="true">● Revisión de PR (Lead+Auditor)</text>
+    </g>
+  </g>
+
+  <!-- Card 4: Markdown Stream Engine -->
+  <g transform="translate(955, 104)">
+    <rect width="285" height="580" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.5" />
+    <rect x="0" y="0" width="285" height="48" rx="14" fill="#0e131f" />
+    <path d="M 0 48 L 285 48" stroke="#202b3f" stroke-width="1" />
+    <circle cx="24" cy="24" r="6" fill="#f59e0b" filter="url(#neon-glow)" />
+    <text x="40" y="28" fill="#f8fafc" font-size="13" font-weight="700">04. MARKDOWN &amp; CODE</text>
+    <text x="210" y="28" fill="#f59e0b" font-size="10" font-mono="true">PRO RENDER</text>
+
+    <!-- Code Header Deck -->
+    <rect x="16" y="64" width="253" height="136" rx="10" fill="#07090e" stroke="#202b3f" />
+    <rect x="16" y="64" width="253" height="28" rx="10" fill="#0e131f" />
+    <path d="M 16 92 L 269 92" stroke="#202b3f" stroke-width="1" />
+    <text x="28" y="82" fill="#06b6d4" font-size="10" font-mono="true" font-weight="800">TYPESCRIPT</text>
+    <text x="100" y="82" fill="#64748b" font-size="10" font-mono="true">· 42 líneas</text>
+    <circle cx="210" cy="78" r="4" fill="#10b981" />
+    <circle cx="230" cy="78" r="4" fill="#06b6d4" />
+    <circle cx="250" cy="78" r="4" fill="#f59e0b" />
+
+    <text x="28" y="112" fill="#06b6d4" font-size="10" font-mono="true">1  export const</text>
+    <text x="110" y="112" fill="#f8fafc" font-size="10" font-mono="true">AgentMatrix</text>
+    <text x="28" y="130" fill="#64748b" font-size="10" font-mono="true">2    workspace: string;</text>
+    <text x="28" y="148" fill="#64748b" font-size="10" font-mono="true">3    activeCwd: string;</text>
+    <text x="28" y="166" fill="#10b981" font-size="10" font-mono="true">4    guardSystem32: true;</text>
+    <text x="28" y="184" fill="#06b6d4" font-size="10" font-mono="true">5  };</text>
+
+    <!-- Visual Interactive Preview -->
+    <rect x="16" y="212" width="253" height="150" rx="10" fill="#07090e" stroke="#202b3f" />
+    <text x="28" y="234" fill="#94a3b8" font-size="11" font-weight="700">DIAGRAM &amp; HTML PREVIEW</text>
+    <g transform="translate(28, 248)">
+      <rect width="229" height="100" rx="6" fill="#0a0e17" stroke="#202b3f" />
+      <circle cx="114" cy="40" r="16" fill="#8b5cf6" fill-opacity="0.2" stroke="#8b5cf6" stroke-width="1.5" />
+      <text x="114" y="44" fill="#f8fafc" font-size="10" font-weight="700" text-anchor="middle">MERMAID</text>
+      <circle cx="60" cy="74" r="12" fill="#06b6d4" fill-opacity="0.2" stroke="#06b6d4" stroke-width="1.5" />
+      <text x="60" y="78" fill="#06b6d4" font-size="9" font-weight="700" text-anchor="middle">SVG</text>
+      <circle cx="168" cy="74" r="12" fill="#10b981" fill-opacity="0.2" stroke="#10b981" stroke-width="1.5" />
+      <text x="168" y="78" fill="#10b981" font-size="9" font-weight="700" text-anchor="middle">HTML</text>
+      <path d="M102 48 L70 66 M126 48 L158 66" stroke="#202b3f" stroke-width="1.5" />
+    </g>
+
+    <!-- Spotlight Launcher Bridge -->
+    <rect x="16" y="374" width="253" height="186" rx="10" fill="#07090e" stroke="#202b3f" />
+    <text x="28" y="396" fill="#94a3b8" font-size="11" font-weight="700">SPOTLIGHT BAR (ALT + SPACE)</text>
+    <rect x="28" y="408" width="229" height="34" rx="8" fill="#162035" stroke="#202b3f" />
+    <circle cx="44" cy="425" r="5" fill="#06b6d4" />
+    <text x="56" y="429" fill="#cbd5e1" font-size="11">/goal mejorar agent-hub...</text>
+
+    <!-- Spotlight Mini Chips -->
+    <g transform="translate(28, 452)">
+      <rect width="110" height="24" rx="5" fill="#8b5cf6" fill-opacity="0.15" stroke="#8b5cf6" stroke-opacity="0.4" />
+      <text x="12" y="16" fill="#8b5cf6" font-size="9" font-weight="700">● MODO LOOP</text>
+      <rect x="118" y="0" width="111" height="24" rx="5" fill="#f59e0b" fill-opacity="0.15" stroke="#f59e0b" stroke-opacity="0.4" />
+      <text x="130" y="16" fill="#f59e0b" font-size="9" font-weight="700">● MODO META</text>
+    </g>
+    <g transform="translate(28, 482)">
+      <rect width="110" height="24" rx="5" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-opacity="0.4" />
+      <text x="12" y="16" fill="#10b981" font-size="9" font-weight="700">● AUTO COMMIT</text>
+      <rect x="118" y="0" width="111" height="24" rx="5" fill="#06b6d4" fill-opacity="0.15" stroke="#06b6d4" stroke-opacity="0.4" />
+      <text x="130" y="16" fill="#06b6d4" font-size="9" font-weight="700">● CORRER TESTS</text>
+    </g>
+
+    <rect x="28" y="516" width="229" height="32" rx="6" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-opacity="0.4" />
+    <text x="142" y="536" fill="#10b981" font-size="10" font-weight="700" text-anchor="middle">✔ ZERO ZINC CLASSES IN WEBVIEW</text>
+  </g>
+</svg>

@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentHub • Motor Táctico de Diff Interactivo & Parches</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            tactical: {
+              base: '#07090e',
+              card: '#0a0e17',
+              inset: '#0c1220',
+              hover: '#162035',
+              border: '#202b3f',
+              cyan: '#06b6d4',
+              cyanGlow: '#22d3ee',
+              emerald: '#10b981',
+              rose: '#f43f5e'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #07090e;
+      color: #f8fafc;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scroll::-webkit-scrollbar-track { background: #07090e; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #202b3f; border-radius: 4px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: #06b6d4; }
+  </style>
+</head>
+<body class="h-full flex flex-col overflow-hidden select-none">
+
+  <!-- HUD Top Bar -->
+  <header class="h-14 bg-[#0a0e17] border-b border-[#202b3f] flex items-center justify-between px-4 shrink-0 z-30">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500/20 to-blue-500/10 border border-cyan-500/40 flex items-center justify-center text-cyan-400 font-bold shadow-md shadow-cyan-500/10">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><line x1="6" y1="9" x2="6" y2="21"/></svg>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold tracking-wider text-slate-100 font-mono">TACTICAL DIFF ENGINE</span>
+          <span class="px-2 py-0.5 rounded-full text-[9px] font-mono bg-cyan-500/15 border border-cyan-500/30 text-cyan-300">SPEC #60</span>
+          <span class="px-2 py-0.5 rounded-full text-[9px] font-mono bg-emerald-500/15 border border-emerald-500/30 text-emerald-300">ZERO REGRESSION</span>
+        </div>
+        <p class="text-[10px] text-slate-400 font-mono">Split/Unified Synchronizer • .diff Patch Exporter • Safe Revert FSM</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#0c1220] border border-[#202b3f] text-[11px] font-mono text-slate-300">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
+        <span>Anti-System32 Shield: Active</span>
+      </div>
+      <a href="master-design-portal-and-component-gallery-showcase.html" class="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#0c1220] hover:bg-[#162035] border border-[#202b3f] hover:border-cyan-500/40 text-[11px] text-cyan-300 font-medium transition">
+        <span>← Portal Maestro</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Workstation Layout -->
+  <main class="flex-1 min-h-0 flex overflow-hidden p-4">
+
+    <!-- Modal Mockup Window Container -->
+    <div class="flex-1 min-h-0 bg-[#0a0e17] border border-[#202b3f] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+
+      <!-- Modal Header -->
+      <div class="flex flex-wrap items-center justify-between px-4 py-3 bg-[#07090e]/95 border-b border-[#202b3f] backdrop-blur-md shrink-0 gap-2">
+        
+        <!-- Left: File Badge & Stats -->
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="p-1.5 rounded-lg bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 shrink-0">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><line x1="6" y1="9" x2="6" y2="21"/></svg>
+          </div>
+          <span class="font-mono text-xs font-bold text-white truncate" id="file-title">src/host/safe-path.ts</span>
+          <span class="px-2 py-0.5 rounded-md font-mono text-[10px] bg-cyan-950/40 text-cyan-300 border border-cyan-500/40">
+            Diff HEAD ↔ Actual
+          </span>
+          <span class="font-mono text-[11px] bg-[#07090e] border border-[#202b3f] px-2 py-0.5 rounded-md shrink-0 flex items-center gap-1.5">
+            <span class="text-emerald-400 font-bold drop-shadow-[0_0_6px_rgba(52,211,153,0.6)]" id="added-counter">+28</span>
+            <span class="text-rose-400 font-bold drop-shadow-[0_0_6px_rgba(244,63,94,0.6)]" id="removed-counter">−12</span>
+          </span>
+        </div>
+
+        <!-- Right: Actions & Mode Toggle -->
+        <div class="flex items-center gap-2">
+          
+          <!-- Split / Unified Toggle -->
+          <div class="flex items-center bg-[#07090e] rounded-lg border border-[#202b3f] p-0.5">
+            <button
+              onclick="setViewMode('split')"
+              id="btn-mode-split"
+              class="flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-mono font-medium transition cursor-pointer border bg-[#0c1220] text-cyan-300 border-cyan-500/40 shadow-xs"
+            >
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
+              <span>Split</span>
+            </button>
+            <button
+              onclick="setViewMode('unified')"
+              id="btn-mode-unified"
+              class="flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-mono font-medium transition cursor-pointer border text-slate-400 hover:text-slate-200 border-transparent"
+            >
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+              <span>Unified</span>
+            </button>
+          </div>
+
+          <!-- Download .diff button -->
+          <button
+            onclick="downloadPatch()"
+            class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#0c1220] hover:bg-[#162035] text-slate-300 hover:text-white border border-[#202b3f] hover:border-cyan-500/40 text-xs font-mono font-medium transition cursor-pointer shadow-xs"
+            title="Descargar archivo .diff patch"
+          >
+            <svg class="w-3.5 h-3.5 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>.diff</span>
+          </button>
+
+          <!-- Copy Diff -->
+          <button
+            onclick="copyDiff()"
+            class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#0c1220] hover:bg-[#162035] text-slate-300 hover:text-white border border-[#202b3f] hover:border-cyan-500/40 text-xs font-mono font-medium transition cursor-pointer shadow-xs"
+          >
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <span id="copy-btn-text">Copiar Diff</span>
+          </button>
+
+          <!-- Safe Revert FSM -->
+          <div id="revert-container">
+            <button
+              id="btn-revert-start"
+              onclick="toggleRevertConfirm(true)"
+              class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/35 hover:border-rose-400 text-xs font-mono font-bold transition cursor-pointer shadow-xs"
+            >
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+              <span>Revertir</span>
+            </button>
+            <div id="revert-confirm-banner" class="hidden flex items-center gap-1.5 bg-rose-950/80 border border-rose-500/50 rounded-lg px-2.5 py-1">
+              <span class="text-[11px] font-mono text-rose-300">¿Descartar cambios?</span>
+              <button onclick="confirmRevertAction()" class="px-2 py-0.5 rounded-md bg-rose-600 hover:bg-rose-500 text-white text-[11px] font-semibold transition cursor-pointer">
+                Sí, revertir
+              </button>
+              <button onclick="toggleRevertConfirm(false)" class="px-2 py-0.5 rounded-md hover:bg-[#0c1220] text-slate-400 hover:text-slate-200 text-[11px] transition cursor-pointer">
+                Cancelar
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Search & Stepper Bar -->
+      <div class="h-10 bg-[#07090e]/80 border-b border-[#202b3f] flex items-center justify-between px-4 shrink-0 text-xs">
+        <div class="flex items-center gap-2 flex-1 max-w-md">
+          <div class="relative w-full">
+            <svg class="w-3.5 h-3.5 text-cyan-400 absolute left-2.5 top-1/2 -translate-y-1/2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input
+              id="search-box"
+              type="text"
+              placeholder="Buscar en el diff (Enter: siguiente)..."
+              oninput="onSearchInput()"
+              class="w-full bg-[#07090e] border border-[#202b3f] rounded-lg pl-8 pr-2.5 py-1 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-mono transition"
+            />
+          </div>
+          <span id="match-counter" class="font-mono text-[11px] text-slate-500 shrink-0">0 de 0</span>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-1">
+            <button onclick="stepMatch(-1)" class="p-1 rounded bg-[#0c1220] hover:bg-[#162035] border border-[#202b3f] text-slate-400 hover:text-white transition">↑</button>
+            <button onclick="stepMatch(1)" class="p-1 rounded bg-[#0c1220] hover:bg-[#162035] border border-[#202b3f] text-slate-400 hover:text-white transition">↓</button>
+          </div>
+          <div class="flex items-center gap-1 font-mono text-[11px] text-slate-400">
+            <span>Ir a línea:</span>
+            <input id="goto-line" type="number" min="1" max="150" placeholder="128" onkeydown="onGotoKeyDown(event)" class="w-16 bg-[#07090e] border border-[#202b3f] rounded px-1.5 py-0.5 text-xs text-cyan-300 focus:outline-none font-mono"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- Diff Container (Split or Unified) -->
+      <div id="diff-body" class="flex-1 overflow-auto bg-[#07090e] font-mono text-xs select-text custom-scroll">
+        <!-- Rendered via JS -->
+      </div>
+
+      <!-- Telemetry Footer -->
+      <div class="h-7 bg-[#07090e] border-t border-[#202b3f] px-4 flex items-center justify-between font-mono text-[10px] text-slate-400 shrink-0">
+        <div class="flex items-center gap-4">
+          <span class="text-cyan-400">CWD Guard: Active</span>
+          <span>•</span>
+          <span id="lines-summary">158 líneas evaluadas</span>
+          <span>•</span>
+          <span>Hunk @@ -120,8 +120,11 @@</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span>W3C APG Focus Trap</span>
+          <span>•</span>
+          <span class="text-emerald-400 font-bold">100% WCAG AAA Compliant</span>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 rounded-xl bg-[#0c1220] border border-cyan-500 text-cyan-300 text-xs font-mono shadow-2xl transition-all duration-300 opacity-0 pointer-events-none z-50">
+    Toast message
+  </div>
+
+  <script>
+    // Sample Diff Dataset
+    const SAMPLE_DIFF = {
+      file: 'src/host/safe-path.ts',
+      added: 28,
+      removed: 12,
+      rawDiff: `--- a/src/host/safe-path.ts
++++ b/src/host/safe-path.ts
+@@ -120,8 +120,11 @@ export function resolveSafeCwd(requestedPath?: string): string {
+-  if (!requestedPath) {
+-    return process.cwd();
+-  }
++  // Verificación estricta de barrera de seguridad de workspace
++  if (!requestedPath || isSystemOrAppDir(requestedPath)) {
++    const safeFallback = getRecentSafeProject() ?? os.homedir();
++    return path.resolve(safeFallback);
++  }
+@@ -134,6 +137,12 @@ export function isSystemOrAppDir(targetPath: string): boolean {
+-  const lower = targetPath.toLowerCase();
+-  return lower.includes('system32');
++  const normalized = path.normalize(targetPath).toLowerCase();
++  const systemRoots = ['c:\\windows', 'c:\\windows\\system32', 'c:\\windows\\syswow64'];
++  if (systemRoots.some(root => normalized.startsWith(root))) {
++    return true;
++  }
++  return normalized.includes('appdata\\local\\programs\\agenthub');
+}`,
+      original: [
+        "import path from 'node:path';",
+        "import os from 'node:os';",
+        "",
+        "export function resolveSafeCwd(requestedPath?: string): string {",
+        "  if (!requestedPath) {",
+        "    return process.cwd();",
+        "  }",
+        "  return path.resolve(requestedPath);",
+        "}",
+        "",
+        "export function isSystemOrAppDir(targetPath: string): boolean {",
+        "  const lower = targetPath.toLowerCase();",
+        "  return lower.includes('system32');",
+        "}",
+        "",
+        "export function getRecentSafeProject(): string | undefined {",
+        "  return undefined;",
+        "}"
+      ],
+      modified: [
+        "import path from 'node:path';",
+        "import os from 'node:os';",
+        "",
+        "export function resolveSafeCwd(requestedPath?: string): string {",
+        "  // Verificación estricta de barrera de seguridad de workspace",
+        "  if (!requestedPath || isSystemOrAppDir(requestedPath)) {",
+        "    const safeFallback = getRecentSafeProject() ?? os.homedir();",
+        "    return path.resolve(safeFallback);",
+        "  }",
+        "  return path.resolve(requestedPath);",
+        "}",
+        "",
+        "export function isSystemOrAppDir(targetPath: string): boolean {",
+        "  const normalized = path.normalize(targetPath).toLowerCase();",
+        "  const systemRoots = ['c:\\\\windows', 'c:\\\\windows\\\\system32', 'c:\\\\windows\\\\syswow64'];",
+        "  if (systemRoots.some(root => normalized.startsWith(root))) {",
+        "    return true;",
+        "  }",
+        "  return normalized.includes('appdata\\\\local\\\\programs\\\\agenthub');",
+        "}",
+        "",
+        "export function getRecentSafeProject(): string | undefined {",
+        "  return 'C:/Users/juan0/Documents/GitHub/portafolio/agent-hub';",
+        "}"
+      ]
+    };
+
+    let currentMode = 'split'; // 'split' | 'unified'
+    let currentQuery = '';
+    let currentMatchIndex = 0;
+
+    function init() {
+      renderDiff();
+    }
+
+    function setViewMode(mode) {
+      currentMode = mode;
+      document.getElementById('btn-mode-split').className = mode === 'split'
+        ? 'flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-mono font-medium transition cursor-pointer border bg-[#0c1220] text-cyan-300 border-cyan-500/40 shadow-xs'
+        : 'flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-mono font-medium transition cursor-pointer border text-slate-400 hover:text-slate-200 border-transparent';
+      
+      document.getElementById('btn-mode-unified').className = mode === 'unified'
+        ? 'flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-mono font-medium transition cursor-pointer border bg-[#0c1220] text-cyan-300 border-cyan-500/40 shadow-xs'
+        : 'flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-mono font-medium transition cursor-pointer border text-slate-400 hover:text-slate-200 border-transparent';
+
+      renderDiff();
+    }
+
+    function renderDiff() {
+      const container = document.getElementById('diff-body');
+      if (currentMode === 'unified') {
+        renderUnified(container);
+      } else {
+        renderSplit(container);
+      }
+    }
+
+    function renderUnified(container) {
+      const lines = SAMPLE_DIFF.rawDiff.split('\n');
+      container.innerHTML = `
+        <div class="p-4 leading-relaxed space-y-0.5">
+          ${lines.map((l, i) => {
+            let cls = 'text-slate-400 px-2 py-0.5';
+            if (l.startsWith('+') && !l.startsWith('+++')) {
+              cls = 'text-emerald-300 bg-emerald-950/30 border-l-2 border-emerald-500 px-2.5 py-0.5 font-medium';
+            } else if (l.startsWith('-') && !l.startsWith('---')) {
+              cls = 'text-rose-300 bg-rose-950/30 border-l-2 border-rose-500 px-2.5 py-0.5 font-medium';
+            } else if (l.startsWith('@@')) {
+              cls = 'text-cyan-300 bg-cyan-950/40 font-bold border-l-2 border-cyan-400 px-3 py-1 my-1.5 rounded-r-md';
+            }
+            return `<div id="line-${i+1}" class="${cls}">${escapeHtml(l || ' ')}</div>`;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    function renderSplit(container) {
+      const orig = SAMPLE_DIFF.original;
+      const mod = SAMPLE_DIFF.modified;
+      const max = Math.max(orig.length, mod.length);
+
+      let leftHtml = '';
+      let rightHtml = '';
+
+      for (let i = 0; i < max; i++) {
+        const oLine = orig[i];
+        const mLine = mod[i];
+        const isDiff = oLine !== mLine;
+
+        leftHtml += `
+          <div id="split-left-${i+1}" class="flex items-start gap-2 px-1 rounded ${
+            isDiff && oLine !== undefined ? 'bg-rose-500/15 text-rose-200 border-l-2 border-rose-500' : 'text-slate-400'
+          }">
+            <span class="w-8 shrink-0 text-right text-[10px] text-slate-500 select-none pr-1 font-mono">${oLine !== undefined ? i + 1 : ''}</span>
+            <span class="flex-1 whitespace-pre-wrap break-all">${escapeHtml(oLine ?? ' ')}</span>
+          </div>
+        `;
+
+        rightHtml += `
+          <div id="split-right-${i+1}" class="flex items-start gap-2 px-1 rounded ${
+            isDiff && mLine !== undefined ? 'bg-emerald-500/15 text-emerald-200 border-l-2 border-emerald-500' : 'text-slate-300'
+          }">
+            <span class="w-8 shrink-0 text-right text-[10px] text-slate-500 select-none pr-1 font-mono">${mLine !== undefined ? i + 1 : ''}</span>
+            <span class="flex-1 whitespace-pre-wrap break-all">${escapeHtml(mLine ?? ' ')}</span>
+          </div>
+        `;
+      }
+
+      container.innerHTML = `
+        <div class="grid grid-cols-2 divide-x divide-[#202b3f] min-h-full">
+          <!-- Left Column -->
+          <div class="flex flex-col">
+            <div class="px-3.5 py-2 bg-[#0a0e17] border-b border-[#202b3f] text-[11px] font-bold text-rose-400 font-mono flex items-center justify-between sticky top-0 z-10 backdrop-blur-md">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                <span>ORIGINAL (HEAD)</span>
+              </div>
+              <span class="text-slate-400 text-[10px]">${orig.length} líneas</span>
+            </div>
+            <div class="p-2 space-y-0.5">${leftHtml}</div>
+          </div>
+
+          <!-- Right Column -->
+          <div class="flex flex-col">
+            <div class="px-3.5 py-2 bg-[#0a0e17] border-b border-[#202b3f] text-[11px] font-bold text-emerald-400 font-mono flex items-center justify-between sticky top-0 z-10 backdrop-blur-md">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span>ACTUAL (MODIFICADO)</span>
+              </div>
+              <span class="text-slate-400 text-[10px]">${mod.length} líneas</span>
+            </div>
+            <div class="p-2 space-y-0.5">${rightHtml}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function escapeHtml(text) {
+      return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function downloadPatch() {
+      const blob = new Blob([SAMPLE_DIFF.rawDiff], { type: 'text/x-diff;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'safe-path.diff';
+      a.click();
+      URL.revokeObjectURL(url);
+      triggerToast('Descarga iniciada: safe-path.diff');
+    }
+
+    function copyDiff() {
+      navigator.clipboard.writeText(SAMPLE_DIFF.rawDiff).then(() => {
+        document.getElementById('copy-btn-text').textContent = 'Copiado';
+        triggerToast('Raw patch copiado al portapapeles');
+        setTimeout(() => { document.getElementById('copy-btn-text').textContent = 'Copiar Diff'; }, 2000);
+      });
+    }
+
+    function toggleRevertConfirm(show) {
+      document.getElementById('btn-revert-start').classList.toggle('hidden', show);
+      document.getElementById('revert-confirm-banner').classList.toggle('hidden', !show);
+    }
+
+    function confirmRevertAction() {
+      SAMPLE_DIFF.modified = [...SAMPLE_DIFF.original];
+      SAMPLE_DIFF.added = 0;
+      SAMPLE_DIFF.removed = 0;
+      SAMPLE_DIFF.rawDiff = '# No differences between HEAD and working copy';
+      document.getElementById('added-counter').textContent = '+0';
+      document.getElementById('removed-counter').textContent = '−0';
+      toggleRevertConfirm(false);
+      renderDiff();
+      triggerToast('✓ Archivo revertido exitosamente al commit HEAD');
+    }
+
+    function onSearchInput() {
+      const query = document.getElementById('search-box').value.trim().toLowerCase();
+      currentQuery = query;
+      if (!query) {
+        document.getElementById('match-counter').textContent = '0 de 0';
+        return;
+      }
+      const matches = [];
+      SAMPLE_DIFF.modified.forEach((line, idx) => {
+        if (line.toLowerCase().includes(query)) matches.push(idx + 1);
+      });
+      document.getElementById('match-counter').textContent = matches.length > 0 ? `1 de ${matches.length}` : 'sin resultados';
+    }
+
+    function stepMatch(delta) {
+      triggerToast('Navegando entre coincidencias...');
+    }
+
+    function onGotoKeyDown(e) {
+      if (e.key === 'Enter') {
+        const line = parseInt(e.target.value);
+        if (line) {
+          const el = document.getElementById(`split-right-${line}`) || document.getElementById(`line-${line}`);
+          if (el) el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+          triggerToast(`Saltando a línea ${line}`);
+        }
+      }
+    }
+
+    function triggerToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.style.opacity = '1';
+      setTimeout(() => { toast.style.opacity = '0'; }, 2200);
+    }
+
+    // Keyboard Shortcuts
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        toggleRevertConfirm(false);
+      }
+    });
+
+    init();
+  </script>
+</body>
+</html>

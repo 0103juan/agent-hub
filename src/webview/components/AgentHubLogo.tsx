@@ -17,21 +17,21 @@ export const AgentHubIcon: React.FC<LogoProps> = ({ className = '', size = 20 })
     >
       <defs>
         <linearGradient id="hubBg" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#141527" />
-          <stop offset="100%" stop-color="#07070d" />
+          <stop offset="0%" stop-color="#0a0e17" />
+          <stop offset="100%" stop-color="#07090e" />
         </linearGradient>
         <linearGradient id="hubBorder" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#818cf8" stop-opacity="0.7" />
-          <stop offset="100%" stop-color="#06b6d4" stop-opacity="0.6" />
+          <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.8" />
+          <stop offset="100%" stop-color="#10b981" stop-opacity="0.7" />
         </linearGradient>
         <linearGradient id="hubGrad" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stop-color="#38bdf8" />
-          <stop offset="50%" stop-color="#6366f1" />
+          <stop offset="50%" stop-color="#0ea5e9" />
           <stop offset="100%" stop-color="#c084fc" />
         </linearGradient>
         <radialGradient id="hubGlow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#6366f1" stop-opacity="0.5" />
-          <stop offset="100%" stop-color="#6366f1" stop-opacity="0" />
+          <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.5" />
+          <stop offset="100%" stop-color="#06b6d4" stop-opacity="0" />
         </radialGradient>
       </defs>
 
@@ -52,12 +52,12 @@ export const AgentHubIcon: React.FC<LogoProps> = ({ className = '', size = 20 })
       <path d="M 188 238 L 324 238" stroke="url(#hubGrad)" strokeWidth="20" strokeLinecap="round" />
 
       {/* Core Singularity */}
-      <polygon points="256,204 286,221 286,255 256,272 226,255 226,221" fill="#090a14" stroke="url(#hubGrad)" strokeWidth="8" />
+      <polygon points="256,204 286,221 286,255 256,272 226,255 226,221" fill="#07090e" stroke="url(#hubGrad)" strokeWidth="8" />
       <circle cx="256" cy="238" r="9" fill="#ffffff" />
 
       {/* MCP Downlink */}
       <path d="M 256 272 L 256 384" stroke="url(#hubGrad)" strokeWidth="12" strokeLinecap="round" strokeDasharray="1 24" />
-      <circle cx="256" cy="392" r="16" fill="#6366f1" />
+      <circle cx="256" cy="392" r="16" fill="#06b6d4" />
       <circle cx="256" cy="392" r="6" fill="#ffffff" />
     </svg>
   );
@@ -79,14 +79,14 @@ export const AgentHubBrand: React.FC<BrandLockupProps> = ({ compact = false, onC
     >
       <div className="relative flex items-center justify-center">
         <AgentHubIcon size={compact ? 18 : 22} className="group-hover:scale-105 transition-transform" />
-        <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-emerald-400 ring-2 ring-zinc-950 animate-pulse" />
+        <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-emerald-400 ring-2 ring-[#07090e] animate-pulse" />
       </div>
       <div className="flex items-baseline gap-1">
-        <span className="font-semibold tracking-tight text-xs md:text-sm text-zinc-100">
-          Agent<span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-cyan-400 bg-clip-text text-transparent">Hub</span>
+        <span className="font-semibold tracking-tight text-xs md:text-sm text-slate-100">
+          Agent<span className="bg-gradient-to-r from-cyan-400 via-teal-300 to-cyan-200 bg-clip-text text-transparent">Hub</span>
         </span>
         {!compact && (
-          <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest hidden lg:inline">
+          <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest hidden lg:inline">
             v0.1.0
           </span>
         )}

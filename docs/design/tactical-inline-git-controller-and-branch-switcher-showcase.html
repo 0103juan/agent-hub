@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tactical Inline Git Controller &amp; Branch Switcher — Showcase</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* 5 Canonical Elevation Layers */
+    .bg-layer-1 { background-color: #07090e; }
+    .bg-layer-2 { background-color: #0a0e17; }
+    .bg-layer-3 { background-color: #0c1220; }
+    .bg-layer-4 { background-color: #162035; }
+    .border-layer-5 { border-color: #202b3f; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-[#07090e] text-slate-200 font-sans h-full overflow-hidden flex flex-col antialiased selection:bg-emerald-500/30 selection:text-emerald-200">
+
+  <!-- Top Tactical Navigation Bar -->
+  <header class="h-14 border-b border-[#202b3f] bg-[#0a0e17] flex items-center justify-between px-6 shrink-0 z-20">
+    <div class="flex items-center gap-4">
+      <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-mono font-bold text-sm">
+        #66
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-sm font-bold tracking-tight text-white">Controlador Git Inline y Conmutador de Ramas</h1>
+          <span class="px-2 py-0.5 text-[10px] font-mono rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">SPEC CARD #66</span>
+        </div>
+        <p class="text-[11px] text-slate-400 font-mono">Zero-Fetch · Conmutación 1-Clic · Ramas de Escuadrón · Creación Inline</p>
+      </div>
+    </div>
+
+    <!-- Active Component in Header -->
+    <div class="flex items-center gap-4">
+      <!-- Simulated GitBranchBadge Component -->
+      <div class="relative" id="badge-wrapper">
+        <button id="branch-badge-btn" class="group inline-flex items-center gap-1.5 rounded-lg border font-mono transition cursor-pointer px-2.5 py-1 text-[11px] bg-[#0a0e17] hover:bg-[#162035] text-slate-300 hover:text-white border-[#202b3f] hover:border-slate-700 shadow-sm">
+          <svg class="shrink-0 text-emerald-400 w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5a3 3 0 11-6 0 3 3 0 016 0zM19 12a3 3 0 11-6 0 3 3 0 016 0zM11 19a3 3 0 11-6 0 3 3 0 016 0zM7 8v8m10-4a3 3 0 00-3-3H7"/></svg>
+          <span id="badge-branch-name" class="font-mono truncate max-w-[110px] text-[11px]">main</span>
+          <svg id="badge-chevron" class="shrink-0 text-slate-500 group-hover:text-slate-300 transition-transform duration-150 w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          <!-- Uncommitted indicator -->
+          <span id="badge-status-pill" class="flex items-center gap-1 font-mono font-semibold rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 px-1.5 py-0.2 text-[10px]">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0"></span>
+            <span id="badge-uncommitted-count">3</span>
+          </span>
+        </button>
+
+        <!-- Popover Menu replicating GitBranchBadge.tsx -->
+        <div id="branch-popover" class="hidden absolute right-0 sm:left-0 top-full mt-1.5 z-50 w-80 p-2.5 rounded-xl bg-[#0a0e17] border border-[#202b3f] shadow-2xl shadow-black/90 space-y-2.5 text-xs">
+          <!-- Active Branch & Status Box -->
+          <div class="p-2.5 rounded-lg bg-[#07090e] border border-[#202b3f] space-y-1.5">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] uppercase font-mono font-semibold text-slate-400 tracking-wider">
+                Rama Activa
+              </span>
+              <span class="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 font-mono font-semibold text-[10px] border border-emerald-500/30 flex items-center gap-1">
+                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                <span id="popover-active-name">main</span>
+              </span>
+            </div>
+            <div class="text-[11px] font-mono flex items-center gap-1.5 pt-0.5" id="popover-status-text">
+              <span class="text-amber-400 font-medium flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+                <span id="popover-count-label">3 archivos con cambios sin commitear</span>
+              </span>
+            </div>
+            <div class="text-[10px] text-slate-500 font-mono">
+              Consulta local directa · sin fetch de red
+            </div>
+          </div>
+
+          <!-- Search Filter Input -->
+          <div class="relative">
+            <svg class="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <input type="text" id="branch-search-input" placeholder="Filtrar ramas..." class="w-full pl-8 pr-6 py-1 rounded-lg bg-[#07090e] border border-[#202b3f] text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500 font-mono">
+          </div>
+
+          <!-- Branches List -->
+          <div class="space-y-1">
+            <div class="flex items-center justify-between text-[10px] text-slate-400 uppercase tracking-wider font-semibold px-1 font-mono">
+              <span>Ramas disponibles (<span id="branch-count-badge">4</span>)</span>
+              <button id="refresh-branches-btn" class="hover:text-slate-200 normal-case tracking-normal flex items-center gap-1 cursor-pointer transition">
+                <svg class="w-2.5 h-2.5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                <span>Refrescar</span>
+              </button>
+            </div>
+            <div id="branches-list-container" class="max-h-40 overflow-y-auto space-y-0.5 no-scrollbar">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Squad Worktrees List -->
+          <div class="space-y-1 pt-1.5 border-t border-[#202b3f]">
+            <div class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold px-1 font-mono">
+              Ramas de Equipo / Worktrees (2)
+            </div>
+            <div id="squad-branches-list" class="max-h-24 overflow-y-auto space-y-0.5 no-scrollbar">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- New Branch Form -->
+          <div class="pt-1.5 border-t border-[#202b3f] space-y-1.5">
+            <div id="new-branch-btn-view">
+              <button id="show-create-form-btn" class="w-full flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg bg-[#0c1220] hover:bg-[#162035] text-slate-300 hover:text-white transition cursor-pointer text-xs font-semibold border border-[#202b3f]">
+                <svg class="w-3 h-3 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                <span>Nueva rama...</span>
+              </button>
+            </div>
+
+            <form id="create-branch-form" class="hidden space-y-1.5">
+              <div class="flex items-center gap-1">
+                <input type="text" id="new-branch-name-input" placeholder="nombre-de-rama" class="flex-1 min-w-0 px-2.5 py-1 rounded-lg bg-[#07090e] border border-cyan-500 text-slate-100 text-xs font-mono focus:outline-none">
+                <button type="submit" class="px-2.5 py-1 rounded-lg bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 text-slate-950 font-bold text-xs transition cursor-pointer shadow-sm shadow-cyan-500/20">
+                  Crear
+                </button>
+                <button type="button" id="cancel-create-btn" class="p-1 text-slate-400 hover:text-slate-200">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+              </div>
+              <div class="text-[10px] text-slate-500 font-mono">
+                Auto-convierte espacios en guiones y conmuta de inmediato.
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <a href="master-design-portal-and-component-gallery-showcase.html" class="px-3 py-1.5 rounded-lg bg-[#0c1220] hover:bg-[#162035] text-slate-300 hover:text-white border border-[#202b3f] text-xs font-medium transition cursor-pointer">
+        Volver al Portal
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Canvas -->
+  <main class="flex-1 p-6 overflow-y-auto bg-[#07090e] space-y-6">
+    <!-- Hero Controls -->
+    <div class="p-6 rounded-2xl bg-[#0a0e17] border border-[#202b3f] flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl">
+      <div class="space-y-1">
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono text-xs font-bold border border-emerald-500/40">VCS CONTROLLER</span>
+          <h2 class="text-lg font-bold text-white">Inspección y Conmutación Ligera de Ramas</h2>
+        </div>
+        <p class="text-xs text-slate-400 max-w-2xl">
+          El micro-controlador de ramas se ubica directamente en el encabezado del chat y en cada panel del Split Workspace, permitiendo alternar ramas de desarrollo o inspeccionar worktrees de escuadrón a 60 FPS sin comandos lentos de red.
+        </p>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="toggle-uncommitted-btn" class="px-3.5 py-1.5 rounded-xl bg-[#0c1220] hover:bg-[#162035] text-slate-300 border border-[#202b3f] text-xs font-mono transition cursor-pointer">
+          Alternar Estado: <strong id="state-toggle-label" class="text-amber-300">Con Cambios (3)</strong>
+        </button>
+        <button id="toggle-git-init-btn" class="px-3.5 py-1.5 rounded-xl bg-[#0c1220] hover:bg-[#162035] text-slate-300 border border-[#202b3f] text-xs font-mono transition cursor-pointer">
+          Simular "Sin Git"
+        </button>
+      </div>
+    </div>
+
+    <!-- 3 Metrics & Details Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="p-4 rounded-xl bg-[#0a0e17] border border-[#202b3f] space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-mono text-slate-400 font-bold">RAMA HEAD LOCAL</span>
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+        </div>
+        <div id="inspector-branch-display" class="text-xs font-mono text-emerald-300 font-bold">main</div>
+        <div class="text-[10px] text-slate-500 font-mono">Commit: a8f912e (HEAD -> main)</div>
+      </div>
+
+      <div class="p-4 rounded-xl bg-[#0a0e17] border border-[#202b3f] space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-mono text-slate-400 font-bold">ESTADO DE ARCHIVOS</span>
+          <span id="inspector-dirty-pill" class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">DIRTY</span>
+        </div>
+        <div id="inspector-dirty-text" class="text-xs font-mono text-amber-300 font-bold">3 Archivos Modificados</div>
+        <div class="text-[10px] text-slate-500 font-mono">GitBranchBadge.tsx, SplitWorkspace.tsx...</div>
+      </div>
+
+      <div class="p-4 rounded-xl bg-[#0a0e17] border border-[#202b3f] space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-mono text-slate-400 font-bold">WORKTREES DE ESCUADRÓN</span>
+          <span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 font-bold">SQUAD VCS</span>
+        </div>
+        <div class="text-xs font-mono text-purple-300 font-bold">2 Ramas Aisladas</div>
+        <div class="text-[10px] text-slate-500 font-mono">squad/architect-01, squad/tester-02</div>
+      </div>
+    </div>
+
+    <!-- Live Event Log -->
+    <div class="rounded-xl bg-[#0a0e17] border border-[#202b3f] overflow-hidden">
+      <div class="h-9 px-4 bg-[#0c1220] border-b border-[#202b3f] flex items-center justify-between text-xs font-mono text-slate-400">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span>TERMINAL DE EVENTOS GIT (IPC DISPATCH)</span>
+        </div>
+        <button id="clear-events-btn" class="text-[10px] text-slate-500 hover:text-slate-300 transition">Limpiar</button>
+      </div>
+      <div id="events-log-container" class="p-4 max-h-48 overflow-y-auto font-mono text-xs text-slate-300 space-y-1.5 no-scrollbar">
+        <div class="text-slate-500">[01:34:00] postToHost({ command: 'getGitBranches' }) -> 4 ramas detectadas</div>
+        <div class="text-emerald-400">[01:34:01] Rama activa establecida en: main</div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Interactive JavaScript Logic -->
+  <script>
+    let activeBranch = 'main';
+    let uncommittedCount = 3;
+    let isGit = true;
+    let isOpen = false;
+    let filter = '';
+
+    const branches = ['main', 'feature/tactical-hud', 'fix/layer-tokens', 'release/v2.4'];
+    const squadBranches = ['squad/architect-agent-01', 'squad/tester-agent-02'];
+
+    const badgeBtn = document.getElementById('branch-badge-btn');
+    const badgeChevron = document.getElementById('badge-chevron');
+    const badgeBranchName = document.getElementById('badge-branch-name');
+    const badgeStatusPill = document.getElementById('badge-status-pill');
+    const badgeUncommittedCount = document.getElementById('badge-uncommitted-count');
+    const branchPopover = document.getElementById('branch-popover');
+    const popoverActiveName = document.getElementById('popover-active-name');
+    const popoverStatusText = document.getElementById('popover-status-text');
+    const searchInput = document.getElementById('branch-search-input');
+    const branchesContainer = document.getElementById('branches-list-container');
+    const squadContainer = document.getElementById('squad-branches-list');
+    const branchCountBadge = document.getElementById('branch-count-badge');
+    const showCreateFormBtn = document.getElementById('show-create-form-btn');
+    const createBranchForm = document.getElementById('create-branch-form');
+    const newBranchNameInput = document.getElementById('new-branch-name-input');
+    const cancelCreateBtn = document.getElementById('cancel-create-btn');
+    const eventsLog = document.getElementById('events-log-container');
+    const inspectorBranchDisplay = document.getElementById('inspector-branch-display');
+    const inspectorDirtyPill = document.getElementById('inspector-dirty-pill');
+    const inspectorDirtyText = document.getElementById('inspector-dirty-text');
+    const stateToggleLabel = document.getElementById('state-toggle-label');
+    const toggleUncommittedBtn = document.getElementById('toggle-uncommitted-btn');
+    const toggleGitInitBtn = document.getElementById('toggle-git-init-btn');
+
+    function log(msg, color = 'text-slate-300') {
+      const time = new Date().toTimeString().split(' ')[0];
+      const div = document.createElement('div');
+      div.className = color;
+      div.textContent = `[${time}] ${msg}`;
+      eventsLog.appendChild(div);
+      eventsLog.scrollTop = eventsLog.scrollHeight;
+    }
+
+    function toggleOpen() {
+      isOpen = !isOpen;
+      if (isOpen) {
+        branchPopover.classList.remove('hidden');
+        badgeBtn.classList.add('border-emerald-500/60', 'bg-[#162035]', 'ring-1', 'ring-emerald-500/30');
+        badgeChevron.classList.add('rotate-180', 'text-emerald-400');
+        searchInput.value = '';
+        filter = '';
+        render();
+        setTimeout(() => searchInput.focus(), 50);
+        log("postToHost({ command: 'getGitBranches' })");
+      } else {
+        branchPopover.classList.add('hidden');
+        badgeBtn.classList.remove('border-emerald-500/60', 'bg-[#162035]', 'ring-1', 'ring-emerald-500/30');
+        badgeChevron.classList.remove('rotate-180', 'text-emerald-400');
+      }
+    }
+
+    badgeBtn.addEventListener('click', toggleOpen);
+
+    document.addEventListener('click', (e) => {
+      const wrapper = document.getElementById('badge-wrapper');
+      if (isOpen && !wrapper.contains(e.target)) {
+        toggleOpen();
+      }
+    });
+
+    function checkout(target) {
+      activeBranch = target;
+      badgeBranchName.textContent = target;
+      popoverActiveName.textContent = target;
+      inspectorBranchDisplay.textContent = target;
+      log(`postToHost({ command: 'checkoutBranch', branch: '${target}' })`, 'text-emerald-400');
+      toggleOpen();
+    }
+
+    function render() {
+      // Filter branches
+      const visible = branches.filter(b => b.toLowerCase().includes(filter.toLowerCase()));
+      branchCountBadge.textContent = visible.length;
+      branchesContainer.innerHTML = '';
+
+      if (visible.length === 0) {
+        branchesContainer.innerHTML = `<div class="p-3 text-center text-slate-500 text-[11px] font-mono">No se encontraron ramas con "${filter}".</div>`;
+      } else {
+        visible.forEach(b => {
+          const isActive = b === activeBranch;
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = `w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left transition font-mono text-xs cursor-pointer ${
+            isActive
+              ? 'bg-emerald-950/30 text-emerald-300 border border-emerald-500/30 font-semibold'
+              : 'hover:bg-[#162035] text-slate-300 hover:text-white border border-transparent'
+          }`;
+          btn.innerHTML = `
+            <div class="flex items-center gap-2 min-w-0">
+              <svg class="w-3.5 h-3.5 shrink-0 ${isActive ? 'text-emerald-400' : 'text-slate-500'}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5a3 3 0 11-6 0 3 3 0 016 0zM19 12a3 3 0 11-6 0 3 3 0 016 0zM11 19a3 3 0 11-6 0 3 3 0 016 0zM7 8v8m10-4a3 3 0 00-3-3H7"/></svg>
+              <span class="truncate">${b}</span>
+            </div>
+            ${isActive
+              ? '<span class="flex items-center gap-1 text-[10px] text-emerald-400 shrink-0 font-medium"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span>Actual</span></span>'
+              : '<span class="text-[10px] text-cyan-400 hover:text-cyan-300 shrink-0 font-medium">Cambiar →</span>'
+            }
+          `;
+          btn.addEventListener('click', () => checkout(b));
+          branchesContainer.appendChild(btn);
+        });
+      }
+
+      // Squad branches
+      squadContainer.innerHTML = '';
+      squadBranches.forEach(b => {
+        const isActive = b === activeBranch;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left transition font-mono text-[11px] cursor-pointer ${
+          isActive
+            ? 'bg-emerald-950/30 text-emerald-300 border border-emerald-500/30 font-semibold'
+            : 'hover:bg-[#162035] text-slate-400 hover:text-slate-200 border border-transparent'
+        }`;
+        btn.innerHTML = `
+          <div class="flex items-center gap-1.5 min-w-0">
+            <svg class="w-3 h-3 text-cyan-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+            <span class="truncate">${b}</span>
+          </div>
+          ${isActive ? '<svg class="w-3 h-3 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>' : ''}
+        `;
+        btn.addEventListener('click', () => checkout(b));
+        squadContainer.appendChild(btn);
+      });
+    }
+
+    searchInput.addEventListener('input', (e) => {
+      filter = e.target.value;
+      render();
+    });
+
+    showCreateFormBtn.addEventListener('click', () => {
+      document.getElementById('new-branch-btn-view').classList.add('hidden');
+      createBranchForm.classList.remove('hidden');
+      newBranchNameInput.value = '';
+      newBranchNameInput.focus();
+    });
+
+    cancelCreateBtn.addEventListener('click', () => {
+      createBranchForm.classList.add('hidden');
+      document.getElementById('new-branch-btn-view').classList.remove('hidden');
+    });
+
+    createBranchForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const raw = newBranchNameInput.value.trim();
+      const slug = raw.replace(/\s+/g, '-');
+      if (!slug) return;
+
+      branches.push(slug);
+      log(`postToHost({ command: 'createBranch', branch: '${slug}' })`, 'text-cyan-300');
+      cancelCreateBtn.click();
+      checkout(slug);
+    });
+
+    // Uncommitted state toggle
+    toggleUncommittedBtn.addEventListener('click', () => {
+      if (uncommittedCount > 0) {
+        uncommittedCount = 0;
+        badgeStatusPill.innerHTML = `<svg class="w-3 h-3 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>`;
+        badgeStatusPill.className = "flex items-center text-emerald-400/80 shrink-0";
+        popoverStatusText.innerHTML = `
+          <span class="text-emerald-400/90 font-medium flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            Árbol limpio (sin cambios pendientes)
+          </span>
+        `;
+        inspectorDirtyPill.textContent = "CLEAN";
+        inspectorDirtyPill.className = "text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold";
+        inspectorDirtyText.textContent = "Árbol de Trabajo Limpio";
+        inspectorDirtyText.className = "text-xs font-mono text-emerald-300 font-bold";
+        stateToggleLabel.textContent = "Limpio (0)";
+        stateToggleLabel.className = "text-emerald-300";
+      } else {
+        uncommittedCount = 3;
+        badgeStatusPill.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0"></span><span id="badge-uncommitted-count">3</span>`;
+        badgeStatusPill.className = "flex items-center gap-1 font-mono font-semibold rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 px-1.5 py-0.2 text-[10px]";
+        popoverStatusText.innerHTML = `
+          <span class="text-amber-400 font-medium flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+            3 archivos con cambios sin commitear
+          </span>
+        `;
+        inspectorDirtyPill.textContent = "DIRTY";
+        inspectorDirtyPill.className = "text-[9px] font-mono px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold";
+        inspectorDirtyText.textContent = "3 Archivos Modificados";
+        inspectorDirtyText.className = "text-xs font-mono text-amber-300 font-bold";
+        stateToggleLabel.textContent = "Con Cambios (3)";
+        stateToggleLabel.className = "text-amber-300";
+      }
+    });
+
+    // Zero-git mode toggle
+    toggleGitInitBtn.addEventListener('click', () => {
+      isGit = !isGit;
+      if (!isGit) {
+        badgeBranchName.textContent = "Sin Git";
+        badgeStatusPill.classList.add('hidden');
+        popoverStatusText.innerHTML = `<span class="text-amber-400 font-mono text-[11px]">Carpeta sin .git inicializado</span>`;
+        toggleGitInitBtn.textContent = "Restaurar Git";
+        log("Carpeta sin Git detectada");
+      } else {
+        badgeBranchName.textContent = activeBranch;
+        badgeStatusPill.classList.remove('hidden');
+        toggleGitInitBtn.textContent = "Simular 'Sin Git'";
+        log("Repositorio Git restaurado");
+      }
+    });
+
+    document.getElementById('refresh-branches-btn').addEventListener('click', () => {
+      log("Ramas refrescadas desde el sistema de archivos", "text-cyan-300");
+    });
+
+    document.getElementById('clear-events-btn').addEventListener('click', () => {
+      eventsLog.innerHTML = '';
+    });
+
+    render();
+  </script>
+</body>
+</html>

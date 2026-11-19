@@ -1,0 +1,287 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" style="background:#07090e; font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;">
+  <defs>
+    <!-- Background Grid -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#162035" stroke-width="0.8" opacity="0.4"/>
+    </pattern>
+    <radialGradient id="cyan-glow" cx="50%" cy="0%" r="70%">
+      <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#07090e" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow-drop" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.65"/>
+    </filter>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="1600" height="900" fill="#07090e"/>
+  <rect width="1600" height="900" fill="url(#grid)"/>
+  <rect width="1600" height="500" fill="url(#cyan-glow)"/>
+
+  <!-- Master Header -->
+  <g transform="translate(48, 36)">
+    <!-- Brand / Badge -->
+    <rect x="0" y="0" width="132" height="26" rx="6" fill="#0c1220" stroke="#f59e0b" stroke-width="1.2"/>
+    <text x="12" y="17" fill="#fbbf24" font-size="11" font-weight="700" letter-spacing="1.5" font-family="ui-monospace, monospace">SPEC CARD #65</text>
+
+    <text x="148" y="18" fill="#64748b" font-size="12" font-family="ui-monospace, monospace">|</text>
+    <text x="164" y="18" fill="#94a3b8" font-size="12" font-weight="600" letter-spacing="0.5">SECTION 2.R TACTICAL MODEL CATALOG &amp; QUOTA FAILOVER ENGINE</text>
+
+    <!-- Master Title -->
+    <text x="0" y="62" fill="#f8fafc" font-size="28" font-weight="800" letter-spacing="-0.5">Catálogo Multi-Proveedor y Blindaje de Cuota con Failover Automático</text>
+    <text x="0" y="86" fill="#94a3b8" font-size="14">Enrutamiento inteligente entre Claude CLI, Antigravity, Copilot y Ollama con telemetría de saturación (90%) y conmutación en 1-clic</text>
+
+    <!-- Top Right Telemetry Badges -->
+    <g transform="translate(1120, 10)">
+      <rect x="0" y="0" width="384" height="64" rx="10" fill="#0a0e17" stroke="#202b3f" stroke-width="1.2" filter="url(#shadow-drop)"/>
+      <circle cx="24" cy="32" r="6" fill="#f59e0b"/>
+      <circle cx="24" cy="32" r="10" fill="none" stroke="#f59e0b" stroke-width="1.5" opacity="0.4"/>
+      <text x="42" y="27" fill="#f8fafc" font-size="12" font-weight="700">FAILOVER SHIELD: STANDBY</text>
+      <text x="42" y="45" fill="#64748b" font-size="10" font-family="ui-monospace, monospace">Threshold 90% • 5h/Weekly Telemetry • Auto Re-arm</text>
+      <rect x="300" y="16" width="70" height="32" rx="6" fill="#0c1220" stroke="#f59e0b" stroke-width="1"/>
+      <text x="314" y="36" fill="#fbbf24" font-size="12" font-weight="800" font-family="ui-monospace, monospace">60 FPS</text>
+    </g>
+  </g>
+
+  <!-- Three Architecture Pillars -->
+
+  <!-- ================= PILLAR 1: MULTI-PROVIDER CATALOG PIPELINE ================= -->
+  <g transform="translate(48, 150)">
+    <rect x="0" y="0" width="470" height="540" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.4" filter="url(#shadow-drop)"/>
+    <rect x="0" y="0" width="470" height="48" rx="14" fill="#0c1220"/>
+    <path d="M 0 48 L 470 48" stroke="#202b3f" stroke-width="1.2"/>
+
+    <!-- Pillar 1 Header -->
+    <rect x="16" y="12" width="24" height="24" rx="6" fill="#06b6d4" fill-opacity="0.15" stroke="#06b6d4" stroke-width="1"/>
+    <circle cx="28" cy="24" r="5" fill="none" stroke="#22d3ee" stroke-width="1.5"/>
+    <text x="48" y="28" fill="#f8fafc" font-size="14" font-weight="700">1. Catálogo Unificado Multi-Proveedor</text>
+    <rect x="340" y="14" width="114" height="20" rx="4" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+    <text x="352" y="28" fill="#22d3ee" font-size="10" font-family="ui-monospace, monospace">buildCatalog()</text>
+
+    <!-- Content 1 -->
+    <g transform="translate(20, 68)">
+      <!-- Step 1: Providers Grid -->
+      <rect x="0" y="0" width="430" height="96" rx="8" fill="#07090e" stroke="#202b3f" stroke-width="1"/>
+      <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700" font-family="ui-monospace, monospace">PROVEEDORES Y RUTAS SOPORTADAS</text>
+
+      <g transform="translate(14, 32)">
+        <rect x="0" y="0" width="94" height="26" rx="4" fill="#162035" stroke="#f59e0b" stroke-width="1"/>
+        <text x="10" y="17" fill="#fbbf24" font-size="10" font-weight="700">Claude CLI</text>
+
+        <rect x="102" y="0" width="94" height="26" rx="4" fill="#162035" stroke="#06b6d4" stroke-width="1"/>
+        <text x="110" y="17" fill="#22d3ee" font-size="10" font-weight="700">Antigravity</text>
+
+        <rect x="204" y="0" width="94" height="26" rx="4" fill="#162035" stroke="#3b82f6" stroke-width="1"/>
+        <text x="218" y="17" fill="#60a5fa" font-size="10" font-weight="700">Copilot</text>
+
+        <rect x="306" y="0" width="94" height="26" rx="4" fill="#162035" stroke="#10b981" stroke-width="1"/>
+        <text x="324" y="17" fill="#34d399" font-size="10" font-weight="700">Ollama</text>
+      </g>
+      <text x="14" y="84" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">accountByProvider deduplica rutas activas y conectadas</text>
+
+      <!-- Step 2: Family taxonomy -->
+      <g transform="translate(0, 110)">
+        <rect x="0" y="0" width="430" height="120" rx="8" fill="#07090e" stroke="#06b6d4" stroke-width="1.2"/>
+        <text x="14" y="22" fill="#22d3ee" font-size="11" font-weight="700" font-family="ui-monospace, monospace">TAXONOMÍA DE FAMILIAS (familyOf)</text>
+        <text x="14" y="42" fill="#e2e8f0" font-size="11">Clasificación automática para iconografía e interfaz:</text>
+
+        <g transform="translate(14, 52)">
+          <rect x="0" y="0" width="74" height="22" rx="4" fill="#162035"/>
+          <text x="8" y="15" fill="#f472b6" font-size="10" font-family="ui-monospace, monospace">Argon 🧠</text>
+
+          <rect x="80" y="0" width="74" height="22" rx="4" fill="#162035"/>
+          <text x="88" y="15" fill="#facc15" font-size="10" font-family="ui-monospace, monospace">Flash ⚡</text>
+
+          <rect x="160" y="0" width="74" height="22" rx="4" fill="#162035"/>
+          <text x="168" y="15" fill="#fb923c" font-size="10" font-family="ui-monospace, monospace">Opus 🔥</text>
+
+          <rect x="240" y="0" width="74" height="22" rx="4" fill="#162035"/>
+          <text x="248" y="15" fill="#38bdf8" font-size="10" font-family="ui-monospace, monospace">Sonnet</text>
+
+          <rect x="320" y="0" width="74" height="22" rx="4" fill="#162035"/>
+          <text x="328" y="15" fill="#94a3b8" font-size="10" font-family="ui-monospace, monospace">Haiku</text>
+        </g>
+        <text x="14" y="104" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">Filtro rápido en 1-click por chips horizontales</text>
+      </g>
+
+      <!-- Step 3: Favorites pinning -->
+      <g transform="translate(0, 244)">
+        <rect x="0" y="0" width="430" height="96" rx="8" fill="#07090e" stroke="#f59e0b" stroke-width="1.2"/>
+        <text x="14" y="22" fill="#fbbf24" font-size="11" font-weight="700" font-family="ui-monospace, monospace">PINNING DE FAVORITOS EN DISCO</text>
+        <text x="14" y="42" fill="#e2e8f0" font-size="11">Persiste en `localStorage.getItem('agent-hub.favoriteModels')`.</text>
+        <rect x="14" y="52" width="402" height="24" rx="4" fill="#162035"/>
+        <text x="22" y="68" fill="#fbbf24" font-size="10" font-family="ui-monospace, monospace">favoriteKey = `${account.provider}:${model.id}`</text>
+        <text x="14" y="88" fill="#94a3b8" font-size="9">Ordena los modelos fijados al principio del catálogo automáticamente.</text>
+      </g>
+
+      <!-- Step 4: Search normalization -->
+      <g transform="translate(0, 354)">
+        <rect x="0" y="0" width="430" height="74" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">BÚSQUEDA INSENSIBLE A DIACRÍTICOS</text>
+        <text x="14" y="42" fill="#94a3b8" font-size="11">Filtra en vivo por label o identificador técnico con `normalizeText()`:</text>
+        <text x="14" y="60" fill="#22d3ee" font-size="10" font-family="ui-monospace, monospace">normalizeText(model.label).includes(normalizedQuery)</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ================= PILLAR 2: DUAL-WINDOW QUOTA TELEMETRY ================= -->
+  <g transform="translate(565, 150)">
+    <rect x="0" y="0" width="470" height="540" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.4" filter="url(#shadow-drop)"/>
+    <rect x="0" y="0" width="470" height="48" rx="14" fill="#0c1220"/>
+    <path d="M 0 48 L 470 48" stroke="#202b3f" stroke-width="1.2"/>
+
+    <!-- Pillar 2 Header -->
+    <rect x="16" y="12" width="24" height="24" rx="6" fill="#f59e0b" fill-opacity="0.15" stroke="#f59e0b" stroke-width="1"/>
+    <polygon points="28,16 31,23 38,24 33,29 35,36 28,32 21,36 23,29 18,24 25,23" fill="#fbbf24"/>
+    <text x="48" y="28" fill="#f8fafc" font-size="14" font-weight="700">2. Telemetría Dual &amp; Umbral 90%</text>
+    <rect x="340" y="14" width="114" height="20" rx="4" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+    <text x="356" y="28" fill="#fbbf24" font-size="10" font-family="ui-monospace, monospace">SATURATED 90%</text>
+
+    <!-- Content 2 -->
+    <g transform="translate(20, 68)">
+      <!-- Threshold Card -->
+      <rect x="0" y="0" width="430" height="126" rx="8" fill="#07090e" stroke="#f59e0b" stroke-width="1.2"/>
+      <text x="14" y="22" fill="#fbbf24" font-size="11" font-weight="700" font-family="ui-monospace, monospace">LÓGICA DEL BLINDAJE DE SATURACIÓN</text>
+
+      <g transform="translate(14, 34)">
+        <text x="0" y="14" fill="#e2e8f0" font-size="11">1. Ventana Móvil 5 Horas (`fiveHourUtilization`)</text>
+        <text x="0" y="32" fill="#e2e8f0" font-size="11">2. Cuota Semanal Acumulada (`weeklyUtilization`)</text>
+        <text x="0" y="52" fill="#f87171" font-size="11" font-weight="700">worst = Math.max(fiveHour, weekly)</text>
+      </g>
+      <rect x="14" y="94" width="402" height="22" rx="4" fill="#162035"/>
+      <text x="22" y="109" fill="#fbbf24" font-size="10" font-family="ui-monospace, monospace">if (worst &lt; 90 || dismissedAt !== undefined) return null;</text>
+
+      <!-- Re-arming FSM -->
+      <g transform="translate(0, 140)">
+        <rect x="0" y="0" width="430" height="154" rx="8" fill="#07090e" stroke="#06b6d4" stroke-width="1.2"/>
+        <text x="14" y="22" fill="#22d3ee" font-size="11" font-weight="700" font-family="ui-monospace, monospace">MÁQUINA DE RE-ARMADO REACTIVO (AUTO RE-ARM)</text>
+        <text x="14" y="42" fill="#e2e8f0" font-size="11">Si el usuario descarta el aviso, no se silencia para siempre:</text>
+
+        <!-- Diagram -->
+        <g transform="translate(14, 54)">
+          <rect x="0" y="0" width="180" height="40" rx="6" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+          <text x="10" y="17" fill="#94a3b8" font-size="10" font-weight="700">Descartado en 92%</text>
+          <text x="10" y="30" fill="#64748b" font-size="9">setDismissedAt(92)</text>
+
+          <path d="M 195 20 L 220 20" stroke="#f59e0b" stroke-width="1.5"/>
+          <polygon points="220,17 226,20 220,23" fill="#f59e0b"/>
+
+          <rect x="230" y="0" width="172" height="40" rx="6" fill="#451a03" stroke="#f59e0b" stroke-width="1"/>
+          <text x="10" y="17" fill="#fbbf24" font-size="10" font-weight="700">Cuota sube a 95%</text>
+          <text x="10" y="30" fill="#f59e0b" font-size="9">worst &gt; dismissedAt</text>
+        </g>
+        <text x="14" y="122" fill="#34d399" font-size="10" font-family="ui-monospace, monospace">-> setDismissedAt(undefined) -> Aviso reaparece solo</text>
+        <text x="14" y="138" fill="#64748b" font-size="9">Protección permanente contra rate limits inesperados</text>
+      </g>
+
+      <!-- Visual Alert Banner Mock -->
+      <g transform="translate(0, 308)">
+        <rect x="0" y="0" width="430" height="120" rx="8" fill="#451a03" stroke="#f59e0b" stroke-width="1.2"/>
+        <text x="14" y="24" fill="#fbbf24" font-size="11" font-weight="700">BANNER TÁCTICO INLINE (QuotaNotice.tsx)</text>
+        <text x="14" y="44" fill="#fef3c7" font-size="10">Alerta de cuota (94%): ventana de 5 h saturada.</text>
+        <text x="14" y="60" fill="#fcd34d" font-size="9" font-family="ui-monospace, monospace">5 h: 94% • Semanal: 42% • Antigravity Pro disponible</text>
+        <rect x="14" y="74" width="180" height="28" rx="6" fill="#f59e0b"/>
+        <text x="24" y="92" fill="#07090e" font-size="10" font-weight="800">Cambiar a Antigravity</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ================= PILLAR 3: 1-CLICK FAILOVER ENGINE ================= -->
+  <g transform="translate(1082, 150)">
+    <rect x="0" y="0" width="470" height="540" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.4" filter="url(#shadow-drop)"/>
+    <rect x="0" y="0" width="470" height="48" rx="14" fill="#0c1220"/>
+    <path d="M 0 48 L 470 48" stroke="#202b3f" stroke-width="1.2"/>
+
+    <!-- Pillar 3 Header -->
+    <rect x="16" y="12" width="24" height="24" rx="6" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="1"/>
+    <path d="M 22 24 L 34 24 M 28 18 L 34 24 L 28 30" fill="none" stroke="#34d399" stroke-width="1.5"/>
+    <text x="48" y="28" fill="#f8fafc" font-size="14" font-weight="700">3. Conmutación 1-Clic Sin Fricción</text>
+    <rect x="340" y="14" width="114" height="20" rx="4" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+    <text x="354" y="28" fill="#34d399" font-size="10" font-family="ui-monospace, monospace">Failover Engine</text>
+
+    <!-- Content 3 -->
+    <g transform="translate(20, 68)">
+      <!-- Alternative Discovery -->
+      <rect x="0" y="0" width="430" height="110" rx="8" fill="#07090e" stroke="#10b981" stroke-width="1"/>
+      <text x="14" y="22" fill="#34d399" font-size="11" font-weight="700" font-family="ui-monospace, monospace">DESCUBRIMIENTO DE CUENTAS ALTERNATIVAS</text>
+      <text x="14" y="42" fill="#e2e8f0" font-size="11">Detecta en milisegundos cuentas listas de otro proveedor:</text>
+      <rect x="14" y="52" width="402" height="44" rx="4" fill="#162035"/>
+      <text x="22" y="69" fill="#94a3b8" font-size="10" font-family="ui-monospace, monospace">alternative = accounts.find(a =&gt; a.status === 'connected'</text>
+      <text x="22" y="85" fill="#34d399" font-size="10" font-family="ui-monospace, monospace">&amp;&amp; a.provider !== activeAccount?.provider)</text>
+
+      <!-- Zero Disruption -->
+      <g transform="translate(0, 126)">
+        <rect x="0" y="0" width="430" height="154" rx="8" fill="#07090e" stroke="#202b3f" stroke-width="1.2"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700" font-family="ui-monospace, monospace">TRANSICIÓN SIN PÉRDIDA DE CONVERSACIÓN</text>
+        <text x="14" y="42" fill="#e2e8f0" font-size="11">El failover no reinicia el chat ni vacía el contexto:</text>
+
+        <rect x="14" y="52" width="402" height="38" rx="6" fill="#162035"/>
+        <text x="22" y="69" fill="#22d3ee" font-size="10" font-family="ui-monospace, monospace">postToHost({ command: 'updateSession', patch: { profileId } })</text>
+        <text x="22" y="82" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">Preserva historial, scratchpad, CWD y variables de entorno</text>
+
+        <!-- Visual flow -->
+        <g transform="translate(14, 100)">
+          <rect x="0" y="0" width="180" height="38" rx="6" fill="#0c1220" stroke="#f59e0b" stroke-width="1"/>
+          <text x="10" y="16" fill="#fbbf24" font-size="10" font-weight="700">Claude CLI (94%)</text>
+          <text x="10" y="30" fill="#64748b" font-size="9">Saturado</text>
+
+          <rect x="222" y="0" width="180" height="38" rx="6" fill="#0c1220" stroke="#10b981" stroke-width="1"/>
+          <text x="232" y="16" fill="#34d399" font-size="10" font-weight="700">Antigravity (12%)</text>
+          <text x="232" y="30" fill="#64748b" font-size="9">Conectado y disponible</text>
+        </g>
+      </g>
+
+      <!-- Zero-Account Notice Box -->
+      <g transform="translate(0, 296)">
+        <rect x="0" y="0" width="430" height="132" rx="8" fill="#0c1220" stroke="#06b6d4" stroke-width="1"/>
+        <text x="14" y="22" fill="#22d3ee" font-size="11" font-weight="700">ESTADO SIN CUENTAS (AccountNotice.tsx)</text>
+        <text x="14" y="42" fill="#94a3b8" font-size="11">Guía al usuario cuando no hay CLI o perfiles configurados:</text>
+        <rect x="14" y="54" width="402" height="34" rx="4" fill="#162035"/>
+        <text x="22" y="69" fill="#fbbf24" font-size="10" font-family="ui-monospace, monospace">"No hay cuentas vinculadas. Vincula una suscripción..."</text>
+        <text x="22" y="81" fill="#38bdf8" font-size="9" font-family="ui-monospace, monospace">Botón directo [Vincular Claude] / [Iniciar sesión]</text>
+        <text x="14" y="112" fill="#64748b" font-size="9">Cero estados vacíos ciegos sin acción correctiva inmediata.</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ================= BOTTOM TELEMETRY / ARCHITECTURE SUMMARY BAR ================= -->
+  <g transform="translate(48, 712)">
+    <rect x="0" y="0" width="1504" height="152" rx="12" fill="#0a0e17" stroke="#202b3f" stroke-width="1.2" filter="url(#shadow-drop)"/>
+
+    <g transform="translate(24, 20)">
+      <text x="0" y="18" fill="#f8fafc" font-size="14" font-weight="700" letter-spacing="0.5">RESUMEN DE ELEVACIÓN &amp; SISTEMA DE ENRUTAMIENTO MULTI-PROVEEDOR</text>
+
+      <g transform="translate(0, 36)">
+        <!-- Layer 1 -->
+        <rect x="0" y="0" width="280" height="66" rx="8" fill="#07090e" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">CAPA 1: #07090e</text>
+        <text x="14" y="40" fill="#94a3b8" font-size="10">Catalog Search &amp; Model Entry Box</text>
+        <text x="14" y="54" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">Input neutral de alta legibilidad</text>
+
+        <!-- Layer 2 -->
+        <rect x="296" y="0" width="280" height="66" rx="8" fill="#0a0e17" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">CAPA 2: #0a0e17</text>
+        <text x="14" y="40" fill="#94a3b8" font-size="10">Modal Shell &amp; Quota Alert Banner</text>
+        <text x="14" y="54" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">Superficie base de elevación</text>
+
+        <!-- Layer 3 -->
+        <rect x="592" y="0" width="280" height="66" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">CAPA 3: #0c1220</text>
+        <text x="14" y="40" fill="#94a3b8" font-size="10">Provider Badges &amp; Active Model Inset</text>
+        <text x="14" y="54" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">Claude, Antigravity, Copilot</text>
+
+        <!-- Layer 4 -->
+        <rect x="888" y="0" width="280" height="66" rx="8" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">CAPA 4: #162035</text>
+        <text x="14" y="40" fill="#94a3b8" font-size="10">Interactive Hover &amp; Filter Chips</text>
+        <text x="14" y="54" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">Filtros Argon, Flash, Opus, Sonnet</text>
+
+        <!-- Layer 5 -->
+        <rect x="1184" y="0" width="272" height="66" rx="8" fill="#202b3f" stroke="#06b6d4" stroke-width="1"/>
+        <text x="14" y="22" fill="#22d3ee" font-size="11" font-weight="700">CAPA 5: #202b3f</text>
+        <text x="14" y="40" fill="#e2e8f0" font-size="10">Bordes estructurales &amp; Divisores</text>
+        <text x="14" y="54" fill="#94a3b8" font-size="9" font-family="ui-monospace, monospace">Contrast ratio &gt; 7:1 WCAG AAA</text>
+      </g>
+    </g>
+  </g>
+</svg>

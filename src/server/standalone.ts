@@ -25,14 +25,16 @@ import { readJsonFile } from '../storage/json-file';
 import { SessionStore } from '../storage/session-store';
 import { TelemetryStore } from '../storage/telemetry-store';
 import { runProjectTests } from '../host/test-runner';
+import { isSystemOrAppDir } from '../host/safe-path';
 import { HubServer } from './hub-server';
 
 // Shim global de VS Code para permitir ejecución headless fuera del editor
 if (typeof (globalThis as any).vscode === 'undefined') {
+  const initialCwd = !isSystemOrAppDir(process.cwd()) ? process.cwd() : undefined;
   (globalThis as any).vscode = {
     workspace: {
-      workspaceFolders: [{ uri: { fsPath: process.cwd() } }],
-      asRelativePath: (p: any) => path.relative(process.cwd(), typeof p === 'string' ? p : (p?.fsPath ?? '')),
+      workspaceFolders: initialCwd ? [{ uri: { fsPath: initialCwd } }] : [],
+      asRelativePath: (p: any) => path.relative(initialCwd ?? process.cwd(), typeof p === 'string' ? p : (p?.fsPath ?? '')),
       openTextDocument: async () => ({}),
       getConfiguration: () => ({ get: () => undefined }),
       registerTextDocumentContentProvider: () => ({ dispose: () => {} })

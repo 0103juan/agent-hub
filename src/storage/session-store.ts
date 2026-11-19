@@ -1,4 +1,5 @@
 import * as path from 'path';
+import { isSystemOrAppDir } from '../host/safe-path';
 import { DEFAULT_MODEL_ID, DEFAULT_PROFILE_ID } from '../shared/model-selection';
 import { ArchivedSessionInfo, ChatMessage, ConversationSession, ProtocolRole, ReasoningEffort } from '../shared/types';
 import { DebouncedJsonFile, readJsonFile, writeJsonFile } from './json-file';
@@ -17,6 +18,8 @@ export interface NewSessionOptions {
   taskSlug?: string;
   protocolRole?: ProtocolRole;
   squad?: string;
+  squadName?: string;
+  title?: string;
   approveStages?: boolean;
   isolatedBranch?: string;
   isolatedBase?: string;
@@ -30,8 +33,15 @@ export function migrateSession(stored: StoredSession): ConversationSession {
   const { modelName, ...session } = stored;
   const rawModel = session.modelId ?? modelName ?? DEFAULT_MODEL_ID;
   const isDisplayName = /\s/.test(rawModel);
+  const cleanPath = session.projectPath && !isSystemOrAppDir(session.projectPath) ? session.projectPath : undefined;
+  const cleanName = (session.projectName === 'AgentHub' || session.projectName === 'System32' || session.projectName === 'system32') && !cleanPath
+    ? undefined
+    : session.projectName;
+
   return {
     ...session,
+    projectName: cleanName,
+    projectPath: cleanPath,
     modelId: isDisplayName ? DEFAULT_MODEL_ID : rawModel.replace(/-(low|medium|high)$/, ''),
     profileId: session.profileId === 'google-workspace' ? 'google-main' : session.profileId,
     loopConfig: session.loopConfig && { ...session.loopConfig, active: false },
@@ -118,12 +128,13 @@ export class SessionStore {
     const now = Date.now();
     const session: ConversationSession = {
       id: `session-${now}-${Math.random().toString(36).substring(2, 7)}`,
-      title: options.taskSlug ?? DEFAULT_TITLE,
+      title: options.title ?? options.taskSlug ?? DEFAULT_TITLE,
       projectName: options.projectName,
       projectPath: options.projectPath,
       taskSlug: options.taskSlug,
       protocolRole: options.protocolRole,
       squad: options.squad,
+      squadName: options.squadName,
       approveStages: options.approveStages,
       isolatedBranch: options.isolatedBranch,
       isolatedBase: options.isolatedBase,
@@ -169,7 +180,7 @@ export class SessionStore {
   /** Ruta del repo de un proyecto, tomada de cualquiera de sus conversaciones. */
   public projectPath(projectName: string): string | undefined {
     // Una copia aislada de un equipo no es la carpeta del proyecto.
-    return this.list().find((session) => session.projectName === projectName && session.projectPath && !session.isolatedBranch)?.projectPath;
+    return this.list().find((session) => session.projectName === projectName && session.projectPath && !isSystemOrAppDir(session.projectPath) && !session.isolatedBranch)?.projectPath;
   }
 
   public renameProject(from: string, to: string): void {

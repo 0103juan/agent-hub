@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentHub // Project Tree, Notifications &amp; File Synergy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-void: #07090e;
+      --bg-carbon: #0a0e17;
+      --bg-surface: #0c1220;
+      --bg-card: #0e131f;
+      --border-subtle: #202b3f;
+      --border-strong: #202b3f;
+      --cyan-primary: #06b6d4;
+      --cyan-glow: rgba(6, 182, 212, 0.45);
+      --emerald-accent: #10b981;
+      --amber-accent: #f59e0b;
+      --rose-accent: #f43f5e;
+      --violet-accent: #8b5cf6;
+      --text-main: #f8fafc;
+      --text-muted: #cbd5e1;
+      --text-dim: #94a3b8;
+      --text-faint: #64748b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-void);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .font-mono { font-family: 'Fira Code', monospace; }
+
+    .grid-bg {
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(6, 182, 212, 0.08), transparent 60%),
+        linear-gradient(to right, rgba(22, 32, 53, 0.35) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(22, 32, 53, 0.35) 1px, transparent 1px);
+      background-size: 100% 100%, 28px 28px, 28px 28px;
+    }
+
+    @keyframes modalPop {
+      0% { opacity: 0; transform: scale(0.96) translateY(6px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .animate-modal-pop {
+      animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 10.5px;
+      font-family: 'Fira Code', monospace;
+      font-weight: 600;
+      border: 1px solid;
+    }
+
+    .badge-cyan { background: rgba(6, 182, 212, 0.12); color: #67e8f9; border-color: rgba(6, 182, 212, 0.35); }
+    .badge-emerald { background: rgba(16, 185, 129, 0.12); color: #6ee7b7; border-color: rgba(16, 185, 129, 0.35); }
+    .badge-amber { background: rgba(245, 158, 11, 0.12); color: #fcd34d; border-color: rgba(245, 158, 11, 0.35); }
+    .badge-rose { background: rgba(244, 63, 94, 0.12); color: #fda4af; border-color: rgba(244, 63, 94, 0.35); }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+    .btn:active { transform: scale(0.97); }
+
+    .hud-card {
+      background: var(--bg-carbon);
+      border: 1px solid var(--border-strong);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--cyan-primary); }
+  </style>
+</head>
+<body class="grid-bg">
+  <div style="max-width: 1340px; margin: 0 auto; padding: 24px 20px;">
+
+    <!-- Top Master Bar -->
+    <header style="background: var(--bg-carbon); border: 1px solid var(--border-strong); border-radius: 14px; padding: 16px 20px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(6, 182, 212, 0.12); border: 1.5px solid var(--cyan-primary); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 16px var(--cyan-glow);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--cyan-primary)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+        </div>
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <h1 style="font-size: 16px; font-weight: 800;">AgentHub // Project Files, Grep &amp; Notification Suite</h1>
+            <span class="badge badge-cyan">Semantic Coding</span>
+            <span class="badge badge-emerald">60fps Drawer</span>
+          </div>
+          <p style="color: var(--text-dim); font-size: 11.5px;">
+            Árbol de archivos con cromática por extensión, búsqueda reactiva grep con marcadores L{line} y campana con apertura elástica.
+          </p>
+        </div>
+      </div>
+
+      <!-- Live Notification Bell Trigger in Header -->
+      <div style="position: relative;">
+        <button id="btnBell" class="btn" style="background: #0c1220; border: 1px solid var(--border-strong); color: var(--text-muted); position: relative; padding: 8px 12px;" onclick="toggleNotifications()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+          <span style="font-size: 11.5px; font-weight: 600;">Avisos</span>
+          <span id="notifBadge" style="position: absolute; top: -6px; right: -6px; background: var(--cyan-primary); color: #07090e; font-size: 9.5px; font-weight: 800; font-family: 'Fira Code', monospace; padding: 1px 6px; border-radius: 10px; box-shadow: 0 0 8px var(--cyan-glow);">3</span>
+        </button>
+
+        <!-- Notification Drawer Popover -->
+        <div id="notifPopover" class="animate-modal-pop" style="display: none; position: absolute; right: 0; top: calc(100% + 8px); width: 340px; background: var(--bg-carbon); border: 1px solid var(--border-strong); border-radius: 12px; padding: 10px; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.85); z-index: 200;">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 8px; border-bottom: 1px solid var(--border-subtle); margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--emerald-accent);"></span>
+              <span style="font-size: 10.5px; font-family: 'Fira Code', monospace; color: var(--text-dim); font-weight: 700;">3 AVISOS ACTIVOS</span>
+            </div>
+            <button style="background: none; border: none; font-size: 10.5px; color: var(--cyan-primary); cursor: pointer;" onclick="clearNotifs()">Limpiar todo</button>
+          </div>
+
+          <div id="notifList" style="display: flex; flex-direction: column; gap: 6px; max-height: 260px; overflow-y: auto;">
+            <!-- Notif 1 -->
+            <div style="background: #07090e; border: 1px solid var(--border-strong); border-radius: 8px; padding: 8px 10px; cursor: pointer;">
+              <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;">
+                <span style="color: var(--emerald-accent); font-size: 10px;">✓</span>
+                <span style="font-weight: 700; font-size: 11px; color: #fff;">Flujo de Diseño completado</span>
+              </div>
+              <div style="font-size: 10.5px; color: var(--text-dim);">Entregados diagramas SVG y showcase interactivo.</div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: 9.5px; font-family: 'Fira Code', monospace; color: var(--text-faint);">
+                <span>hace 1 min</span>
+                <span style="color: var(--cyan-primary);">Ir a sesión →</span>
+              </div>
+            </div>
+
+            <!-- Notif 2 -->
+            <div style="background: #191410; border: 1px solid rgba(245,158,11,0.3); border-radius: 8px; padding: 8px 10px; cursor: pointer;">
+              <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;">
+                <span style="color: var(--amber-accent); font-size: 10px;">!</span>
+                <span style="font-weight: 700; font-size: 11px; color: #fcd34d;">Cuota 5h al 88%</span>
+              </div>
+              <div style="font-size: 10.5px; color: var(--text-dim);">Cambio suave de failover preparado para Claude.</div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: 9.5px; font-family: 'Fira Code', monospace; color: var(--text-faint);">
+                <span>hace 7 min</span>
+                <span style="color: var(--amber-accent);">Ver Telemetría →</span>
+              </div>
+            </div>
+
+            <!-- Notif 3 -->
+            <div style="background: #07090e; border: 1px solid var(--border-strong); border-radius: 8px; padding: 8px 10px; cursor: pointer;">
+              <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;">
+                <span style="color: var(--cyan-primary); font-size: 10px;">⌥</span>
+                <span style="font-weight: 700; font-size: 11px; color: #fff;">Auto Commit generado</span>
+              </div>
+              <div style="font-size: 10.5px; color: var(--text-dim);">feat(hud): semantic file extension icons</div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: 9.5px; font-family: 'Fira Code', monospace; color: var(--text-faint);">
+                <span>hace 15 min</span>
+                <span style="color: var(--cyan-primary);">Copiar →</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Live Demonstration: Sidebar Mockup + Grep Search Explorer -->
+    <main style="display: grid; grid-template-columns: 340px 1fr; gap: 24px; align-items: start;">
+
+      <!-- Column 1: Live ProjectFilesSidebar Component -->
+      <aside class="hud-card" style="box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        <!-- Sidebar Header Tabs -->
+        <div style="padding: 10px 12px; border-bottom: 1px solid var(--border-strong); background: var(--bg-card); display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; gap: 4px; background: #07090e; padding: 3px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+            <button id="tabGit" style="padding: 4px 10px; border-radius: 6px; font-size: 10.5px; font-weight: 700; border: none; cursor: pointer; background: transparent; color: var(--text-dim);" onclick="switchFilesTab('git')">Git (4)</button>
+            <button id="tabFiles" style="padding: 4px 10px; border-radius: 6px; font-size: 10.5px; font-weight: 700; border: none; cursor: pointer; background: var(--cyan-primary); color: #07090e;" onclick="switchFilesTab('files')">Archivos (38)</button>
+          </div>
+          <span style="font-size: 10.5px; color: var(--text-dim); font-family: 'Fira Code', monospace;">agent-hub</span>
+        </div>
+
+        <!-- Search Bar with Mode Toggle -->
+        <div style="padding: 10px 12px; border-bottom: 1px solid var(--border-subtle); background: rgba(14,19,31,0.5);">
+          <div style="background: #07090e; border: 1px solid var(--border-strong); border-radius: 8px; padding: 6px 10px; display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="fileSearchInput" placeholder="Buscar archivos o grep..." oninput="onSearchInput(this.value)"
+                   style="width: 100%; background: none; border: none; font-size: 11px; color: #fff; outline: none;">
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px; font-size: 10px;">
+            <span style="color: var(--text-faint);">Modo:</span>
+            <button id="modeName" class="badge badge-cyan" style="cursor: pointer;" onclick="setSearchMode('name')">Nombre</button>
+            <button id="modeGrep" class="badge" style="background: transparent; color: var(--text-dim); border-color: var(--border-strong); cursor: pointer;" onclick="setSearchMode('grep')">Contenido (Grep)</button>
+          </div>
+        </div>
+
+        <!-- File Tree Items with Semantic Color Coding -->
+        <div id="fileTreeContainer" style="padding: 8px; max-height: 480px; overflow-y: auto; display: flex; flex-direction: column; gap: 3px;">
+          <!-- Folder item -->
+          <div style="display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; background: #0c1220; font-size: 11px; font-weight: 700; color: #fff; cursor: pointer;">
+            <span style="color: var(--cyan-primary);">📁</span>
+            <span class="font-mono">src/webview/components</span>
+          </div>
+
+          <!-- TypeScript (.tsx) -> Cyan -->
+          <div class="tree-item" style="display: flex; align-items: center; justify-content: space-between; padding: 5px 8px 5px 22px; border-radius: 6px; font-size: 11px; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='#131927'" onmouseout="this.style.background='transparent'" onclick="previewCode('ProjectFilesSidebar.tsx', 'ts')">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="color: #38bdf8;">📄</span>
+              <span class="font-mono" style="color: #cbd5e1;">ProjectFilesSidebar.tsx</span>
+            </div>
+            <span class="badge badge-cyan" style="font-size: 8.5px; padding: 1px 4px;">TSX</span>
+          </div>
+
+          <!-- TypeScript (.tsx) -> Cyan -->
+          <div class="tree-item" style="display: flex; align-items: center; justify-content: space-between; padding: 5px 8px 5px 22px; border-radius: 6px; font-size: 11px; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='#131927'" onmouseout="this.style.background='transparent'" onclick="previewCode('Notifications.tsx', 'ts')">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="color: #38bdf8;">📄</span>
+              <span class="font-mono" style="color: #cbd5e1;">Notifications.tsx</span>
+            </div>
+            <span class="badge badge-cyan" style="font-size: 8.5px; padding: 1px 4px;">TSX</span>
+          </div>
+
+          <!-- JavaScript (.js) -> Amber -->
+          <div class="tree-item" style="display: flex; align-items: center; justify-content: space-between; padding: 5px 8px 5px 22px; border-radius: 6px; font-size: 11px; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='#131927'" onmouseout="this.style.background='transparent'" onclick="previewCode('tailwind.config.js', 'js')">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="color: #fde047;">📄</span>
+              <span class="font-mono" style="color: #cbd5e1;">tailwind.config.js</span>
+            </div>
+            <span class="badge badge-amber" style="font-size: 8.5px; padding: 1px 4px;">JS</span>
+          </div>
+
+          <!-- JSON (.json) -> Gold -->
+          <div class="tree-item" style="display: flex; align-items: center; justify-content: space-between; padding: 5px 8px 5px 22px; border-radius: 6px; font-size: 11px; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='#131927'" onmouseout="this.style.background='transparent'" onclick="previewCode('package.json', 'json')">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="color: #fbbf24;">📄</span>
+              <span class="font-mono" style="color: #cbd5e1;">package.json</span>
+            </div>
+            <span class="badge badge-amber" style="font-size: 8.5px; padding: 1px 4px;">JSON</span>
+          </div>
+
+          <!-- CSS (.css) -> Rose -->
+          <div class="tree-item" style="display: flex; align-items: center; justify-content: space-between; padding: 5px 8px 5px 22px; border-radius: 6px; font-size: 11px; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='#131927'" onmouseout="this.style.background='transparent'" onclick="previewCode('styles.css', 'css')">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="color: #f43f5e;">📄</span>
+              <span class="font-mono" style="color: #cbd5e1;">styles.css</span>
+            </div>
+            <span class="badge badge-rose" style="font-size: 8.5px; padding: 1px 4px;">CSS</span>
+          </div>
+
+          <!-- Markdown (.md) -> Emerald -->
+          <div class="tree-item" style="display: flex; align-items: center; justify-content: space-between; padding: 5px 8px 5px 22px; border-radius: 6px; font-size: 11px; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='#131927'" onmouseout="this.style.background='transparent'" onclick="previewCode('README.md', 'md')">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="color: #34d399;">📄</span>
+              <span class="font-mono" style="color: #cbd5e1;">README.md</span>
+            </div>
+            <span class="badge badge-emerald" style="font-size: 8.5px; padding: 1px 4px;">MD</span>
+          </div>
+
+          <!-- Assets (.svg) -> Purple -->
+          <div class="tree-item" style="display: flex; align-items: center; justify-content: space-between; padding: 5px 8px 5px 22px; border-radius: 6px; font-size: 11px; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='#131927'" onmouseout="this.style.background='transparent'" onclick="previewCode('logo.svg', 'svg')">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="color: #a78bfa;">📄</span>
+              <span class="font-mono" style="color: #cbd5e1;">logo.svg</span>
+            </div>
+            <span class="badge" style="background: rgba(167,139,250,0.12); color: #c4b5fd; border-color: rgba(167,139,250,0.35); font-size: 8.5px; padding: 1px 4px;">SVG</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Column 2: Interactive Code Inspector & Grep Result Details -->
+      <section style="display: flex; flex-direction: column; gap: 20px;">
+        
+        <!-- Live Code Viewer Card -->
+        <div class="hud-card" style="padding: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border-subtle);">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 11px; color: var(--text-faint); font-family: 'Fira Code', monospace;">PREVISUALIZACIÓN DE ARCHIVO //</span>
+              <span id="previewTitle" class="font-mono font-bold" style="color: #fff; font-size: 12.5px;">ProjectFilesSidebar.tsx</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-secondary" style="font-size: 10.5px; padding: 4px 10px;" onclick="copyCode()">Copiar Código</button>
+              <button class="btn" style="background: var(--cyan-primary); color: #07090e; font-size: 10.5px; font-weight: 700; padding: 4px 10px;">Adjuntar al Chat (@)</button>
+            </div>
+          </div>
+
+          <!-- Code Snippet Display -->
+          <pre id="codeBlock" style="background: #07090e; border: 1px solid var(--border-strong); border-radius: 8px; padding: 14px; font-family: 'Fira Code', monospace; font-size: 11.5px; line-height: 1.6; color: var(--text-muted); overflow-x: auto; min-height: 220px;">
+<span style="color: #c084fc;">const</span> <span style="color: #60a5fa;">getFileColor</span> = (name: <span style="color: #38bdf8;">string</span>) =&gt; {
+  <span style="color: #c084fc;">const</span> ext = name.slice(name.lastIndexOf(<span style="color: #86efac;">'.'</span>)).toLowerCase();
+  <span style="color: #c084fc;">switch</span> (ext) {
+    <span style="color: #c084fc;">case</span> <span style="color: #86efac;">'.ts'</span>:
+    <span style="color: #c084fc;">case</span> <span style="color: #86efac;">'.tsx'</span>:
+      <span style="color: #c084fc;">return</span> <span style="color: #86efac;">'text-cyan-400'</span>;
+    <span style="color: #c084fc;">case</span> <span style="color: #86efac;">'.js'</span>:
+    <span style="color: #c084fc;">case</span> <span style="color: #86efac;">'.jsx'</span>:
+      <span style="color: #c084fc;">return</span> <span style="color: #86efac;">'text-amber-400'</span>;
+    <span style="color: #c084fc;">case</span> <span style="color: #86efac;">'.json'</span>:
+      <span style="color: #c084fc;">return</span> <span style="color: #86efac;">'text-amber-300'</span>;
+    <span style="color: #c084fc;">case</span> <span style="color: #86efac;">'.css'</span>:
+      <span style="color: #c084fc;">return</span> <span style="color: #86efac;">'text-rose-400'</span>;
+    <span style="color: #c084fc;">default</span>:
+      <span style="color: #c084fc;">return</span> <span style="color: #86efac;">'text-slate-400'</span>;
+  }
+};</pre>
+        </div>
+
+        <!-- Grep Features Summary Matrix -->
+        <div class="hud-card" style="padding: 20px;">
+          <h2 style="font-size: 13px; font-weight: 800; color: var(--emerald-accent); font-family: 'Fira Code', monospace; margin-bottom: 12px;">
+            CARACTERÍSTICAS DEL MOTOR DE GREP &amp; FILE SYNERGY
+          </h2>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px;">
+            <div style="background: #07090e; border: 1px solid var(--border-subtle); border-radius: 8px; padding: 12px;">
+              <div style="font-weight: 700; color: #fff; margin-bottom: 4px;">L{Line} Marcadores Directos</div>
+              <p style="font-size: 11.5px; color: var(--text-dim);">
+                Cada resultado de contenido indexa el número exacto de línea para saltar de inmediato al contexto del archivo.
+              </p>
+            </div>
+            <div style="background: #07090e; border: 1px solid var(--border-subtle); border-radius: 8px; padding: 12px;">
+              <div style="font-weight: 700; color: #fff; margin-bottom: 4px;">Debounce Táctico de 250ms</div>
+              <p style="font-size: 11.5px; color: var(--text-dim);">
+                Previene bloqueos de UI o llamadas excesivas a procesos node mientras el usuario escribe su consulta.
+              </p>
+            </div>
+            <div style="background: #07090e; border: 1px solid var(--border-subtle); border-radius: 8px; padding: 12px;">
+              <div style="font-weight: 700; color: #fff; margin-bottom: 4px;">Smart Triggers en Git</div>
+              <p style="font-size: 11.5px; color: var(--text-dim);">
+                Filtros directos por estado M, A, D, ? con generación asistida de commits convencionales y auditoría de riesgos.
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+  <script>
+    // Tab Switching
+    function switchFilesTab(tab) {
+      const btnGit = document.getElementById('tabGit');
+      const btnFiles = document.getElementById('tabFiles');
+      if (tab === 'git') {
+        btnGit.style.background = 'var(--cyan-primary)';
+        btnGit.style.color = '#07090e';
+        btnFiles.style.background = 'transparent';
+        btnFiles.style.color = 'var(--text-dim)';
+      } else {
+        btnFiles.style.background = 'var(--cyan-primary)';
+        btnFiles.style.color = '#07090e';
+        btnGit.style.background = 'transparent';
+        btnGit.style.color = 'var(--text-dim)';
+      }
+    }
+
+    // Search Mode Toggle
+    function setSearchMode(mode) {
+      const mName = document.getElementById('modeName');
+      const mGrep = document.getElementById('modeGrep');
+      if (mode === 'name') {
+        mName.className = 'badge badge-cyan';
+        mGrep.className = 'badge';
+        mGrep.style.background = 'transparent';
+        mGrep.style.color = 'var(--text-dim)';
+      } else {
+        mGrep.className = 'badge badge-cyan';
+        mName.className = 'badge';
+        mName.style.background = 'transparent';
+        mName.style.color = 'var(--text-dim)';
+      }
+    }
+
+    function onSearchInput(val) {
+      const items = document.querySelectorAll('.tree-item');
+      items.forEach(el => {
+        el.style.display = el.innerText.toLowerCase().includes(val.toLowerCase()) ? 'flex' : 'none';
+      });
+    }
+
+    // Preview Code Snippet
+    function previewCode(fileName, type) {
+      document.getElementById('previewTitle').innerText = fileName;
+      const codeBlock = document.getElementById('codeBlock');
+      if (type === 'ts') {
+        codeBlock.innerHTML = `<span style="color: #c084fc;">export const</span> <span style="color: #60a5fa;">Notifications</span>: React.FC&lt;Props&gt; = ({ notices }) =&gt; {\n  <span style="color: #c084fc;">const</span> [open, setOpen] = useState(<span style="color: #fde047;">false</span>);\n  <span style="color: #c084fc;">return</span> (\n    &lt;<span style="color: #f43f5e;">div</span> className=<span style="color: #86efac;">"animate-modal-pop"</span>&gt;\n      &lt;<span style="color: #f43f5e;">Bell</span> className=<span style="color: #86efac;">"text-cyan-400"</span> /&gt;\n    &lt;/<span style="color: #f43f5e;">div</span>&gt;\n  );\n};`;
+      } else if (type === 'css') {
+        codeBlock.innerHTML = `<span style="color: #38bdf8;">@keyframes</span> modalPop {\n  <span style="color: #fde047;">0%</span> { opacity: <span style="color: #fde047;">0</span>; transform: scale(<span style="color: #fde047;">0.96</span>) translateY(<span style="color: #fde047;">6px</span>); }\n  <span style="color: #fde047;">100%</span> { opacity: <span style="color: #fde047;">1</span>; transform: scale(<span style="color: #fde047;">1</span>) translateY(<span style="color: #fde047;">0</span>); }\n}\n<span style="color: #6ee7b7;">.animate-modal-pop</span> {\n  animation: modalPop <span style="color: #fde047;">0.2s</span> cubic-bezier(<span style="color: #fde047;">0.16</span>, <span style="color: #fde047;">1</span>, <span style="color: #fde047;">0.3</span>, <span style="color: #fde047;">1</span>) forwards;\n}`;
+      } else if (type === 'json') {
+        codeBlock.innerHTML = `{\n  <span style="color: #38bdf8;">"name"</span>: <span style="color: #86efac;">"agent-hub"</span>,\n  <span style="color: #38bdf8;">"version"</span>: <span style="color: #86efac;">"0.1.0"</span>,\n  <span style="color: #38bdf8;">"scripts"</span>: {\n    <span style="color: #38bdf8;">"test:flows"</span>: <span style="color: #86efac;">"esbuild tests/flows.test.ts ... &amp;&amp; node --test"</span>\n  }\n}`;
+      } else {
+        codeBlock.innerHTML = `<span style="color: #64748b;">// Contenido de ${fileName} cargado desde el árbol de proyecto.</span>`;
+      }
+    }
+
+    function copyCode() {
+      const code = document.getElementById('codeBlock').innerText;
+      navigator.clipboard.writeText(code).then(() => alert('Código copiado al portapapeles.'));
+    }
+
+    // Notifications Toggle
+    function toggleNotifications() {
+      const pop = document.getElementById('notifPopover');
+      pop.style.display = pop.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function clearNotifs() {
+      document.getElementById('notifList').innerHTML = '<div style="padding: 16px; text-align: center; color: var(--text-faint); font-family: monospace;">Sin avisos pendientes.</div>';
+      document.getElementById('notifBadge').style.display = 'none';
+    }
+
+    window.addEventListener('click', (e) => {
+      if (!e.target.closest('#btnBell') && !e.target.closest('#notifPopover')) {
+        document.getElementById('notifPopover').style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>

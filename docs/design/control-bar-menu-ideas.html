@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AgentHub · 10 ideas para la barra de agente de cada columna</title>
+<style>
+  :root {
+    --bg: #07090e; --panel: #0a0e17; --raised: #0c1220; --hover: #162035; --line: #202b3f;
+    --text: #e2e8f0; --soft: #cbd5e1; --muted: #94a3b8; --dim: #64748b;
+    --cyan: #22d3ee; --cyan-d: #0891b2; --green: #34d399; --amber: #fbbf24; --red: #f87171;
+    --mono: "JetBrains Mono", ui-monospace, "Cascadia Code", Consolas, monospace;
+    --sans: Inter, "Segoe UI", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 13px/1.45 var(--sans); }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  button:focus-visible, input:focus-visible { outline: 1px solid var(--cyan); outline-offset: 1px; }
+  header.page { padding: 28px 32px 8px; max-width: 1500px; margin: 0 auto; }
+  header.page h1 { margin: 0 0 4px; font-size: 20px; }
+  header.page p { margin: 0; color: var(--muted); max-width: 820px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(470px, 1fr)); gap: 22px; padding: 20px 32px 48px; max-width: 1500px; margin: 0 auto; }
+  .idea { display: flex; flex-direction: column; gap: 10px; }
+  .idea h2 { margin: 0; font-size: 14px; display: flex; gap: 8px; align-items: baseline; }
+  .idea h2 .n { font: 600 11px var(--mono); color: var(--cyan); }
+  .idea .what { margin: 0; color: var(--soft); }
+  .idea .when { margin: 0; color: var(--dim); font-size: 12px; }
+  .when b { color: var(--muted); font-weight: 600; }
+
+  /* Columna simulada al ancho real */
+  .col { width: 100%; max-width: 470px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); overflow: hidden; display: flex; flex-direction: column; }
+  .col-head { display: flex; align-items: center; gap: 8px; padding: 7px 12px; font-size: 12px; color: var(--soft); border-bottom: 1px solid var(--line); background: #07090ef2; }
+  .col-head .dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981b3; }
+  .col-head .t { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar-slot { padding: 8px 10px 0; position: relative; }
+  .chat { padding: 10px 14px; color: var(--muted); font-size: 12.5px; min-height: 92px; }
+  .chat p { margin: 0 0 6px; }
+  .chat code { font: 11px var(--mono); color: var(--cyan); background: var(--raised); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; }
+  .composer { margin: 0 10px 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; color: var(--dim); font-size: 12px; background: var(--bg); }
+
+  /* Piezas comunes */
+  .surface { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 12px; background: #0a0e17f2; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border: 1px solid var(--line); border-radius: 8px; background: var(--raised); color: var(--soft); font-size: 11.5px; white-space: nowrap; transition: background .15s, border-color .15s; }
+  .btn:hover { background: var(--hover); border-color: #334155; color: var(--text); }
+  .btn.on { border-color: #06b6d480; background: #083344aa; color: #a5f3fc; }
+  .chev { width: 9px; height: 9px; opacity: .6; flex: none; transition: transform .15s; }
+  [aria-expanded="true"] > .chev { transform: rotate(180deg); opacity: 1; }
+  .mono { font-family: var(--mono); }
+  .muted { color: var(--muted); } .dim { color: var(--dim); }
+  .grow { flex: 1; min-width: 0; }
+  .ell { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .role-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; padding: 2px 9px; border-radius: 8px; border: 1px solid; font-size: 11.5px; font-weight: 600; white-space: nowrap; }
+  .meter { display: inline-flex; align-items: center; gap: 5px; font: 600 10.5px var(--mono); color: var(--soft); }
+  .meter i { display: block; width: 34px; height: 4px; border-radius: 4px; background: #1e293b; overflow: hidden; }
+  .meter i b { display: block; height: 100%; background: var(--green); }
+  .cost { font: 600 11px var(--mono); color: var(--green); }
+  .sep { width: 1px; align-self: stretch; background: var(--line); margin: 2px 2px; }
+  .k { font: 10px var(--mono); color: var(--dim); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; }
+
+  /* Menú flotante */
+  .pop { position: fixed; z-index: 50; min-width: 220px; max-width: 360px; padding: 6px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); box-shadow: 0 18px 40px #000c; animation: pop .14s ease-out; }
+  @keyframes pop { from { opacity: 0; transform: translateY(-4px) scale(.98); } }
+  .pop h4 { margin: 2px 6px 6px; font: 600 10px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
+  .opt { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; padding: 6px 8px; border-radius: 8px; color: var(--soft); }
+  .opt:hover, .opt:focus-visible { background: var(--hover); color: var(--text); outline: none; }
+  .opt.cur { background: #083344aa; color: #a5f3fc; }
+  .opt .hint { margin-left: auto; font: 10.5px var(--mono); color: var(--dim); }
+  .opt .rec { font: 600 9px var(--mono); color: var(--amber); border: 1px solid #f59e0b55; border-radius: 4px; padding: 0 4px; }
+  .tabs { display: flex; gap: 2px; padding: 2px; margin-bottom: 6px; border: 1px solid var(--line); border-radius: 9px; background: var(--bg); }
+  .tabs button { flex: 1; padding: 4px 6px; border-radius: 7px; font-size: 11.5px; color: var(--muted); }
+  .tabs button.on { background: var(--raised); color: var(--cyan); box-shadow: inset 0 0 0 1px #06b6d455; }
+  .search { width: 100%; padding: 6px 10px; margin-bottom: 6px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--text); font: 12px var(--sans); }
+
+  /* 3 · presets */
+  .seg { display: flex; padding: 2px; gap: 2px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+  .seg button { flex: 1; padding: 5px 4px; border-radius: 8px; color: var(--muted); font-size: 11.5px; line-height: 1.2; }
+  .seg button small { display: block; font: 9.5px var(--mono); color: var(--dim); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .seg button { min-width: 0; }
+  .seg button.on { background: var(--raised); color: var(--text); box-shadow: inset 0 0 0 1px #06b6d466; }
+  .seg button.on small { color: var(--cyan); }
+  .reveal { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .2s ease; }
+  .reveal > div { overflow: hidden; }
+  .reveal.open { grid-template-rows: 1fr; }
+
+  /* 5 · anillo */
+  .ring { position: relative; width: 38px; height: 38px; flex: none; }
+  .ring svg { transform: rotate(-90deg); }
+  .ring span { position: absolute; inset: 0; display: grid; place-items: center; font: 600 9.5px var(--mono); color: var(--soft); }
+
+  /* 6 · barra de estado */
+  .status { display: flex; align-items: stretch; height: 24px; margin: 0 10px 8px; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--bg); font: 11px var(--mono); }
+  .status button { display: flex; align-items: center; gap: 5px; padding: 0 8px; color: var(--muted); border-right: 1px solid var(--line); white-space: nowrap; }
+  .status button:hover { background: var(--hover); color: var(--text); }
+  .status .fill { flex: 1; border-right: 1px solid var(--line); }
+  .status button:last-child { border-right: 0; }
+
+  /* 7 · línea que se abre */
+  .thin { border: 1px solid var(--line); border-radius: 10px; background: #0a0e17f2; transition: border-color .2s; }
+  .thin .line { display: flex; align-items: center; gap: 8px; height: 26px; padding: 0 10px; font-size: 11.5px; color: var(--muted); }
+  .thin .more { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .2s ease; }
+  .thin .more > div { overflow: hidden; }
+  .thin:hover, .thin:focus-within, .thin.pinned { border-color: #06b6d466; }
+  .thin:hover .more, .thin:focus-within .more, .thin.pinned .more { grid-template-rows: 1fr; }
+
+  /* 8 · carrusel de roles */
+  .avatars { display: flex; gap: 6px; overflow-x: auto; padding: 4px 2px 6px; scrollbar-width: thin; }
+  .av { flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid; display: grid; place-items: center; font: 700 10px var(--sans); transition: transform .15s, width .15s; opacity: .55; }
+  .av:hover { opacity: 1; transform: translateY(-1px); }
+  .av.on { opacity: 1; width: auto; padding: 0 12px 0 10px; border-radius: 16px; gap: 6px; display: inline-flex; align-items: center; }
+  .card { padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); font-size: 12px; }
+  .warn { color: var(--amber); }
+
+  /* 9 · matriz */
+  .matrix { display: grid; grid-template-columns: 96px repeat(5, 1fr); gap: 3px; font: 10.5px var(--mono); }
+  .matrix .h { color: var(--dim); text-align: center; padding: 2px 0; }
+  .matrix .r { color: var(--muted); padding: 5px 4px; white-space: nowrap; }
+  .cell { border-radius: 6px; padding: 6px 0; text-align: center; color: var(--soft); border: 1px solid transparent; }
+  .cell:hover { border-color: var(--cyan); }
+  .cell.cur { background: var(--cyan-d) !important; color: #031018; font-weight: 700; }
+
+  /* 10 · acordeón */
+  .acc { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; }
+  .acc > button { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; padding: 5px 9px; border: 1px solid var(--line); border-radius: 9px; background: var(--raised); text-align: left; min-width: 0; }
+  .acc > button small { font: 600 9.5px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--dim); }
+  .acc > button span { width: 100%; font-size: 12px; color: var(--soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .acc > button[aria-expanded="true"] { border-color: #06b6d480; background: #083344aa; }
+  .acc > button[aria-expanded="true"] small { color: var(--cyan); }
+  .panel { margin-top: 6px; padding: 8px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+  .chips { display: flex; flex-wrap: wrap; gap: 4px; }
+  .chips .btn { font-size: 11px; }
+
+  footer.page { max-width: 1500px; margin: 0 auto; padding: 0 32px 40px; color: var(--muted); }
+  footer.page h3 { color: var(--text); font-size: 14px; margin: 0 0 6px; }
+</style>
+</head>
+<body>
+<header class="page">
+  <h1>10 ideas para la barra de agente de cada columna</h1>
+  <p>Cada idea funciona: abre los menús, cambia el rol, el modelo o el esfuerzo. Todas están a 470 px, el ancho real de una columna con 4 abiertas, y usan los colores, roles y modelos de AgentHub.</p>
+</header>
+<main class="grid" id="grid"></main>
+<footer class="page">
+  <h3>Mi recomendación</h3>
+  <p>Combinar la <b>1</b> (una sola pastilla con menú por pestañas) con los <b>presets</b> de la 3 dentro de la pestaña «Agente». La barra baja a una sola línea en cualquier ancho y lo que más se cambia (el rol y el nivel de esfuerzo) queda a un clic. Si prefieres no tapar la conversación con menús flotantes, la <b>10</b> (acordeón) es la alternativa más ordenada.</p>
+</footer>
+
+<script>
+const ACCOUNTS = ['Claude (Principal)', 'Claude (Trabajo)', 'Codex', 'Gemini'];
+const MODELS = ['Claude Opus 5.5', 'Claude Sonnet 5.5', 'Claude Haiku 5.5', 'Claude Fable 5.1'];
+const EFFORTS = ['low', 'medium', 'high', 'xhigh', 'max'];
+const ROLES = [
+  { id: '', label: 'Rol libre', c: '#94a3b8', d: 'Sin instrucciones de protocolo.' },
+  { id: 'explorador', label: 'Explorador', c: '#22d3ee', m: 'Claude Haiku 5.5', e: 'low', d: 'Buscar, leer y resumir código o logs sin ensuciar el contexto principal.' },
+  { id: 'arquitecto', label: 'Arquitecto', c: '#60a5fa', m: 'Claude Sonnet 5.5', e: 'high', d: 'Especificar, planear, diseñar componentes y definir criterios de aceptación.' },
+  { id: 'tester', label: 'Tester', c: '#34d399', m: 'Claude Sonnet 5.5', e: 'medium', d: 'Escribir pruebas que confirmen el fallo inicial.' },
+  { id: 'desarrollador', label: 'Desarrollador', c: '#a78bfa', m: 'Claude Sonnet 5.5', e: 'medium', d: 'Implementar el código mínimo para que las pruebas pasen.' },
+  { id: 'revisor', label: 'Revisor', c: '#fbbf24', m: 'Claude Sonnet 5.5', e: 'high', d: 'Revisar diffs, seguridad, rendimiento y estándares.' },
+  { id: 'documentador', label: 'Documentador', c: '#2dd4bf', m: 'Claude Sonnet 5.5', e: 'low', d: 'Actualizar README, docs de API y bitácora.' },
+  { id: 'disenador', label: 'Diseñador', c: '#f472b6', m: 'Claude Opus 5.5', e: 'high', d: 'Crear y revisar identidad visual, piezas y mockups.' },
+  { id: 'coordinador', label: 'Coordinador', c: '#38bdf8', m: 'Claude Sonnet 5.5', e: 'medium', d: 'Repartir el trabajo entre agentes y pedir tu aprobación.' },
+  { id: 'depurador', label: 'Depurador', c: '#f87171', m: 'Claude Sonnet 5.5', e: 'high', d: 'Reproducir un fallo y aislar la causa raíz.' }
+];
+const PRESETS = [
+  { id: 'rapido', label: 'Rápido', m: 'Claude Haiku 5.5', e: 'low' },
+  { id: 'equilibrado', label: 'Equilibrado', m: 'Claude Sonnet 5.5', e: 'medium' },
+  { id: 'profundo', label: 'Profundo', m: 'Claude Opus 5.5', e: 'high' }
+];
+const short = (m) => m.replace('Claude ', '');
+const role = (id) => ROLES.find((r) => r.id === id) || ROLES[0];
+const CHEV = '<svg class="chev" viewBox="0 0 10 10"><path d="M2 3.5 5 6.5 8 3.5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>';
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const chip = (r) => `<span class="chip" style="color:${r.c};border-color:${r.c}80;background:${r.c}1a"><span class="role-dot" style="background:${r.c}"></span>${r.label}</span>`;
+const meter = (s) => `<span class="meter" title="Contexto usado"><i><b style="width:${s.ctx}%"></b></i>${s.ctx}%</span>`;
+const cost = (s) => `<span class="cost" title="Gasto de la sesión">$${s.cost.toFixed(2)}</span>`;
+
+/* ---------- menú flotante reutilizable ---------- */
+let openPop = null;
+function closePop() {
+  if (!openPop) return;
+  openPop.el.remove();
+  openPop.anchor?.setAttribute('aria-expanded', 'false');
+  openPop.onClose?.();
+  openPop = null;
+}
+document.addEventListener('pointerdown', (e) => { if (openPop && !openPop.el.contains(e.target) && !openPop.anchor.contains(e.target)) closePop(); });
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closePop();
+  if (!openPop || !['ArrowDown', 'ArrowUp'].includes(e.key)) return;
+  const items = [...openPop.el.querySelectorAll('.opt, .cell')];
+  const i = items.indexOf(document.activeElement);
+  items[(i + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length]?.focus();
+  e.preventDefault();
+});
+window.addEventListener('scroll', closePop, true);
+
+function pop(anchor, fill, { up = false, width, onClose } = {}) {
+  const again = openPop && openPop.anchor === anchor;
+  closePop();
+  if (again) return null;
+  const el = document.createElement('div');
+  el.className = 'pop';
+  if (width) el.style.width = width + 'px';
+  document.body.append(el);
+  openPop = { el, anchor, onClose };
+  anchor.setAttribute('aria-expanded', 'true');
+  const draw = () => { fill(el, draw); place(); };
+  const place = () => {
+    const a = anchor.getBoundingClientRect();
+    const w = el.offsetWidth, h = el.offsetHeight;
+    el.style.left = Math.max(8, Math.min(a.left, innerWidth - w - 8)) + 'px';
+    el.style.top = (up || a.bottom + h + 8 > innerHeight ? a.top - h - 6 : a.bottom + 6) + 'px';
+  };
+  draw();
+  el.querySelector('.opt.cur, .opt, input')?.focus();
+  return el;
+}
+function options(title, list, cur, pick) {
+  return `${title ? `<h4>${title}</h4>` : ''}${list.map((o, i) =>
+    `<button class="opt ${o.value === cur ? 'cur' : ''}" data-i="${i}">${o.html || esc(o.label)}${o.hint ? `<span class="hint">${o.hint}</span>` : ''}</button>`).join('')}`;
+}
+function listMenu(anchor, title, list, cur, pick, opts) {
+  pop(anchor, (el) => {
+    el.innerHTML = options(title, list, cur);
+    el.querySelectorAll('.opt').forEach((b) => (b.onclick = () => { pick(list[b.dataset.i].value); closePop(); }));
+  }, opts);
+}
+const accountList = () => ACCOUNTS.map((a) => ({ value: a, label: a }));
+const modelList = (s) => MODELS.map((m) => ({ value: m, label: m, html: `${esc(m)}${role(s.role).m === m ? ' <span class="rec">REC</span>' : ''}` }));
+const effortList = (s) => EFFORTS.map((e) => ({ value: e, label: e, html: `<span class="mono">${e}</span>${role(s.role).e === e ? ' <span class="rec">REC</span>' : ''}` }));
+const roleList = (s) => ROLES.map((r) => ({ value: r.id, label: r.label, html: `<span class="role-dot" style="background:${r.c}"></span>${r.label}`, hint: r.m ? `${short(r.m)} · ${r.e}` : '' }));
+
+/* ---------- las 10 ideas ---------- */
+const IDEAS = [
+  {
+    title: 'Una sola pastilla con menú por pestañas',
+    what: 'Toda la barra cabe en una línea: rol, modelo, esfuerzo y consumo en una pastilla. El clic abre un menú con pestañas Agente · Rol · Esfuerzo · Consumo.',
+    when: 'Máximo orden con 4 columnas; el detalle está a un clic.',
+    render(el, s, set) {
+      el.innerHTML = `<div class="surface"><button class="btn grow" style="justify-content:flex-start" aria-expanded="false">
+        <span class="role-dot" style="background:${role(s.role).c}"></span><b style="color:${role(s.role).c}">${role(s.role).label}</b>
+        <span class="dim">·</span><span class="ell">${short(s.model)}</span><span class="dim mono">${s.effort}</span>${CHEV}</button>${meter(s)}${cost(s)}</div>`;
+      let tab = 'agente';
+      el.querySelector('.btn').onclick = (e) => pop(e.currentTarget, (p, redraw) => {
+        const tabs = [['agente', 'Agente'], ['rol', 'Rol'], ['esfuerzo', 'Esfuerzo'], ['consumo', 'Consumo']];
+        const body = tab === 'agente' ? options('Cuenta', accountList(), s.account) + options('Modelo', modelList(s), s.model)
+          : tab === 'rol' ? options('', roleList(s), s.role)
+          : tab === 'esfuerzo' ? options('', effortList(s), s.effort)
+          : `<div style="padding:4px 6px">${meter(s)} <span class="muted">de 200k tokens</span><br>${cost(s)} <span class="muted">gastados · sin límite</span></div>`;
+        p.innerHTML = `<div class="tabs">${tabs.map(([k, l]) => `<button data-t="${k}" class="${k === tab ? 'on' : ''}">${l}</button>`).join('')}</div><div class="body">${body}</div>`;
+        p.querySelectorAll('[data-t]').forEach((b) => (b.onclick = () => { tab = b.dataset.t; redraw(); }));
+        const lists = tab === 'agente' ? [...accountList(), ...modelList(s)] : tab === 'rol' ? roleList(s) : effortList(s);
+        p.querySelectorAll('.opt').forEach((b, i) => (b.onclick = () => {
+          const v = lists[i].value;
+          set(tab === 'agente' ? (ACCOUNTS.includes(v) ? { account: v } : { model: v }) : tab === 'rol' ? { role: v } : { effort: v });
+          closePop();
+        }));
+      }, { width: 300 });
+    }
+  },
+  {
+    title: 'Migas navegables',
+    what: 'Cuenta › Modelo › Rol › Esfuerzo como una ruta. Cada eslabón es un desplegable; se lee de izquierda a derecha como una frase.',
+    when: 'Cuando quieres ver todo sin abrir nada y cambiar una pieza suelta.',
+    render(el, s, set) {
+      const crumb = (k, label, color) => `<button class="btn" data-k="${k}" aria-expanded="false" style="border-color:transparent;background:none;padding:3px 5px${color ? `;color:${color}` : ''}">${label}${CHEV}</button>`;
+      el.innerHTML = `<div class="surface" style="gap:0;flex-wrap:wrap">${crumb('account', 'Principal')}<span class="dim">›</span>${crumb('model', short(s.model))}<span class="dim">›</span>${crumb('role', role(s.role).label, role(s.role).c)}<span class="dim">›</span>${crumb('effort', `<span class="mono">${s.effort}</span>`)}<span class="grow"></span>${meter(s)}&nbsp;&nbsp;${cost(s)}</div>`;
+      const menus = { account: ['Cuenta', accountList], model: ['Modelo', modelList], role: ['Rol', roleList], effort: ['Esfuerzo', effortList] };
+      el.querySelectorAll('[data-k]').forEach((b) => (b.onclick = () => {
+        const [t, f] = menus[b.dataset.k];
+        listMenu(b, t, f(s), s[b.dataset.k], (v) => set({ [b.dataset.k]: v }));
+      }));
+    }
+  },
+  {
+    title: 'Presets + personalizar',
+    what: 'Tres perfiles listos (Rápido, Equilibrado, Profundo) y «Del rol», que aplica lo recomendado. Los ajustes finos se abren debajo solo si los pides.',
+    when: 'Si casi siempre cambias «cuánto piensa» y rara vez el modelo exacto.',
+    render(el, s, set) {
+      const r = role(s.role);
+      const active = PRESETS.find((p) => p.m === s.model && p.e === s.effort)?.id ?? (r.m === s.model && r.e === s.effort ? 'rol' : '');
+      el.innerHTML = `<div class="surface" style="flex-direction:column;align-items:stretch">
+        <div class="seg">${PRESETS.map((p) => `<button data-p="${p.id}" class="${active === p.id ? 'on' : ''}">${p.label}<small>${short(p.m).replace(' 5.5', '')} · ${p.e}</small></button>`).join('')}
+          <button data-p="rol" class="${active === 'rol' ? 'on' : ''}" ${r.m ? '' : 'disabled style="opacity:.4"'}>Del rol<small>${r.m ? `${short(r.m).replace(' 5.5', '')} · ${r.e}` : '—'}</small></button></div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <button class="btn" data-k="role" aria-expanded="false" style="padding:2px 6px">${chip(r)}${CHEV}</button>
+          <button class="btn" data-x aria-expanded="${s.open3 ? 'true' : 'false'}">Personalizar${CHEV}</button><span class="grow"></span>${meter(s)}${cost(s)}</div>
+        <div class="reveal ${s.open3 ? 'open' : ''}"><div><div style="display:flex;gap:4px;flex-wrap:wrap;padding-top:2px">
+          <button class="btn" data-k="account" aria-expanded="false">${s.account}${CHEV}</button>
+          <button class="btn" data-k="model" aria-expanded="false">${short(s.model)}${CHEV}</button>
+          <button class="btn mono" data-k="effort" aria-expanded="false">${s.effort}${CHEV}</button></div></div></div></div>`;
+      el.querySelectorAll('[data-p]').forEach((b) => (b.onclick = () => {
+        const p = b.dataset.p === 'rol' ? { m: r.m, e: r.e } : PRESETS.find((x) => x.id === b.dataset.p);
+        set({ model: p.m, effort: p.e });
+      }));
+      el.querySelector('[data-x]').onclick = () => set({ open3: !s.open3 });
+      const menus = { account: ['Cuenta', accountList], model: ['Modelo', modelList], role: ['Rol', roleList], effort: ['Esfuerzo', effortList] };
+      el.querySelectorAll('[data-k]').forEach((b) => (b.onclick = () => {
+        const [t, f] = menus[b.dataset.k];
+        listMenu(b, t, f(s), s[b.dataset.k], (v) => set({ [b.dataset.k]: v }));
+      }));
+    }
+  },
+  {
+    title: 'Buscador de ajustes (Ctrl K de la columna)',
+    what: 'Un botón abre un buscador: escribes «arq», «opus» o «high» y eliges con flechas y Enter. Todas las opciones en una lista agrupada.',
+    when: 'Para quien usa teclado; escala aunque haya muchos modelos y roles.',
+    render(el, s, set) {
+      el.innerHTML = `<div class="surface"><button class="btn grow" style="justify-content:flex-start" aria-expanded="false">
+        <svg width="12" height="12" viewBox="0 0 12 12"><circle cx="5" cy="5" r="3.6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="m8 8 3 3" stroke="currentColor" stroke-width="1.4"/></svg>
+        ${chip(role(s.role))}<span class="ell">${short(s.model)} · <span class="mono">${s.effort}</span></span><span class="grow"></span><span class="k">Ctrl K</span></button>${meter(s)}${cost(s)}</div>`;
+      el.querySelector('.btn').onclick = (e) => {
+        let q = '';
+        pop(e.currentTarget, (p, redraw) => {
+          const all = [
+            ...roleList(s).map((o) => ({ ...o, g: 'Rol', k: 'role' })),
+            ...modelList(s).map((o) => ({ ...o, g: 'Modelo', k: 'model' })),
+            ...effortList(s).map((o) => ({ ...o, g: 'Esfuerzo', k: 'effort' })),
+            ...accountList().map((o) => ({ ...o, g: 'Cuenta', k: 'account' }))
+          ].filter((o) => !q || (o.label + ' ' + o.g).toLowerCase().normalize('NFD').replace(/\p{M}/gu, '').includes(q));
+          if (!p.querySelector('input')) {
+            p.innerHTML = `<input class="search" placeholder="Rol, modelo, esfuerzo o cuenta…" aria-label="Buscar ajuste"><div class="res"></div>`;
+            p.querySelector('input').oninput = (ev) => { q = ev.target.value.toLowerCase().normalize('NFD').replace(/\p{M}/gu, ''); redraw(); };
+            p.querySelector('input').onkeydown = (ev) => { if (ev.key === 'Enter') p.querySelector('.opt')?.click(); };
+          }
+          let g = '';
+          p.querySelector('.res').innerHTML = all.slice(0, 12).map((o, i) => `${o.g !== g ? `<h4>${(g = o.g)}</h4>` : ''}<button class="opt ${s[o.k] === o.value ? 'cur' : ''}" data-i="${i}">${o.html || esc(o.label)}${o.hint ? `<span class="hint">${o.hint}</span>` : ''}</button>`).join('') || '<p class="dim" style="margin:6px">Sin resultados.</p>';
+          p.querySelectorAll('.opt').forEach((b) => (b.onclick = () => { const o = all[b.dataset.i]; set({ [o.k]: o.value }); closePop(); }));
+        }, { width: 320 });
+      };
+    }
+  },
+  {
+    title: 'Anillo de contexto + tarjeta que se abre',
+    what: 'El anillo muestra el contexto usado con el color del rol. Al lado, el rol en grande y el modelo debajo. El clic despliega la tarjeta completa en su sitio.',
+    when: 'Si el dato que más miras es «cuánto contexto queda».',
+    render(el, s, set) {
+      const r = role(s.role), C = 2 * Math.PI * 15;
+      el.innerHTML = `<div class="surface" style="flex-direction:column;align-items:stretch;gap:0">
+        <button style="display:flex;align-items:center;gap:10px;text-align:left" data-x aria-expanded="${s.open5 ? 'true' : 'false'}">
+          <span class="ring"><svg width="38" height="38"><circle cx="19" cy="19" r="15" fill="none" stroke="#1e293b" stroke-width="4"/><circle cx="19" cy="19" r="15" fill="none" stroke="${r.c}" stroke-width="4" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - Math.max(s.ctx, 2) / 100)}"/></svg><span>${s.ctx}%</span></span>
+          <span class="grow"><b style="color:${r.c}">${r.label}</b><br><span class="muted" style="font-size:11.5px">${short(s.model)} · <span class="mono">${s.effort}</span> · ${s.account}</span></span>${cost(s)}${CHEV}</button>
+        <div class="reveal ${s.open5 ? 'open' : ''}"><div><div style="display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:center;padding:10px 2px 2px;font-size:12px">
+          <span class="dim">Rol</span><span><button class="btn" data-k="role" aria-expanded="false">${r.label}${CHEV}</button></span>
+          <span class="dim">Modelo</span><span><button class="btn" data-k="model" aria-expanded="false">${short(s.model)}${CHEV}</button> <button class="btn mono" data-k="effort" aria-expanded="false">${s.effort}${CHEV}</button></span>
+          <span class="dim">Cuenta</span><span><button class="btn" data-k="account" aria-expanded="false">${s.account}${CHEV}</button></span>
+          <span class="dim">Rol hace</span><span class="muted">${r.d}</span></div></div></div></div>`;
+      el.querySelector('[data-x]').onclick = () => set({ open5: !s.open5 });
+      const menus = { account: ['Cuenta', accountList], model: ['Modelo', modelList], role: ['Rol', roleList], effort: ['Esfuerzo', effortList] };
+      el.querySelectorAll('[data-k]').forEach((b) => (b.onclick = () => { const [t, f] = menus[b.dataset.k]; listMenu(b, t, f(s), s[b.dataset.k], (v) => set({ [b.dataset.k]: v })); }));
+    }
+  },
+  {
+    title: 'Barra de estado al pie, estilo editor',
+    what: 'La barra sale de arriba y baja junto al composer, como la barra de estado de VS Code. Cada segmento abre su menú hacia arriba, cerca de donde escribes.',
+    when: 'Deja toda la altura de arriba para la conversación.',
+    footer: true,
+    render(el, s, set) {
+      const r = role(s.role);
+      el.innerHTML = `<div class="status">
+        <button data-k="role" aria-expanded="false" style="color:${r.c}"><span class="role-dot" style="background:${r.c}"></span>${r.label}</button>
+        <button data-k="model" aria-expanded="false">${short(s.model)}</button>
+        <button data-k="effort" aria-expanded="false">${s.effort}</button>
+        <span class="fill"></span>
+        <button data-k="account" aria-expanded="false" title="${s.account}">Principal</button>
+        <button title="Contexto">${s.ctx}%</button><button style="color:var(--green)">$${s.cost.toFixed(2)}</button></div>`;
+      const menus = { account: ['Cuenta', accountList], model: ['Modelo', modelList], role: ['Rol', roleList], effort: ['Esfuerzo', effortList] };
+      el.querySelectorAll('[data-k]').forEach((b) => (b.onclick = () => { const [t, f] = menus[b.dataset.k]; listMenu(b, t, f(s), s[b.dataset.k], (v) => set({ [b.dataset.k]: v }), { up: true }); }));
+    }
+  },
+  {
+    title: 'Línea fina que se abre al acercarte',
+    what: 'En reposo es una línea de 26 px con el resumen. Al pasar el ratón o con Tab se abre la fila de controles; se cierra sola cuando sales.',
+    when: 'Para quien casi nunca cambia la configuración a mitad de la tarea.',
+    render(el, s, set) {
+      const r = role(s.role);
+      el.innerHTML = `<div class="thin"><div class="line"><span class="role-dot" style="background:${r.c}"></span><b style="color:${r.c}">${r.label}</b><span class="ell">${short(s.model)} · <span class="mono">${s.effort}</span></span><span class="grow"></span>${meter(s)}${cost(s)}</div>
+        <div class="more"><div><div style="display:flex;gap:4px;flex-wrap:wrap;padding:0 8px 8px">
+          <button class="btn" data-k="role" aria-expanded="false">${r.label}${CHEV}</button>
+          <button class="btn" data-k="model" aria-expanded="false">${short(s.model)}${CHEV}</button>
+          <button class="btn mono" data-k="effort" aria-expanded="false">${s.effort}${CHEV}</button>
+          <button class="btn" data-k="account" aria-expanded="false">${s.account}${CHEV}</button></div></div></div></div>`;
+      const box = el.querySelector('.thin');
+      const menus = { account: ['Cuenta', accountList], model: ['Modelo', modelList], role: ['Rol', roleList], effort: ['Esfuerzo', effortList] };
+      el.querySelectorAll('[data-k]').forEach((b) => (b.onclick = () => {
+        const [t, f] = menus[b.dataset.k];
+        box.classList.add('pinned');
+        listMenu(b, t, f(s), s[b.dataset.k], (v) => set({ [b.dataset.k]: v }), { onClose: () => box.classList.remove('pinned') });
+      }));
+    }
+  },
+  {
+    title: 'Roles como avatares + recomendación',
+    what: 'Los roles son círculos de color y el elegido se expande con su nombre. Debajo, una tarjeta avisa si el modelo o el esfuerzo no coinciden con lo recomendado y ofrece aplicarlo.',
+    when: 'Si trabajas mucho con equipos y cambias de rol a menudo.',
+    render(el, s, set) {
+      const r = role(s.role);
+      const off = r.m && (r.m !== s.model || r.e !== s.effort);
+      el.innerHTML = `<div class="surface" style="flex-direction:column;align-items:stretch;gap:4px">
+        <div class="avatars" role="radiogroup" aria-label="Rol">${ROLES.map((x) => `<button class="av ${x.id === s.role ? 'on' : ''}" role="radio" aria-checked="${x.id === s.role}" data-r="${x.id}" title="${x.label}" style="color:${x.c};border-color:${x.c};background:${x.c}1a">${x.id === s.role ? x.label : x.label.slice(0, 3)}</button>`).join('')}</div>
+        <div class="card" style="display:flex;align-items:center;gap:8px">
+          <span class="grow"><span class="muted">${short(s.model)} · <span class="mono">${s.effort}</span></span>${off ? `<br><span class="warn">El rol recomienda ${short(r.m)} · ${r.e}</span>` : r.m ? '<br><span class="dim">Coincide con lo recomendado</span>' : ''}</span>
+          ${off ? '<button class="btn on" data-apply>Aplicar</button>' : ''}<button class="btn" data-k="model" aria-expanded="false">Modelo${CHEV}</button>${cost(s)}</div></div>`;
+      el.querySelectorAll('[data-r]').forEach((b) => (b.onclick = () => set({ role: b.dataset.r })));
+      el.querySelector('[data-apply]')?.addEventListener('click', () => set({ model: r.m, effort: r.e }));
+      el.querySelector('[data-k]').onclick = (e) => pop(e.currentTarget, (p) => {
+        p.innerHTML = options('Modelo', modelList(s), s.model) + options('Esfuerzo', effortList(s), s.effort);
+        const all = [...modelList(s).map((o) => ['model', o.value]), ...effortList(s).map((o) => ['effort', o.value])];
+        p.querySelectorAll('.opt').forEach((b, i) => (b.onclick = () => { set({ [all[i][0]]: all[i][1] }); closePop(); }));
+      }, { width: 260 });
+    }
+  },
+  {
+    title: 'Matriz modelo × esfuerzo',
+    what: 'Un clic abre una cuadrícula: filas de modelos y columnas de esfuerzo. Eliges la combinación en un solo gesto y la estrella marca la recomendada para el rol.',
+    when: 'Para comparar «más modelo» contra «más esfuerzo» de un vistazo.',
+    render(el, s, set) {
+      const r = role(s.role);
+      el.innerHTML = `<div class="surface"><button class="btn" data-k="role" aria-expanded="false" style="padding:2px 6px">${chip(r)}${CHEV}</button>
+        <button class="btn grow" data-m aria-expanded="false" style="justify-content:flex-start"><span class="ell">${short(s.model)} <span class="dim">×</span> <span class="mono">${s.effort}</span></span><span class="grow"></span>${CHEV}</button>${meter(s)}${cost(s)}</div>`;
+      el.querySelector('[data-k]').onclick = (e) => listMenu(e.currentTarget, 'Rol', roleList(s), s.role, (v) => set({ role: v }));
+      el.querySelector('[data-m]').onclick = (e) => pop(e.currentTarget, (p) => {
+        p.innerHTML = `<h4>Modelo × esfuerzo</h4><div class="matrix"><span></span>${EFFORTS.map((x) => `<span class="h">${x}</span>`).join('')}
+          ${MODELS.map((m) => `<span class="r">${short(m)}</span>${EFFORTS.map((x, j) => {
+            const rec = r.m === m && r.e === x;
+            return `<button class="cell ${m === s.model && x === s.effort ? 'cur' : ''}" data-m="${m}" data-e="${x}" style="background:var(--raised)" title="${m} · ${x}${rec ? ' (recomendado para el rol)' : ''}">${rec ? '★' : '·'}</button>`;
+          }).join('')}`).join('')}</div><p class="dim" style="margin:6px 4px 2px;font-size:11px">★ recomendado para ${r.label}</p>`;
+        p.querySelectorAll('.cell').forEach((b) => (b.onclick = () => { set({ model: b.dataset.m, effort: b.dataset.e }); closePop(); }));
+        p.querySelector('.cell.cur')?.focus();
+      }, { width: 360 });
+    }
+  },
+  {
+    title: 'Acordeón de tres secciones',
+    what: 'Tres pestañas grandes: Agente, Rol y Consumo. El clic abre un panel en línea con las opciones como fichas; no flota ni tapa la conversación.',
+    when: 'Para quien prefiere ver todas las opciones de una sección a la vez.',
+    render(el, s, set) {
+      const r = role(s.role);
+      const sec = s.sec10;
+      const tab = (k, label, val) => `<button data-s="${k}" aria-expanded="${sec === k}"><small>${label}</small><span>${val}</span></button>`;
+      const chipBtns = (list, k) => `<div class="chips">${list.map((o) => `<button class="btn ${s[k] === o.value ? 'on' : ''}" data-k="${k}" data-v="${esc(o.value)}">${o.html || esc(o.label)}</button>`).join('')}</div>`;
+      const panel = sec === 'agente' ? `<h4 class="dim mono" style="margin:0 0 4px;font-size:10px">MODELO</h4>${chipBtns(modelList(s), 'model')}<h4 class="dim mono" style="margin:8px 0 4px;font-size:10px">ESFUERZO</h4>${chipBtns(effortList(s), 'effort')}<h4 class="dim mono" style="margin:8px 0 4px;font-size:10px">CUENTA</h4>${chipBtns(accountList(), 'account')}`
+        : sec === 'rol' ? `${chipBtns(roleList(s).map((o) => ({ ...o, html: `<span class="role-dot" style="background:${role(o.value).c}"></span>${o.label}` })), 'role')}<p class="muted" style="margin:8px 2px 0;font-size:12px">${r.d}${r.m ? ` <span class="dim">Recomendado: ${short(r.m)} · ${r.e}</span>` : ''}</p>`
+        : sec === 'consumo' ? `<div style="display:flex;gap:14px;align-items:center">${meter(s)}<span class="muted">de 200k tokens</span>${cost(s)}<span class="muted">sin límite</span></div>` : '';
+      el.innerHTML = `<div class="surface" style="flex-direction:column;align-items:stretch">
+        <div class="acc">${tab('agente', 'Agente', `${short(s.model)} · ${s.effort}`)}${tab('rol', 'Rol', `<span style="color:${r.c}">${r.label}</span>`)}${tab('consumo', 'Consumo', `${s.ctx}% · $${s.cost.toFixed(2)}`)}</div>
+        ${sec ? `<div class="panel">${panel}</div>` : ''}</div>`;
+      el.querySelectorAll('[data-s]').forEach((b) => (b.onclick = () => set({ sec10: sec === b.dataset.s ? '' : b.dataset.s })));
+      el.querySelectorAll('[data-v]').forEach((b) => (b.onclick = () => set({ [b.dataset.k]: b.dataset.v })));
+    }
+  }
+];
+
+const CHAT = '<p>Abrí los dos PRs contra <code>develop</code> y no los fusioné.</p><p class="dim">Antes de fusionar hay que revisar el modelo por defecto en <code>llm/config.py:52</code>.</p>';
+const grid = document.getElementById('grid');
+IDEAS.forEach((idea, i) => {
+  const s = { account: 'Claude (Principal)', model: 'Claude Opus 5.5', effort: 'high', role: 'arquitecto', ctx: [3, 12, 41, 2, 67, 8, 3, 22, 5, 15][i], cost: [2.94, 0.34, 6.33, 3.12, 1.2, 0.86, 2.94, 4.1, 0.52, 7.8][i], sec10: i === 9 ? 'rol' : '' };
+  const box = document.createElement('section');
+  box.className = 'idea';
+  box.innerHTML = `<h2><span class="n">${String(i + 1).padStart(2, '0')}</span>${idea.title}</h2><p class="what">${idea.what}</p><p class="when"><b>Conviene:</b> ${idea.when}</p>
+    <div class="col"><div class="col-head"><span class="dot"></span><span class="mono dim">${i + 1}</span><span class="t">Revisa el PR de metrovía, no coloques nada sin aprobar</span></div>
+    ${idea.footer ? '' : '<div class="bar-slot"></div>'}<div class="chat">${CHAT}</div>${idea.footer ? '<div class="bar-slot" style="padding:0"></div>' : ''}<div class="composer">Pregunta a Claude (Principal), @ para agentes y archivos…</div></div>`;
+  grid.append(box);
+  const slot = box.querySelector('.bar-slot');
+  const set = (patch) => { Object.assign(s, patch); idea.render(slot, s, set); };
+  idea.render(slot, s, set);
+});
+</script>
+</body>
+</html>

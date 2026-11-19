@@ -1,0 +1,283 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" style="background:#07090e; font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;">
+  <defs>
+    <!-- Background Grid -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#162035" stroke-width="0.8" opacity="0.4"/>
+    </pattern>
+    <radialGradient id="cyan-glow" cx="50%" cy="0%" r="70%">
+      <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#07090e" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="emerald-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#202b3f" stop-opacity="0.8"/>
+    </linearGradient>
+    <filter id="shadow-drop" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.65"/>
+    </filter>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="1600" height="900" fill="#07090e"/>
+  <rect width="1600" height="900" fill="url(#grid)"/>
+  <rect width="1600" height="500" fill="url(#cyan-glow)"/>
+
+  <!-- Master Header -->
+  <g transform="translate(48, 36)">
+    <!-- Brand / Badge -->
+    <rect x="0" y="0" width="132" height="26" rx="6" fill="#0c1220" stroke="#06b6d4" stroke-width="1.2"/>
+    <text x="12" y="17" fill="#22d3ee" font-size="11" font-weight="700" letter-spacing="1.5" font-family="ui-monospace, monospace">SPEC CARD #63</text>
+
+    <text x="148" y="18" fill="#64748b" font-size="12" font-family="ui-monospace, monospace">|</text>
+    <text x="164" y="18" fill="#94a3b8" font-size="12" font-weight="600" letter-spacing="0.5">SECTION 2.P TACTICAL WORKSPACE PICKER &amp; MULTI-ROOT SWITCHER</text>
+
+    <!-- Master Title -->
+    <text x="0" y="62" fill="#f8fafc" font-size="28" font-weight="800" letter-spacing="-0.5">Selector Táctico de Espacios de Trabajo y Árbol Multi-Raíz</text>
+    <text x="0" y="86" fill="#94a3b8" font-size="14">Exploración de directorios en vivo, filtro de repositorios Git, persistencia de favoritos, historial reciente y apertura en VS Code / Explorer</text>
+
+    <!-- Top Right Telemetry Badges -->
+    <g transform="translate(1120, 10)">
+      <rect x="0" y="0" width="384" height="64" rx="10" fill="#0a0e17" stroke="#202b3f" stroke-width="1.2" filter="url(#shadow-drop)"/>
+      <circle cx="24" cy="32" r="6" fill="#06b6d4"/>
+      <circle cx="24" cy="32" r="10" fill="none" stroke="#06b6d4" stroke-width="1.5" opacity="0.4"/>
+      <text x="42" y="27" fill="#f8fafc" font-size="12" font-weight="700">WORKSPACE ROUTER: SYNCHRONIZED</text>
+      <text x="42" y="45" fill="#64748b" font-size="10" font-family="ui-monospace, monospace">Git-Aware • LocalStorage Stars • Host API Isolation</text>
+      <rect x="300" y="16" width="70" height="32" rx="6" fill="#0c1220" stroke="#06b6d4" stroke-width="1"/>
+      <text x="314" y="36" fill="#22d3ee" font-size="12" font-weight="800" font-family="ui-monospace, monospace">60 FPS</text>
+    </g>
+  </g>
+
+  <!-- Three Architecture Pillars -->
+
+  <!-- ================= PILLAR 1: HOST DISCOVERY & BROWSER PIPELINE ================= -->
+  <g transform="translate(48, 150)">
+    <rect x="0" y="0" width="470" height="540" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.4" filter="url(#shadow-drop)"/>
+    <rect x="0" y="0" width="470" height="48" rx="14" fill="#0c1220"/>
+    <path d="M 0 48 L 470 48" stroke="#202b3f" stroke-width="1.2"/>
+
+    <!-- Pillar 1 Header -->
+    <rect x="16" y="12" width="24" height="24" rx="6" fill="#06b6d4" fill-opacity="0.15" stroke="#06b6d4" stroke-width="1"/>
+    <path d="M 20 28 L 25 18 L 31 28" fill="none" stroke="#22d3ee" stroke-width="1.5"/>
+    <text x="48" y="28" fill="#f8fafc" font-size="14" font-weight="700">1. Pipeline de Exploración Host</text>
+    <rect x="350" y="14" width="104" height="20" rx="4" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+    <text x="362" y="28" fill="#22d3ee" font-size="10" font-family="ui-monospace, monospace">listDirs IPC</text>
+
+    <!-- Content 1 -->
+    <g transform="translate(20, 68)">
+      <!-- Step 1: Open event -->
+      <rect x="0" y="0" width="430" height="74" rx="8" fill="#07090e" stroke="#202b3f" stroke-width="1"/>
+      <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700" font-family="ui-monospace, monospace">01. INVOCACIÓN REACTIVA IPC</text>
+      <text x="14" y="42" fill="#e2e8f0" font-size="11">Al abrir el selector, emite `postToHost({ command: 'listDirs' })`.</text>
+      <text x="14" y="60" fill="#64748b" font-size="10" font-family="ui-monospace, monospace">Escucha evento window.onMessage -> e.data.type === 'dirListing'</text>
+
+      <!-- Arrow down -->
+      <path d="M 215 80 L 215 96" stroke="#06b6d4" stroke-width="1.5" stroke-dasharray="3,3"/>
+      <polygon points="212,96 215,102 218,96" fill="#06b6d4"/>
+
+      <!-- Step 2: Breadcrumb & Traversal -->
+      <g transform="translate(0, 108)">
+        <rect x="0" y="0" width="430" height="96" rx="8" fill="#07090e" stroke="#06b6d4" stroke-width="1.2"/>
+        <text x="14" y="22" fill="#22d3ee" font-size="11" font-weight="700" font-family="ui-monospace, monospace">02. NAVEGACIÓN JERÁRQUICA &amp; BREADCRUMB</text>
+        <text x="14" y="42" fill="#e2e8f0" font-size="11">Descompone ruta en migas legibles con botón de subida:</text>
+        <rect x="14" y="52" width="402" height="34" rx="4" fill="#162035"/>
+        <text x="22" y="67" fill="#38bdf8" font-size="10" font-family="ui-monospace, monospace">breadcrumb = [root, ...dir.slice(root.length)].join(' / ')</text>
+        <text x="22" y="80" fill="#94a3b8" font-size="9" font-family="ui-monospace, monospace">parentDir = listing.dir.replace(/[\\/][^\\/]+$/, '')</text>
+      </g>
+
+      <!-- Arrow down -->
+      <path d="M 215 210 L 215 226" stroke="#06b6d4" stroke-width="1.5" stroke-dasharray="3,3"/>
+      <polygon points="212,226 215,232 218,226" fill="#06b6d4"/>
+
+      <!-- Step 3: Git Detection -->
+      <g transform="translate(0, 238)">
+        <rect x="0" y="0" width="430" height="88" rx="8" fill="#07090e" stroke="#10b981" stroke-width="1.2"/>
+        <text x="14" y="22" fill="#34d399" font-size="11" font-weight="700" font-family="ui-monospace, monospace">03. RECONOCIMIENTO AUTOMÁTICO DE REPOSITORIOS</text>
+        <text x="14" y="42" fill="#e2e8f0" font-size="11">Cada entrada contiene metadata `isGit: boolean` (.git folder).</text>
+        <text x="14" y="58" fill="#94a3b8" font-size="10">Alternador `reposOnly` filtra instantáneamente proyectos con VCS.</text>
+        <rect x="14" y="66" width="260" height="16" rx="3" fill="#162035"/>
+        <text x="20" y="78" fill="#34d399" font-size="9" font-family="ui-monospace, monospace">visibleEntries = entries.filter(!reposOnly || isGit)</text>
+      </g>
+
+      <!-- Host Safety Box -->
+      <g transform="translate(0, 338)">
+        <rect x="0" y="0" width="430" height="90" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">BLINDAJE DE SEGURIDAD HOST CWD</text>
+        <text x="14" y="42" fill="#94a3b8" font-size="11">El backend valida `isSystemOrAppDir()` evitando que el agente</text>
+        <text x="14" y="58" fill="#94a3b8" font-size="11">se ancle a carpetas críticas del SO (System32, AppData raíz).</text>
+        <text x="14" y="74" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">resolveSafeCwd() garantiza ejecución confinada</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ================= PILLAR 2: FAVORITES & RECENT HISTORY ================= -->
+  <g transform="translate(565, 150)">
+    <rect x="0" y="0" width="470" height="540" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.4" filter="url(#shadow-drop)"/>
+    <rect x="0" y="0" width="470" height="48" rx="14" fill="#0c1220"/>
+    <path d="M 0 48 L 470 48" stroke="#202b3f" stroke-width="1.2"/>
+
+    <!-- Pillar 2 Header -->
+    <rect x="16" y="12" width="24" height="24" rx="6" fill="#f59e0b" fill-opacity="0.15" stroke="#f59e0b" stroke-width="1"/>
+    <polygon points="28,16 31,23 38,24 33,29 35,36 28,32 21,36 23,29 18,24 25,23" fill="#fbbf24"/>
+    <text x="48" y="28" fill="#f8fafc" font-size="14" font-weight="700">2. Favoritos &amp; Historial Reciente</text>
+    <rect x="350" y="14" width="104" height="20" rx="4" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+    <text x="362" y="28" fill="#fbbf24" font-size="10" font-family="ui-monospace, monospace">localStorage</text>
+
+    <!-- Content 2 -->
+    <g transform="translate(20, 68)">
+      <!-- Favorites storage card -->
+      <rect x="0" y="0" width="430" height="130" rx="8" fill="#07090e" stroke="#202b3f" stroke-width="1"/>
+      <text x="14" y="22" fill="#fbbf24" font-size="11" font-weight="700" font-family="ui-monospace, monospace">PERSISTENCIA DE RUTAS PREFERIDAS</text>
+      <text x="14" y="42" fill="#e2e8f0" font-size="11">Almacenamiento permanente en clave de usuario:</text>
+      <rect x="14" y="50" width="402" height="24" rx="4" fill="#162035"/>
+      <text x="22" y="66" fill="#f59e0b" font-size="10" font-family="ui-monospace, monospace">FAVORITES_KEY = 'agent-hub.favoriteDirs'</text>
+      <text x="14" y="92" fill="#94a3b8" font-size="10">Acceso directo en 1-click sin tener que explorar el disco.</text>
+      <text x="14" y="110" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">toggleFavorite(dir) => adds/removes with Star icon visual sync</text>
+
+      <!-- Recents card -->
+      <g transform="translate(0, 142)">
+        <rect x="0" y="0" width="430" height="150" rx="8" fill="#07090e" stroke="#06b6d4" stroke-width="1.2"/>
+        <text x="14" y="22" fill="#22d3ee" font-size="11" font-weight="700" font-family="ui-monospace, monospace">HISTORIAL RECIENTE CON DETECCIÓN ACTIVA</text>
+        <text x="14" y="42" fill="#e2e8f0" font-size="11">Muestra los últimos proyectos utilizados y resalta el actual:</text>
+
+        <!-- Simulated item active -->
+        <g transform="translate(14, 52)">
+          <rect x="0" y="0" width="402" height="38" rx="6" fill="#0c1220" stroke="#06b6d4" stroke-width="1"/>
+          <text x="12" y="17" fill="#22d3ee" font-size="11" font-weight="700">agent-hub (Actual)</text>
+          <text x="12" y="30" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">C:\Users\juan0\Documents\GitHub\portafolio\agent-hub</text>
+          <circle cx="386" cy="19" r="6" fill="#06b6d4"/>
+          <path d="M 383 19 L 385 21 L 389 17" fill="none" stroke="#07090e" stroke-width="1.5"/>
+        </g>
+
+        <!-- Simulated item inactive -->
+        <g transform="translate(14, 96)">
+          <rect x="0" y="0" width="402" height="38" rx="6" fill="#07090e" stroke="#202b3f" stroke-width="1"/>
+          <text x="12" y="17" fill="#cbd5e1" font-size="11" font-weight="600">frontend-showcases</text>
+          <text x="12" y="30" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">C:\Users\juan0\Documents\GitHub\frontend-showcases</text>
+        </g>
+      </g>
+
+      <!-- Search normalization -->
+      <g transform="translate(0, 304)">
+        <rect x="0" y="0" width="430" height="124" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">NORMALIZACIÓN DE BÚSQUEDA TÁCTICA</text>
+        <text x="14" y="42" fill="#94a3b8" font-size="11">Usa `normalizeText()` eliminando tildes y diacríticos:</text>
+        <rect x="14" y="52" width="402" height="34" rx="4" fill="#162035"/>
+        <text x="22" y="67" fill="#38bdf8" font-size="10" font-family="ui-monospace, monospace">str.normalize("NFD").replace(/[\u0300-\u036f]/g, "")</text>
+        <text x="22" y="80" fill="#94a3b8" font-size="9" font-family="ui-monospace, monospace">Búsqueda tolerante a mayúsculas y acentos</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ================= PILLAR 3: ACTIONS & EXTERNAL INTEGRATIONS ================= -->
+  <g transform="translate(1082, 150)">
+    <rect x="0" y="0" width="470" height="540" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.4" filter="url(#shadow-drop)"/>
+    <rect x="0" y="0" width="470" height="48" rx="14" fill="#0c1220"/>
+    <path d="M 0 48 L 470 48" stroke="#202b3f" stroke-width="1.2"/>
+
+    <!-- Pillar 3 Header -->
+    <rect x="16" y="12" width="24" height="24" rx="6" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="1"/>
+    <path d="M 22 24 L 34 24 M 28 18 L 34 24 L 28 30" fill="none" stroke="#34d399" stroke-width="1.5"/>
+    <text x="48" y="28" fill="#f8fafc" font-size="14" font-weight="700">3. Acciones &amp; Despacho Externo</text>
+    <rect x="350" y="14" width="104" height="20" rx="4" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+    <text x="364" y="28" fill="#34d399" font-size="10" font-family="ui-monospace, monospace">Integrations</text>
+
+    <!-- Content 3 -->
+    <g transform="translate(20, 68)">
+      <!-- 3-Button quick action bar -->
+      <rect x="0" y="0" width="430" height="114" rx="8" fill="#07090e" stroke="#10b981" stroke-width="1"/>
+      <text x="14" y="22" fill="#34d399" font-size="11" font-weight="700" font-family="ui-monospace, monospace">BARRA DE ACCIONES RÁPIDAS DEL PROYECTO</text>
+
+      <g transform="translate(14, 34)">
+        <!-- Explorer -->
+        <rect x="0" y="0" width="128" height="38" rx="6" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="10" y="18" fill="#38bdf8" font-size="10" font-weight="700">Explorador</text>
+        <text x="10" y="30" fill="#64748b" font-size="9">Windows Explorer</text>
+
+        <!-- VS Code -->
+        <rect x="136" y="0" width="128" height="38" rx="6" fill="#0c1220" stroke="#10b981" stroke-width="1"/>
+        <text x="146" y="18" fill="#34d399" font-size="10" font-weight="700">VS Code</text>
+        <text x="146" y="30" fill="#64748b" font-size="9">openInVsCode(dir)</text>
+
+        <!-- Copy -->
+        <rect x="272" y="0" width="128" height="38" rx="6" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="282" y="18" fill="#e2e8f0" font-size="10" font-weight="700">Copiar Ruta</text>
+        <text x="282" y="30" fill="#64748b" font-size="9">Clipboard API</text>
+      </g>
+      <text x="14" y="98" fill="#94a3b8" font-size="10">Despacho sin interrumpir la sesión conversacional activa.</text>
+
+      <!-- Session vs Workspace Switch -->
+      <g transform="translate(0, 126)">
+        <rect x="0" y="0" width="430" height="154" rx="8" fill="#07090e" stroke="#202b3f" stroke-width="1.2"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700" font-family="ui-monospace, monospace">DISCRIMINACIÓN DE ÁMBITO (SESSION VS GLOBAL)</text>
+        <text x="14" y="42" fill="#e2e8f0" font-size="11">Soporta vinculación contextual por hilo o a nivel aplicación:</text>
+
+        <rect x="14" y="52" width="402" height="38" rx="6" fill="#162035"/>
+        <text x="22" y="69" fill="#22d3ee" font-size="10" font-family="ui-monospace, monospace">sessionId ? setSessionDir(id, dir) : setWorkspaceDir(dir)</text>
+        <text x="22" y="82" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">Aísla agentes multi-proyecto en workspaces independientes</text>
+
+        <!-- Flow illustration -->
+        <g transform="translate(14, 100)">
+          <rect x="0" y="0" width="180" height="38" rx="6" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+          <text x="10" y="16" fill="#94a3b8" font-size="10" font-weight="700">Global Workspace</text>
+          <text x="10" y="30" fill="#64748b" font-size="9">Aplica a todo el hub</text>
+
+          <rect x="222" y="0" width="180" height="38" rx="6" fill="#0c1220" stroke="#06b6d4" stroke-width="1"/>
+          <text x="232" y="16" fill="#22d3ee" font-size="10" font-weight="700">Session Workspace</text>
+          <text x="232" y="30" fill="#64748b" font-size="9">Confinado a 1 agente</text>
+        </g>
+      </g>
+
+      <!-- Native OS Dialog Trigger -->
+      <g transform="translate(0, 292)">
+        <rect x="0" y="0" width="430" height="136" rx="8" fill="#0c1220" stroke="#06b6d4" stroke-width="1"/>
+        <text x="14" y="22" fill="#22d3ee" font-size="11" font-weight="700">DIÁLOGO NATIVO DEL SISTEMA OPERATIVO</text>
+        <text x="14" y="42" fill="#94a3b8" font-size="11">Botón destacado "Abrir otra carpeta..." invoca el diálogo de</text>
+        <text x="14" y="58" fill="#94a3b8" font-size="11">selección de directorios de Windows mediante Electron/VSCode:</text>
+        <rect x="14" y="70" width="300" height="22" rx="4" fill="#162035"/>
+        <text x="22" y="85" fill="#38bdf8" font-size="10" font-family="ui-monospace, monospace">postToHost({ command: 'chooseWorkspaceDir' })</text>
+        <text x="14" y="114" fill="#64748b" font-size="9">Cierra el popup automáticamente al seleccionar.</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ================= BOTTOM TELEMETRY / ARCHITECTURE SUMMARY BAR ================= -->
+  <g transform="translate(48, 712)">
+    <rect x="0" y="0" width="1504" height="152" rx="12" fill="#0a0e17" stroke="#202b3f" stroke-width="1.2" filter="url(#shadow-drop)"/>
+
+    <g transform="translate(24, 20)">
+      <text x="0" y="18" fill="#f8fafc" font-size="14" font-weight="700" letter-spacing="0.5">RESUMEN DE ELEVACIÓN &amp; TIPOGRAFÍA TÁCTICA HUD</text>
+
+      <g transform="translate(0, 36)">
+        <!-- Layer 1 -->
+        <rect x="0" y="0" width="280" height="66" rx="8" fill="#07090e" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">CAPA 1: #07090e</text>
+        <text x="14" y="40" fill="#94a3b8" font-size="10">Active Path Box &amp; Search Input</text>
+        <text x="14" y="54" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">Fondo neutro de alta legibilidad</text>
+
+        <!-- Layer 2 -->
+        <rect x="296" y="0" width="280" height="66" rx="8" fill="#0a0e17" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">CAPA 2: #0a0e17</text>
+        <text x="14" y="40" fill="#94a3b8" font-size="10">Popup Container &amp; Trigger Button</text>
+        <text x="14" y="54" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">Shadow-2xl shadow-black/80</text>
+
+        <!-- Layer 3 -->
+        <rect x="592" y="0" width="280" height="66" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">CAPA 3: #0c1220</text>
+        <text x="14" y="40" fill="#94a3b8" font-size="10">Active Recent Item &amp; Action Pills</text>
+        <text x="14" y="54" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">VS Code / Explorer / Copiar</text>
+
+        <!-- Layer 4 -->
+        <rect x="888" y="0" width="280" height="66" rx="8" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">CAPA 4: #162035</text>
+        <text x="14" y="40" fill="#94a3b8" font-size="10">Interactive Row Hover States</text>
+        <text x="14" y="54" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">Transición fluida a 60 FPS</text>
+
+        <!-- Layer 5 -->
+        <rect x="1184" y="0" width="272" height="66" rx="8" fill="#202b3f" stroke="#06b6d4" stroke-width="1"/>
+        <text x="14" y="22" fill="#22d3ee" font-size="11" font-weight="700">CAPA 5: #202b3f</text>
+        <text x="14" y="40" fill="#e2e8f0" font-size="10">Bordes estructurales &amp; Divisores</text>
+        <text x="14" y="54" fill="#94a3b8" font-size="9" font-family="ui-monospace, monospace">Contrast ratio &gt; 7:1 WCAG AAA</text>
+      </g>
+    </g>
+  </g>
+</svg>

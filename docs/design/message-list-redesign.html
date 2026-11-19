@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentHub - Message List Tactical Redesign</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            hub: {
+              void: '#07090e',
+              surface: '#0e131f',
+              panel: '#131927',
+              border: '#202b3f',
+              'border-subtle': '#182030',
+              accent: '#6366f1',
+              cyan: '#06b6d4',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              purple: '#a855f7'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #07090e;
+      color: #f1f5f9;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .hud-card {
+      background: linear-gradient(180deg, rgba(19, 25, 39, 0.95) 0%, rgba(14, 19, 31, 0.98) 100%);
+      border: 1px solid #202b3f;
+    }
+    .user-bubble {
+      background: linear-gradient(135deg, rgba(30, 27, 75, 0.45) 0%, rgba(14, 19, 31, 0.95) 50%, rgba(7, 9, 14, 0.98) 100%);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+    }
+    .agent-bubble {
+      background: linear-gradient(180deg, rgba(19, 25, 39, 0.9) 0%, rgba(14, 19, 31, 0.95) 100%);
+      border: 1px solid #202b3f;
+      transition: border-color 0.2s ease;
+    }
+    .agent-bubble:hover {
+      border-color: #334460;
+    }
+  </style>
+</head>
+<body class="p-4 md:p-6 max-w-4xl mx-auto space-y-4">
+
+  <!-- IN-CHAT SEARCH & FILTER HUD BAR -->
+  <div class="flex flex-wrap items-center justify-between gap-3 p-2.5 rounded-xl bg-hub-surface/95 border border-hub-border shadow-lg backdrop-blur-md sticky top-0 z-20">
+    <div class="flex items-center gap-2 flex-1 min-w-[240px]">
+      <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <input type="text" placeholder="Buscar en la conversación (Ctrl+F)..." value="command center" class="w-full bg-transparent border-none text-xs text-slate-100 placeholder-slate-500 focus:outline-none font-sans">
+      <span class="text-[10px] font-mono text-slate-400 shrink-0 bg-hub-panel px-2 py-0.5 rounded border border-hub-border">2 coincidencias</span>
+    </div>
+
+    <div class="flex items-center gap-1 text-xs">
+      <button class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-600 text-white shadow-sm">Todos</button>
+      <button class="px-2.5 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200">Modificados</button>
+      <button class="px-2.5 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200">Fijados</button>
+      <button class="px-2.5 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200">Errores</button>
+    </div>
+  </div>
+
+  <!-- DATE SEPARATOR -->
+  <div class="flex items-center gap-3 text-[10px] font-mono uppercase tracking-widest text-slate-500 select-none py-1">
+    <span class="flex-1 h-px bg-hub-border"></span>
+    <span>HOY · 15 DE NOVIEMBRE</span>
+    <span class="flex-1 h-px bg-hub-border"></span>
+  </div>
+
+  <!-- 1. USER MESSAGE -->
+  <div class="user-bubble p-4 rounded-2xl text-[13px] leading-relaxed ml-8 shadow-sm space-y-2">
+    <div class="flex items-center justify-between text-xs text-slate-400 font-mono">
+      <div class="flex items-center gap-2">
+        <span class="w-6 h-6 rounded-lg bg-indigo-500/20 text-indigo-300 flex items-center justify-center font-bold text-xs border border-indigo-500/30">TÚ</span>
+        <span class="font-bold text-slate-200">Juan Diego</span>
+        <span class="text-slate-500 text-[11px]">23:40</span>
+      </div>
+      <button class="text-[11px] px-2 py-0.5 rounded bg-hub-panel hover:bg-slate-800 text-slate-300 border border-hub-border transition">
+        Editar
+      </button>
+    </div>
+    <p class="text-slate-200 leading-relaxed font-sans">
+      Revisa la telemetría del enjambre y propone el rediseño para el Command Center táctico de AgentHub.
+    </p>
+  </div>
+
+  <!-- 2. ASSISTANT MESSAGE -->
+  <div class="agent-bubble p-4 rounded-2xl text-[13px] leading-relaxed mr-4 shadow-sm space-y-3">
+    <!-- Header meta -->
+    <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-hub-border-subtle text-xs font-mono text-slate-400">
+      <div class="flex flex-wrap items-center gap-2 min-w-0">
+        <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">Claude</span>
+        <span class="font-bold text-slate-100">claude-3-5-sonnet-20241022</span>
+        <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-500/15 text-purple-300 border border-purple-500/30">DISEÑADOR</span>
+        <span class="text-slate-500 text-[11px]">· 2.4s · 320 palabras · <strong class="text-emerald-400 font-bold">$0.0084</strong></span>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="flex items-center gap-1.5">
+        <button class="flex items-center gap-1 text-[11px] px-2 py-1 rounded-lg bg-hub-panel hover:bg-slate-800 text-slate-300 border border-hub-border transition">
+          <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+          Copiar
+        </button>
+        <button class="p-1 rounded-lg bg-hub-panel hover:bg-slate-800 text-slate-400 hover:text-amber-400 border border-hub-border transition" title="Fijar mensaje">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+        </button>
+        <button class="flex items-center gap-1 text-[11px] px-2 py-1 rounded-lg bg-hub-panel hover:bg-slate-800 text-indigo-300 border border-hub-border transition">
+          <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          Segunda opinión
+        </button>
+        <button class="flex items-center gap-1 text-[11px] px-2 py-1 rounded-lg bg-hub-panel hover:bg-slate-800 text-amber-300 border border-hub-border transition">
+          <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+          Bifurcar
+        </button>
+      </div>
+    </div>
+
+    <!-- Execution Process Dropdown -->
+    <details class="group rounded-xl border border-hub-border bg-[#090d16] text-xs overflow-hidden shadow-inner" open>
+      <summary class="flex cursor-pointer select-none items-center justify-between px-3 py-2 text-slate-300 hover:text-slate-100 transition">
+        <div class="flex items-center gap-2 font-medium">
+          <svg class="w-4 h-4 text-indigo-400 transition-transform group-open:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          <span class="font-bold text-slate-200">Proceso de Ejecución</span>
+          <span class="text-slate-500 font-mono text-[11px]">· 3 pasos · 4,200 tokens de pensamiento</span>
+        </div>
+        <span class="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 font-bold">COMPLETADO</span>
+      </summary>
+
+      <div class="p-3 border-t border-hub-border-subtle space-y-2.5">
+        <!-- Thinking sub-block -->
+        <div class="border-l-2 border-purple-500/60 pl-3 py-1 space-y-1">
+          <div class="text-[11px] font-bold text-purple-300 flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+            Razonamiento Interno
+          </div>
+          <p class="text-[11px] font-mono text-slate-400 italic bg-hub-surface p-2 rounded-lg border border-hub-border leading-relaxed">
+            "Para el Command Center debemos priorizar el reactor orbital central, dando visibilidad al estado del enjambre y minimizando la carga cognitiva con colores de alto contraste..."
+          </p>
+        </div>
+
+        <!-- Tool Calls -->
+        <ol class="space-y-1.5 font-mono text-[11px] pl-3 border-l border-hub-border">
+          <li class="flex items-center gap-2 text-slate-300">
+            <svg class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <span>read_file: <code class="text-cyan-300">TacticalHudView.tsx</code></span>
+          </li>
+          <li class="flex items-center gap-2 text-slate-300">
+            <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+            <span>edit_file: <code class="text-emerald-300">TacticalHudView.tsx</code> (+116/-83 líneas)</span>
+          </li>
+          <li class="flex items-center gap-2 text-slate-300">
+            <svg class="w-3.5 h-3.5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <span>run_command: <code class="text-purple-300">npm run test:flows</code> (11/11 tests pass)</span>
+          </li>
+        </ol>
+      </div>
+    </details>
+
+    <!-- Main Message Answer Text -->
+    <div class="space-y-2 text-slate-200 font-sans leading-relaxed">
+      <p>
+        He completado el diseño del <strong>Command Center (Tactical HUD)</strong>. La interfaz ofrece ahora una vista unificada del enjambre con dial concéntrico animado y estados clasificados por color según el protocolo de desarrollo:
+      </p>
+      <ul class="list-disc pl-5 space-y-1 text-slate-300 text-xs">
+        <li><strong>Columna Izquierda</strong>: Agentes activos con roles y barra de avance de etapas del pipeline.</li>
+        <li><strong>Columna Central</strong>: Reactor orbital con cuotas de cuentas y MCPs, métricas KPI en tiempo real y estaciones de trabajo en paralelo.</li>
+        <li><strong>Columna Derecha</strong>: Mesh de servidores MCP y terminal CRT en vivo con comandos de build y tests.</li>
+      </ul>
+    </div>
+
+    <!-- Interactive Decision Card (QuestionOptionsCard) -->
+    <div class="p-3.5 rounded-xl border border-indigo-500/40 bg-[#090d16] space-y-3 shadow-md">
+      <div class="flex items-center justify-between text-xs font-bold text-slate-100">
+        <div class="flex items-center gap-2 text-indigo-300">
+          <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          <span>¿Cuál es el siguiente paso que deseas continuar?</span>
+        </div>
+        <span class="text-[10px] font-mono text-slate-400 font-normal">Pulsa [1] o [2] en el teclado</span>
+      </div>
+
+      <div class="space-y-2">
+        <!-- Option 1 -->
+        <button class="w-full text-left p-3 rounded-xl bg-hub-surface hover:bg-slate-800/80 border border-indigo-500/50 hover:border-indigo-400 text-xs flex items-center justify-between gap-3 transition cursor-pointer shadow-sm">
+          <div class="flex items-center gap-3">
+            <span class="w-5 h-5 rounded-md bg-indigo-600 text-white font-mono text-xs font-bold flex items-center justify-center shrink-0">1</span>
+            <div>
+              <div class="font-bold text-slate-100">Elevar MessageList y anatomía de mensajes del chat</div>
+              <div class="text-[11px] text-slate-400 mt-0.5">Mejora las burbujas de usuario/asistente, decisiones interactivas y diffs</div>
+            </div>
+          </div>
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 font-bold uppercase shrink-0">
+            RECOMENDADO
+          </span>
+        </button>
+
+        <!-- Option 2 -->
+        <button class="w-full text-left p-3 rounded-xl bg-hub-surface hover:bg-slate-800/80 border border-hub-border hover:border-slate-500 text-xs flex items-center justify-between gap-3 transition cursor-pointer">
+          <div class="flex items-center gap-3">
+            <span class="w-5 h-5 rounded-md bg-hub-panel text-slate-300 font-mono text-xs font-bold flex items-center justify-center shrink-0 border border-hub-border">2</span>
+            <div>
+              <div class="font-bold text-slate-200">Rediseñar el explorador de archivos y sidebar de proyecto</div>
+              <div class="text-[11px] text-slate-400 mt-0.5">Árbol de carpetas y navegación de archivos rápida</div>
+            </div>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Code Checkpoint & Modified Files -->
+    <div class="pt-2 border-t border-hub-border-subtle flex flex-wrap items-center justify-between gap-2 text-xs font-mono text-slate-400">
+      <div class="flex items-center gap-2">
+        <span class="text-[11px] font-bold text-slate-300">ARCHIVOS MODIFICADOS (2):</span>
+        <span class="px-2 py-0.5 rounded bg-hub-panel border border-hub-border text-slate-200 text-[11px] flex items-center gap-1">
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span> TacticalHudView.tsx
+        </span>
+        <span class="px-2 py-0.5 rounded bg-hub-panel border border-hub-border text-slate-200 text-[11px] flex items-center gap-1">
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span> TelemetryDashboard.tsx
+        </span>
+      </div>
+
+      <button class="flex items-center gap-1 text-amber-400 hover:text-amber-300 font-semibold text-[11px] px-2 py-0.5 rounded hover:bg-amber-500/10 transition">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
+        Deshacer turno
+      </button>
+    </div>
+  </div>
+
+</body>
+</html>

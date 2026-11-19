@@ -1,0 +1,293 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" style="background:#07090e; font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;">
+  <defs>
+    <!-- Background Grid -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#162035" stroke-width="0.8" opacity="0.4"/>
+    </pattern>
+    <radialGradient id="cyan-glow" cx="50%" cy="0%" r="70%">
+      <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#07090e" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow-drop" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.65"/>
+    </filter>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="1600" height="900" fill="#07090e"/>
+  <rect width="1600" height="900" fill="url(#grid)"/>
+  <rect width="1600" height="500" fill="url(#cyan-glow)"/>
+
+  <!-- Master Header -->
+  <g transform="translate(48, 36)">
+    <!-- Brand / Badge -->
+    <rect x="0" y="0" width="132" height="26" rx="6" fill="#0c1220" stroke="#06b6d4" stroke-width="1.2"/>
+    <text x="12" y="17" fill="#22d3ee" font-size="11" font-weight="700" letter-spacing="1.5" font-family="ui-monospace, monospace">SPEC CARD #68</text>
+
+    <text x="148" y="18" fill="#64748b" font-size="12" font-family="ui-monospace, monospace">|</text>
+    <text x="164" y="18" fill="#94a3b8" font-size="12" font-weight="600" letter-spacing="0.5">SECTION 2.U TACTICAL ATTACHMENTS &amp; SYNTAX HIGHLIGHTER ENGINE</text>
+
+    <!-- Master Title -->
+    <text x="0" y="62" fill="#f8fafc" font-size="28" font-weight="800" letter-spacing="-0.5">Bandeja Multimodal de Adjuntos y Motor de Resaltado Sintáctico</text>
+    <text x="0" y="86" fill="#94a3b8" font-size="14">Estimador de tokens de contexto, miniaturas multimedia, parser léxico ligero de código y renderizador de diffs en línea</text>
+
+    <!-- Top Right Telemetry Badges -->
+    <g transform="translate(1120, 10)">
+      <rect x="0" y="0" width="384" height="64" rx="10" fill="#0a0e17" stroke="#202b3f" stroke-width="1.2" filter="url(#shadow-drop)"/>
+      <circle cx="24" cy="32" r="6" fill="#06b6d4"/>
+      <circle cx="24" cy="32" r="10" fill="none" stroke="#06b6d4" stroke-width="1.5" opacity="0.4"/>
+      <text x="42" y="27" fill="#f8fafc" font-size="12" font-weight="700">CODE ENGINE: ZERO-DEPENDENCY</text>
+      <text x="42" y="45" fill="#64748b" font-size="10" font-family="ui-monospace, monospace">Context Estimation • Lexical Regex • Inline Diffs</text>
+      <rect x="300" y="16" width="70" height="32" rx="6" fill="#0c1220" stroke="#06b6d4" stroke-width="1"/>
+      <text x="314" y="36" fill="#22d3ee" font-size="12" font-weight="800" font-family="ui-monospace, monospace">60 FPS</text>
+    </g>
+  </g>
+
+  <!-- Three Architecture Pillars -->
+
+  <!-- ================= PILLAR 1: MULTIMODAL ATTACHMENT TRAY ================= -->
+  <g transform="translate(48, 150)">
+    <rect x="0" y="0" width="470" height="540" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.4" filter="url(#shadow-drop)"/>
+    <rect x="0" y="0" width="470" height="48" rx="14" fill="#0c1220"/>
+    <path d="M 0 48 L 470 48" stroke="#202b3f" stroke-width="1.2"/>
+
+    <!-- Pillar 1 Header -->
+    <rect x="16" y="12" width="24" height="24" rx="6" fill="#06b6d4" fill-opacity="0.15" stroke="#06b6d4" stroke-width="1"/>
+    <circle cx="28" cy="24" r="5" fill="none" stroke="#22d3ee" stroke-width="1.5"/>
+    <text x="48" y="28" fill="#f8fafc" font-size="14" font-weight="700">1. Bandeja de Adjuntos &amp; Telemetría</text>
+    <rect x="340" y="14" width="114" height="20" rx="4" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+    <text x="352" y="28" fill="#22d3ee" font-size="10" font-family="ui-monospace, monospace">AttachmentChips</text>
+
+    <!-- Content 1 -->
+    <g transform="translate(20, 68)">
+      <!-- Context token estimation card -->
+      <rect x="0" y="0" width="430" height="114" rx="8" fill="#07090e" stroke="#06b6d4" stroke-width="1.2"/>
+      <text x="14" y="22" fill="#22d3ee" font-size="11" font-weight="700" font-family="ui-monospace, monospace">ESTIMADOR DE TOKENS EN TIEMPO REAL</text>
+      <text x="14" y="42" fill="#e2e8f0" font-size="11">Calcula el peso total antes de despachar el prompt:</text>
+
+      <rect x="14" y="52" width="402" height="34" rx="4" fill="#162035"/>
+      <text x="22" y="67" fill="#38bdf8" font-size="10" font-family="ui-monospace, monospace">tokens = Math.round(attachments.reduce(sum + len) / 4)</text>
+      <text x="22" y="80" fill="#94a3b8" font-size="9" font-family="ui-monospace, monospace">Aviso visual: "3 adjuntos • ~4,200 tokens de contexto"</text>
+      <text x="14" y="104" fill="#64748b" font-size="9">Acción masiva: botón [Quitar todos] para vaciar la bandeja.</text>
+
+      <!-- Multimodal chips showcase -->
+      <g transform="translate(0, 126)">
+        <rect x="0" y="0" width="430" height="154" rx="8" fill="#07090e" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700" font-family="ui-monospace, monospace">CHIPS MULTIMODAL CON MINIATURA</text>
+
+        <!-- Code chip -->
+        <g transform="translate(14, 34)">
+          <rect x="0" y="0" width="280" height="28" rx="6" fill="#0c1220" stroke="#06b6d4" stroke-width="1"/>
+          <text x="10" y="18" fill="#22d3ee" font-size="10" font-family="ui-monospace, monospace">📄 src/server.ts#L10-L45 (1.8 KB)</text>
+          <circle cx="266" cy="14" r="6" fill="#000000" opacity="0.8"/>
+          <text x="264" y="17" fill="#f43f5e" font-size="9" font-weight="700">×</text>
+        </g>
+
+        <!-- Image thumbnail chip -->
+        <g transform="translate(14, 70)">
+          <rect x="0" y="0" width="56" height="56" rx="8" fill="#162035" stroke="#06b6d4" stroke-width="1.2"/>
+          <text x="12" y="32" fill="#22d3ee" font-size="18">🖼️</text>
+          <text x="70" y="24" fill="#e2e8f0" font-size="11" font-weight="600">mockup-hud.png</text>
+          <text x="70" y="40" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">64x64 preview con botón [x] en hover</text>
+          <text x="70" y="54" fill="#34d399" font-size="9">Soporte vision multi-LLM nativo</text>
+        </g>
+
+        <!-- Audio / Video chips -->
+        <g transform="translate(14, 134)">
+          <rect x="0" y="0" width="130" height="24" rx="4" fill="#162035"/>
+          <text x="8" y="16" fill="#fbbf24" font-size="9" font-family="ui-monospace, monospace">🎵 audio-spec.wav</text>
+
+          <rect x="140" y="0" width="130" height="24" rx="4" fill="#162035"/>
+          <text x="148" y="16" fill="#c084fc" font-size="9" font-family="ui-monospace, monospace">🎬 demo-flow.mp4</text>
+        </g>
+      </g>
+
+      <!-- Subpixel design -->
+      <g transform="translate(0, 292)">
+        <rect x="0" y="0" width="430" height="132" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">COMPACTACIÓN Y ADAPTABILIDAD AL COMPOSITOR</text>
+        <text x="14" y="42" fill="#94a3b8" font-size="11">La bandeja se expande dinámicamente sobre el cuadro de texto</text>
+        <text x="14" y="58" fill="#94a3b8" font-size="11">y colapsa suavemente a 0px de altura cuando no hay adjuntos,</text>
+        <text x="14" y="74" fill="#94a3b8" font-size="11">sin saltos de layout ni desplazamiento involuntario del scroll.</text>
+        <text x="14" y="104" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">Elevación Layer 1 (#07090e) con borde Layer 5 (#202b3f)</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ================= PILLAR 2: MICRO SYNTAX HIGHLIGHTER ENGINE ================= -->
+  <g transform="translate(565, 150)">
+    <rect x="0" y="0" width="470" height="540" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.4" filter="url(#shadow-drop)"/>
+    <rect x="0" y="0" width="470" height="48" rx="14" fill="#0c1220"/>
+    <path d="M 0 48 L 470 48" stroke="#202b3f" stroke-width="1.2"/>
+
+    <!-- Pillar 2 Header -->
+    <rect x="16" y="12" width="24" height="24" rx="6" fill="#8b5cf6" fill-opacity="0.15" stroke="#8b5cf6" stroke-width="1"/>
+    <path d="M 21 28 L 25 18 L 31 28" fill="none" stroke="#c084fc" stroke-width="1.5"/>
+    <text x="48" y="28" fill="#f8fafc" font-size="14" font-weight="700">2. Motor de Resaltado Léxico (0-Dep)</text>
+    <rect x="340" y="14" width="114" height="20" rx="4" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+    <text x="350" y="28" fill="#c084fc" font-size="10" font-family="ui-monospace, monospace">renderSyntaxCode</text>
+
+    <!-- Content 2 -->
+    <g transform="translate(20, 68)">
+      <!-- Tokenizer architecture -->
+      <rect x="0" y="0" width="430" height="126" rx="8" fill="#07090e" stroke="#8b5cf6" stroke-width="1.2"/>
+      <text x="14" y="22" fill="#c084fc" font-size="11" font-weight="700" font-family="ui-monospace, monospace">TOKENIZADOR LÉXICO POR EXPRESIÓN REGULAR</text>
+      <text x="14" y="42" fill="#e2e8f0" font-size="11">Elimina librerías pesadas como Prism (150KB+) o Highlight.js:</text>
+
+      <rect x="14" y="52" width="402" height="34" rx="4" fill="#162035"/>
+      <text x="22" y="67" fill="#38bdf8" font-size="9" font-family="ui-monospace, monospace">TOKEN_REGEX = /(\/\/[^\n]*|#[^\n]*|"(?:\\.|[^"\\])*"|...)/g</text>
+      <text x="22" y="80" fill="#94a3b8" font-size="9" font-family="ui-monospace, monospace">Tokens: KEYWORDS (Set) • TYPES (Set) • OPERATORS (Set)</text>
+      <text x="14" y="106" fill="#34d399" font-size="9">Ejecución ultrarrápida: colorea 500 líneas en menos de 1.2 ms.</text>
+
+      <!-- Token classification palette -->
+      <g transform="translate(0, 138)">
+        <rect x="0" y="0" width="430" height="162" rx="8" fill="#07090e" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700" font-family="ui-monospace, monospace">PALETA DE TOKENS SINTÁCTICOS CERTIFICADA</text>
+
+        <g transform="translate(14, 34)">
+          <rect x="0" y="0" width="94" height="24" rx="4" fill="#162035"/>
+          <text x="8" y="16" fill="#f43f5e" font-size="10" font-family="ui-monospace, monospace">syn-kw (Keyword)</text>
+
+          <rect x="102" y="0" width="94" height="24" rx="4" fill="#162035"/>
+          <text x="110" y="16" fill="#22d3ee" font-size="10" font-family="ui-monospace, monospace">syn-type (Type)</text>
+
+          <rect x="204" y="0" width="94" height="24" rx="4" fill="#162035"/>
+          <text x="212" y="16" fill="#34d399" font-size="10" font-family="ui-monospace, monospace">syn-str (String)</text>
+
+          <rect x="306" y="0" width="94" height="24" rx="4" fill="#162035"/>
+          <text x="314" y="16" fill="#64748b" font-size="10" font-family="ui-monospace, monospace">syn-com (Notes)</text>
+        </g>
+
+        <!-- Simulated code snippet -->
+        <g transform="translate(14, 68)">
+          <rect x="0" y="0" width="402" height="80" rx="6" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+          <text x="14" y="20" fill="#f43f5e" font-size="10" font-family="ui-monospace, monospace">export const</text>
+          <text x="96" y="20" fill="#38bdf8" font-size="10" font-family="ui-monospace, monospace">createAgent =</text>
+          <text x="190" y="20" fill="#c084fc" font-size="10" font-family="ui-monospace, monospace">(role: ProtocolRole): Agent =&gt; {</text>
+
+          <text x="26" y="40" fill="#64748b" font-size="10" font-family="ui-monospace, monospace">// Inicializa el agente con aislamiento de CWD</text>
+
+          <text x="26" y="60" fill="#f43f5e" font-size="10" font-family="ui-monospace, monospace">return</text>
+          <text x="74" y="60" fill="#38bdf8" font-size="10" font-family="ui-monospace, monospace">new</text>
+          <text x="104" y="60" fill="#22d3ee" font-size="10" font-family="ui-monospace, monospace">AgentContext</text>
+          <text x="190" y="60" fill="#34d399" font-size="10" font-family="ui-monospace, monospace">({ role, cwd: safePath });</text>
+        </g>
+      </g>
+
+      <!-- Multi-language support -->
+      <g transform="translate(0, 312)">
+        <rect x="0" y="0" width="430" height="114" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">SOPORTE MULTI-LENGUAJE NATIVO</text>
+        <text x="14" y="42" fill="#94a3b8" font-size="11">Mapeo automático de extensiones y lenguajes:</text>
+        <text x="14" y="60" fill="#e2e8f0" font-size="10" font-family="ui-monospace, monospace">TypeScript, JavaScript, Python, Rust, Go, SQL, Bash, JSON, Diff</text>
+        <text x="14" y="88" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">0 paquetes npm externos · 100% código interno en syntax-highlighter.tsx</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ================= PILLAR 3: INLINE UNIFIED DIFF ENGINE ================= -->
+  <g transform="translate(1082, 150)">
+    <rect x="0" y="0" width="470" height="540" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.4" filter="url(#shadow-drop)"/>
+    <rect x="0" y="0" width="470" height="48" rx="14" fill="#0c1220"/>
+    <path d="M 0 48 L 470 48" stroke="#202b3f" stroke-width="1.2"/>
+
+    <!-- Pillar 3 Header -->
+    <rect x="16" y="12" width="24" height="24" rx="6" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="1"/>
+    <path d="M 22 24 L 26 28 L 34 20" fill="none" stroke="#34d399" stroke-width="1.5"/>
+    <text x="48" y="28" fill="#f8fafc" font-size="14" font-weight="700">3. Renderizador de Diff en Línea</text>
+    <rect x="350" y="14" width="104" height="20" rx="4" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+    <text x="366" y="28" fill="#34d399" font-size="10" font-family="ui-monospace, monospace">DiffLines.tsx</text>
+
+    <!-- Content 3 -->
+    <g transform="translate(20, 68)">
+      <!-- Diff Delta Anatomy -->
+      <rect x="0" y="0" width="430" height="114" rx="8" fill="#07090e" stroke="#10b981" stroke-width="1"/>
+      <text x="14" y="22" fill="#34d399" font-size="11" font-weight="700" font-family="ui-monospace, monospace">ANATOMÍA DEL DELTA UNIFICADO</text>
+      <text x="14" y="42" fill="#e2e8f0" font-size="11">Clasificación en tiempo real de líneas git:</text>
+
+      <g transform="translate(14, 52)">
+        <text x="0" y="16" fill="#34d399" font-size="10" font-family="ui-monospace, monospace">+ Added Line (line.startsWith('+') &amp;&amp; !startsWith('+++'))</text>
+        <text x="0" y="34" fill="#fb7185" font-size="10" font-family="ui-monospace, monospace">- Deleted Line (line.startsWith('-') &amp;&amp; !startsWith('---'))</text>
+        <text x="0" y="52" fill="#22d3ee" font-size="10" font-family="ui-monospace, monospace">@@ Hunk Header (line.startsWith('@@'))</text>
+      </g>
+
+      <!-- Simulated Diff Box -->
+      <g transform="translate(0, 126)">
+        <rect x="0" y="0" width="430" height="154" rx="8" fill="#07090e" stroke="#202b3f" stroke-width="1.2"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700" font-family="ui-monospace, monospace">MOCK DE RENDERIZADO VISUAL INLINE</text>
+
+        <g transform="translate(14, 34)">
+          <!-- Hunk header -->
+          <rect x="0" y="0" width="402" height="20" rx="3" fill="#0c1220"/>
+          <text x="8" y="14" fill="#22d3ee" font-size="10" font-family="ui-monospace, monospace" font-weight="700">@@ -15,4 +15,6 @@ export interface SessionProps</text>
+
+          <!-- Deletion -->
+          <rect x="0" y="24" width="402" height="22" rx="3" fill="#4c0519" fill-opacity="0.5"/>
+          <line x1="0" y1="24" x2="0" y2="46" stroke="#f43f5e" stroke-width="3"/>
+          <text x="10" y="39" fill="#fda4af" font-size="10" font-family="ui-monospace, monospace">- const maxAgents = 2;</text>
+
+          <!-- Addition 1 -->
+          <rect x="0" y="48" width="402" height="22" rx="3" fill="#064e3b" fill-opacity="0.5"/>
+          <line x1="0" y1="48" x2="0" y2="70" stroke="#10b981" stroke-width="3"/>
+          <text x="10" y="63" fill="#a7f3d0" font-size="10" font-family="ui-monospace, monospace">+ const maxAgents = 4; // Malla concurrente HUD</text>
+
+          <!-- Addition 2 -->
+          <rect x="0" y="72" width="402" height="22" rx="3" fill="#064e3b" fill-opacity="0.5"/>
+          <line x1="0" y1="72" x2="0" y2="94" stroke="#10b981" stroke-width="3"/>
+          <text x="10" y="87" fill="#a7f3d0" font-size="10" font-family="ui-monospace, monospace">+ const layout = 'grid'; // Disposición 2x2</text>
+        </g>
+      </g>
+
+      <!-- Selection & Copy guarantee -->
+      <g transform="translate(0, 296)">
+        <rect x="0" y="0" width="430" height="132" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">SELECCIÓN NATIVA Y EXPORTACIÓN LIMPIA</text>
+        <text x="14" y="42" fill="#94a3b8" font-size="11">Usa `select-text` permitiendo copiar código directamente</text>
+        <text x="14" y="58" fill="#94a3b8" font-size="11">desde los mensajes del chat sin capturar prefijos no deseados</text>
+        <text x="14" y="74" fill="#94a3b8" font-size="11">ni alterar el formateo de espacios y tabulaciones.</text>
+        <text x="14" y="104" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">Scroll contenido con max-h-64 y estilo HUD sin barras feas.</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ================= BOTTOM TELEMETRY / ARCHITECTURE SUMMARY BAR ================= -->
+  <g transform="translate(48, 712)">
+    <rect x="0" y="0" width="1504" height="152" rx="12" fill="#0a0e17" stroke="#202b3f" stroke-width="1.2" filter="url(#shadow-drop)"/>
+
+    <g transform="translate(24, 20)">
+      <text x="0" y="18" fill="#f8fafc" font-size="14" font-weight="700" letter-spacing="0.5">RESUMEN DE ELEVACIÓN &amp; SISTEMA DE RESALTADO Y ADJUNTOS TÁCTICOS</text>
+
+      <g transform="translate(0, 36)">
+        <!-- Layer 1 -->
+        <rect x="0" y="0" width="280" height="66" rx="8" fill="#07090e" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">CAPA 1: #07090e</text>
+        <text x="14" y="40" fill="#94a3b8" font-size="10">Attachment Tray &amp; Diff Pre Canvas</text>
+        <text x="14" y="54" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">Fondo no reflectivo para código</text>
+
+        <!-- Layer 2 -->
+        <rect x="296" y="0" width="280" height="66" rx="8" fill="#0a0e17" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">CAPA 2: #0a0e17</text>
+        <text x="14" y="40" fill="#94a3b8" font-size="10">Hunk Header &amp; Tray Boundaries</text>
+        <text x="14" y="54" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">Superficie base de elevación</text>
+
+        <!-- Layer 3 -->
+        <rect x="592" y="0" width="280" height="66" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">CAPA 3: #0c1220</text>
+        <text x="14" y="40" fill="#94a3b8" font-size="10">Attachment Chips &amp; Code Blocks</text>
+        <text x="14" y="54" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">Chips con borde cian y esmeralda</text>
+
+        <!-- Layer 4 -->
+        <rect x="888" y="0" width="280" height="66" rx="8" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">CAPA 4: #162035</text>
+        <text x="14" y="40" fill="#94a3b8" font-size="10">Hover States &amp; Remove Badges</text>
+        <text x="14" y="54" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">Micro-interacción fluida a 60 FPS</text>
+
+        <!-- Layer 5 -->
+        <rect x="1184" y="0" width="272" height="66" rx="8" fill="#202b3f" stroke="#06b6d4" stroke-width="1"/>
+        <text x="14" y="22" fill="#22d3ee" font-size="11" font-weight="700">CAPA 5: #202b3f</text>
+        <text x="14" y="40" fill="#e2e8f0" font-size="10">Bordes estructurales &amp; Divisores</text>
+        <text x="14" y="54" fill="#94a3b8" font-size="9" font-family="ui-monospace, monospace">Contrast ratio &gt; 7:1 WCAG AAA</text>
+      </g>
+    </g>
+  </g>
+</svg>

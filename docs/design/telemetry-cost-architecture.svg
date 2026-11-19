@@ -1,0 +1,230 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 480" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#07090e" />
+      <stop offset="50%" stop-color="#0a0e17" />
+      <stop offset="100%" stop-color="#0e131f" />
+    </linearGradient>
+
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#131927" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#0b101b" stop-opacity="0.95" />
+    </linearGradient>
+
+    <linearGradient id="barEmerald" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#059669" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+
+    <linearGradient id="barIndigo" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4f46e5" />
+      <stop offset="100%" stop-color="#818cf8" />
+    </linearGradient>
+
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000000" flood-opacity="0.6" />
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="960" height="480" fill="url(#bgGrad)" />
+  <rect width="960" height="480" fill="none" stroke="#202b3f" stroke-width="1.5" />
+
+  <!-- Grid Accents -->
+  <g stroke="#161f30" stroke-width="1" stroke-dasharray="3,3">
+    <line x1="40" y1="80" x2="920" y2="80" />
+    <line x1="40" y1="420" x2="920" y2="420" />
+    <line x1="310" y1="80" x2="310" y2="420" />
+    <line x1="630" y1="80" x2="630" y2="420" />
+  </g>
+
+  <!-- Header -->
+  <g transform="translate(40, 30)">
+    <rect width="36" height="36" rx="8" fill="#064e3b" stroke="#10b981" stroke-width="1.5" />
+    <path d="M12 24l4-8 4 4 6-10" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+    <text x="48" y="24" fill="#f8fafc" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="17" font-weight="800" letter-spacing="-0.02em">
+      ARQUITECTURA DE TELEMETRÍA, CONSUMO Y COSTOS
+    </text>
+    <text x="48" y="40" fill="#94a3b8" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="11">
+      Pipeline de agregación por modelo, proyección de gasto mensual y monitoreo de cuotas
+    </text>
+    <rect x="760" y="8" width="120" height="24" rx="12" fill="#131927" stroke="#202b3f" />
+    <circle cx="774" cy="20" r="4" fill="#10b981" />
+    <text x="784" y="24" fill="#cbd5e1" font-family="'JetBrains Mono', monospace" font-size="10">MÉTRICAS v2.5</text>
+  </g>
+
+  <!-- Column 1: KPI Global Metrics -->
+  <g transform="translate(40, 95)" filter="url(#cardShadow)">
+    <rect width="250" height="305" rx="14" fill="url(#cardGrad)" stroke="#202b3f" stroke-width="1.2" />
+    <rect width="250" height="36" rx="14" fill="#151d2e" />
+    <path d="M0 24h250" stroke="#202b3f" stroke-width="1" />
+    <circle cx="20" cy="18" r="4" fill="#10b981" />
+    <text x="32" y="22" fill="#e2e8f0" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="700">1. Resumen Global</text>
+
+    <!-- KPI 1: Tokens -->
+    <g transform="translate(14, 48)">
+      <rect width="222" height="52" rx="8" fill="#090d16" stroke="#202b3f" />
+      <text x="12" y="22" fill="#818cf8" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="600">Tokens Totales</text>
+      <text x="12" y="40" fill="#ffffff" font-family="'JetBrains Mono', monospace" font-size="16" font-weight="700">482.4k</text>
+      <text x="120" y="40" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="10">in / out / think</text>
+    </g>
+
+    <!-- KPI 2: Reasoning -->
+    <g transform="translate(14, 110)">
+      <rect width="222" height="52" rx="8" fill="#090d16" stroke="#202b3f" />
+      <text x="12" y="22" fill="#c084fc" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="600">Razonamiento (CoT)</text>
+      <text x="12" y="40" fill="#f3e8ff" font-family="'JetBrains Mono', monospace" font-size="16" font-weight="700">64.2k</text>
+      <text x="130" y="40" fill="#a855f7" font-family="'JetBrains Mono', monospace" font-size="10">DeepSeek / Sonnet</text>
+    </g>
+
+    <!-- KPI 3: Total Cost -->
+    <g transform="translate(14, 172)">
+      <rect width="222" height="52" rx="8" fill="#090d16" stroke="#059669" stroke-width="1.2" />
+      <text x="12" y="22" fill="#34d399" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="700">Costo Acumulado</text>
+      <text x="12" y="40" fill="#10b981" font-family="'JetBrains Mono', monospace" font-size="16" font-weight="800">$1.842 USD</text>
+      <text x="140" y="40" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="10">84 turnos</text>
+    </g>
+
+    <!-- KPI 4: Monthly Projection -->
+    <g transform="translate(14, 234)">
+      <rect width="222" height="52" rx="8" fill="#090d16" stroke="#d97706" stroke-dasharray="2,2" />
+      <text x="12" y="22" fill="#fbbf24" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="700">Proyección 30 Días</text>
+      <text x="12" y="40" fill="#fde68a" font-family="'JetBrains Mono', monospace" font-size="15" font-weight="700">≈ $7.85 USD</text>
+      <text x="130" y="40" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="10">ritmo 7 días</text>
+    </g>
+  </g>
+
+  <!-- Connect 1 -> 2 -->
+  <path d="M290 240 L340 240" stroke="#10b981" stroke-width="2" stroke-dasharray="4,4" />
+  <polygon points="342,240 336,236 336,244" fill="#10b981" />
+
+  <!-- Column 2: Daily & Agent Distribution (Center) -->
+  <g transform="translate(345, 95)" filter="url(#cardShadow)">
+    <rect width="270" height="305" rx="14" fill="url(#cardGrad)" stroke="#202b3f" stroke-width="1.2" />
+    <rect width="270" height="36" rx="14" fill="#151d2e" />
+    <path d="M0 24h270" stroke="#202b3f" stroke-width="1" />
+    <circle cx="20" cy="18" r="4" fill="#38bdf8" />
+    <text x="32" y="22" fill="#e2e8f0" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="700">2. Tendencia Diaria y por Agente</text>
+
+    <!-- Daily Bars -->
+    <g transform="translate(14, 48)">
+      <text x="0" y="14" fill="#94a3b8" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" font-weight="700">HISTORIAL DE GASTO DIARIO</text>
+      
+      <!-- Day 1 -->
+      <g transform="translate(0, 24)">
+        <text x="0" y="12" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="9">13 Nov (jue)</text>
+        <rect x="74" y="2" width="120" height="12" rx="3" fill="#202b3f" />
+        <rect x="74" y="2" width="55" height="12" rx="3" fill="url(#barEmerald)" />
+        <text x="202" y="12" fill="#cbd5e1" font-family="'JetBrains Mono', monospace" font-size="9">$0.28</text>
+      </g>
+
+      <!-- Day 2 -->
+      <g transform="translate(0, 44)">
+        <text x="0" y="12" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="9">14 Nov (vie)</text>
+        <rect x="74" y="2" width="120" height="12" rx="3" fill="#202b3f" />
+        <rect x="74" y="2" width="85" height="12" rx="3" fill="url(#barEmerald)" />
+        <text x="202" y="12" fill="#cbd5e1" font-family="'JetBrains Mono', monospace" font-size="9">$0.45</text>
+      </g>
+
+      <!-- Day 3 -->
+      <g transform="translate(0, 64)">
+        <text x="0" y="12" fill="#38bdf8" font-family="'JetBrains Mono', monospace" font-size="9">15 Nov (hoy)</text>
+        <rect x="74" y="2" width="120" height="12" rx="3" fill="#202b3f" />
+        <rect x="74" y="2" width="110" height="12" rx="3" fill="url(#barEmerald)" />
+        <text x="202" y="12" fill="#34d399" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700">$0.62</text>
+      </g>
+    </g>
+
+    <!-- Agent Distribution Bars -->
+    <g transform="translate(14, 160)">
+      <text x="0" y="14" fill="#94a3b8" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" font-weight="700">DISTRIBUCIÓN POR AGENTE / ROL</text>
+
+      <!-- Agent 1: Arquitecto -->
+      <g transform="translate(0, 24)">
+        <text x="0" y="12" fill="#cbd5e1" font-family="'Plus Jakarta Sans', sans-serif" font-size="10">Arquitecto</text>
+        <rect x="80" y="2" width="114" height="10" rx="3" fill="#202b3f" />
+        <rect x="80" y="2" width="60" height="10" rx="3" fill="url(#barIndigo)" />
+        <text x="202" y="11" fill="#cbd5e1" font-family="'JetBrains Mono', monospace" font-size="9">42%</text>
+      </g>
+
+      <!-- Agent 2: Desarrollador -->
+      <g transform="translate(0, 44)">
+        <text x="0" y="12" fill="#cbd5e1" font-family="'Plus Jakarta Sans', sans-serif" font-size="10">Desarrollador</text>
+        <rect x="80" y="2" width="114" height="10" rx="3" fill="#202b3f" />
+        <rect x="80" y="2" width="45" height="10" rx="3" fill="url(#barIndigo)" />
+        <text x="202" y="11" fill="#cbd5e1" font-family="'JetBrains Mono', monospace" font-size="9">33%</text>
+      </g>
+
+      <!-- Agent 3: Diseñador -->
+      <g transform="translate(0, 64)">
+        <text x="0" y="12" fill="#cbd5e1" font-family="'Plus Jakarta Sans', sans-serif" font-size="10">Diseñador</text>
+        <rect x="80" y="2" width="114" height="10" rx="3" fill="#202b3f" />
+        <rect x="80" y="2" width="30" height="10" rx="3" fill="url(#barIndigo)" />
+        <text x="202" y="11" fill="#cbd5e1" font-family="'JetBrains Mono', monospace" font-size="9">25%</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Connect 2 -> 3 -->
+  <path d="M615 240 L660 240" stroke="#38bdf8" stroke-width="2" stroke-dasharray="4,4" />
+  <polygon points="662,240 656,236 656,244" fill="#38bdf8" />
+
+  <!-- Column 3: Model Breakdown & Actions (Right) -->
+  <g transform="translate(665, 95)" filter="url(#cardShadow)">
+    <rect width="255" height="305" rx="14" fill="url(#cardGrad)" stroke="#202b3f" stroke-width="1.2" />
+    <rect width="255" height="36" rx="14" fill="#151d2e" />
+    <path d="M0 24h255" stroke="#202b3f" stroke-width="1" />
+    <circle cx="20" cy="18" r="4" fill="#c084fc" />
+    <text x="32" y="22" fill="#e2e8f0" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="700">3. Modelos y Exportación</text>
+
+    <!-- Model Item 1 -->
+    <g transform="translate(14, 48)">
+      <rect width="227" height="60" rx="8" fill="#090d16" stroke="#202b3f" />
+      <circle cx="14" cy="18" r="4" fill="#f59e0b" />
+      <text x="24" y="21" fill="#f8fafc" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="600">claude-3-5-sonnet</text>
+      <text x="14" y="38" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="9">54 turnos · 340k tokens</text>
+      <text x="14" y="50" fill="#34d399" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700">$1.240 USD</text>
+      <text x="170" y="50" fill="#60a5fa" font-family="'JetBrains Mono', monospace" font-size="9">94% caché</text>
+    </g>
+
+    <!-- Model Item 2 -->
+    <g transform="translate(14, 116)">
+      <rect width="227" height="60" rx="8" fill="#090d16" stroke="#202b3f" />
+      <circle cx="14" cy="18" r="4" fill="#38bdf8" />
+      <text x="24" y="21" fill="#f8fafc" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="600">gemini-2.5-pro</text>
+      <text x="14" y="38" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="9">30 turnos · 142k tokens</text>
+      <text x="14" y="50" fill="#34d399" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700">$0.602 USD</text>
+      <text x="170" y="50" fill="#60a5fa" font-family="'JetBrains Mono', monospace" font-size="9">88% caché</text>
+    </g>
+
+    <!-- Export Actions -->
+    <g transform="translate(14, 190)">
+      <text x="0" y="14" fill="#94a3b8" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" font-weight="700">EXPORTACIÓN DE AUDITORÍA</text>
+
+      <g transform="translate(0, 24)">
+        <rect width="108" height="30" rx="6" fill="#131927" stroke="#202b3f" />
+        <text x="20" y="19" fill="#cbd5e1" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" font-weight="600">CSV Report</text>
+      </g>
+
+      <g transform="translate(118, 24)">
+        <rect width="109" height="30" rx="6" fill="#131927" stroke="#202b3f" />
+        <text x="20" y="19" fill="#cbd5e1" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" font-weight="600">JSON Raw</text>
+      </g>
+
+      <g transform="translate(0, 62)">
+        <rect width="227" height="30" rx="6" fill="#1e1b4b" stroke="#4f46e5" />
+        <text x="56" y="19" fill="#ddd6fe" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" font-weight="700">Copiar Resumen</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Footer Info -->
+  <g transform="translate(40, 428)">
+    <text x="0" y="20" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="11">
+      COMPONENTE: src/webview/components/TelemetryDashboard.tsx · PROTOCOLO DE DESARROLLO AGENTHUB
+    </text>
+    <text x="920" y="20" text-anchor="end" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="11">
+      WCAG AA CONTRAST COMPLIANT (≥ 4.5:1)
+    </text>
+  </g>
+</svg>

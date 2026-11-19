@@ -1,0 +1,302 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 640" width="100%" height="100%" style="background:#07090e; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b0f19"/>
+      <stop offset="50%" stop-color="#07090e"/>
+      <stop offset="100%" stop-color="#05070a"/>
+    </linearGradient>
+
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#141c2e"/>
+      <stop offset="100%" stop-color="#0e131f"/>
+    </linearGradient>
+
+    <linearGradient id="indigoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#4f46e5"/>
+    </linearGradient>
+
+    <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22d3ee"/>
+      <stop offset="100%" stop-color="#0891b2"/>
+    </linearGradient>
+
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+
+    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+
+    <!-- Filters -->
+    <filter id="glowIndigo" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <filter id="shadowBox" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.7"/>
+    </filter>
+  </defs>
+
+  <!-- Background Grid -->
+  <rect width="1000" height="640" fill="url(#bgGrad)"/>
+  <g opacity="0.08" stroke="#38bdf8" stroke-width="1">
+    <path d="M0,80 H1000 M0,160 H1000 M0,240 H1000 M0,320 H1000 M0,400 H1000 M0,480 H1000 M0,560 H1000" />
+    <path d="M100,0 V640 M200,0 V640 M300,0 V640 M400,0 V640 M500,0 V640 M600,0 V640 M700,0 V640 M800,0 V640 M900,0 V640" />
+  </g>
+
+  <!-- Header -->
+  <g transform="translate(40, 36)">
+    <rect x="0" y="0" width="14" height="14" fill="#6366f1" rx="2" />
+    <text x="24" y="12" fill="#f8fafc" font-size="14" font-weight="700" letter-spacing="0.1em">AGENTHUB // ARCHITECTURE</text>
+    <text x="260" y="12" fill="#6366f1" font-size="12" font-weight="600">HUD QUICK COMMANDS &amp; EVENT NOTIFICATIONS</text>
+    <text x="0" y="30" fill="#94a3b8" font-size="11">Tactical Dark HUD Protocol: Alt+Space Launcher, Signal Bell, Workspace &amp; Branch Badging</text>
+  </g>
+
+  <!-- Top Badges / Status -->
+  <g transform="translate(740, 36)">
+    <rect x="0" y="0" width="100" height="22" rx="4" fill="#162035" stroke="#202b3f" />
+    <circle cx="12" cy="11" r="3" fill="#10b981" />
+    <text x="22" y="15" fill="#e2e8f0" font-size="10">STATUS: LIVE</text>
+
+    <rect x="110" y="0" width="110" height="22" rx="4" fill="#162035" stroke="#202b3f" />
+    <text x="120" y="15" fill="#38bdf8" font-size="10">MODAL STACK v2</text>
+  </g>
+
+  <!-- Section 1: Trigger Layer (Top Left) -->
+  <g transform="translate(40, 90)" filter="url(#shadowBox)">
+    <rect width="280" height="240" rx="10" fill="url(#cardGrad)" stroke="#202b3f" stroke-width="1.5"/>
+    <rect width="280" height="32" rx="10" fill="#111827"/>
+    <rect x="12" y="10" width="8" height="12" fill="#6366f1" rx="1.5"/>
+    <text x="28" y="21" fill="#f1f5f9" font-size="11" font-weight="700">01. INGRESS &amp; TRIGGERS</text>
+
+    <!-- Trigger Items -->
+    <g transform="translate(16, 46)">
+      <!-- Keybind -->
+      <rect width="248" height="40" rx="6" fill="#090d16" stroke="#1f293d"/>
+      <rect x="8" y="10" width="65" height="20" rx="4" fill="#1e1b4b" stroke="#4338ca"/>
+      <text x="14" y="24" fill="#c7d2fe" font-size="10" font-weight="700">Alt+Space</text>
+      <text x="82" y="24" fill="#cbd5e1" font-size="10">Spotlight Launcher</text>
+
+      <!-- Bell Icon -->
+      <g transform="translate(0, 48)">
+        <rect width="248" height="40" rx="6" fill="#090d16" stroke="#1f293d"/>
+        <circle cx="20" cy="20" r="10" fill="#202b3f"/>
+        <text x="16" y="24" fill="#fbbf24" font-size="11">🔔</text>
+        <text x="40" y="24" fill="#cbd5e1" font-size="10">Signal Bell (Notices)</text>
+        <rect x="195" y="12" width="42" height="16" rx="8" fill="#dc2626"/>
+        <text x="203" y="24" fill="#ffffff" font-size="9" font-weight="700">3 NEW</text>
+      </g>
+
+      <!-- Header Controls -->
+      <g transform="translate(0, 96)">
+        <rect width="248" height="40" rx="6" fill="#090d16" stroke="#1f293d"/>
+        <text x="12" y="24" fill="#38bdf8" font-size="11">📂</text>
+        <text x="32" y="18" fill="#e2e8f0" font-size="10" font-weight="600">Workspace &amp; Branch</text>
+        <text x="32" y="32" fill="#64748b" font-size="9">Directory picker &amp; Git state</text>
+        <rect x="190" y="12" width="46" height="16" rx="4" fill="#082f49" stroke="#0284c7"/>
+        <text x="198" y="24" fill="#38bdf8" font-size="9">ACTIVE</text>
+      </g>
+
+      <!-- Account Auth -->
+      <g transform="translate(0, 144)">
+        <rect width="248" height="36" rx="6" fill="#090d16" stroke="#1f293d"/>
+        <text x="12" y="22" fill="#a855f7" font-size="11">🔑</text>
+        <text x="32" y="22" fill="#cbd5e1" font-size="10">AddAccount Provider Modal</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Section 2: Core Processing & Dispatch (Center) -->
+  <g transform="translate(360, 90)" filter="url(#shadowBox)">
+    <rect width="320" height="240" rx="10" fill="url(#cardGrad)" stroke="#202b3f" stroke-width="1.5"/>
+    <rect width="320" height="32" rx="10" fill="#111827"/>
+    <rect x="12" y="10" width="8" height="12" fill="#06b6d4" rx="1.5"/>
+    <text x="28" y="21" fill="#f1f5f9" font-size="11" font-weight="700">02. DISPATCH &amp; OVERLAY ORCHESTRATION</text>
+
+    <g transform="translate(16, 46)">
+      <!-- Spotlight Dispatcher -->
+      <rect width="288" height="52" rx="6" fill="#090d16" stroke="#0891b2" stroke-dasharray="3 3"/>
+      <text x="12" y="20" fill="#22d3ee" font-size="10" font-weight="700">SPOTLIGHT DISPATCHER</text>
+      <text x="12" y="34" fill="#94a3b8" font-size="9">Auto-routing: /loop, /goal, git-commit,</text>
+      <text x="12" y="46" fill="#94a3b8" font-size="9">test runner &amp; security branch audit</text>
+
+      <!-- Notification Bus -->
+      <g transform="translate(0, 60)">
+        <rect width="288" height="52" rx="6" fill="#090d16" stroke="#d97706" stroke-dasharray="3 3"/>
+        <text x="12" y="20" fill="#fbbf24" font-size="10" font-weight="700">EVENT &amp; NOTICE BUS</text>
+        <text x="12" y="34" fill="#94a3b8" font-size="9">Telemetry capture, unread failure tracking,</text>
+        <text x="12" y="46" fill="#94a3b8" font-size="9">relative timestamps &amp; session jumping</text>
+      </g>
+
+      <!-- Account State -->
+      <g transform="translate(0, 120)">
+        <rect width="288" height="56" rx="6" fill="#090d16" stroke="#4f46e5" stroke-dasharray="3 3"/>
+        <text x="12" y="20" fill="#818cf8" font-size="10" font-weight="700">PROVIDER CREDENTIAL ADAPTER</text>
+        <text x="12" y="34" fill="#94a3b8" font-size="9">OAuth &amp; CLI token binding: Claude Code,</text>
+        <text x="12" y="46" fill="#94a3b8" font-size="9">Antigravity (Google) &amp; Ollama local instances</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Section 3: Visual Presentation & HUD UI (Right) -->
+  <g transform="translate(720, 90)" filter="url(#shadowBox)">
+    <rect width="240" height="240" rx="10" fill="url(#cardGrad)" stroke="#202b3f" stroke-width="1.5"/>
+    <rect width="240" height="32" rx="10" fill="#111827"/>
+    <rect x="12" y="10" width="8" height="12" fill="#10b981" rx="1.5"/>
+    <text x="28" y="21" fill="#f1f5f9" font-size="11" font-weight="700">03. HUD VISUAL LAYER</text>
+
+    <g transform="translate(16, 46)">
+      <!-- Item 1 -->
+      <rect width="208" height="38" rx="6" fill="#090d16" stroke="#1f293d"/>
+      <text x="10" y="16" fill="#f8fafc" font-size="10" font-weight="600">Spotlight Floating HUD</text>
+      <text x="10" y="30" fill="#38bdf8" font-size="9">Blur backdrop + Chip matrix</text>
+
+      <!-- Item 2 -->
+      <g transform="translate(0, 46)">
+        <rect width="208" height="38" rx="6" fill="#090d16" stroke="#1f293d"/>
+        <text x="10" y="16" fill="#f8fafc" font-size="10" font-weight="600">Notices Popover Card</text>
+        <text x="10" y="30" fill="#fbbf24" font-size="9">Failure alert badge + Clean</text>
+      </g>
+
+      <!-- Item 3 -->
+      <g transform="translate(0, 92)">
+        <rect width="208" height="38" rx="6" fill="#090d16" stroke="#1f293d"/>
+        <text x="10" y="16" fill="#f8fafc" font-size="10" font-weight="600">Workspace Tree Picker</text>
+        <text x="10" y="30" fill="#34d399" font-size="9">Favorites + Git badges</text>
+      </g>
+
+      <!-- Item 4 -->
+      <g transform="translate(0, 138)">
+        <rect width="208" height="38" rx="6" fill="#090d16" stroke="#1f293d"/>
+        <text x="10" y="16" fill="#f8fafc" font-size="10" font-weight="600">Branch Switcher &amp; Sync</text>
+        <text x="10" y="30" fill="#a855f7" font-size="9">Active status + Squad filters</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Connecting Arrows -->
+  <g stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="4 2" fill="none" opacity="0.6">
+    <path d="M 320, 170 L 360, 170" marker-end="url(#arrow)" />
+    <path d="M 680, 170 L 720, 170" marker-end="url(#arrow)" />
+  </g>
+
+  <!-- Bottom Detailed Architecture: Spotlight Component Breakdown -->
+  <g transform="translate(40, 360)" filter="url(#shadowBox)">
+    <rect width="920" height="240" rx="10" fill="url(#cardGrad)" stroke="#202b3f" stroke-width="1.5"/>
+    <rect width="920" height="32" rx="10" fill="#111827"/>
+    <rect x="12" y="10" width="8" height="12" fill="#a855f7" rx="1.5"/>
+    <text x="28" y="21" fill="#f1f5f9" font-size="11" font-weight="700">COMPONENT VISUAL BLUEPRINT // SPOTLIGHT HUD &amp; NOTIFICATIONS SPEC</text>
+    <text x="640" y="21" fill="#94a3b8" font-size="10">PALETTE: #07090e / #0e131f / #202b3f | WCAG AAA</text>
+
+    <!-- Sub-block 1: Quick Action Matrix -->
+    <g transform="translate(20, 48)">
+      <rect width="270" height="170" rx="8" fill="#080c14" stroke="#202b3f"/>
+      <text x="14" y="22" fill="#c7d2fe" font-size="10" font-weight="700">SPOTLIGHT QUICK-CHIPS</text>
+
+      <g transform="translate(14, 34)">
+        <!-- Chip 1: /loop -->
+        <rect width="114" height="32" rx="5" fill="#1f1530" stroke="#7e22ce"/>
+        <text x="8" y="16" fill="#c084fc" font-size="9" font-weight="700">🔁 /loop</text>
+        <text x="8" y="27" fill="#a855f7" font-size="8">Bucle continuo</text>
+
+        <!-- Chip 2: /goal -->
+        <g transform="translate(124, 0)">
+          <rect width="118" height="32" rx="5" fill="#2d1d0c" stroke="#b45309"/>
+          <text x="8" y="16" fill="#fbbf24" font-size="9" font-weight="700">🎯 /goal</text>
+          <text x="8" y="27" fill="#d97706" font-size="8">Meta con tests</text>
+        </g>
+
+        <!-- Chip 3: Auto Commit -->
+        <g transform="translate(0, 38)">
+          <rect width="114" height="32" rx="5" fill="#082319" stroke="#059669"/>
+          <text x="8" y="16" fill="#34d399" font-size="9" font-weight="700">⚡ Commit</text>
+          <text x="8" y="27" fill="#10b981" font-size="8">Git semántico</text>
+        </g>
+
+        <!-- Chip 4: Tests -->
+        <g transform="translate(124, 38)">
+          <rect width="118" height="32" rx="5" fill="#07232e" stroke="#0891b2"/>
+          <text x="8" y="16" fill="#22d3ee" font-size="9" font-weight="700">🧪 Tests</text>
+          <text x="8" y="27" fill="#06b6d4" font-size="8">npm test runner</text>
+        </g>
+
+        <!-- Chip 5: Audit -->
+        <g transform="translate(0, 76)">
+          <rect width="242" height="30" rx="5" fill="#19152b" stroke="#6366f1"/>
+          <text x="8" y="16" fill="#a5b4fc" font-size="9" font-weight="700">🛡️ Auditar Rama</text>
+          <text x="8" y="25" fill="#818cf8" font-size="8">Revisión profunda de seguridad &amp; diffs</text>
+        </g>
+      </g>
+    </g>
+
+    <!-- Sub-block 2: Notifications Popover Structure -->
+    <g transform="translate(310, 48)">
+      <rect width="280" height="170" rx="8" fill="#080c14" stroke="#202b3f"/>
+      <text x="14" y="22" fill="#fde68a" font-size="10" font-weight="700">SIGNAL BELL POPOVER</text>
+
+      <g transform="translate(14, 34)">
+        <rect width="252" height="24" rx="4" fill="#162035"/>
+        <text x="8" y="16" fill="#94a3b8" font-size="9" font-weight="600">3 AVISOS EN COLA</text>
+        <text x="180" y="16" fill="#64748b" font-size="9">Limpiar todo</text>
+
+        <!-- Notice item 1: Error -->
+        <g transform="translate(0, 30)">
+          <rect width="252" height="34" rx="4" fill="#1f1113" stroke="#991b1b"/>
+          <circle cx="12" cy="17" r="4" fill="#ef4444"/>
+          <text x="22" y="16" fill="#fca5a5" font-size="9" font-weight="600">Fallo de compilación vite</text>
+          <text x="22" y="27" fill="#7f1d1d" font-size="8">hace 2m • Sesión #83</text>
+        </g>
+
+        <!-- Notice item 2: Success -->
+        <g transform="translate(0, 68)">
+          <rect width="252" height="34" rx="4" fill="#061c14" stroke="#065f46"/>
+          <circle cx="12" cy="17" r="4" fill="#10b981"/>
+          <text x="22" y="16" fill="#6ee7b7" font-size="9" font-weight="600">Build exitoso de webview</text>
+          <text x="22" y="27" fill="#047857" font-size="8">hace 5m • Sesión #82</text>
+        </g>
+      </g>
+    </g>
+
+    <!-- Sub-block 3: Provider Authentication Badges -->
+    <g transform="translate(610, 48)">
+      <rect width="290" height="170" rx="8" fill="#080c14" stroke="#202b3f"/>
+      <text x="14" y="22" fill="#a7f3d0" font-size="10" font-weight="700">ADD ACCOUNT PROVIDERS</text>
+
+      <g transform="translate(14, 34)">
+        <!-- Provider 1 -->
+        <rect width="80" height="42" rx="5" fill="#2a1608" stroke="#ea580c"/>
+        <text x="8" y="18" fill="#fdba74" font-size="9" font-weight="700">Claude</text>
+        <text x="8" y="32" fill="#c2410c" font-size="8">Anthropic CLI</text>
+
+        <!-- Provider 2 -->
+        <g transform="translate(88, 0)">
+          <rect width="84" height="42" rx="5" fill="#0c1d38" stroke="#2563eb"/>
+          <text x="8" y="18" fill="#93c5fd" font-size="9" font-weight="700">Antigravity</text>
+          <text x="8" y="32" fill="#1d4ed8" font-size="8">Google Hub</text>
+        </g>
+
+        <!-- Provider 3 -->
+        <g transform="translate(180, 0)">
+          <rect width="82" height="42" rx="5" fill="#07271e" stroke="#059669"/>
+          <text x="8" y="18" fill="#6ee7b7" font-size="9" font-weight="700">Ollama</text>
+          <text x="8" y="32" fill="#047857" font-size="8">Local LLMs</text>
+        </g>
+
+        <!-- Form preview -->
+        <g transform="translate(0, 52)">
+          <rect width="262" height="66" rx="5" fill="#0d1320" stroke="#202b3f"/>
+          <text x="10" y="18" fill="#94a3b8" font-size="8">Etiqueta identificadora:</text>
+          <rect x="10" y="24" width="242" height="20" rx="4" fill="#05070a" stroke="#334155"/>
+          <text x="16" y="38" fill="#f8fafc" font-size="9">ej. Personal 2 / Trabajo</text>
+          <text x="210" y="58" fill="#64748b" font-size="8">14/40</text>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

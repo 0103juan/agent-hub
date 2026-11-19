@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AgentHub · Rediseño del Centro de Herramientas y Servidores MCP</title>
+<style>
+  :root {
+    --bg: #07090e;
+    --s1: #0e131f;
+    --s2: #131a29;
+    --s3: #1a2334;
+    --line: #202b3f;
+    --line-hi: #2a3750;
+    --t1: #f3f6fc;
+    --t2: #dde4ef;
+    --t3: #c5cfde;
+    --t4: #a3b0c5;
+    --t5: #8593ab;
+    --indigo: #6366f1;
+    --amber: #f59e0b;
+    --cyan: #38bdf8;
+    --emerald: #10b981;
+    --rose: #f43f5e;
+    --orange: #f97316;
+    --purple: #a855f7;
+    --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+    --sans: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--t2); font: 13px/1.5 var(--sans); }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  svg.i { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  .mono { font-family: var(--mono); }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+
+  .hub-card {
+    background: var(--s1);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .hub-lift {
+    transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s ease, border-color 0.2s ease;
+  }
+  .hub-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px -10px rgba(0,0,0,0.8), 0 0 0 1px rgba(99,102,241,0.2);
+  }
+
+  /* Header */
+  .header-bar {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+    gap: 12px; padding: 12px 16px; border-radius: 12px;
+    background: linear-gradient(135deg, rgba(14,19,31,0.95), rgba(19,26,41,0.95));
+    border: 1px solid var(--line);
+  }
+  .brand-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--indigo), #0284c7);
+    display: grid; place-items: center; color: white;
+    box-shadow: 0 4px 12px rgba(99,102,241,0.3);
+  }
+
+  /* MCP Card */
+  .mcp-card {
+    padding: 14px; border-radius: 12px;
+    background: var(--s1); border: 1px solid var(--line);
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .mcp-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+
+  .tool-chip {
+    font-size: 10px; font-family: var(--mono);
+    padding: 2px 7px; border-radius: 5px;
+    background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.25);
+    color: #c7d2fe; display: inline-flex; align-items: center; gap: 3px;
+  }
+
+  .proto-tag {
+    font-size: 9px; font-weight: 700; font-family: var(--mono);
+    padding: 2px 6px; border-radius: 4px; text-transform: uppercase;
+  }
+  .proto-stdio { background: rgba(56,189,248,0.15); color: #7dd3fc; border: 1px solid rgba(56,189,248,0.3); }
+  .proto-http { background: rgba(168,85,247,0.15); color: #d8b4fe; border: 1px solid rgba(168,85,247,0.3); }
+
+  .client-sync {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 7px; border-radius: 5px; font-size: 10px; font-weight: 600; font-family: var(--mono);
+  }
+  .sync-claude { background: rgba(249,115,22,0.15); color: #fdba74; border: 1px solid rgba(249,115,22,0.3); }
+  .sync-google { background: rgba(56,189,248,0.15); color: #7dd3fc; border: 1px solid rgba(56,189,248,0.3); }
+  .sync-off { background: var(--s2); color: var(--t5); border: 1px solid var(--line); }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <header class="header-bar">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <div class="brand-icon">
+        <svg class="i" style="width:20px; height:20px;" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+      </div>
+      <div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <h1 style="margin:0; font-size:14px; font-weight:800; color:var(--t1);">Centro de Herramientas y Servidores MCP</h1>
+          <span class="mono" style="font-size:10px; padding:2px 8px; border-radius:99px; background:rgba(99,102,241,0.15); color:#a5b4fc; border:1px solid rgba(99,102,241,0.3);">
+            8 SERVIDORES · 42 HERRAMIENTAS
+          </span>
+        </div>
+        <div style="font-size:11px; color:var(--t4);">Herramientas y protocolos conectados bidireccionalmente a Claude y Antigravity</div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div style="display:flex; gap:8px;">
+      <button style="display:flex; align-items:center; gap:6px; padding:6px 12px; border-radius:8px; background:var(--s2); border:1px solid var(--line); font-size:11px; font-weight:600; color:var(--t2);">
+        <svg class="i" style="color:var(--emerald);" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Probar Salud
+      </button>
+      <button style="display:flex; align-items:center; gap:6px; padding:6px 14px; border-radius:8px; background:var(--indigo); color:white; font-size:11px; font-weight:700; box-shadow:0 2px 10px rgba(99,102,241,0.3);">
+        <svg class="i" viewBox="0 0 24 24"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+        Sincronizar Todo
+      </button>
+    </div>
+  </header>
+
+  <!-- Search & Filter Controls -->
+  <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; padding:10px 14px; border-radius:10px; background:var(--s1); border:1px solid var(--line);">
+    <input style="background:var(--bg); border:1px solid var(--line); border-radius:6px; padding:6px 12px; font-size:12px; color:var(--t1); flex:1; min-width:240px; outline:none;" placeholder="Buscar servidor o herramienta (ej: read_file, postgres, playwright)..." />
+    <div style="display:flex; gap:6px;">
+      <button style="padding:4px 10px; border-radius:99px; background:rgba(99,102,241,0.2); border:1px solid rgba(99,102,241,0.4); color:#c7d2fe; font-size:11px; font-weight:600;">Todos (8)</button>
+      <button style="padding:4px 10px; border-radius:99px; background:var(--s2); border:1px solid var(--line); color:var(--t4); font-size:11px;">Portafolio Local (5)</button>
+      <button style="padding:4px 10px; border-radius:99px; background:var(--s2); border:1px solid var(--line); color:var(--t4); font-size:11px;">En la Nube (3)</button>
+    </div>
+  </div>
+
+  <!-- Local Portfolio MCP Card (Filesystem) -->
+  <article class="mcp-card hub-lift">
+    <div class="mcp-header">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="width:8px; height:8px; border-radius:50%; background:var(--emerald);"></span>
+        <span class="mono" style="font-size:13px; font-weight:800; color:var(--emerald);">filesystem</span>
+        <span class="proto-tag proto-stdio">STDIO</span>
+        <span style="font-size:11px; color:var(--t4);">Acceso seguro y granular al árbol de archivos del workspace</span>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span class="client-sync sync-claude">Claude ✓</span>
+        <span class="client-sync sync-google">Antigravity ✓</span>
+        <button style="padding:3px 10px; border-radius:6px; background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.3); color:#6ee7b7; font-size:11px; font-weight:700;">Activo</button>
+      </div>
+    </div>
+
+    <!-- Command line -->
+    <div class="mono" style="font-size:11px; color:var(--t3); background:var(--s2); padding:6px 10px; border-radius:6px; border:1px solid var(--line); display:flex; justify-content:space-between; align-items:center;">
+      <span style="color:#7dd3fc;">npx -y @modelcontextprotocol/server-filesystem .</span>
+      <button style="color:var(--t5); font-size:10px;">Copiar</button>
+    </div>
+
+    <!-- Exposed Tools -->
+    <div style="display:flex; flex-wrap:wrap; align-items:center; gap:6px;">
+      <span style="font-size:10px; font-weight:700; color:var(--t5); text-transform:uppercase; margin-right:4px;">Herramientas (6):</span>
+      <span class="tool-chip">read_file</span>
+      <span class="tool-chip">write_file</span>
+      <span class="tool-chip">edit_file</span>
+      <span class="tool-chip">list_directory</span>
+      <span class="tool-chip">directory_tree</span>
+      <span class="tool-chip">search_files</span>
+    </div>
+  </article>
+
+  <!-- Local Portfolio MCP Card (Postgres) -->
+  <article class="mcp-card hub-lift">
+    <div class="mcp-header">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="width:8px; height:8px; border-radius:50%; background:var(--emerald);"></span>
+        <span class="mono" style="font-size:13px; font-weight:800; color:var(--emerald);">postgres</span>
+        <span class="proto-tag proto-stdio">STDIO</span>
+        <span style="font-size:11px; color:var(--t4);">Consultas SQL de sólo lectura e inspección de esquemas</span>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span class="client-sync sync-claude">Claude ✓</span>
+        <span class="client-sync sync-google">Antigravity ✓</span>
+        <button style="padding:3px 10px; border-radius:6px; background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.3); color:#6ee7b7; font-size:11px; font-weight:700;">Activo</button>
+      </div>
+    </div>
+
+    <div class="mono" style="font-size:11px; color:var(--t3); background:var(--s2); padding:6px 10px; border-radius:6px; border:1px solid var(--line); display:flex; justify-content:space-between; align-items:center;">
+      <span style="color:#7dd3fc;">npx -y @modelcontextprotocol/server-postgres postgresql://localhost/mydb</span>
+      <button style="color:var(--t5); font-size:10px;">Copiar</button>
+    </div>
+
+    <div style="display:flex; flex-wrap:wrap; align-items:center; gap:6px;">
+      <span style="font-size:10px; font-weight:700; color:var(--t5); text-transform:uppercase; margin-right:4px;">Herramientas (2):</span>
+      <span class="tool-chip">query</span>
+      <span class="tool-chip">describe_table</span>
+    </div>
+  </article>
+
+  <!-- Cloud / Web MCP Card (Playwright) -->
+  <article class="mcp-card hub-lift">
+    <div class="mcp-header">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="width:8px; height:8px; border-radius:50%; background:var(--cyan);"></span>
+        <span class="mono" style="font-size:13px; font-weight:800; color:var(--cyan);">playwright</span>
+        <span class="proto-tag proto-http">BROWSER</span>
+        <span style="font-size:11px; color:var(--t4);">Navegación web automatizada, capturas de pantalla e interacción UI</span>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span class="client-sync sync-claude">Claude ✓</span>
+        <span class="client-sync sync-google">Antigravity ✓</span>
+        <button style="padding:3px 8px; border-radius:6px; background:var(--s2); border:1px solid var(--line); font-size:11px; color:var(--t2);">Probar</button>
+      </div>
+    </div>
+
+    <div style="display:flex; flex-wrap:wrap; align-items:center; gap:6px;">
+      <span style="font-size:10px; font-weight:700; color:var(--t5); text-transform:uppercase; margin-right:4px;">Herramientas (8):</span>
+      <span class="tool-chip">browser_navigate</span>
+      <span class="tool-chip">browser_take_screenshot</span>
+      <span class="tool-chip">browser_click</span>
+      <span class="tool-chip">browser_fill_form</span>
+      <span class="tool-chip">browser_snapshot</span>
+      <span class="tool-chip">browser_evaluate</span>
+    </div>
+  </article>
+
+</div>
+</body>
+</html>

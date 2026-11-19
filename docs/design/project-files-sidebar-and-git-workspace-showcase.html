@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentHub // Project Files Sidebar & Git Workspace Showcase</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-void: #07090e;
+      --bg-carbon: #0a0e17;
+      --bg-surface: #0c1220;
+      --bg-card: #0e131f;
+      --border-subtle: #162035;
+      --border-strong: #202b3f;
+      --cyan-primary: #06b6d4;
+      --cyan-glow: rgba(6, 182, 212, 0.4);
+      --emerald-accent: #10b981;
+      --amber-accent: #f59e0b;
+      --rose-accent: #f43f5e;
+      --violet-accent: #8b5cf6;
+      --text-main: #f8fafc;
+      --text-muted: #cbd5e1;
+      --text-dim: #94a3b8;
+      --text-faint: #64748b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-void);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .font-mono { font-family: 'Fira Code', monospace; }
+
+    .grid-bg {
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(6, 182, 212, 0.08), transparent 60%),
+        radial-gradient(circle at 100% 100%, rgba(139, 92, 246, 0.05), transparent 50%),
+        linear-gradient(to right, rgba(22, 32, 53, 0.35) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(22, 32, 53, 0.35) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 28px 28px, 28px 28px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 6px 12px;
+      font-size: 11.5px;
+      font-weight: 600;
+      border-radius: 8px;
+      border: 1px solid var(--border-strong);
+      background: #131927;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s ease-in-out;
+      text-decoration: none;
+    }
+    .btn:hover {
+      background: #1a2337;
+      color: #fff;
+      border-color: #334460;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #06b6d4, #14b8a6);
+      color: #07090e;
+      border: none;
+      font-weight: 800;
+      box-shadow: 0 0 12px rgba(6, 182, 212, 0.35);
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #0891b2, #0d9488);
+      color: #07090e;
+      box-shadow: 0 0 16px rgba(6, 182, 212, 0.5);
+    }
+    .btn-emerald {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: rgba(16, 185, 129, 0.35);
+      color: var(--emerald-accent);
+    }
+    .btn-emerald:hover {
+      background: rgba(16, 185, 129, 0.25);
+      color: #fff;
+    }
+    .btn-violet {
+      background: rgba(139, 92, 246, 0.15);
+      border-color: rgba(139, 92, 246, 0.35);
+      color: var(--violet-accent);
+    }
+    .btn-violet:hover {
+      background: rgba(139, 92, 246, 0.25);
+      color: #fff;
+    }
+
+    /* Modal Animation */
+    @keyframes modalPop {
+      0% { opacity: 0; transform: scale(0.97) translateY(8px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .modal-anim { animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-void); }
+    ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  </style>
+</head>
+<body class="grid-bg">
+
+  <!-- TOP HEADER -->
+  <header style="background: rgba(10, 14, 23, 0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-strong); padding: 14px 24px; position: sticky; top: 0; z-index: 40;">
+    <div style="max-width: 1440px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 34px; height: 34px; border-radius: 9px; background: linear-gradient(135deg, var(--cyan-primary), var(--emerald-accent)); display: flex; align-items: center; justify-content: center; color: #07090e; font-size: 16px; font-weight: 900; box-shadow: 0 0 12px var(--cyan-glow);">
+          📁
+        </div>
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <h1 style="font-size: 15px; font-weight: 800; color: #fff;">Project Files Sidebar & Git Workspace</h1>
+            <span style="font-size: 10px; font-family: 'Fira Code', monospace; font-weight: 700; color: var(--cyan-primary); background: rgba(6,182,212,0.15); border: 1px solid rgba(6,182,212,0.3); padding: 1px 7px; border-radius: 5px;">SPEC CARD #47</span>
+          </div>
+          <p style="font-size: 11px; color: var(--text-dim); margin-top: 1px;" class="font-mono">
+            Dual Tab Git/Tree • Content Grep • Disparadores Inteligentes • Aislamiento CWD Total
+          </p>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 11px; color: var(--emerald-accent); font-weight: 700; background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.35); padding: 4px 10px; border-radius: 6px;" class="font-mono">
+          ✓ 0 Zinc / Purple / Indigo
+        </span>
+        <button class="btn btn-primary" onclick="toggleSidebarView()">
+          ⇄ Alternar Vista
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN WORKSPACE -->
+  <main style="max-width: 1440px; margin: 0 auto; padding: 24px 20px; flex: 1; width: 100%; display: grid; grid-template-columns: 340px 1fr; gap: 20px;">
+    
+    <!-- SIDEBAR COLUMN -->
+    <div style="background: var(--bg-surface); border: 1px solid var(--border-strong); border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; height: 680px; box-shadow: 0 15px 35px -10px rgba(0,0,0,0.8);">
+      
+      <!-- Top Dual Tabs -->
+      <div style="padding: 10px 12px; background: rgba(10,14,23,0.95); border-bottom: 1px solid var(--border-strong); display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+        <div style="display: flex; background: #131927; border: 1px solid var(--border-strong); border-radius: 8px; padding: 2px; flex: 1;">
+          <button id="tabGit" style="flex: 1; padding: 5px 8px; font-size: 11px; font-weight: 800; border-radius: 6px; border: none; background: var(--cyan-primary); color: #07090e; cursor: pointer; transition: all 0.15s;" onclick="switchTab('git')">
+            ⎇ Git (<span id="gitCountBadge">5</span>)
+          </button>
+          <button id="tabTree" style="flex: 1; padding: 5px 8px; font-size: 11px; font-weight: 600; border-radius: 6px; border: none; background: transparent; color: var(--text-dim); cursor: pointer; transition: all 0.15s;" onclick="switchTab('tree')">
+            📁 Archivos (<span id="treeCountBadge">18</span>)
+          </button>
+        </div>
+        <button class="btn" style="padding: 5px 8px;" onclick="refreshFiles()" title="Refrescar">↻</button>
+      </div>
+
+      <!-- Search & Filters Header -->
+      <div style="padding: 10px 12px; background: var(--bg-card); border-bottom: 1px solid var(--border-subtle); display: flex; flex-direction: column; gap: 8px;">
+        <!-- Search Input -->
+        <div style="position: relative;">
+          <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="Filtrar cambios..." 
+            oninput="handleSearch(this.value)"
+            style="width: 100%; background: var(--bg-void); border: 1px solid var(--border-strong); border-radius: 8px; padding: 6px 10px 6px 28px; font-size: 11px; color: #fff; font-family: 'Fira Code', monospace; outline: none;"
+          >
+          <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--text-dim); pointer-events: none;">🔍</span>
+        </div>
+
+        <!-- Search Mode Bar (Only on tree tab) -->
+        <div id="treeSearchModes" style="display: none; align-items: center; gap: 8px; font-size: 10.5px;">
+          <span style="color: var(--text-dim);">Modo:</span>
+          <button id="modeNameBtn" style="padding: 2px 6px; border-radius: 4px; border: 1px solid var(--cyan-primary); background: rgba(6,182,212,0.15); color: var(--cyan-primary); font-size: 10.5px; font-weight: 700; cursor: pointer;" onclick="setGrepMode('name')">Nombre</button>
+          <button id="modeGrepBtn" style="padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border-strong); background: transparent; color: var(--text-dim); font-size: 10.5px; cursor: pointer;" onclick="setGrepMode('grep')">Contenido (Grep)</button>
+        </div>
+
+        <!-- Git Smart Triggers Bar (Only on git tab) -->
+        <div id="gitTriggersBar" style="display: flex; flex-direction: column; gap: 6px;">
+          <!-- Filter chips -->
+          <div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
+            <button class="status-chip active" style="font-size: 10px; font-family: 'Fira Code', monospace; padding: 1px 6px; border-radius: 4px; border: 1px solid rgba(245,158,11,0.5); background: rgba(245,158,11,0.15); color: var(--amber-accent); cursor: pointer;" onclick="toggleStatusFilter('M', this)">M 3</button>
+            <button class="status-chip active" style="font-size: 10px; font-family: 'Fira Code', monospace; padding: 1px 6px; border-radius: 4px; border: 1px solid rgba(16,185,129,0.5); background: rgba(16,185,129,0.15); color: var(--emerald-accent); cursor: pointer;" onclick="toggleStatusFilter('A', this)">A 1</button>
+            <button class="status-chip active" style="font-size: 10px; font-family: 'Fira Code', monospace; padding: 1px 6px; border-radius: 4px; border: 1px solid rgba(6,182,212,0.5); background: rgba(6,182,212,0.15); color: var(--cyan-primary); cursor: pointer;" onclick="toggleStatusFilter('?', this)">? 1</button>
+            
+            <div style="margin-left: auto; display: flex; gap: 4px;">
+              <button class="btn" style="padding: 2px 6px; font-size: 10px;" onclick="copyChangedList()">📋 Copiar</button>
+              <button class="btn" style="padding: 2px 6px; font-size: 10px;" onclick="toggleSort()">⇅ Orden</button>
+            </div>
+          </div>
+
+          <!-- Action buttons -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 2px;">
+            <button class="btn btn-emerald" style="padding: 4px 6px; font-size: 10.5px;" onclick="runAutoCommit()">
+              ✨ Auto Commit
+            </button>
+            <button class="btn btn-violet" style="padding: 4px 6px; font-size: 10.5px;" onclick="runAuditBranch()">
+              🛡️ Auditar Cambios
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- File List Container -->
+      <div id="fileListContainer" style="flex: 1; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 4px;">
+        <!-- Injected via JavaScript -->
+      </div>
+
+    </div>
+
+    <!-- MAIN DETAIL PREVIEW & WORKSPACE GAUNTLET -->
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+      
+      <!-- Top Selected File Card -->
+      <div style="background: var(--bg-surface); border: 1px solid var(--border-strong); border-radius: 16px; padding: 20px; box-shadow: 0 15px 35px -10px rgba(0,0,0,0.8);">
+        <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px; margin-bottom: 14px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 18px;" id="detailIcon">📄</span>
+            <div>
+              <h2 style="font-size: 14px; font-weight: 800; color: #fff;" id="detailTitle">src/webview/components/TacticalHudView.tsx</h2>
+              <p style="font-size: 11px; color: var(--text-dim);" class="font-mono" id="detailSubtitle">Modificado (M) • TypeScript React • 397 líneas</p>
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-secondary" onclick="openDiffModal('src/webview/components/TacticalHudView.tsx')">
+              ± Ver Diff Interactivo
+            </button>
+            <button class="btn btn-emerald" onclick="attachFileToComposer('src/webview/components/TacticalHudView.tsx')">
+              📎 Adjuntar al Chat
+            </button>
+          </div>
+        </div>
+
+        <!-- Code Preview Box -->
+        <pre style="background: var(--bg-void); border: 1px solid var(--border-strong); border-radius: 10px; padding: 14px; font-family: 'Fira Code', monospace; font-size: 11.5px; color: var(--text-muted); line-height: 1.6; max-height: 320px; overflow-y: auto;" id="detailCodeBox">
+<span style="color: #64748b;">// Tactical HUD View - Purified Tokens Verified</span>
+<span style="color: #c084fc; font-weight: 600;">export const</span> <span style="color: #60a5fa;">TacticalHudView</span>: <span style="color: #38bdf8;">React.FC</span>&lt;<span style="color: #38bdf8;">Props</span>&gt; = ({
+  state,
+  session,
+  workspaceDir,
+  gitFilesCount,
+  currentBranch
+}) =&gt; {
+  <span style="color: #64748b;">// Central holographic dial with cyan/emerald gradient</span>
+  <span style="color: #c084fc; font-weight: 600;">return</span> (
+    &lt;<span style="color: #f43f5e;">div</span> <span style="color: #06b6d4;">className</span>=<span style="color: #86efac;">"flex-1 min-h-0 flex flex-col bg-[#07090e] text-slate-100"</span>&gt;
+      &lt;<span style="color: #f43f5e;">h1</span> <span style="color: #06b6d4;">className</span>=<span style="color: #86efac;">"text-sm font-black tracking-[0.1em] text-slate-100 uppercase"</span>&gt;COMMAND CENTER&lt;/<span style="color: #f43f5e;">h1</span>&gt;
+      &lt;<span style="color: #f43f5e;">span</span> <span style="color: #06b6d4;">className</span>=<span style="color: #86efac;">"text-[10px] font-mono bg-cyan-500/15 text-cyan-300 border border-cyan-500/30"</span>&gt;LIVE HUD&lt;/<span style="color: #f43f5e;">span</span>&gt;
+    &lt;/<span style="color: #f43f5e;">div</span>&gt;
+  );
+};</pre>
+      </div>
+
+      <!-- Workspace Protection Gauntlet Card -->
+      <div style="background: var(--bg-card); border: 1px solid var(--border-strong); border-radius: 16px; padding: 18px;">
+        <h3 style="font-size: 12.5px; font-weight: 800; color: #fff; margin-bottom: 10px;" class="font-mono">
+          ESCUDO DE AISLAMIENTO // VERIFICACIÓN ZERO REGRESSION
+        </h3>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+          <div style="background: var(--bg-void); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 12px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--emerald-accent);" class="font-mono">✓ ANTI-SYSTEM32</div>
+            <div style="font-size: 10.5px; color: var(--text-dim); margin-top: 4px;">isSystemOrAppDir bloquea System32, SysWOW64 y carpetas de programa.</div>
+          </div>
+          <div style="background: var(--bg-void); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 12px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--cyan-primary);" class="font-mono">✓ 14/14 TESTS FLOWS</div>
+            <div style="font-size: 10.5px; color: var(--text-dim); margin-top: 4px;">flows.test.ts superado en 59 ms con validación de aislamiento.</div>
+          </div>
+          <div style="background: var(--bg-void); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 12px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--violet-accent);" class="font-mono">✓ PURIFIED PALETTE</div>
+            <div style="font-size: 10.5px; color: var(--text-dim); margin-top: 4px;">0 tokens purple-, indigo- o zinc- en todo el árbol de componentes.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+    const GIT_FILES = [
+      { path: 'src/webview/components/TacticalHudView.tsx', status: 'M', type: 'tsx', lines: '+24 / -8' },
+      { path: 'src/webview/components/chat/Composer.tsx', status: 'M', type: 'tsx', lines: '+18 / -12' },
+      { path: 'src/webview/components/chat/MessageList.tsx', status: 'M', type: 'tsx', lines: '+6 / -2' },
+      { path: 'docs/design/project-files-sidebar-and-git-workspace-architecture.svg', status: 'A', type: 'svg', lines: '+310 lines' },
+      { path: 'docs/design/project-files-sidebar-and-git-workspace-showcase.html', status: '?', type: 'html', lines: 'Nuevo archivo' }
+    ];
+
+    const PROJECT_TREE = [
+      { path: 'src/webview/App.tsx', type: 'tsx' },
+      { path: 'src/webview/styles.css', type: 'css' },
+      { path: 'src/webview/components/TacticalHudView.tsx', type: 'tsx' },
+      { path: 'src/webview/components/ProjectFilesSidebar.tsx', type: 'tsx' },
+      { path: 'src/webview/components/chat/Composer.tsx', type: 'tsx' },
+      { path: 'src/webview/components/chat/MessageList.tsx', type: 'tsx' },
+      { path: 'src/webview/components/chat/syntax-highlighter.tsx', type: 'tsx' },
+      { path: 'src/host/workspace.ts', type: 'ts' },
+      { path: 'src/host/safe-path.ts', type: 'ts' },
+      { path: 'docs/design/tactical-hud-architecture.md', type: 'md' },
+      { path: 'docs/design/tactical-composer.svg', type: 'svg' },
+      { path: 'package.json', type: 'json' }
+    ];
+
+    let currentTab = 'git';
+    let searchQuery = '';
+    let grepMode = 'name';
+    let activeFilter = null;
+    let sortBy = 'status';
+
+    function init() {
+      renderFiles();
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      document.getElementById('tabGit').style.background = tab === 'git' ? 'var(--cyan-primary)' : 'transparent';
+      document.getElementById('tabGit').style.color = tab === 'git' ? '#07090e' : 'var(--text-dim)';
+      document.getElementById('tabTree').style.background = tab === 'tree' ? 'var(--cyan-primary)' : 'transparent';
+      document.getElementById('tabTree').style.color = tab === 'tree' ? '#07090e' : 'var(--text-dim)';
+
+      document.getElementById('gitTriggersBar').style.display = tab === 'git' ? 'flex' : 'none';
+      document.getElementById('treeSearchModes').style.display = tab === 'tree' ? 'flex' : 'none';
+      renderFiles();
+    }
+
+    function setGrepMode(mode) {
+      grepMode = mode;
+      document.getElementById('modeNameBtn').style.border = mode === 'name' ? '1px solid var(--cyan-primary)' : '1px solid var(--border-strong)';
+      document.getElementById('modeNameBtn').style.background = mode === 'name' ? 'rgba(6,182,212,0.15)' : 'transparent';
+      document.getElementById('modeNameBtn').style.color = mode === 'name' ? 'var(--cyan-primary)' : 'var(--text-dim)';
+
+      document.getElementById('modeGrepBtn').style.border = mode === 'grep' ? '1px solid var(--cyan-primary)' : '1px solid var(--border-strong)';
+      document.getElementById('modeGrepBtn').style.background = mode === 'grep' ? 'rgba(6,182,212,0.15)' : 'transparent';
+      document.getElementById('modeGrepBtn').style.color = mode === 'grep' ? 'var(--cyan-primary)' : 'var(--text-dim)';
+      renderFiles();
+    }
+
+    function handleSearch(val) {
+      searchQuery = val.trim().toLowerCase();
+      renderFiles();
+    }
+
+    function toggleStatusFilter(status, btn) {
+      if (activeFilter === status) {
+        activeFilter = null;
+        document.querySelectorAll('.status-chip').forEach(c => c.style.opacity = '1');
+      } else {
+        activeFilter = status;
+        document.querySelectorAll('.status-chip').forEach(c => c.style.opacity = '0.5');
+        btn.style.opacity = '1';
+      }
+      renderFiles();
+    }
+
+    function toggleSort() {
+      sortBy = sortBy === 'status' ? 'name' : 'status';
+      renderFiles();
+    }
+
+    function renderFiles() {
+      const container = document.getElementById('fileListContainer');
+      if (currentTab === 'git') {
+        let list = [...GIT_FILES];
+        if (searchQuery) list = list.filter(f => f.path.toLowerCase().includes(searchQuery));
+        if (activeFilter) list = list.filter(f => f.status === activeFilter);
+        if (sortBy === 'name') list.sort((a,b) => a.path.localeCompare(b.path));
+
+        if (list.length === 0) {
+          container.innerHTML = '<div style="text-align: center; color: var(--text-faint); padding: 24px;" class="font-mono">No hay archivos en git con ese filtro</div>';
+          return;
+        }
+
+        container.innerHTML = list.map(item => `
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; background: rgba(10,14,23,0.7); border: 1px solid var(--border-subtle); border-radius: 8px; cursor: pointer; transition: all 0.15s;" onmouseover="this.style.borderColor='var(--cyan-primary)'" onmouseout="this.style.borderColor='var(--border-subtle)'" onclick="selectFile('${item.path}', '${item.status}', '${item.type}')">
+            <div style="display: flex; align-items: center; gap: 8px; min-width: 0;">
+              <span style="font-size: 10px; font-family: 'Fira Code', monospace; font-weight: 800; padding: 1px 5px; border-radius: 4px; ${getStatusStyle(item.status)}">${item.status}</span>
+              <span style="font-size: 11px; font-family: 'Fira Code', monospace; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.path}</span>
+            </div>
+            <span style="font-size: 9.5px; color: var(--text-faint); font-family: 'Fira Code', monospace;">${item.lines}</span>
+          </div>
+        `).join('');
+      } else {
+        let list = [...PROJECT_TREE];
+        if (searchQuery) list = list.filter(f => f.path.toLowerCase().includes(searchQuery));
+
+        container.innerHTML = list.map(item => `
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 7px 10px; background: rgba(10,14,23,0.7); border: 1px solid var(--border-subtle); border-radius: 8px; cursor: pointer; transition: all 0.15s;" onmouseover="this.style.borderColor='var(--cyan-primary)'" onmouseout="this.style.borderColor='var(--border-subtle)'" onclick="selectFile('${item.path}', 'FILE', '${item.type}')">
+            <div style="display: flex; align-items: center; gap: 8px; min-width: 0;">
+              <span style="font-size: 11px;">${getFileIcon(item.type)}</span>
+              <span style="font-size: 11px; font-family: 'Fira Code', monospace; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.path}</span>
+            </div>
+            <span style="font-size: 9px; color: ${getFileColor(item.type)}; font-family: 'Fira Code', monospace; text-transform: uppercase;">.${item.type}</span>
+          </div>
+        `).join('');
+      }
+    }
+
+    function getStatusStyle(s) {
+      switch(s) {
+        case 'M': return 'background: rgba(245,158,11,0.2); color: var(--amber-accent); border: 1px solid rgba(245,158,11,0.4);';
+        case 'A': return 'background: rgba(16,185,129,0.2); color: var(--emerald-accent); border: 1px solid rgba(16,185,129,0.4);';
+        case 'D': return 'background: rgba(244,63,94,0.2); color: var(--rose-accent); border: 1px solid rgba(244,63,94,0.4);';
+        case '?': return 'background: rgba(6,182,212,0.2); color: var(--cyan-primary); border: 1px solid rgba(6,182,212,0.4);';
+        default: return 'background: #162035; color: #fff;';
+      }
+    }
+
+    function getFileIcon(type) {
+      switch(type) {
+        case 'tsx':
+        case 'ts':
+        case 'js': return '📄';
+        case 'css': return '🎨';
+        case 'json': return '⚙️';
+        case 'md': return '📝';
+        case 'svg': return '📐';
+        default: return '📄';
+      }
+    }
+
+    function getFileColor(type) {
+      switch(type) {
+        case 'tsx':
+        case 'ts': return 'var(--cyan-primary)';
+        case 'css': return 'var(--rose-accent)';
+        case 'json': return 'var(--amber-accent)';
+        case 'md': return 'var(--emerald-accent)';
+        case 'svg': return 'var(--violet-accent)';
+        default: return 'var(--text-dim)';
+      }
+    }
+
+    function selectFile(path, status, type) {
+      document.getElementById('detailTitle').innerText = path;
+      document.getElementById('detailSubtitle').innerText = `${status} • Formato .${type} • Listo para inspección`;
+      document.getElementById('detailIcon').innerText = getFileIcon(type);
+    }
+
+    function copyChangedList() {
+      const text = GIT_FILES.map(f => `${f.status} ${f.path}`).join('\n');
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Lista de archivos modificados copiada al portapapeles:\n\n' + text);
+      });
+    }
+
+    function runAutoCommit() {
+      alert('✨ Lanzando generador Conventional Commits con IA a partir de git diff...');
+    }
+
+    function runAuditBranch() {
+      alert('🛡️ Lanzando auditoría de seguridad y análisis estático contra main...');
+    }
+
+    function openDiffModal(path) {
+      alert('± Abriendo visor interactivo de diff para: ' + path);
+    }
+
+    function attachFileToComposer(path) {
+      alert('📎 Archivo adjuntado al compositor activo: ' + path);
+    }
+
+    function refreshFiles() {
+      renderFiles();
+    }
+
+    function toggleSidebarView() {
+      switchTab(currentTab === 'git' ? 'tree' : 'git');
+    }
+
+    init();
+  </script>
+</body>
+</html>

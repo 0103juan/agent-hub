@@ -23,7 +23,8 @@
     "app": "node bin/agent-hub.js --desktop",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
-    "test": "esbuild tests/agent-hub.test.ts --bundle --platform=node --alias:vscode=./src/server/vscode-shim.ts --outfile=tests/dist.test.js && node --test tests/dist.test.js",
+    "test": "esbuild tests/agent-hub.test.ts --bundle --platform=node --alias:vscode=./src/server/vscode-shim.ts --outfile=tests/dist.test.js && node --test tests/dist.test.js && npm run test:flows",
+    "test:flows": "esbuild tests/flows.test.ts --bundle --platform=node --alias:vscode=./src/server/vscode-shim.ts --outfile=tests/dist.flows.test.js && node --test tests/dist.flows.test.js",
     "watch:webview": "vite build --watch",
     "dev": "npm run build",
     "update": "pwsh -NoProfile -File actualizar.ps1"

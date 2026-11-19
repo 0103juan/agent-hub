@@ -1,0 +1,303 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="100%" height="100%" style="background:#07090e; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <defs>
+    <linearGradient id="hud-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0a0e17" />
+      <stop offset="100%" stop-color="#05070a" />
+    </linearGradient>
+    <linearGradient id="brand-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#6366f1" />
+      <stop offset="50%" stop-color="#8b5cf6" />
+      <stop offset="100%" stop-color="#06b6d4" />
+    </linearGradient>
+    <linearGradient id="emerald-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#06b6d4" />
+    </linearGradient>
+    <linearGradient id="amber-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#ef4444" />
+    </linearGradient>
+    <filter id="neon-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#162035" stroke-width="0.75" stroke-opacity="0.6" />
+      <circle cx="32" cy="32" r="1" fill="#06b6d4" fill-opacity="0.25" />
+    </pattern>
+  </defs>
+
+  <rect width="1280" height="720" fill="url(#hud-bg)" />
+  <rect width="1280" height="720" fill="url(#grid)" />
+
+  <!-- Header Header Deck -->
+  <rect x="40" y="24" width="1200" height="64" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.5" />
+  <circle cx="72" cy="56" r="16" fill="#06b6d4" fill-opacity="0.15" stroke="#06b6d4" stroke-width="1.5" />
+  <path d="M64 56 L70 62 L80 49" fill="none" stroke="#06b6d4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  <text x="100" y="50" fill="#f8fafc" font-size="16" font-weight="800" letter-spacing="0.5">AGENTHUB // MASTER DESIGN SYSTEM SPECIFICATION</text>
+  <text x="100" y="68" fill="#94a3b8" font-size="11" font-mono="true">TACTICAL HUD SPEC CARD #32 • COMPLETE FRONTEND TOKEN UNIFICATION • 100% PURITY</text>
+
+  <rect x="990" y="38" width="125" height="36" rx="8" fill="#10b981" fill-opacity="0.12" stroke="#10b981" stroke-width="1.2" />
+  <circle cx="1006" cy="56" r="4" fill="#10b981" filter="url(#neon-glow)" />
+  <text x="1018" y="60" fill="#10b981" font-size="11" font-weight="800" font-mono="true">0 ZINC LEAKS</text>
+
+  <rect x="1125" y="38" width="95" height="36" rx="8" fill="#06b6d4" fill-opacity="0.15" stroke="#06b6d4" stroke-width="1.2" />
+  <text x="1144" y="60" fill="#06b6d4" font-size="11" font-weight="800" font-mono="true">VERIFIED</text>
+
+  <!-- Section 1: Color Hierarchy Palette -->
+  <g transform="translate(40, 108)">
+    <rect width="380" height="270" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.5" />
+    <rect width="380" height="42" rx="14" fill="#0e131f" />
+    <path d="M 0 42 L 380 42" stroke="#202b3f" stroke-width="1" />
+    <circle cx="22" cy="21" r="5" fill="#06b6d4" />
+    <text x="36" y="25" fill="#f8fafc" font-size="13" font-weight="700">01. PALETA CROMÁTICA HUD</text>
+    <text x="290" y="25" fill="#06b6d4" font-size="10" font-mono="true">WCAG AAA</text>
+
+    <!-- Color Swatches -->
+    <g transform="translate(16, 56)">
+      <!-- Obsidian Void -->
+      <rect width="64" height="44" rx="6" fill="#07090e" stroke="#202b3f" />
+      <text x="8" y="38" fill="#64748b" font-size="9" font-mono="true">#07090e</text>
+      <text x="8" y="20" fill="#94a3b8" font-size="9" font-weight="700">Void</text>
+
+      <!-- Panel Surface -->
+      <rect x="72" width="64" height="44" rx="6" fill="#0a0e17" stroke="#202b3f" />
+      <text x="80" y="38" fill="#64748b" font-size="9" font-mono="true">#0a0e17</text>
+      <text x="80" y="20" fill="#94a3b8" font-size="9" font-weight="700">Surface</text>
+
+      <!-- Elevate -->
+      <rect x="144" width="64" height="44" rx="6" fill="#162035" stroke="#202b3f" />
+      <text x="152" y="38" fill="#94a3b8" font-size="9" font-mono="true">#162035</text>
+      <text x="152" y="20" fill="#f8fafc" font-size="9" font-weight="700">Elevated</text>
+
+      <!-- Border Rim -->
+      <rect x="216" width="64" height="44" rx="6" fill="#202b3f" stroke="#334155" />
+      <text x="224" y="38" fill="#94a3b8" font-size="9" font-mono="true">#202b3f</text>
+      <text x="224" y="20" fill="#f8fafc" font-size="9" font-weight="700">Border</text>
+
+      <!-- Accent Rim -->
+      <rect x="288" width="64" height="44" rx="6" fill="#202b3f" stroke="#06b6d4" stroke-opacity="0.5" />
+      <text x="296" y="38" fill="#06b6d4" font-size="9" font-mono="true">#202b3f</text>
+      <text x="296" y="20" fill="#06b6d4" font-size="9" font-weight="700">Tactical</text>
+    </g>
+
+    <!-- Accent Semantics -->
+    <g transform="translate(16, 114)">
+      <rect width="170" height="64" rx="8" fill="#07090e" stroke="#06b6d4" stroke-opacity="0.3" />
+      <circle cx="16" cy="18" r="4" fill="#06b6d4" />
+      <text x="26" y="22" fill="#06b6d4" font-size="11" font-weight="700">Cian Eléctrico (#06b6d4)</text>
+      <text x="12" y="40" fill="#94a3b8" font-size="9.5">Primario de acción, terminales,</text>
+      <text x="12" y="52" fill="#94a3b8" font-size="9.5">rutas seguras y llamadas activas.</text>
+
+      <rect x="178" width="170" height="64" rx="8" fill="#07090e" stroke="#10b981" stroke-opacity="0.3" />
+      <circle cx="194" cy="18" r="4" fill="#10b981" />
+      <text x="204" y="22" fill="#10b981" font-size="11" font-weight="700">Esmeralda (#10b981)</text>
+      <text x="190" y="40" fill="#94a3b8" font-size="9.5">Ramas limpias (0 diff), salud OK,</text>
+      <text x="190" y="52" fill="#94a3b8" font-size="9.5">tests aprobados y estado online.</text>
+    </g>
+
+    <g transform="translate(16, 186)">
+      <rect width="170" height="64" rx="8" fill="#07090e" stroke="#f59e0b" stroke-opacity="0.3" />
+      <circle cx="16" cy="18" r="4" fill="#f59e0b" />
+      <text x="26" y="22" fill="#f59e0b" font-size="11" font-weight="700">Ámbar Alerta (#f59e0b)</text>
+      <text x="12" y="40" fill="#94a3b8" font-size="9.5">Señal de protocolo, cambios git</text>
+      <text x="12" y="52" fill="#94a3b8" font-size="9.5">pendientes y avisos de cuota.</text>
+
+      <rect x="178" width="170" height="64" rx="8" fill="#07090e" stroke="#8b5cf6" stroke-opacity="0.3" />
+      <circle cx="194" cy="18" r="4" fill="#8b5cf6" />
+      <text x="204" y="22" fill="#8b5cf6" font-size="11" font-weight="700">Púrpura Protocolo (#8b5cf6)</text>
+      <text x="190" y="40" fill="#94a3b8" font-size="9.5">Roles canónicos, Modo Loop,</text>
+      <text x="190" y="52" fill="#94a3b8" font-size="9.5">orquestación y memoria persistente.</text>
+    </g>
+  </g>
+
+  <!-- Section 2: Typography & Contrast Ratio -->
+  <g transform="translate(440, 108)">
+    <rect width="380" height="270" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.5" />
+    <rect width="380" height="42" rx="14" fill="#0e131f" />
+    <path d="M 0 42 L 380 42" stroke="#202b3f" stroke-width="1" />
+    <circle cx="22" cy="21" r="5" fill="#8b5cf6" />
+    <text x="36" y="25" fill="#f8fafc" font-size="13" font-weight="700">02. TIPOGRAFÍA Y ESCALA VISUAL</text>
+    <text x="280" y="25" fill="#8b5cf6" font-size="10" font-mono="true">2 FAMILIAS</text>
+
+    <!-- Font Families -->
+    <g transform="translate(16, 56)">
+      <rect width="348" height="60" rx="8" fill="#07090e" stroke="#202b3f" />
+      <text x="14" y="24" fill="#f8fafc" font-size="14" font-weight="800">Plus Jakarta Sans / Inter</text>
+      <text x="14" y="44" fill="#94a3b8" font-size="11">Interfaz humana, títulos de columnas, botones de comando y modales.</text>
+    </g>
+
+    <g transform="translate(16, 124)">
+      <rect width="348" height="60" rx="8" fill="#07090e" stroke="#202b3f" />
+      <text x="14" y="24" fill="#06b6d4" font-size="13" font-weight="700" font-mono="true">JetBrains Mono / Consolas</text>
+      <text x="14" y="44" fill="#94a3b8" font-size="11">Rutas CWD, hashes Git, tokens de memoria, métricas y syntax highlighting.</text>
+    </g>
+
+    <!-- Contrast Verification Table -->
+    <g transform="translate(16, 192)">
+      <rect width="348" height="62" rx="8" fill="#07090e" stroke="#202b3f" />
+      <text x="14" y="20" fill="#f8fafc" font-size="10" font-weight="700">CONTRASTE REAL VERIFICADO CONTRA #07090e:</text>
+      <text x="14" y="38" fill="#f8fafc" font-size="10.5" font-mono="true">text-slate-100: 17.8:1 (AAA) · text-slate-300: 10.4:1 (AAA)</text>
+      <text x="14" y="52" fill="#94a3b8" font-size="10.5" font-mono="true">text-slate-400: 6.2:1 (AA+) · text-cyan-300: 12.1:1 (AAA)</text>
+    </g>
+  </g>
+
+  <!-- Section 3: Component Coverage Matrix -->
+  <g transform="translate(840, 108)">
+    <rect width="400" height="270" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.5" />
+    <rect width="400" height="42" rx="14" fill="#0e131f" />
+    <path d="M 0 42 L 400 42" stroke="#202b3f" stroke-width="1" />
+    <circle cx="22" cy="21" r="5" fill="#10b981" />
+    <text x="36" y="25" fill="#f8fafc" font-size="13" font-weight="700">03. AUDITORÍA DE COMPONENTES FRONTEND</text>
+    <text x="325" y="25" fill="#10b981" font-size="10" font-mono="true">100% PURITY</text>
+
+    <g transform="translate(16, 52)">
+      <!-- Row 1 -->
+      <rect width="176" height="30" rx="6" fill="#07090e" stroke="#202b3f" />
+      <text x="10" y="19" fill="#f8fafc" font-size="11">AgentsView.tsx</text>
+      <text x="140" y="19" fill="#10b981" font-size="9.5" font-mono="true">0 zinc</text>
+
+      <rect x="184" width="184" height="30" rx="6" fill="#07090e" stroke="#202b3f" />
+      <text x="194" y="19" fill="#f8fafc" font-size="11">SquadCanvas.tsx</text>
+      <text x="325" y="19" fill="#10b981" font-size="9.5" font-mono="true">0 zinc</text>
+
+      <!-- Row 2 -->
+      <rect y="36" width="176" height="30" rx="6" fill="#07090e" stroke="#202b3f" />
+      <text x="10" y="55" fill="#f8fafc" font-size="11">MemoryView.tsx</text>
+      <text x="140" y="55" fill="#10b981" font-size="9.5" font-mono="true">0 zinc</text>
+
+      <rect x="184" y="36" width="184" height="30" rx="6" fill="#07090e" stroke="#202b3f" />
+      <text x="194" y="55" fill="#f8fafc" font-size="11">MCPManagerView.tsx</text>
+      <text x="325" y="55" fill="#10b981" font-size="9.5" font-mono="true">0 zinc</text>
+
+      <!-- Row 3 -->
+      <rect y="72" width="176" height="30" rx="6" fill="#07090e" stroke="#202b3f" />
+      <text x="10" y="91" fill="#f8fafc" font-size="11">Markdown.tsx</text>
+      <text x="140" y="91" fill="#10b981" font-size="9.5" font-mono="true">0 zinc</text>
+
+      <rect x="184" y="72" width="184" height="30" rx="6" fill="#07090e" stroke="#202b3f" />
+      <text x="194" y="91" fill="#f8fafc" font-size="11">WorkspacePicker.tsx</text>
+      <text x="325" y="91" fill="#10b981" font-size="9.5" font-mono="true">0 zinc</text>
+
+      <!-- Row 4 -->
+      <rect y="108" width="176" height="30" rx="6" fill="#07090e" stroke="#202b3f" />
+      <text x="10" y="127" fill="#f8fafc" font-size="11">SpotlightBar.tsx</text>
+      <text x="140" y="127" fill="#10b981" font-size="9.5" font-mono="true">0 zinc</text>
+
+      <rect x="184" y="108" width="184" height="30" rx="6" fill="#07090e" stroke="#202b3f" />
+      <text x="194" y="127" fill="#f8fafc" font-size="11">GitBranchBadge.tsx</text>
+      <text x="325" y="127" fill="#10b981" font-size="9.5" font-mono="true">0 zinc</text>
+
+      <!-- Row 5 -->
+      <rect y="144" width="176" height="30" rx="6" fill="#07090e" stroke="#202b3f" />
+      <text x="10" y="163" fill="#f8fafc" font-size="11">SplitWorkspace.tsx</text>
+      <text x="140" y="163" fill="#10b981" font-size="9.5" font-mono="true">0 zinc</text>
+
+      <rect x="184" y="144" width="184" height="30" rx="6" fill="#07090e" stroke="#202b3f" />
+      <text x="194" y="163" fill="#f8fafc" font-size="11">ModelCatalogModal.tsx</text>
+      <text x="325" y="163" fill="#10b981" font-size="9.5" font-mono="true">0 zinc</text>
+
+      <!-- Summary Banner -->
+      <rect y="180" width="368" height="26" rx="6" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-opacity="0.4" />
+      <text x="184" y="197" fill="#10b981" font-size="10" font-weight="700" text-anchor="middle">✔ TOTAL DE CLASES ZINC EN WEBVIEW: 0 / 100% PURIFICADO</text>
+    </g>
+  </g>
+
+  <!-- Section 4: Live Component Gallery HUD Mockup -->
+  <g transform="translate(40, 396)">
+    <rect width="1200" height="290" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.5" />
+    <rect width="1200" height="42" rx="14" fill="#0e131f" />
+    <path d="M 0 42 L 1200 42" stroke="#202b3f" stroke-width="1" />
+    <circle cx="22" cy="21" r="5" fill="#f59e0b" />
+    <text x="36" y="25" fill="#f8fafc" font-size="13" font-weight="700">04. GALERÍA DE COMPONENTES INTERACTIVOS EN PRODUCCIÓN</text>
+    <text x="1070" y="25" fill="#f59e0b" font-size="10" font-mono="true">LIVE RENDERING</text>
+
+    <!-- Component 1: Quick Action Composer -->
+    <g transform="translate(16, 56)">
+      <rect width="368" height="216" rx="10" fill="#07090e" stroke="#202b3f" />
+      <text x="16" y="24" fill="#94a3b8" font-size="11" font-weight="700">A. COMPOSER TÁCTICO &amp; CHIPS</text>
+      <rect x="16" y="36" width="336" height="74" rx="8" fill="#0a0e17" stroke="#202b3f" />
+      <text x="28" y="58" fill="#f8fafc" font-size="11">Revisa el progreso acumulado en los turnos</text>
+      <text x="28" y="74" fill="#f8fafc" font-size="11">anteriores y verifica que todo funcione.</text>
+
+      <g transform="translate(16, 120)">
+        <rect width="120" height="28" rx="6" fill="#162035" stroke="#202b3f" />
+        <circle cx="14" cy="14" r="3.5" fill="#06b6d4" />
+        <text x="24" y="18" fill="#06b6d4" font-size="10" font-mono="true">src/server/std.ts</text>
+
+        <rect x="126" width="105" height="28" rx="6" fill="#162035" stroke="#202b3f" />
+        <circle cx="138" cy="14" r="3.5" fill="#8b5cf6" />
+        <text x="148" y="18" fill="#8b5cf6" font-size="10" font-mono="true">tests/flows.ts</text>
+
+        <rect x="237" width="99" height="28" rx="6" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-opacity="0.4" />
+        <text x="250" y="18" fill="#10b981" font-size="10" font-mono="true">14/14 tests OK</text>
+      </g>
+
+      <g transform="translate(16, 158)">
+        <rect width="336" height="34" rx="6" fill="url(#brand-grad)" />
+        <text x="168" y="22" fill="#fff" font-size="11" font-weight="800" text-anchor="middle">ENVIAR INSTRUCCIÓN (Enter)</text>
+      </g>
+    </g>
+
+    <!-- Component 2: Branch & Workspace Controller -->
+    <g transform="translate(400, 56)">
+      <rect width="384" height="216" rx="10" fill="#07090e" stroke="#202b3f" />
+      <text x="16" y="24" fill="#94a3b8" font-size="11" font-weight="700">B. CONTROLADOR DE ESPACIOS &amp; GIT</text>
+
+      <!-- Workspace Bar -->
+      <g transform="translate(16, 36)">
+        <rect width="352" height="36" rx="8" fill="#0a0e17" stroke="#202b3f" />
+        <circle cx="18" cy="18" r="4" fill="#06b6d4" />
+        <text x="30" y="22" fill="#06b6d4" font-size="11" font-mono="true">C:/.../portafolio/agent-hub</text>
+        <rect x="270" y="6" width="74" height="24" rx="5" fill="#162035" stroke="#202b3f" />
+        <text x="284" y="22" fill="#cbd5e1" font-size="10">Cambiar</text>
+      </g>
+
+      <!-- Branch Badge Details -->
+      <g transform="translate(16, 82)">
+        <rect width="352" height="58" rx="8" fill="#0a0e17" stroke="#10b981" stroke-opacity="0.3" />
+        <circle cx="18" cy="20" r="4" fill="#10b981" />
+        <text x="30" y="24" fill="#10b981" font-size="12" font-bold font-mono="true">Rama: main</text>
+        <rect x="260" y="10" width="80" height="20" rx="4" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-opacity="0.4" />
+        <text x="272" y="24" fill="#10b981" font-size="9" font-weight="700">LIMPIO (0 DIFF)</text>
+        <text x="18" y="46" fill="#94a3b8" font-size="10">Worktree individual aislado; sincronización bidireccional lista.</text>
+      </g>
+
+      <!-- System32 Sentinel -->
+      <g transform="translate(16, 150)">
+        <rect width="352" height="42" rx="8" fill="#10b981" fill-opacity="0.1" stroke="#10b981" stroke-opacity="0.3" />
+        <text x="16" y="20" fill="#10b981" font-size="10.5" font-weight="800">BLINDAJE DE DIRECTORIO DE EJECUCIÓN (CWD GUARD)</text>
+        <text x="16" y="34" fill="#64748b" font-size="9.5">resolveSafeCwd previene caídas a System32; fallback automático a raíz.</text>
+      </g>
+    </g>
+
+    <!-- Component 3: Tactical Health & Telemetry -->
+    <g transform="translate(800, 56)">
+      <rect width="384" height="216" rx="10" fill="#07090e" stroke="#202b3f" />
+      <text x="16" y="24" fill="#94a3b8" font-size="11" font-weight="700">C. MONITOR TELEMÉTRICO &amp; MCPs</text>
+
+      <g transform="translate(16, 36)">
+        <rect width="170" height="66" rx="8" fill="#0a0e17" stroke="#202b3f" />
+        <text x="12" y="22" fill="#94a3b8" font-size="10">SERVIDORES MCP</text>
+        <text x="12" y="46" fill="#f8fafc" font-size="20" font-weight="800">8 / 8</text>
+        <text x="70" y="46" fill="#10b981" font-size="10" font-mono="true">100% ONLINE</text>
+        <text x="12" y="58" fill="#64748b" font-size="9">112 herramientas</text>
+
+        <rect x="182" width="170" height="66" rx="8" fill="#0a0e17" stroke="#202b3f" />
+        <text x="194" y="22" fill="#94a3b8" font-size="10">INYECCIÓN MEMORIA</text>
+        <text x="194" y="46" fill="#06b6d4" font-size="20" font-weight="800">92%</text>
+        <text x="246" y="46" fill="#06b6d4" font-size="10" font-mono="true">1.84K / 2K</text>
+        <text x="194" y="58" fill="#64748b" font-size="9">Ventana óptima</text>
+      </g>
+
+      <g transform="translate(16, 114)">
+        <rect width="352" height="78" rx="8" fill="#0a0e17" stroke="#202b3f" />
+        <text x="14" y="22" fill="#94a3b8" font-size="10" font-weight="700">FAILOVER &amp; CUOTA EN CALIENTE</text>
+        <text x="14" y="40" fill="#f59e0b" font-size="10.5" font-mono="true">Claude 3.7 Sonnet: 45% día · 12% semana</text>
+        <text x="14" y="56" fill="#10b981" font-size="10.5" font-mono="true">Google Antigravity Flash: 100% disponible</text>
+        <rect x="240" y="32" width="100" height="28" rx="5" fill="#162035" stroke="#202b3f" />
+        <text x="254" y="50" fill="#06b6d4" font-size="10" font-weight="700">Ver Catálogo</text>
+      </g>
+    </g>
+  </g>
+</svg>

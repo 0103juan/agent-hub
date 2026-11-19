@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentHub // Global HUD Design System & Micro-Interactions Showcase</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            hud: {
+              base: '#07090e',
+              surface: '#0a0e17',
+              panel: '#0c1220',
+              hover: '#162035',
+              border: '#202b3f',
+              activeBorder: '#202b3f',
+              cyan: '#06b6d4',
+              indigo: '#6366f1',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              purple: '#a855f7'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom 6px Tactical Scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #202b3f; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #06b6d4; }
+
+    /* Tactical Focus-Visible Ring */
+    :focus-visible {
+      outline: 2px solid #06b6d4;
+      outline-offset: 1.5px;
+      box-shadow: 0 0 10px rgba(6, 182, 212, 0.4);
+    }
+
+    /* Selection */
+    ::selection {
+      background: rgba(6, 182, 212, 0.35);
+      color: #f1f5f9;
+    }
+
+    /* Aurora Wave */
+    @keyframes auroraWave {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .aurora-border {
+      background: linear-gradient(90deg, #06b6d4, #6366f1, #a855f7, #06b6d4);
+      background-size: 300% 300%;
+      animation: auroraWave 3s ease infinite;
+    }
+
+    /* Hub Lift */
+    .hub-lift {
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s ease, border-color 0.2s ease;
+    }
+    .hub-lift:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px -14px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(6, 182, 212, 0.3);
+      border-color: rgba(6, 182, 212, 0.5);
+    }
+  </style>
+</head>
+<body class="bg-hud-base text-slate-100 font-sans antialiased min-h-screen p-6 flex flex-col items-center justify-center selection:bg-cyan-500/35 selection:text-cyan-100">
+
+  <div class="w-full max-w-5xl space-y-6">
+
+    <!-- Header Block -->
+    <div class="flex flex-wrap items-center justify-between gap-4 p-5 rounded-2xl bg-hud-surface/95 border border-hud-border shadow-2xl backdrop-blur-md">
+      <div class="flex items-center gap-3.5">
+        <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-cyan-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-cyan-500/30 shrink-0">
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2.5">
+            <h1 class="text-base font-bold text-slate-100 font-mono tracking-wide">GLOBAL HUD DESIGN SYSTEM SPEC</h1>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 font-bold">
+              WCAG AA 4.8:1
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 font-mono mt-0.5">
+            Micro-interacciones tácticas, animación Aurora, física de elevación y tokens visuales unificados.
+          </p>
+        </div>
+      </div>
+
+      <!-- Quick Toggles -->
+      <div class="flex items-center gap-2">
+        <button id="densityBtn" onclick="toggleDensity()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#121929] hover:bg-[#18233a] text-slate-200 border border-[#1e2c47] font-mono text-xs transition cursor-pointer">
+          <svg class="w-3.5 h-3.5 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="3" y2="18"/></svg>
+          <span id="densityLabel">Densidad: Cómoda</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 6 Pillar Interactive Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="cardsGrid">
+
+      <!-- Pillar 1 -->
+      <div class="hub-lift p-4 rounded-xl bg-hud-panel border border-hud-border space-y-3 cursor-pointer">
+        <div class="flex items-center justify-between border-b border-hud-border/70 pb-2">
+          <span class="text-xs font-mono font-bold text-cyan-400">01 // AURORA WAVE</span>
+          <span class="text-[10px] font-mono text-slate-400">Thinking Animation</span>
+        </div>
+        <div class="p-3 rounded-lg bg-[#060a12] border border-hud-border relative overflow-hidden">
+          <div class="aurora-border absolute top-0 left-0 right-0 h-1"></div>
+          <div class="flex items-center gap-2 mt-1">
+            <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
+            <span class="text-xs font-mono text-cyan-200">Razonando contexto...</span>
+          </div>
+        </div>
+        <p class="text-xs text-slate-300 font-sans leading-relaxed">
+          Degradado cian/índigo/púrpura de 300% de escala con ciclo de 3 segundos continuo sin impacto en framerate.
+        </p>
+      </div>
+
+      <!-- Pillar 2 -->
+      <div class="hub-lift p-4 rounded-xl bg-hud-panel border border-hud-border space-y-3 cursor-pointer">
+        <div class="flex items-center justify-between border-b border-hud-border/70 pb-2">
+          <span class="text-xs font-mono font-bold text-purple-400">02 // TACTICAL FOCUS</span>
+          <span class="text-[10px] font-mono text-slate-400">Keyboard Navigation</span>
+        </div>
+        <div class="flex gap-2">
+          <button class="flex-1 py-2 px-3 rounded-lg bg-[#162035] border border-hud-border text-xs font-mono text-slate-200 focus:border-cyan-400 transition">
+            Presiona TAB aquí
+          </button>
+          <button class="flex-1 py-2 px-3 rounded-lg bg-[#162035] border border-hud-border text-xs font-mono text-slate-200 focus:border-cyan-400 transition">
+            Siguiente TAB
+          </button>
+        </div>
+        <p class="text-xs text-slate-300 font-sans leading-relaxed">
+          Anillo táctico <code class="text-cyan-300 font-mono">:focus-visible</code> de 2px con halo de 10px en cian para navegación sin mouse.
+        </p>
+      </div>
+
+      <!-- Pillar 3 -->
+      <div class="hub-lift p-4 rounded-xl bg-hud-panel border border-hud-border space-y-3 cursor-pointer">
+        <div class="flex items-center justify-between border-b border-hud-border/70 pb-2">
+          <span class="text-xs font-mono font-bold text-emerald-400">03 // SELECTION HIGHLIGHT</span>
+          <span class="text-[10px] font-mono text-slate-400">Typography Contrast</span>
+        </div>
+        <div class="p-2.5 rounded-lg bg-[#060a12] border border-hud-border">
+          <p class="text-xs font-mono text-emerald-300 select-all">
+            const hud = initializeTacticalTheme();
+          </p>
+        </div>
+        <p class="text-xs text-slate-300 font-sans leading-relaxed">
+          Selección de texto en <code class="text-cyan-300 font-mono">rgba(6,182,212,0.35)</code> garantizando legibilidad en bloques de código.
+        </p>
+      </div>
+
+      <!-- Pillar 4 -->
+      <div class="hub-lift p-4 rounded-xl bg-hud-panel border border-hud-border space-y-3 cursor-pointer">
+        <div class="flex items-center justify-between border-b border-hud-border/70 pb-2">
+          <span class="text-xs font-mono font-bold text-amber-400">04 // PRECISION SCROLLBAR</span>
+          <span class="text-[10px] font-mono text-slate-400">6px Ultra-Slim</span>
+        </div>
+        <div class="h-20 overflow-y-auto p-2 rounded-lg bg-[#060a12] border border-hud-border text-xs font-mono text-slate-400 space-y-1">
+          <div>Línea 01 · Iniciar sesión en CLI</div>
+          <div>Línea 02 · Conmutación automática</div>
+          <div>Línea 03 · Verificación de cuota</div>
+          <div>Línea 04 · Despacho paralelo</div>
+          <div>Línea 05 · Auditor de seguridad</div>
+          <div>Línea 06 · Guardar scratchpad</div>
+        </div>
+        <p class="text-xs text-slate-300 font-sans leading-relaxed">
+          Scrollbar de 6px ultrafina con thumb en <code class="text-slate-300 font-mono">#202b3f</code> y reactividad cian al interactuar.
+        </p>
+      </div>
+
+      <!-- Pillar 5 -->
+      <div class="hub-lift p-4 rounded-xl bg-hud-panel border border-hud-border space-y-3 cursor-pointer">
+        <div class="flex items-center justify-between border-b border-hud-border/70 pb-2">
+          <span class="text-xs font-mono font-bold text-cyan-400">05 // HUB-LIFT ELEVATION</span>
+          <span class="text-[10px] font-mono text-slate-400">Hover Physics</span>
+        </div>
+        <div class="p-3 rounded-lg bg-[#162035] border border-cyan-500/30 text-center">
+          <span class="text-xs font-mono text-cyan-200">Pasa el cursor sobre esta tarjeta</span>
+        </div>
+        <p class="text-xs text-slate-300 font-sans leading-relaxed">
+          Elevación de 2px con curva cúbica Bézier de 280ms y resplandor óptico cian en el borde exterior.
+        </p>
+      </div>
+
+      <!-- Pillar 6 -->
+      <div class="hub-lift p-4 rounded-xl bg-hud-panel border border-hud-border space-y-3 cursor-pointer">
+        <div class="flex items-center justify-between border-b border-hud-border/70 pb-2">
+          <span class="text-xs font-mono font-bold text-indigo-400">06 // GLASSMORPHISM</span>
+          <span class="text-[10px] font-mono text-slate-400">12px Backdrop Blur</span>
+        </div>
+        <div class="p-3 rounded-lg bg-hud-surface/85 backdrop-blur-md border border-hud-border text-center">
+          <span class="text-xs font-mono text-indigo-300">Superficie Flotante HUD</span>
+        </div>
+        <p class="text-xs text-slate-300 font-sans leading-relaxed">
+          Fondos translúcidos en <code class="text-slate-300 font-mono">#0a0e17/85</code> para modales, barras fijas y menús contextuales.
+        </p>
+      </div>
+
+    </div>
+
+    <!-- Palette Token Matrix -->
+    <div class="p-4 rounded-xl bg-hud-surface border border-hud-border shadow-lg">
+      <div class="text-xs font-mono font-bold text-slate-200 mb-3 tracking-wider">TACTICAL COLOR PALETTE TOKENS //</div>
+      <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2">
+        <div class="p-2 rounded-lg bg-[#07090e] border border-hud-border text-center">
+          <div class="text-[10px] font-mono text-slate-400">Base</div>
+          <div class="text-xs font-mono font-bold text-slate-200">#07090e</div>
+        </div>
+        <div class="p-2 rounded-lg bg-[#0a0e17] border border-hud-border text-center">
+          <div class="text-[10px] font-mono text-slate-400">Surface</div>
+          <div class="text-xs font-mono font-bold text-slate-200">#0a0e17</div>
+        </div>
+        <div class="p-2 rounded-lg bg-[#0c1220] border border-hud-border text-center">
+          <div class="text-[10px] font-mono text-slate-400">Panel</div>
+          <div class="text-xs font-mono font-bold text-slate-200">#0c1220</div>
+        </div>
+        <div class="p-2 rounded-lg bg-[#202b3f] border border-hud-border text-center">
+          <div class="text-[10px] font-mono text-slate-400">Border</div>
+          <div class="text-xs font-mono font-bold text-slate-200">#202b3f</div>
+        </div>
+        <div class="p-2 rounded-lg bg-cyan-950/40 border border-cyan-500/40 text-center">
+          <div class="text-[10px] font-mono text-cyan-400">Cyan Primary</div>
+          <div class="text-xs font-mono font-bold text-cyan-300">#06b6d4</div>
+        </div>
+        <div class="p-2 rounded-lg bg-emerald-950/40 border border-emerald-500/40 text-center">
+          <div class="text-[10px] font-mono text-emerald-400">Emerald OK</div>
+          <div class="text-xs font-mono font-bold text-emerald-300">#10b981</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    let isCompact = false;
+    function toggleDensity() {
+      isCompact = !isCompact;
+      const label = document.getElementById('densityLabel');
+      const grid = document.getElementById('cardsGrid');
+      
+      if (isCompact) {
+        label.textContent = 'Densidad: Compacta';
+        grid.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2';
+        document.querySelectorAll('.hub-lift').forEach(el => el.className = 'hub-lift p-2.5 rounded-lg bg-hud-panel border border-hud-border space-y-2 cursor-pointer text-xs');
+      } else {
+        label.textContent = 'Densidad: Cómoda';
+        grid.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4';
+        document.querySelectorAll('.hub-lift').forEach(el => el.className = 'hub-lift p-4 rounded-xl bg-hud-panel border border-hud-border space-y-3 cursor-pointer');
+      }
+    }
+  </script>
+</body>
+</html>

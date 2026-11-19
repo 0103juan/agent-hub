@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentHub HUD — Command Palette & Modal Shell Redesign</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #05070c;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .hud-glow {
+      box-shadow: 0 0 25px -5px rgba(99, 102, 241, 0.25), 0 0 10px -2px rgba(6, 182, 212, 0.2);
+    }
+  </style>
+</head>
+<body class="min-h-screen text-slate-100 flex items-center justify-center p-4 antialiased bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#0d1527] via-[#07090e] to-[#040508]">
+
+  <!-- Backdrop Overlay -->
+  <div class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
+    
+    <!-- Modal Container -->
+    <div class="bg-[#0e131f] border border-[#202b3f] rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl hud-glow overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+      
+      <!-- Top Title Bar -->
+      <div class="px-4 py-3 border-b border-[#202b3f] flex items-center justify-between bg-[#0a0d16]/90 backdrop-blur-md shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="p-1.5 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-xs font-bold text-white tracking-wide uppercase flex items-center gap-2">
+              Paleta de Comandos
+              <span class="px-1.5 py-0.5 rounded font-mono text-[9px] bg-[#131927] text-cyan-300 border border-[#202b3f]">Ctrl+K</span>
+            </h2>
+            <p class="text-[10px] text-slate-400">Acceso rápido a sesiones, roles de protocolo y acciones del workspace</p>
+          </div>
+        </div>
+        <button class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#131927] border border-transparent hover:border-[#202b3f] transition-colors cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Search Input & Quick Filters Bar -->
+      <div class="p-3 bg-[#0a0d16] border-b border-[#202b3f] shrink-0 space-y-2.5">
+        <div class="relative flex items-center">
+          <svg class="w-4 h-4 text-cyan-400 absolute left-3 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          <input 
+            type="text" 
+            placeholder="Buscar sesión, rol o acción... (ej. planificar, terminal, arquitecto)" 
+            value="refactor" 
+            class="w-full bg-[#07090e] border border-[#202b3f] rounded-xl pl-9 pr-24 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/40 font-mono transition-all shadow-inner"
+          />
+          <div class="absolute right-2.5 flex items-center gap-1.5 text-[10px] font-mono text-slate-400 bg-[#131927] px-2 py-0.5 rounded border border-[#202b3f]">
+            <span>4 coinc.</span>
+          </div>
+        </div>
+
+        <!-- Filter category tabs -->
+        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+          <button class="px-2.5 py-1 rounded-lg text-[10px] font-mono font-medium transition-colors bg-indigo-600/20 text-indigo-300 border border-indigo-500/40">
+            Todos (4)
+          </button>
+          <button class="px-2.5 py-1 rounded-lg text-[10px] font-mono font-medium transition-colors bg-[#131927] hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-[#202b3f]">
+            Roles (1)
+          </button>
+          <button class="px-2.5 py-1 rounded-lg text-[10px] font-mono font-medium transition-colors bg-[#131927] hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-[#202b3f]">
+            Sesiones (1)
+          </button>
+          <button class="px-2.5 py-1 rounded-lg text-[10px] font-mono font-medium transition-colors bg-[#131927] hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-[#202b3f]">
+            Acciones (1)
+          </button>
+          <button class="px-2.5 py-1 rounded-lg text-[10px] font-mono font-medium transition-colors bg-[#131927] hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-[#202b3f]">
+            Comandos (1)
+          </button>
+        </div>
+      </div>
+
+      <!-- Results Stream (Listbox) -->
+      <div class="flex-1 overflow-y-auto p-2 space-y-1 divide-y divide-[#202b3f]/30">
+        
+        <!-- Active Result (Role) -->
+        <div class="pt-1 first:pt-0">
+          <div class="flex items-center gap-3 p-2.5 rounded-xl bg-[#131927] border border-indigo-500/40 cursor-pointer shadow-sm relative group">
+            <div class="absolute left-0 top-2 bottom-2 w-1 bg-indigo-500 rounded-r"></div>
+            
+            <div class="p-2 rounded-lg bg-indigo-500/20 text-indigo-300 shrink-0">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+              </svg>
+            </div>
+
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-white group-hover:text-indigo-200 transition-colors">Arquitecto de Solución</span>
+                <span class="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-indigo-950/60 text-indigo-300 border border-indigo-800/40 uppercase">Rol</span>
+              </div>
+              <p class="text-[11px] text-slate-400 truncate mt-0.5 font-mono">claude-3-7 · high · handoff → Desarrollador</p>
+            </div>
+
+            <div class="shrink-0 flex items-center gap-2">
+              <span class="text-[10px] font-mono text-cyan-400 bg-cyan-950/40 border border-cyan-800/30 px-2 py-0.5 rounded-md">Recomendado</span>
+              <kbd class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-[#07090e] text-slate-400 border border-[#202b3f]">↵</kbd>
+            </div>
+          </div>
+        </div>
+
+        <!-- Result 2 (Session) -->
+        <div class="pt-1">
+          <div class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#131927]/60 border border-transparent hover:border-[#202b3f] cursor-pointer transition-all group">
+            <div class="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 shrink-0">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+              </svg>
+            </div>
+
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-semibold text-slate-200 group-hover:text-white transition-colors">Refactorizar Vistas Webview Tactical HUD</span>
+                <span class="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-emerald-950/60 text-emerald-300 border border-emerald-800/40 uppercase">Sesión</span>
+              </div>
+              <p class="text-[11px] text-slate-400 truncate mt-0.5 font-mono">agent-hub · 18 mensajes · Hace 4 min</p>
+            </div>
+
+            <div class="shrink-0">
+              <span class="text-[10px] font-mono text-slate-500">Cambiar</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Result 3 (Action) -->
+        <div class="pt-1">
+          <div class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#131927]/60 border border-transparent hover:border-[#202b3f] cursor-pointer transition-all group">
+            <div class="p-2 rounded-lg bg-amber-500/10 text-amber-400 shrink-0">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+              </svg>
+            </div>
+
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-semibold text-slate-200 group-hover:text-white transition-colors">Refactorizar y Organizar Workspace</span>
+                <span class="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-amber-950/60 text-amber-300 border border-amber-800/40 uppercase">Acción</span>
+              </div>
+              <p class="text-[11px] text-slate-400 truncate mt-0.5 font-mono">Escanear dependencias y limpiar carpetas temporales</p>
+            </div>
+
+            <div class="shrink-0">
+              <span class="text-[10px] font-mono text-amber-400/80 bg-amber-950/30 border border-amber-800/30 px-2 py-0.5 rounded">run:clean</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Result 4 (App Command) -->
+        <div class="pt-1">
+          <div class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#131927]/60 border border-transparent hover:border-[#202b3f] cursor-pointer transition-all group">
+            <div class="p-2 rounded-lg bg-cyan-500/10 text-cyan-400 shrink-0">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+              </svg>
+            </div>
+
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-semibold text-slate-200 group-hover:text-white transition-colors">Alternar Vista de Terminal HUD</span>
+                <span class="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-cyan-950/60 text-cyan-300 border border-cyan-800/40 uppercase">Comando</span>
+              </div>
+              <p class="text-[11px] text-slate-400 truncate mt-0.5 font-mono">Abrir el panel inferior de línea de comandos integrada</p>
+            </div>
+
+            <div class="shrink-0">
+              <kbd class="px-2 py-0.5 rounded text-[10px] font-mono bg-[#07090e] text-cyan-400 border border-[#202b3f]">Ctrl+`</kbd>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer Navigation Controls -->
+      <div class="px-4 py-2.5 bg-[#0a0d16] border-t border-[#202b3f] text-[11px] text-slate-400 flex items-center justify-between shrink-0 font-mono">
+        <div class="flex items-center gap-3">
+          <span class="flex items-center gap-1.5">
+            <kbd class="px-1.5 py-0.5 rounded text-[9px] bg-[#131927] border border-[#202b3f] text-slate-300">↑</kbd>
+            <kbd class="px-1.5 py-0.5 rounded text-[9px] bg-[#131927] border border-[#202b3f] text-slate-300">↓</kbd>
+            <span class="text-slate-400 text-[10px]">navegar</span>
+          </span>
+          <span class="flex items-center gap-1.5">
+            <kbd class="px-1.5 py-0.5 rounded text-[9px] bg-[#131927] border border-[#202b3f] text-slate-300">↵</kbd>
+            <span class="text-slate-400 text-[10px]">ejecutar</span>
+          </span>
+          <span class="flex items-center gap-1.5">
+            <kbd class="px-1.5 py-0.5 rounded text-[9px] bg-[#131927] border border-[#202b3f] text-slate-300">Esc</kbd>
+            <span class="text-slate-400 text-[10px]">cerrar</span>
+          </span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+          <span class="text-[10px] text-slate-400 font-semibold">4 resultados</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,186 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#07090e" />
+      <stop offset="50%" stop-color="#0a0d16" />
+      <stop offset="100%" stop-color="#07090e" />
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0e131f" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#0a0d16" stop-opacity="0.98" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <style>
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    .sans { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+  </style>
+
+  <!-- Background Canvas -->
+  <rect width="960" height="540" fill="url(#bgGrad)" />
+
+  <!-- Subtle Blueprint Grid -->
+  <g opacity="0.08" stroke="#38bdf8" stroke-width="1">
+    <path d="M 0 40 L 960 40 M 0 80 L 960 80 M 0 120 L 960 120 M 0 160 L 960 160 M 0 200 L 960 200 M 0 240 L 960 240 M 0 280 L 960 280 M 0 320 L 960 320 M 0 360 L 960 360 M 0 400 L 960 400 M 0 440 L 960 440 M 0 480 L 960 480 M 0 520 L 960 520" />
+    <path d="M 60 0 L 60 540 M 120 0 L 120 540 M 180 0 L 180 540 M 240 0 L 240 540 M 300 0 L 300 540 M 360 0 L 360 540 M 420 0 L 420 540 M 480 0 L 480 540 M 540 0 L 540 540 M 600 0 L 600 540 M 660 0 L 660 540 M 720 0 L 720 540 M 780 0 L 780 540 M 840 0 L 840 540 M 900 0 L 900 540" />
+  </g>
+
+  <!-- Header Banner -->
+  <g transform="translate(60, 28)">
+    <rect x="0" y="0" width="840" height="42" rx="8" fill="#0e131f" stroke="#202b3f" stroke-width="1.5" />
+    <circle cx="24" cy="21" r="5" fill="#f43f5e" filter="url(#glow)" />
+    <text x="42" y="26" fill="#f8fafc" font-size="13" font-weight="700" class="sans" letter-spacing="0.5">AGENTHUB HUD :: SECURITY AUDITOR &amp; SHORTCUT MATRIX ARCHITECTURE</text>
+    <rect x="670" y="9" width="150" height="24" rx="4" fill="#f43f5e" fill-opacity="0.15" stroke="#f43f5e" stroke-width="1" />
+    <text x="745" y="25" fill="#fb7185" font-size="11" font-weight="600" text-anchor="middle" class="mono">ZERO-LEAK HUD</text>
+  </g>
+
+  <!-- Container Left: Security Auditor Modal Preview -->
+  <g transform="translate(60, 88)">
+    <rect x="0" y="0" width="480" height="422" rx="12" fill="url(#cardGrad)" stroke="#202b3f" stroke-width="1.5" />
+
+    <!-- Title Bar -->
+    <rect x="0" y="0" width="480" height="44" rx="12" fill="#0a0d16" />
+    <rect x="0" y="43" width="480" height="1" fill="#202b3f" />
+
+    <g transform="translate(16, 12)">
+      <rect x="0" y="0" width="20" height="20" rx="4" fill="#f59e0b" fill-opacity="0.2" stroke="#f59e0b" stroke-width="1" />
+      <path d="M 10 4 L 16 7 L 16 12 C 16 16 10 18 10 18 C 10 18 4 16 4 12 L 4 7 Z" stroke="#fbbf24" stroke-width="1.2" fill="none" />
+      <text x="28" y="15" fill="#f8fafc" font-size="12" font-weight="700" class="sans">Auditor de Seguridad, Entorno y SQL</text>
+    </g>
+
+    <!-- Threat Summary Banner -->
+    <g transform="translate(16, 56)">
+      <rect x="0" y="0" width="448" height="62" rx="8" fill="#f59e0b" fill-opacity="0.1" stroke="#f59e0b" stroke-opacity="0.4" stroke-width="1" />
+      <circle cx="26" cy="31" r="10" fill="#f59e0b" fill-opacity="0.2" />
+      <path d="M 26 25 L 26 33 M 26 36 L 26 37" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" />
+      
+      <text x="46" y="26" fill="#fbbf24" font-size="12" font-weight="700" class="sans">3 Hallazgos Detectados en el Workspace</text>
+      <text x="46" y="44" fill="#94a3b8" font-size="10" class="mono">1 secreto · 1 variable huérfana · 1 sentencia SQL de riesgo</text>
+
+      <rect x="330" y="18" width="104" height="26" rx="6" fill="#6366f1" />
+      <text x="382" y="34" fill="#ffffff" font-size="10" font-weight="600" text-anchor="middle" class="sans">Corregir con IA</text>
+    </g>
+
+    <!-- Findings Cards -->
+    <g transform="translate(16, 130)">
+      <!-- Item 1: Exposed Secret -->
+      <g transform="translate(0, 0)">
+        <rect x="0" y="0" width="448" height="52" rx="6" fill="#0a0d16" stroke="#f43f5e" stroke-opacity="0.4" />
+        <rect x="10" y="8" width="48" height="18" rx="3" fill="#f43f5e" fill-opacity="0.2" stroke="#f43f5e" stroke-opacity="0.4" />
+        <text x="34" y="21" fill="#fb7185" font-size="9" font-weight="700" text-anchor="middle" class="mono">SECRET</text>
+        <text x="66" y="21" fill="#38bdf8" font-size="11" font-weight="600" class="mono">src/services/auth.ts:42</text>
+        <text x="12" y="40" fill="#94a3b8" font-size="10" class="mono">const API_KEY = "sk-live-99a38f..."</text>
+      </g>
+
+      <!-- Item 2: Undocumented Env -->
+      <g transform="translate(0, 60)">
+        <rect x="0" y="0" width="448" height="52" rx="6" fill="#0a0d16" stroke="#f59e0b" stroke-opacity="0.4" />
+        <rect x="10" y="8" width="48" height="18" rx="3" fill="#f59e0b" fill-opacity="0.2" stroke="#f59e0b" stroke-opacity="0.4" />
+        <text x="34" y="21" fill="#fbbf24" font-size="9" font-weight="700" text-anchor="middle" class="mono">ENV_VAR</text>
+        <text x="66" y="21" fill="#f8fafc" font-size="11" font-weight="600" class="mono">DATABASE_REPLICA_URL</text>
+        <text x="12" y="40" fill="#94a3b8" font-size="10" class="mono">Referenciada en código pero ausente en .env.example</text>
+      </g>
+
+      <!-- Item 3: SQL Risk -->
+      <g transform="translate(0, 120)">
+        <rect x="0" y="0" width="448" height="52" rx="6" fill="#0a0d16" stroke="#a855f7" stroke-opacity="0.4" />
+        <rect x="10" y="8" width="48" height="18" rx="3" fill="#a855f7" fill-opacity="0.2" stroke="#a855f7" stroke-opacity="0.4" />
+        <text x="34" y="21" fill="#c084fc" font-size="9" font-weight="700" text-anchor="middle" class="mono">SQL_DDL</text>
+        <text x="66" y="21" fill="#38bdf8" font-size="11" font-weight="600" class="mono">src/db/migrations/004.sql:12</text>
+        <text x="12" y="40" fill="#94a3b8" font-size="10" class="mono">Sentencia DROP TABLE en migración sin rollback</text>
+      </g>
+    </g>
+
+    <!-- Auditor Footer -->
+    <g transform="translate(0, 374)">
+      <rect x="0" y="0" width="480" height="48" rx="12" fill="#0a0d16" />
+      <rect x="0" y="0" width="480" height="1" fill="#202b3f" />
+      <text x="18" y="28" fill="#64748b" font-size="10" class="mono">REGLAS OWASP TOP 10 ACTIVADAS · AUDITORÍA EN TIEMPO REAL</text>
+    </g>
+  </g>
+
+  <!-- Container Right: Keyboard Shortcuts Matrix Modal -->
+  <g transform="translate(560, 88)">
+    <rect x="0" y="0" width="340" height="422" rx="12" fill="url(#cardGrad)" stroke="#202b3f" stroke-width="1.5" />
+
+    <!-- Title Bar -->
+    <rect x="0" y="0" width="340" height="44" rx="12" fill="#0a0d16" />
+    <rect x="0" y="43" width="340" height="1" fill="#202b3f" />
+
+    <g transform="translate(16, 12)">
+      <rect x="0" y="0" width="20" height="20" rx="4" fill="#6366f1" fill-opacity="0.2" stroke="#6366f1" stroke-width="1" />
+      <path d="M 4 8 L 16 8 M 4 12 L 16 12 M 7 15 L 13 15" stroke="#818cf8" stroke-width="1.2" stroke-linecap="round" />
+      <text x="28" y="15" fill="#f8fafc" font-size="12" font-weight="700" class="sans">Atajos de Teclado HUD</text>
+    </g>
+
+    <!-- Keycaps Matrix -->
+    <g transform="translate(16, 56)">
+      <!-- Row 1 -->
+      <g transform="translate(0, 0)">
+        <rect x="0" y="0" width="308" height="34" rx="6" fill="#0a0d16" stroke="#202b3f" />
+        <text x="12" y="21" fill="#cbd5e1" font-size="11" class="sans">Paleta de comandos</text>
+        <rect x="238" y="6" width="58" height="22" rx="4" fill="#07090e" stroke="#202b3f" />
+        <text x="267" y="20" fill="#38bdf8" font-size="10" font-weight="600" text-anchor="middle" class="mono">Ctrl+K</text>
+      </g>
+
+      <!-- Row 2 -->
+      <g transform="translate(0, 40)">
+        <rect x="0" y="0" width="308" height="34" rx="6" fill="#0a0d16" stroke="#202b3f" />
+        <text x="12" y="21" fill="#cbd5e1" font-size="11" class="sans">Terminal integrada</text>
+        <rect x="246" y="6" width="50" height="22" rx="4" fill="#07090e" stroke="#202b3f" />
+        <text x="271" y="20" fill="#38bdf8" font-size="10" font-weight="600" text-anchor="middle" class="mono">Ctrl+`</text>
+      </g>
+
+      <!-- Row 3 -->
+      <g transform="translate(0, 80)">
+        <rect x="0" y="0" width="308" height="34" rx="6" fill="#0a0d16" stroke="#202b3f" />
+        <text x="12" y="21" fill="#cbd5e1" font-size="11" class="sans">Borrador de trabajo</text>
+        <rect x="246" y="6" width="50" height="22" rx="4" fill="#07090e" stroke="#202b3f" />
+        <text x="271" y="20" fill="#38bdf8" font-size="10" font-weight="600" text-anchor="middle" class="mono">Ctrl+E</text>
+      </g>
+
+      <!-- Row 4 -->
+      <g transform="translate(0, 120)">
+        <rect x="0" y="0" width="308" height="34" rx="6" fill="#0a0d16" stroke="#202b3f" />
+        <text x="12" y="21" fill="#cbd5e1" font-size="11" class="sans">Archivos y Git</text>
+        <rect x="246" y="6" width="50" height="22" rx="4" fill="#07090e" stroke="#202b3f" />
+        <text x="271" y="20" fill="#38bdf8" font-size="10" font-weight="600" text-anchor="middle" class="mono">Ctrl+B</text>
+      </g>
+
+      <!-- Row 5 -->
+      <g transform="translate(0, 160)">
+        <rect x="0" y="0" width="308" height="34" rx="6" fill="#0a0d16" stroke="#202b3f" />
+        <text x="12" y="21" fill="#cbd5e1" font-size="11" class="sans">Modo enfoque</text>
+        <rect x="216" y="6" width="80" height="22" rx="4" fill="#07090e" stroke="#202b3f" />
+        <text x="256" y="20" fill="#38bdf8" font-size="10" font-weight="600" text-anchor="middle" class="mono">Ctrl+Shift+F</text>
+      </g>
+
+      <!-- Row 6 -->
+      <g transform="translate(0, 200)">
+        <rect x="0" y="0" width="308" height="34" rx="6" fill="#0a0d16" stroke="#202b3f" />
+        <text x="12" y="21" fill="#cbd5e1" font-size="11" class="sans">Plan Primero (Toggle)</text>
+        <rect x="216" y="6" width="80" height="22" rx="4" fill="#07090e" stroke="#202b3f" />
+        <text x="256" y="20" fill="#38bdf8" font-size="10" font-weight="600" text-anchor="middle" class="mono">Ctrl+Shift+P</text>
+      </g>
+
+      <!-- Row 7 -->
+      <g transform="translate(0, 240)">
+        <rect x="0" y="0" width="308" height="34" rx="6" fill="#0a0d16" stroke="#202b3f" />
+        <text x="12" y="21" fill="#cbd5e1" font-size="11" class="sans">Lanzador Rápido</text>
+        <rect x="220" y="6" width="76" height="22" rx="4" fill="#07090e" stroke="#202b3f" />
+        <text x="258" y="20" fill="#38bdf8" font-size="10" font-weight="600" text-anchor="middle" class="mono">Alt+Espacio</text>
+      </g>
+    </g>
+
+    <!-- Shortcuts Footer -->
+    <g transform="translate(0, 374)">
+      <rect x="0" y="0" width="340" height="48" rx="12" fill="#0a0d16" />
+      <rect x="0" y="0" width="340" height="1" fill="#202b3f" />
+      <text x="16" y="28" fill="#64748b" font-size="10" class="mono">PULSA ESC PARA CERRAR</text>
+    </g>
+  </g>
+</svg>

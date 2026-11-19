@@ -1,0 +1,220 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#07090e" />
+      <stop offset="100%" stop-color="#0b101c" />
+    </linearGradient>
+
+    <!-- Card Gradient -->
+    <linearGradient id="panel-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0f1d" />
+      <stop offset="100%" stop-color="#0e1526" />
+    </linearGradient>
+
+    <!-- Aurora Wave Gradient -->
+    <linearGradient id="aurora-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#06b6d4" />
+      <stop offset="35%" stop-color="#6366f1" />
+      <stop offset="70%" stop-color="#a855f7" />
+      <stop offset="100%" stop-color="#06b6d4" />
+    </linearGradient>
+
+    <!-- Cyan Glow Filter -->
+    <filter id="glow-cyan" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <filter id="soft-shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#000" flood-opacity="0.6" />
+    </filter>
+  </defs>
+
+  <style>
+    .font-mono { font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace; }
+    .font-sans { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    .title { font-size: 20px; font-weight: 800; letter-spacing: 1.5px; fill: #f8fafc; }
+    .sub { font-size: 11px; font-weight: 600; letter-spacing: 1px; fill: #94a3b8; }
+    .label { font-size: 11px; fill: #cbd5e1; }
+  </style>
+
+  <!-- Base Grid Background -->
+  <rect width="1200" height="700" fill="url(#bg-grad)" />
+
+  <!-- Subtle Cyber Grid -->
+  <g stroke="#202b3f" stroke-width="0.5" stroke-opacity="0.35">
+    <line x1="0" y1="80" x2="1200" y2="80" />
+    <line x1="0" y1="380" x2="1200" y2="380" />
+    <line x1="400" y1="0" x2="400" y2="700" />
+    <line x1="800" y1="0" x2="800" y2="700" />
+  </g>
+
+  <!-- Header Block -->
+  <g transform="translate(60, 40)">
+    <rect x="0" y="0" width="4" height="32" fill="#06b6d4" rx="2" />
+    <text x="16" y="18" class="font-sans title">AGENT-HUB // GLOBAL HUD DESIGN SYSTEM &amp; MICRO-INTERACTIONS</text>
+    <text x="16" y="32" class="font-mono sub">CORE CSS ARCHITECTURE · AURORA THINKING WAVE · TACTICAL FOCUS &amp; SELECTION TOKENS</text>
+  </g>
+
+  <!-- Grid of 6 Tactical Pillars -->
+  <g transform="translate(60, 95)" filter="url(#soft-shadow)">
+
+    <!-- Pillar 1: Aurora Wave & Thinking Flow -->
+    <g transform="translate(0, 0)">
+      <rect x="0" y="0" width="340" height="260" rx="10" fill="url(#panel-grad)" stroke="#202b3f" stroke-width="1.2" />
+      <text x="16" y="26" class="font-mono" font-size="11" font-weight="700" fill="#06b6d4">01 // AURORA THINKING WAVE</text>
+      
+      <!-- Visual Demonstration -->
+      <g transform="translate(16, 45)">
+        <rect x="0" y="0" width="308" height="42" rx="6" fill="#060a12" stroke="#202b3f" stroke-width="1" />
+        <rect x="2" y="2" width="304" height="4" rx="2" fill="url(#aurora-grad)">
+          <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite" />
+        </rect>
+        <circle cx="16" cy="24" r="4" fill="#06b6d4">
+          <animate attributeName="r" values="3.5;5;3.5" dur="1.5s" repeatCount="indefinite" />
+        </circle>
+        <text x="28" y="28" class="font-mono" font-size="9.5" fill="#e0f2fe">Razonando turno con gemini-3.8-pro…</text>
+      </g>
+
+      <text x="16" y="115" class="font-sans label" fill="#94a3b8">
+        <tspan x="16" dy="0">• <tspan fill="#f8fafc" font-weight="600">Dynamic Conic Gradient:</tspan></tspan>
+        <tspan x="26" dy="16">Cian (#06b6d4) → Índigo (#6366f1) → Púrpura</tspan>
+        <tspan x="26" dy="16">con ciclo de 3s sin sobrecargar CPU/GPU.</tspan>
+
+        <tspan x="16" dy="24">• <tspan fill="#f8fafc" font-weight="600">Reduced Motion Compliant:</tspan></tspan>
+        <tspan x="26" dy="16">Se congela automáticamente si el usuario</tspan>
+        <tspan x="26" dy="16">activa prefers-reduced-motion en el OS.</tspan>
+      </text>
+    </g>
+
+    <!-- Pillar 2: Tactical Focus Visible & Selection -->
+    <g transform="translate(370, 0)">
+      <rect x="0" y="0" width="340" height="260" rx="10" fill="url(#panel-grad)" stroke="#202b3f" stroke-width="1.2" />
+      <text x="16" y="26" class="font-mono" font-size="11" font-weight="700" fill="#a855f7">02 // TACTICAL FOCUS &amp; SELECTION</text>
+
+      <!-- Visual Demonstration -->
+      <g transform="translate(16, 45)">
+        <rect x="0" y="0" width="145" height="36" rx="6" fill="#162035" stroke="#06b6d4" stroke-width="2" filter="url(#glow-cyan)" />
+        <text x="16" y="22" class="font-mono" font-size="9.5" font-weight="700" fill="#67e8f9">:focus-visible</text>
+
+        <rect x="160" y="0" width="148" height="36" rx="6" fill="#060a12" stroke="#202b3f" stroke-width="1" />
+        <rect x="168" y="10" width="80" height="16" fill="rgba(6,182,212,0.35)" />
+        <text x="172" y="22" class="font-mono" font-size="9.5" fill="#f8fafc">::selection</text>
+      </g>
+
+      <text x="16" y="115" class="font-sans label" fill="#94a3b8">
+        <tspan x="16" dy="0">• <tspan fill="#f8fafc" font-weight="600">High-Visibility Cyan Focus Ring:</tspan></tspan>
+        <tspan x="26" dy="16">Outline de 2px en #06b6d4 con 1.5px offset</tspan>
+        <tspan x="26" dy="16">y halo óptico para navegación por teclado.</tspan>
+
+        <tspan x="16" dy="24">• <tspan fill="#f8fafc" font-weight="600">Luminous Selection Highlight:</tspan></tspan>
+        <tspan x="26" dy="16">rgba(6, 182, 212, 0.35) preservando la lectura</tspan>
+        <tspan x="26" dy="16">de código fuente en bloques Markdown.</tspan>
+      </text>
+    </g>
+
+    <!-- Pillar 3: Glassmorphism & Custom Scrollbars -->
+    <g transform="translate(740, 0)">
+      <rect x="0" y="0" width="340" height="260" rx="10" fill="url(#panel-grad)" stroke="#202b3f" stroke-width="1.2" />
+      <text x="16" y="26" class="font-mono" font-size="11" font-weight="700" fill="#10b981">03 // GLASS &amp; PRECISION SCROLLBARS</text>
+
+      <!-- Visual Demonstration -->
+      <g transform="translate(16, 45)">
+        <rect x="0" y="0" width="270" height="36" rx="6" fill="rgba(10,14,23,0.85)" stroke="#202b3f" stroke-width="1" />
+        <text x="16" y="22" class="font-mono" font-size="9.5" fill="#94a3b8">backdrop-filter: blur(12px)</text>
+        
+        <!-- Mini Scrollbar -->
+        <rect x="285" y="0" width="6" height="36" rx="3" fill="#060a12" />
+        <rect x="285" y="8" width="6" height="18" rx="3" fill="#06b6d4" />
+      </g>
+
+      <text x="16" y="115" class="font-sans label" fill="#94a3b8">
+        <tspan x="16" dy="0">• <tspan fill="#f8fafc" font-weight="600">Ultra-Slim 6px Scrollbar:</tspan></tspan>
+        <tspan x="26" dy="16">Thumb en #202b3f con hover reactivo</tspan>
+        <tspan x="26" dy="16">en cian #06b6d4 y esquinas transparentes.</tspan>
+
+        <tspan x="16" dy="24">• <tspan fill="#f8fafc" font-weight="600">Tactical Glass Panels:</tspan></tspan>
+        <tspan x="26" dy="16">Superficies flotantes translúcidas</tspan>
+        <tspan x="26" dy="16">en #0a0e17/85 con desenfoque de 12px.</tspan>
+      </text>
+    </g>
+
+    <!-- Pillar 4: Interactive Card Elevation (Hub-Lift) -->
+    <g transform="translate(0, 280)">
+      <rect x="0" y="0" width="340" height="260" rx="10" fill="url(#panel-grad)" stroke="#202b3f" stroke-width="1.2" />
+      <text x="16" y="26" class="font-mono" font-size="11" font-weight="700" fill="#f59e0b">04 // HUB-LIFT PHYSICS</text>
+
+      <g transform="translate(16, 45)">
+        <rect x="0" y="0" width="308" height="36" rx="6" fill="#162035" stroke="#06b6d4" stroke-width="1" />
+        <text x="16" y="22" class="font-mono" font-size="9.5" fill="#38bdf8">transform: translateY(-2px);</text>
+      </g>
+
+      <text x="16" y="115" class="font-sans label" fill="#94a3b8">
+        <tspan x="16" dy="0">• <tspan fill="#f8fafc" font-weight="600">Organic Elevation Response:</tspan></tspan>
+        <tspan x="26" dy="16">Elevación de 2px con curva cubic-bezier</tspan>
+        <tspan x="26" dy="16">y sombra profunda de alta definición.</tspan>
+
+        <tspan x="16" dy="24">• <tspan fill="#f8fafc" font-weight="600">Subtle Cyan Edge Glow:</tspan></tspan>
+        <tspan x="26" dy="16">Borde iluminado 1px rgba(6,182,212,0.3)</tspan>
+        <tspan x="26" dy="16">que confirma el enfoque táctil del usuario.</tspan>
+      </text>
+    </g>
+
+    <!-- Pillar 5: Staggered Fade-in & Optical Spotlight -->
+    <g transform="translate(370, 280)">
+      <rect x="0" y="0" width="340" height="260" rx="10" fill="url(#panel-grad)" stroke="#202b3f" stroke-width="1.2" />
+      <text x="16" y="26" class="font-mono" font-size="11" font-weight="700" fill="#38bdf8">05 // STAGGERED ENTRANCES &amp; SPOT</text>
+
+      <g transform="translate(16, 45)">
+        <rect x="0" y="0" width="90" height="36" rx="4" fill="#0d1424" stroke="#202b3f" stroke-width="1" />
+        <text x="16" y="22" class="font-mono" font-size="9" fill="#94a3b8">+0ms</text>
+        <rect x="105" y="0" width="90" height="36" rx="4" fill="#0d1424" stroke="#202b3f" stroke-width="1" />
+        <text x="121" y="22" class="font-mono" font-size="9" fill="#94a3b8">+50ms</text>
+        <rect x="210" y="0" width="98" height="36" rx="4" fill="#0d1424" stroke="#202b3f" stroke-width="1" />
+        <text x="226" y="22" class="font-mono" font-size="9" fill="#94a3b8">+100ms</text>
+      </g>
+
+      <text x="16" y="115" class="font-sans label" fill="#94a3b8">
+        <tspan x="16" dy="0">• <tspan fill="#f8fafc" font-weight="600">Smooth Cascading Mount:</tspan></tspan>
+        <tspan x="26" dy="16">Las tarjetas entran con 50ms de desfase</tspan>
+        <tspan x="26" dy="16">evitando saltos bruscos en el montaje.</tspan>
+
+        <tspan x="16" dy="24">• <tspan fill="#f8fafc" font-weight="600">Pointer Radial Spotlight:</tspan></tspan>
+        <tspan x="26" dy="16">Un solo listener global en .hub-view calcula</tspan>
+        <tspan x="26" dy="16">el haz de luz sobre todas las tarjetas.</tspan>
+      </text>
+    </g>
+
+    <!-- Pillar 6: Compact Density & High Contrast -->
+    <g transform="translate(740, 280)">
+      <rect x="0" y="0" width="340" height="260" rx="10" fill="url(#panel-grad)" stroke="#202b3f" stroke-width="1.2" />
+      <text x="16" y="26" class="font-mono" font-size="11" font-weight="700" fill="#34d399">06 // DENSITY &amp; CONTRAST WCAG AA</text>
+
+      <g transform="translate(16, 45)">
+        <rect x="0" y="0" width="145" height="36" rx="6" fill="#060a12" stroke="#202b3f" stroke-width="1" />
+        <text x="16" y="22" class="font-mono" font-size="9" fill="#94a3b8">Density: Compact</text>
+        <rect x="160" y="0" width="148" height="36" rx="6" fill="#060a12" stroke="#202b3f" stroke-width="1" />
+        <text x="176" y="22" class="font-mono" font-size="9" fill="#34d399">Contrast ≥ 4.8:1</text>
+      </g>
+
+      <text x="16" y="115" class="font-sans label" fill="#94a3b8">
+        <tspan x="16" dy="0">• <tspan fill="#f8fafc" font-weight="600">Adaptive Vertical Metrics:</tspan></tspan>
+        <tspan x="26" dy="16">data-density='compact' reduce paddings</tspan>
+        <tspan x="26" dy="16">y márgenes en 35% para pantallas densas.</tspan>
+
+        <tspan x="16" dy="24">• <tspan fill="#f8fafc" font-weight="600">Windows High Contrast Mode:</tspan></tspan>
+        <tspan x="26" dy="16">Fuerza bordes 1px ButtonText y Outline</tspan>
+        <tspan x="26" dy="16">Highlight en sistemas de accesibilidad.</tspan>
+      </text>
+    </g>
+
+  </g>
+
+  <!-- Bottom Footer Info -->
+  <g transform="translate(60, 660)">
+    <line x1="0" y1="0" x2="1080" y2="0" stroke="#202b3f" stroke-width="1" />
+    <text x="0" y="20" class="font-mono" font-size="10" fill="#64748b">AGENT-HUB DESIGN SYSTEM // ITERATION 24 (LOOP 3 - ITER 6) // STATUS: ARCHITECTURE CERTIFIED</text>
+    <text x="1080" y="20" text-anchor="end" class="font-mono" font-size="10" fill="#06b6d4">WCAG AA CERTIFIED · 100% COVERAGE · PALETTE: #07090e · #0a0e17 · #202b3f · #06b6d4</text>
+  </g>
+</svg>

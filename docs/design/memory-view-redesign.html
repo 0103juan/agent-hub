@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AgentHub · Rediseño del Centro de Memoria</title>
+<style>
+  :root {
+    --bg: #07090e;
+    --s1: #0e131f;
+    --s2: #131a29;
+    --s3: #1a2334;
+    --line: #202b3f;
+    --line-hi: #2a3750;
+    --t1: #f3f6fc;
+    --t2: #dde4ef;
+    --t3: #c5cfde;
+    --t4: #a3b0c5;
+    --t5: #8593ab;
+    --indigo: #6366f1;
+    --amber: #f59e0b;
+    --cyan: #38bdf8;
+    --emerald: #10b981;
+    --rose: #f43f5e;
+    --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+    --sans: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--t2); font: 13px/1.5 var(--sans); }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  svg.i { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  .mono { font-family: var(--mono); }
+
+  .container { max-width: 1000px; margin: 0 auto; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+
+  .hub-card {
+    background: var(--s1);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .hub-lift {
+    transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s ease, border-color 0.2s ease;
+  }
+  .hub-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px -10px rgba(0,0,0,0.8), 0 0 0 1px rgba(99,102,241,0.2);
+  }
+
+  /* Header */
+  .header-bar {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+    gap: 12px; padding: 12px 16px; border-radius: 12px;
+    background: linear-gradient(135deg, rgba(14,19,31,0.95), rgba(19,26,41,0.95));
+    border: 1px solid var(--line);
+  }
+  .brand-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(135deg, #a855f7, var(--indigo));
+    display: grid; place-items: center; color: white;
+    box-shadow: 0 4px 12px rgba(168,85,247,0.3);
+  }
+
+  /* Segmented Controls */
+  .view-switch {
+    display: flex; align-items: center; gap: 2px;
+    background: var(--bg); border: 1px solid var(--line);
+    padding: 3px; border-radius: 8px;
+  }
+  .view-btn {
+    display: flex; align-items: center; gap: 6px;
+    padding: 4px 12px; border-radius: 6px;
+    font-size: 11px; font-weight: 500; color: var(--t4);
+    transition: all 0.2s;
+  }
+  .view-btn:hover { color: var(--t1); background: rgba(255,255,255,0.04); }
+  .view-btn.active { background: var(--indigo); color: white; font-weight: 600; box-shadow: 0 2px 8px rgba(99,102,241,0.4); }
+
+  /* Context Gauge */
+  .gauge-box { padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; }
+  .gauge-bar-bg { width: 100%; height: 8px; border-radius: 99px; background: var(--s2); overflow: hidden; display: flex; }
+  .gauge-fill { height: 100%; border-radius: 99px; transition: width 0.4s ease; }
+
+  /* Structured Lesson Card */
+  .lesson-card {
+    padding: 14px; border-radius: 12px;
+    background: var(--s1); border: 1px solid var(--line);
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .badge-tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; border-radius: 6px;
+    font-size: 10px; font-weight: 700; font-family: var(--mono);
+    text-transform: uppercase; border: 1px solid currentColor;
+  }
+  .tag-signal { color: #fde68a; background: rgba(120,53,15,0.25); border-color: rgba(245,158,11,0.4); }
+  .tag-lesson { color: #c7d2fe; background: rgba(30,27,75,0.3); border-color: rgba(99,102,241,0.4); }
+  .tag-evidence { color: #a7f3d0; background: rgba(6,78,59,0.25); border-color: rgba(16,185,129,0.4); }
+
+  /* Form Elements */
+  .input-field {
+    background: var(--bg); border: 1px solid var(--line);
+    border-radius: 8px; padding: 7px 12px;
+    color: var(--t1); font-size: 12px; font-family: var(--sans);
+    outline: none; transition: border-color 0.2s;
+  }
+  .input-field:focus { border-color: var(--indigo); }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <header class="header-bar">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <div class="brand-icon">
+        <svg class="i" style="width:20px; height:20px;" viewBox="0 0 24 24"><path d="M12 2a4 4 0 0 0-4 4v1a4 4 0 0 0-4 4v1a4 4 0 0 0-2 3.5 4 4 0 0 0 4 4h1a4 4 0 0 0 4 3.5 4 4 0 0 0 4-3.5h1a4 4 0 0 0 4-4 4 4 0 0 0-2-3.5v-1a4 4 0 0 0-4-4V6a4 4 0 0 0-4-4z"/><line x1="12" y1="2" x2="12" y2="22"/></svg>
+      </div>
+      <div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <h1 style="margin:0; font-size:14px; font-weight:800; color:var(--t1);">Centro de Memoria del Proyecto</h1>
+          <span class="mono" style="font-size:10px; padding:2px 8px; border-radius:99px; background:rgba(99,102,241,0.15); color:#a5b4fc; border:1px solid rgba(99,102,241,0.3);">.agent-hub/experience.md</span>
+        </div>
+        <div style="font-size:11px; color:var(--t4);">Lecciones y reglas acumuladas que los agentes leen como experiencia previa</div>
+      </div>
+    </div>
+
+    <!-- Mode Switcher -->
+    <div class="view-switch">
+      <button class="view-btn active" onclick="switchView('structured')">
+        <svg class="i" viewBox="0 0 24 24"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+        Fichas de Lecciones
+      </button>
+      <button class="view-btn" onclick="switchView('raw')">
+        <svg class="i" viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+        Editor Markdown
+      </button>
+    </div>
+  </header>
+
+  <!-- Live Context Window Gauge -->
+  <section class="hub-card gauge-box">
+    <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px;">
+      <div style="display:flex; align-items:center; gap:6px;">
+        <span style="width:8px; height:8px; border-radius:50%; background:var(--emerald);"></span>
+        <span style="font-weight:700; color:var(--t1);">Ventana Activa del Agente</span>
+        <span style="color:var(--t4);">(Solo los últimos 2.000 caracteres se inyectan en el prompt)</span>
+      </div>
+      <div class="mono" style="font-size:11px; font-weight:700; color:var(--emerald);">
+        2.000 / 2.000 caracteres (100% activo)
+      </div>
+    </div>
+    <div class="gauge-bar-bg">
+      <div class="gauge-fill" style="width:75%; background:var(--line-hi);"></div>
+      <div class="gauge-fill" style="width:25%; background:linear-gradient(90deg, #10b981, #06b6d4);"></div>
+    </div>
+    <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--t5); font-family:var(--mono);">
+      <span>Historial archivado en disco (8.140 caracteres)</span>
+      <span style="color:var(--emerald);">● En contexto directo</span>
+    </div>
+  </section>
+
+  <!-- Structured Lessons View -->
+  <main style="display:flex; flex-direction:column; gap:12px;" id="structuredView">
+
+    <!-- Search & Filter Bar -->
+    <div style="display:flex; gap:10px; align-items:center;">
+      <input class="input-field" style="flex:1;" placeholder="Buscar lección por señal, lección o archivo..." value="electron" />
+      <button style="padding:7px 14px; border-radius:8px; background:var(--s2); border:1px solid var(--line); font-size:11px; font-weight:600; color:var(--t2);">
+        + Registrar Lección
+      </button>
+    </div>
+
+    <!-- Sample Lesson Card 1 -->
+    <article class="lesson-card hub-lift">
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="badge-tag tag-signal">SEÑAL</span>
+          <span style="font-weight:700; color:var(--t1);">Al empaquetar scripts CLI como backend embebido con Electron y esbuild</span>
+        </div>
+        <span class="mono" style="font-size:10px; color:var(--emerald); background:rgba(16,185,129,0.1); padding:1px 6px; border-radius:4px; border:1px solid rgba(16,185,129,0.2);">EN CONTEXTO</span>
+      </div>
+
+      <div style="padding:10px 12px; border-radius:8px; background:var(--s2); border:1px solid var(--line); display:flex; flex-direction:column; gap:6px;">
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span class="badge-tag tag-lesson">LECCIÓN</span>
+          <span style="font-size:12px; color:var(--t2); font-weight:500;">
+            <code class="mono" style="color:#c7d2fe;">require.main === module</code> se evalúa como true en el punto de entrada de Electron y dispara auto-ejecuciones; añadir <code class="mono" style="color:#c7d2fe;">&& !process.versions.electron</code>.
+          </span>
+        </div>
+      </div>
+
+      <div style="display:flex; align-items:center; justify-content:space-between; font-size:11px;">
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span class="badge-tag tag-evidence">EVIDENCIA</span>
+          <code class="mono" style="font-size:11px; color:var(--t4);">src/server/standalone.ts</code>
+        </div>
+        <button style="font-size:10px; color:var(--t4); padding:2px 8px; border-radius:4px; background:var(--s2); border:1px solid var(--line);">Copiar cita</button>
+      </div>
+    </article>
+
+    <!-- Sample Lesson Card 2 -->
+    <article class="lesson-card hub-lift">
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="badge-tag tag-signal">SEÑAL</span>
+          <span style="font-weight:700; color:var(--t1);">Al cambiar colores de toda la webview (paleta, tema, rediseño)</span>
+        </div>
+        <span class="mono" style="font-size:10px; color:var(--emerald); background:rgba(16,185,129,0.1); padding:1px 6px; border-radius:4px; border:1px solid rgba(16,185,129,0.2);">EN CONTEXTO</span>
+      </div>
+
+      <div style="padding:10px 12px; border-radius:8px; background:var(--s2); border:1px solid var(--line); display:flex; flex-direction:column; gap:6px;">
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span class="badge-tag tag-lesson">LECCIÓN</span>
+          <span style="font-size:12px; color:var(--t2); font-weight:500;">
+            Los tonos zinc de Tailwind se leen de <code class="mono" style="color:#c7d2fe;">--hub-zinc-*</code> con mezcla del tema de VS Code; dentro de VS Code se ponen a <code class="mono" style="color:#c7d2fe;">initial</code>. Cambia la paleta en :root, no clase por clase.
+          </span>
+        </div>
+      </div>
+
+      <div style="display:flex; align-items:center; justify-content:space-between; font-size:11px;">
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span class="badge-tag tag-evidence">EVIDENCIA</span>
+          <code class="mono" style="font-size:11px; color:var(--t4);">tailwind.config.js & src/webview/styles.css</code>
+        </div>
+        <button style="font-size:10px; color:var(--t4); padding:2px 8px; border-radius:4px; background:var(--s2); border:1px solid var(--line);">Copiar cita</button>
+      </div>
+    </article>
+  </main>
+
+</div>
+<script>
+  function switchView(mode) {
+    document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+  }
+</script>
+</body>
+</html>

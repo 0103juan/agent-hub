@@ -191,7 +191,7 @@ function metaContent(name: string): string | undefined {
 const MarkdownImage: React.FC<{ alt: string; src: string }> = ({ alt, src }) => {
   const [hasFailed, setHasFailed] = useState(false);
   const resolved = resolveImageSrc(src, metaContent('agent-hub-files'), metaContent('agent-hub-workspace'));
-  if (hasFailed) return <span className="text-zinc-500">[imagen no disponible: {alt || src}]</span>;
+  if (hasFailed) return <span className="text-slate-500">[imagen no disponible: {alt || src}]</span>;
   return (
     <img
       src={resolved}
@@ -199,7 +199,7 @@ const MarkdownImage: React.FC<{ alt: string; src: string }> = ({ alt, src }) => 
       title={alt || src}
       loading="lazy"
       onError={() => setHasFailed(true)}
-      className="my-1.5 block max-h-80 max-w-full rounded border border-zinc-700 bg-zinc-950/60 object-contain"
+      className="my-1.5 block max-h-80 max-w-full rounded border border-[#202b3f] bg-[#07090e]/80 object-contain shadow-sm"
     />
   );
 };
@@ -290,7 +290,7 @@ const FileLinkChip: React.FC<{ fileInfo: FileLinkInfo }> = ({ fileInfo }) => {
     ) : fileType === 'config' ? (
       <Sliders className="w-3.5 h-3.5 text-amber-400 group-hover:text-amber-300 shrink-0" />
     ) : (
-      <FileText className="w-3.5 h-3.5 text-indigo-400 group-hover:text-indigo-300 shrink-0" />
+      <FileText className="w-3.5 h-3.5 text-cyan-400 group-hover:text-cyan-300 shrink-0" />
     );
 
   const canOpenInDocuments = /\.(md|markdown|mdx|txt|rst|adoc|log|csv|json|ya?ml|toml|ini|xml|html?|sql|sh|ps1|bat|py|[jt]sx?|css|java|go|rs|cs|php|rb|cpp?|hpp?)$/i.test(cleanPath);
@@ -306,12 +306,12 @@ const FileLinkChip: React.FC<{ fileInfo: FileLinkInfo }> = ({ fileInfo }) => {
         if (canOpenInDocuments) window.dispatchEvent(new CustomEvent('agenthub:open-document', { detail: cleanPath }));
         else postToHost({ command: 'openAttachment', fsPath: cleanPath, line: startLine, endLine });
       }}
-      className="inline-flex items-center gap-1.5 px-2 py-0.5 my-0.5 mx-0.5 rounded-md bg-zinc-800/90 hover:bg-zinc-700/90 border border-zinc-700/80 hover:border-indigo-500/60 text-zinc-200 hover:text-white transition-all shadow-xs text-[11.5px] font-mono group align-middle cursor-pointer"
+      className="inline-flex items-center gap-1.5 px-2 py-0.5 my-0.5 mx-0.5 rounded-md bg-[#162035]/90 hover:bg-[#202b3f] border border-[#202b3f] hover:border-cyan-500/60 text-slate-200 hover:text-white transition-all shadow-xs text-[11.5px] font-mono group align-middle cursor-pointer"
     >
       {icon}
       <span className="font-medium tracking-tight truncate max-w-[260px]">{displayName}</span>
       {lineBadge && (
-        <span className="text-[10px] px-1 py-0.2 rounded bg-indigo-950/80 text-indigo-300 border border-indigo-700/50 font-semibold tracking-tight shrink-0">
+        <span className="text-[10px] px-1 py-0.2 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-500/40 font-semibold tracking-tight shrink-0">
           {lineBadge}
         </span>
       )}
@@ -322,7 +322,7 @@ const FileLinkChip: React.FC<{ fileInfo: FileLinkInfo }> = ({ fileInfo }) => {
         title="Abrir en VS Code"
         aria-label={`Abrir ${displayName} en VS Code`}
         onClick={() => openInVsCode(cleanPath, startLine)}
-        className="p-1 rounded text-zinc-400 hover:text-indigo-300 hover:bg-zinc-800 transition"
+        className="p-1 rounded text-slate-400 hover:text-cyan-300 hover:bg-[#0c1220] transition"
       >
         <ExternalLink className="w-3.5 h-3.5" />
       </button>
@@ -356,7 +356,7 @@ function renderInline(text: string): React.ReactNode[] {
           key={index}
           title="Clic para copiar"
           onClick={() => navigator.clipboard.writeText(part.slice(1, -1)).catch(() => {})}
-          className="cursor-copy rounded bg-zinc-800 px-1 text-[0.92em] font-mono hover:bg-zinc-700"
+          className="cursor-copy rounded bg-[#162035] px-1 text-[0.92em] font-mono text-cyan-300 border border-[#202b3f] hover:bg-[#202b3f]"
         >
           {part.slice(1, -1)}
         </code>
@@ -367,7 +367,7 @@ function renderInline(text: string): React.ReactNode[] {
     if (image) return <MarkdownImage key={index} alt={image[1]} src={image[2].trim()} />;
 
     if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
-      return <strong key={index} className="font-semibold text-zinc-100">{renderInline(part.slice(2, -2))}</strong>;
+      return <strong key={index} className="font-semibold text-slate-100">{renderInline(part.slice(2, -2))}</strong>;
     }
 
     if (part.startsWith('*') && part.endsWith('*') && part.length > 2) {
@@ -397,7 +397,7 @@ function renderInline(text: string): React.ReactNode[] {
       }
 
       const inner = isCode ? (
-        <code className="rounded bg-indigo-950/80 border border-indigo-700/60 px-1 py-0.5 text-indigo-300 font-mono text-[0.92em]">
+        <code className="rounded bg-cyan-950/40 border border-cyan-500/40 px-1.5 py-0.5 text-cyan-200 font-mono text-[0.92em]">
           {rawLabel}
         </code>
       ) : (
@@ -410,10 +410,10 @@ function renderInline(text: string): React.ReactNode[] {
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 text-indigo-400 hover:text-indigo-300 hover:underline font-medium align-middle"
+          className="inline-flex items-center gap-1 text-cyan-400 hover:text-cyan-300 hover:underline font-medium align-middle"
         >
           <span>{inner}</span>
-          <ExternalLink className="w-3 h-3 text-zinc-500 hover:text-indigo-300" />
+          <ExternalLink className="w-3 h-3 text-slate-500 hover:text-cyan-300" />
         </a>
       );
     }
@@ -436,6 +436,34 @@ export const InteractiveDiagramViewer: React.FC<InteractiveDiagramViewerProps> =
 
   const inlineCanvasRef = useRef<HTMLDivElement>(null);
   const fullscreenCanvasRef = useRef<HTMLDivElement>(null);
+  const fullscreenModalRef = useRef<HTMLDivElement>(null);
+
+  // Al salir de pantalla completa, restaurar el foco en el disparador que abrió el visor
+  useEffect(() => {
+    if (!isFullscreen) return;
+    const opener = document.activeElement as HTMLElement | null;
+    return () => opener?.focus?.();
+  }, [isFullscreen]);
+
+  // Trampa de foco cíclica en modo pantalla completa
+  const trapFullscreenFocus = (event: React.KeyboardEvent) => {
+    if (event.key !== 'Tab' || !fullscreenModalRef.current) return;
+    const focusable = Array.from(
+      fullscreenModalRef.current.querySelectorAll<HTMLElement>(
+        'button:not(:disabled), a[href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])'
+      )
+    ).filter((element) => element.offsetParent !== null);
+    if (focusable.length === 0) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
 
   const handleZoomIn = () => {
     setScale((s) => Math.min(5, Math.round((s + 0.25) * 100) / 100));
@@ -592,17 +620,17 @@ mermaid.initialize({
 
   const controlsPill = (size: 'sm' | 'md' = 'sm') => {
     const btnClass = size === 'sm'
-      ? 'flex h-6 w-6 items-center justify-center rounded hover:bg-zinc-700/80 hover:text-white transition-colors'
-      : 'flex h-7 w-7 items-center justify-center rounded hover:bg-zinc-700/80 hover:text-white transition-colors';
+      ? 'flex h-6 w-6 items-center justify-center rounded hover:bg-[#202b3f] hover:text-white transition-colors'
+      : 'flex h-7 w-7 items-center justify-center rounded hover:bg-[#202b3f] hover:text-white transition-colors';
     const textClass = size === 'sm'
-      ? 'px-1.5 py-0.5 text-[11px] font-mono text-zinc-300 hover:text-white hover:bg-zinc-800 rounded min-w-[3rem] text-center transition-colors'
-      : 'px-2 py-0.5 text-xs font-mono text-zinc-200 hover:text-white hover:bg-zinc-800 rounded min-w-[3.5rem] text-center transition-colors';
+      ? 'px-1.5 py-0.5 text-[11px] font-mono text-slate-300 hover:text-white hover:bg-[#162035] rounded min-w-[3rem] text-center transition-colors'
+      : 'px-2 py-0.5 text-xs font-mono text-slate-200 hover:text-white hover:bg-[#162035] rounded min-w-[3.5rem] text-center transition-colors';
     const iconSize = size === 'sm' ? 'h-3.5 w-3.5' : 'h-4 w-4';
 
     return (
       <div
         onMouseDown={(e) => e.stopPropagation()}
-        className="flex items-center gap-0.5 rounded-lg border border-zinc-700/80 bg-zinc-900/90 p-1 text-zinc-300 shadow-md backdrop-blur-md"
+        className="flex items-center gap-0.5 rounded-lg border border-[#202b3f] bg-[#0a0e17]/95 p-1 text-slate-300 shadow-md backdrop-blur-md"
       >
         <button
           type="button"
@@ -631,7 +659,7 @@ mermaid.initialize({
         >
           <ZoomIn className={iconSize} />
         </button>
-        <div className="mx-1 h-3.5 w-[1px] bg-zinc-700" />
+        <div className="mx-1 h-3.5 w-[1px] bg-[#202b3f]" />
         <button
           type="button"
           onClick={handleReset}
@@ -652,11 +680,11 @@ mermaid.initialize({
         ref={inlineCanvasRef}
         onMouseDown={handleMouseDown}
         onDoubleClick={handleReset}
-        className={`relative w-full h-80 overflow-hidden border-b border-zinc-800 bg-zinc-950 flex items-center justify-center select-none group/diagram ${
+        className={`relative w-full h-80 overflow-hidden border-b border-[#202b3f] bg-[#07090e] flex items-center justify-center select-none group/diagram ${
           isDragging ? 'cursor-grabbing' : 'cursor-grab'
         }`}
         style={{
-          backgroundImage: 'radial-gradient(circle, #27272a 1px, transparent 1px)',
+          backgroundImage: 'radial-gradient(circle, #202b3f 1px, transparent 1px)',
           backgroundSize: '20px 20px',
           backgroundPosition: `${position.x}px ${position.y}px`,
         }}
@@ -685,7 +713,7 @@ mermaid.initialize({
             }}
             title="Abrir en pantalla completa para inspeccionar"
             aria-label="Pantalla completa"
-            className="flex h-8 items-center gap-1 rounded-lg border border-zinc-700/80 bg-zinc-900/90 px-2 text-xs text-zinc-300 shadow-md backdrop-blur-md hover:bg-indigo-600/30 hover:border-indigo-500/60 hover:text-indigo-200 transition-colors"
+            className="flex h-8 items-center gap-1 rounded-lg border border-[#202b3f] bg-[#0a0e17]/95 px-2 text-xs text-slate-300 shadow-md backdrop-blur-md hover:bg-cyan-600/30 hover:border-cyan-500/60 hover:text-cyan-200 transition-colors"
           >
             <Maximize2 className="h-3.5 w-3.5" />
             <span className="hidden sm:inline text-[11px]">Ampliar</span>
@@ -693,7 +721,7 @@ mermaid.initialize({
         </div>
 
         {/* Pista de uso al pasar el cursor */}
-        <div className="absolute bottom-2 left-2 z-10 pointer-events-none flex items-center gap-1.5 rounded-md bg-zinc-900/80 px-2 py-0.5 text-[10px] text-zinc-400 border border-zinc-800/80 backdrop-blur-xs opacity-0 group-hover/diagram:opacity-100 transition-opacity">
+        <div className="absolute bottom-2 left-2 z-10 pointer-events-none flex items-center gap-1.5 rounded-md bg-[#0a0e17]/90 px-2 py-0.5 text-[10px] text-slate-400 border border-[#202b3f] backdrop-blur-xs opacity-0 group-hover/diagram:opacity-100 transition-opacity">
           <span>Arrastra para mover · Rueda para zoom · Doble clic para centrar</span>
         </div>
       </div>
@@ -701,22 +729,24 @@ mermaid.initialize({
       {/* Modal de Pantalla Completa */}
       {isFullscreen && (
         <div
+          ref={fullscreenModalRef}
+          onKeyDown={trapFullscreenFocus}
           role="dialog"
           aria-modal="true"
           aria-label={`Vista ampliada de diagrama ${language === 'mermaid' ? 'Mermaid' : 'SVG'}`}
-          className="fixed inset-0 z-50 flex flex-col bg-zinc-950/95 backdrop-blur-md animate-in fade-in duration-150"
+          className="fixed inset-0 z-50 flex flex-col bg-[#07090e]/95 backdrop-blur-md animate-in fade-in duration-150"
         >
           {/* Cabecera del modal */}
           <div
             onMouseDown={(e) => e.stopPropagation()}
-            className="flex items-center justify-between border-b border-zinc-800 bg-zinc-900/95 px-4 py-2.5 shadow-md"
+            className="flex items-center justify-between border-b border-[#202b3f] bg-[#0a0e17]/95 px-4 py-2.5 shadow-md"
           >
             <div className="flex items-center gap-2.5">
-              <span className="flex items-center gap-1.5 text-xs font-semibold text-zinc-100">
-                <Eye className="h-4 w-4 text-indigo-400" />
+              <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-100">
+                <Eye className="h-4 w-4 text-cyan-400" />
                 <span>Diagrama {language === 'mermaid' ? 'Mermaid' : 'SVG'}</span>
               </span>
-              <span className="rounded bg-indigo-950/80 border border-indigo-700/50 px-2 py-0.5 text-[10px] font-mono text-indigo-300">
+              <span className="rounded bg-cyan-950/60 border border-cyan-500/40 px-2 py-0.5 text-[10px] font-mono text-cyan-300">
                 Pantalla Completa
               </span>
             </div>
@@ -731,11 +761,11 @@ mermaid.initialize({
                 }}
                 title="Cerrar pantalla completa (Esc)"
                 aria-label="Cerrar pantalla completa"
-                className="flex h-8 items-center gap-1.5 rounded-lg border border-zinc-700/80 bg-zinc-800/90 px-3 text-xs text-zinc-200 hover:bg-zinc-700 hover:text-white transition-colors"
+                className="flex h-8 items-center gap-1.5 rounded-lg border border-[#202b3f] bg-[#0c1220] px-3 text-xs text-slate-200 hover:bg-[#162035] hover:text-white transition-colors"
               >
                 <X className="h-4 w-4" />
                 <span>Cerrar</span>
-                <kbd className="hidden sm:inline-block rounded bg-zinc-900 border border-zinc-700 px-1 py-0.2 text-[10px] text-zinc-400">Esc</kbd>
+                <kbd className="hidden sm:inline-block rounded bg-[#07090e] border border-[#202b3f] px-1 py-0.2 text-[10px] text-slate-400">Esc</kbd>
               </button>
             </div>
           </div>
@@ -745,11 +775,11 @@ mermaid.initialize({
             ref={fullscreenCanvasRef}
             onMouseDown={handleMouseDown}
             onDoubleClick={handleReset}
-            className={`relative flex-1 w-full overflow-hidden bg-zinc-950 flex items-center justify-center select-none ${
+            className={`relative flex-1 w-full overflow-hidden bg-[#07090e] flex items-center justify-center select-none ${
               isDragging ? 'cursor-grabbing' : 'cursor-grab'
             }`}
             style={{
-              backgroundImage: 'radial-gradient(circle, #27272a 1.2px, transparent 1.2px)',
+              backgroundImage: 'radial-gradient(circle, #202b3f 1.2px, transparent 1.2px)',
               backgroundSize: '24px 24px',
               backgroundPosition: `${position.x}px ${position.y}px`,
             }}
@@ -767,7 +797,7 @@ mermaid.initialize({
             </div>
 
             {/* Pista flotante inferior en pantalla completa */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-none flex items-center gap-2 rounded-full border border-zinc-800/80 bg-zinc-900/80 px-4 py-1 text-xs text-zinc-400 shadow-lg backdrop-blur">
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-none flex items-center gap-2 rounded-full border border-[#202b3f] bg-[#0a0e17]/90 px-4 py-1 text-xs text-slate-400 shadow-lg backdrop-blur">
               <span>Arrastra para mover</span>
               <span>·</span>
               <span>Rueda para zoom</span>
@@ -803,18 +833,21 @@ const CodeBlock: React.FC<{ language: string; code: string; withActions: boolean
     setTimeout(() => setWasCopied(false), 1500);
   };
 
-  const actionClass = 'flex items-center gap-1 rounded px-1 hover:bg-zinc-700 hover:text-zinc-100';
+  const actionClass = 'flex items-center gap-1.5 rounded-md px-2 py-0.5 hover:bg-[#162035] hover:text-white text-slate-400 text-[11px] font-medium transition cursor-pointer border border-transparent hover:border-[#202b3f]';
 
   return (
-    <div className="my-1.5 overflow-hidden rounded border border-zinc-700 bg-zinc-950/60">
-      <div className="flex items-center gap-1 border-b border-zinc-700 px-2 py-0.5 text-[11px] text-zinc-400">
-        <span className="flex-1 truncate">{language || 'texto'} <span className="text-zinc-500">· {lineCount} {lineCount === 1 ? 'línea' : 'líneas'}</span></span>
+    <div className="my-2 overflow-hidden rounded-xl border border-[#202b3f] bg-[#07090e] shadow-md">
+      <div className="flex items-center gap-1.5 border-b border-[#202b3f] px-3 py-1 text-xs text-slate-400 bg-[#0a0e17]">
+        <span className="flex-1 truncate font-mono">
+          <span className="font-bold text-cyan-400 uppercase text-[11px]">{language || 'texto'}</span>{' '}
+          <span className="text-slate-500 text-[10px]">· {lineCount} {lineCount === 1 ? 'línea' : 'líneas'}</span>
+        </span>
         {!previewMode && (
           <>
-            <button type="button" aria-pressed={wrap} className={`${actionClass} ${wrap ? 'bg-zinc-700 text-zinc-100' : ''}`} onClick={() => setWrap(!wrap)} title="Ajustar líneas largas" aria-label="Ajustar líneas largas">
+            <button type="button" aria-pressed={wrap} className={`${actionClass} ${wrap ? 'bg-[#162035] text-slate-100 border-[#202b3f]' : ''}`} onClick={() => setWrap(!wrap)} title="Ajustar líneas largas" aria-label="Ajustar líneas largas">
               <WrapText className="h-3 w-3" />
             </button>
-            <button type="button" aria-pressed={lineNumbers} className={`${actionClass} ${lineNumbers ? 'bg-zinc-700 text-zinc-100' : ''}`} onClick={() => setLineNumbers(!lineNumbers)} title="Números de línea" aria-label="Números de línea">
+            <button type="button" aria-pressed={lineNumbers} className={`${actionClass} ${lineNumbers ? 'bg-[#162035] text-slate-100 border-[#202b3f]' : ''}`} onClick={() => setLineNumbers(!lineNumbers)} title="Números de línea" aria-label="Números de línea">
               <ListOrdered className="h-3 w-3" />
             </button>
           </>
@@ -825,7 +858,7 @@ const CodeBlock: React.FC<{ language: string; code: string; withActions: boolean
         {isVisual && (
           <button
             type="button"
-            className={`${actionClass} ${previewMode ? 'bg-indigo-600/40 text-indigo-200' : 'text-indigo-400'}`}
+            className={`${actionClass} ${previewMode ? 'bg-cyan-500/20 text-cyan-200 border-cyan-500/50' : 'text-cyan-400'}`}
             onClick={() => setPreviewMode(!previewMode)}
             title="Alternar vista previa interactiva"
           >
@@ -836,7 +869,7 @@ const CodeBlock: React.FC<{ language: string; code: string; withActions: boolean
         {withActions && (
           <>
             <button type="button" className={actionClass} onClick={copy} title="Copiar">
-              {wasCopied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+              {wasCopied ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
               <span>Copiar</span>
             </button>
             <button
@@ -854,7 +887,7 @@ const CodeBlock: React.FC<{ language: string; code: string; withActions: boolean
               title="Quitar la revisión inline del editor"
               onClick={() => postToHost({ command: 'clearInlineDiff' })}
             >
-              <X className="h-3 w-3 text-zinc-400" />
+              <X className="h-3 w-3 text-slate-400" />
               <span>Limpiar</span>
             </button>
             <button type="button" className={actionClass} title="Guardar en un archivo del espacio de trabajo" onClick={() => setSavePath(savePath === undefined ? '' : undefined)}>
@@ -875,7 +908,7 @@ const CodeBlock: React.FC<{ language: string; code: string; withActions: boolean
 
       {savePath !== undefined && (
         <form
-          className="flex items-center gap-1 border-b border-zinc-700 px-2 py-1 text-[11px]"
+          className="flex items-center gap-1.5 border-b border-[#202b3f] px-3 py-1.5 text-xs bg-[#07090e]"
           onSubmit={(event) => {
             event.preventDefault();
             if (!savePath.trim()) return;
@@ -889,7 +922,7 @@ const CodeBlock: React.FC<{ language: string; code: string; withActions: boolean
             onChange={(event) => setSavePath(event.target.value)}
             placeholder="ruta/relativa/archivo.ext"
             aria-label="Ruta del archivo"
-            className="flex-1 min-w-0 bg-transparent font-mono text-zinc-200 focus:outline-none placeholder-zinc-500"
+            className="flex-1 min-w-0 bg-transparent font-mono text-slate-200 focus:outline-none placeholder-slate-500 text-xs"
           />
           <button type="submit" className={actionClass}>Guardar</button>
         </form>
@@ -900,19 +933,19 @@ const CodeBlock: React.FC<{ language: string; code: string; withActions: boolean
       )}
 
       {previewMode && language === 'html' && (
-        <div className="p-2 bg-zinc-950 flex flex-col items-center border-b border-zinc-800">
+        <div className="p-2.5 bg-[#07090e] flex flex-col items-center border-b border-[#202b3f]">
           <div className="flex items-center gap-2 mb-2 text-[10px]">
             <button
               type="button"
               onClick={() => setViewport('desktop')}
-              className={`px-2 py-0.5 rounded transition ${viewport === 'desktop' ? 'bg-indigo-600 text-white font-medium' : 'text-zinc-400 hover:text-zinc-200 bg-zinc-800'}`}
+              className={`px-2 py-0.5 rounded transition ${viewport === 'desktop' ? 'bg-gradient-to-r from-cyan-600 to-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-slate-200 bg-[#162035]'}`}
             >
               Escritorio (100%)
             </button>
             <button
               type="button"
               onClick={() => setViewport('mobile')}
-              className={`px-2 py-0.5 rounded transition ${viewport === 'mobile' ? 'bg-indigo-600 text-white font-medium' : 'text-zinc-400 hover:text-zinc-200 bg-zinc-800'}`}
+              className={`px-2 py-0.5 rounded transition ${viewport === 'mobile' ? 'bg-gradient-to-r from-cyan-600 to-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-slate-200 bg-[#162035]'}`}
             >
               Móvil (375px)
             </button>
@@ -920,7 +953,7 @@ const CodeBlock: React.FC<{ language: string; code: string; withActions: boolean
           <iframe
             sandbox="allow-scripts"
             srcDoc={`<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><script src="https://cdn.tailwindcss.com"></script><style>body { margin: 0; padding: 12px; font-family: system-ui, sans-serif; background: #09090b; color: #f4f4f5; }</style></head><body>${code}</body></html>`}
-            className={`h-80 border border-zinc-700/80 rounded transition-all duration-300 bg-zinc-950 ${viewport === 'mobile' ? 'w-[375px]' : 'w-full'}`}
+            className={`h-80 border border-[#202b3f] rounded-lg transition-all duration-300 bg-[#07090e] ${viewport === 'mobile' ? 'w-[375px]' : 'w-full'}`}
           />
         </div>
       )}
@@ -939,20 +972,20 @@ const CodeBlock: React.FC<{ language: string; code: string; withActions: boolean
 
       {!previewMode && (
         <div className={`relative ${collapsible && !showAll ? 'max-h-[26rem] overflow-hidden' : ''}`}>
-          <pre className={`flex p-2 text-xs ${wrap ? 'whitespace-pre-wrap break-words' : 'overflow-x-auto'} ${language === 'svg' ? 'border-t border-zinc-700' : ''}`}>
+          <pre className={`flex p-3 text-xs leading-5 bg-[#07090e] ${wrap ? 'whitespace-pre-wrap break-words' : 'overflow-x-auto'} ${language === 'svg' ? 'border-t border-[#202b3f]' : ''}`}>
             {lineNumbers && (
-              <span aria-hidden className="select-none pr-2 mr-2 border-r border-zinc-800 text-right leading-5 text-zinc-600 shrink-0">
+              <span aria-hidden className="select-none pr-2 mr-2 border-r border-[#162035] text-right leading-5 text-slate-600 shrink-0 font-mono">
                 {Array.from({ length: lineCount }, (_, index) => `${index + 1}\n`).join('')}
               </span>
             )}
-            <code className="leading-5 min-w-0">{renderSyntaxCode(code, language)}</code>
+            <code className="leading-5 min-w-0 font-mono">{renderSyntaxCode(code, language)}</code>
           </pre>
-          {collapsible && !showAll && <div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-zinc-950 to-transparent" />}
+          {collapsible && !showAll && <div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-[#07090e] to-transparent" />}
         </div>
       )}
       {!previewMode && collapsible && (
-        <button type="button" onClick={() => setShowAll(!showAll)} className="flex w-full items-center justify-center gap-1 border-t border-zinc-800 py-0.5 text-[11px] text-indigo-300 hover:bg-zinc-800/60">
-          {showAll ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+        <button type="button" onClick={() => setShowAll(!showAll)} className="flex w-full items-center justify-center gap-1 border-t border-[#202b3f] bg-[#07090e] py-1 text-xs text-cyan-400 hover:text-cyan-300 hover:bg-[#162035] transition cursor-pointer">
+          {showAll ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
           {showAll ? 'Mostrar menos' : `Mostrar las ${lineCount} líneas`}
         </button>
       )}
@@ -960,7 +993,13 @@ const CodeBlock: React.FC<{ language: string; code: string; withActions: boolean
   );
 };
 
-const HEADING_CLASSES = ['', 'text-base font-semibold', 'text-sm font-semibold', 'font-semibold', 'font-medium'];
+const HEADING_CLASSES = [
+  '',
+  'text-base font-bold text-white tracking-tight pt-2 pb-0.5 border-b border-[#202b3f]/60 pb-1',
+  'text-sm font-bold text-slate-100 pt-1.5 pb-0.5',
+  'text-xs font-semibold text-slate-200 pt-1',
+  'text-xs font-medium text-slate-300'
+];
 
 const MarkdownTable: React.FC<{ block: Extract<Block, { kind: 'table' }> }> = ({ block }) => {
   const [copied, setCopied] = useState(false);
@@ -973,32 +1012,32 @@ const MarkdownTable: React.FC<{ block: Extract<Block, { kind: 'table' }> }> = ({
     } catch {}
   };
   return (
-  <div className="group/table relative my-1.5 overflow-x-auto rounded border border-zinc-700">
+  <div className="group/table relative my-2 overflow-x-auto rounded-xl border border-[#202b3f] bg-[#0a0e17] shadow-md">
     <button
       type="button"
       onClick={copyTable}
-      className="absolute right-1 top-1 z-10 flex items-center gap-1 rounded bg-zinc-900/90 px-1.5 py-0.5 text-[10px] text-zinc-300 opacity-0 transition hover:text-white group-hover/table:opacity-100 focus-visible:opacity-100"
+      className="absolute right-2 top-2 z-10 flex items-center gap-1.5 rounded-lg bg-[#07090e] border border-[#202b3f] px-2.5 py-1 text-xs text-slate-300 opacity-0 transition group-hover/table:opacity-100 focus-visible:opacity-100 hover:text-white cursor-pointer shadow-md"
       title="Copiar la tabla para pegarla en una hoja de cálculo"
     >
       {copied ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
-      {copied ? 'Copiada' : 'Copiar tabla'}
+      <span>{copied ? 'Copiada' : 'Copiar tabla'}</span>
     </button>
     {/* Los identificadores largos se parten para que una columna no se lleve todo el ancho. */}
-    <table className="w-full border-collapse text-[12px] leading-snug [overflow-wrap:anywhere]">
-      <thead className="bg-zinc-800/80 text-zinc-100">
+    <table className="w-full border-collapse text-xs leading-normal [overflow-wrap:anywhere]">
+      <thead className="bg-[#07090e] text-cyan-300 font-mono text-[11px] uppercase tracking-wider border-b border-[#202b3f]">
         <tr>
           {block.header.map((cell, cellIndex) => (
-            <th key={cellIndex} style={{ textAlign: block.align[cellIndex] ?? 'left' }} className="border-b border-zinc-700 px-2 py-1.5 font-semibold">
+            <th key={cellIndex} style={{ textAlign: block.align[cellIndex] ?? 'left' }} className="px-3 py-2 font-bold">
               {renderInline(cell)}
             </th>
           ))}
         </tr>
       </thead>
-      <tbody>
+      <tbody className="divide-y divide-[#202b3f]/60">
         {block.rows.map((row, rowIndex) => (
-          <tr key={rowIndex} className="border-t border-zinc-800 first:border-t-0 even:bg-zinc-800/30">
+          <tr key={rowIndex} className="even:bg-[#0a0e17]/40 hover:bg-[#162035] transition">
             {block.header.map((_, cellIndex) => (
-              <td key={cellIndex} style={{ textAlign: block.align[cellIndex] }} className="min-w-[7rem] px-2 py-1.5 align-top">
+              <td key={cellIndex} style={{ textAlign: block.align[cellIndex] }} className="min-w-[7rem] px-3 py-2 align-top text-slate-200">
                 {renderInline(row[cellIndex] ?? '')}
               </td>
             ))}
@@ -1036,13 +1075,13 @@ function isItemFileLink(text: string): boolean {
 }
 
 export const Markdown = memo<{ text: string; withCodeActions?: boolean }>(({ text, withCodeActions = false }) => (
-  <div className="space-y-1.5 break-words">
+  <div className="space-y-2 break-words text-slate-200">
     {parseMarkdownBlocks(text).map((block, index) => {
       switch (block.kind) {
         case 'code':
           return <CodeBlock key={index} language={block.language} code={block.code} withActions={withCodeActions} />;
         case 'heading':
-          return <div key={index} role="heading" aria-level={block.level} className={`pt-1 ${HEADING_CLASSES[block.level]}`}>{renderInline(block.text)}</div>;
+          return <div key={index} role="heading" aria-level={block.level} className={HEADING_CLASSES[block.level]}>{renderInline(block.text)}</div>;
         case 'list': {
           const rawItems = block.itemDetails && block.itemDetails.length > 0
             ? block.itemDetails
@@ -1052,8 +1091,8 @@ export const Markdown = memo<{ text: string; withCodeActions?: boolean }>(({ tex
 
           if (isFileList) {
             return (
-              <div key={index} className="my-2 p-1.5 rounded-lg bg-zinc-900/70 border border-zinc-800 shadow-xs">
-                <div className="flex items-center gap-1.5 overflow-x-auto py-1 px-1 scrollbar-thin">
+              <div key={index} className="my-2 p-2 rounded-xl bg-[#0a0e17] border border-[#202b3f] shadow-xs">
+                <div className="flex items-center gap-2 overflow-x-auto py-1 px-1 scrollbar-thin">
                   {rawItems.map((item, itemIndex) => (
                     <div key={itemIndex} className="shrink-0">
                       {renderInline(item.text)}
@@ -1075,7 +1114,7 @@ export const Markdown = memo<{ text: string; withCodeActions?: boolean }>(({ tex
             );
           }
           return (
-            <div key={index} className="my-1.5 space-y-1.5 text-[13px]">
+            <div key={index} className="my-1.5 space-y-1 text-xs">
               {block.itemDetails.map((item, itemIndex) => {
                 const indentClass = item.level === 0 ? '' : item.level === 1 ? 'pl-4' : 'pl-8';
                 const bulletChar = item.level > 1 ? '–' : '•';
@@ -1085,10 +1124,10 @@ export const Markdown = memo<{ text: string; withCodeActions?: boolean }>(({ tex
                 const itemText = task ? item.text.slice(task[0].length) : item.text;
                 return (
                   <div key={itemIndex} className={`flex items-start gap-2.5 ${indentClass}`}>
-                    <span className="shrink-0 select-none text-zinc-400 font-mono text-[11px] leading-6 min-w-[1.25rem] text-right font-medium">
+                    <span className="shrink-0 select-none text-slate-400 font-mono text-[11px] leading-5 min-w-[1.25rem] text-right font-medium">
                       {task ? (taskDone ? '☑' : '☐') : item.ordered ? `${item.num ?? itemIndex + 1}.` : bulletChar}
                     </span>
-                    <div className={`flex-1 leading-6 ${taskDone ? 'text-zinc-500 line-through' : ''}`}>
+                    <div className={`flex-1 leading-5 ${taskDone ? 'text-slate-500 line-through' : ''}`}>
                       {renderInline(itemText)}
                     </div>
                   </div>
@@ -1100,11 +1139,15 @@ export const Markdown = memo<{ text: string; withCodeActions?: boolean }>(({ tex
         case 'table':
           return <MarkdownTable key={index} block={block} />;
         case 'quote':
-          return <blockquote key={index} className="whitespace-pre-wrap border-l-2 border-zinc-600 pl-2.5 text-zinc-300">{renderInline(block.text)}</blockquote>;
+          return (
+            <blockquote key={index} className="whitespace-pre-wrap border-l-2 border-cyan-500 pl-3.5 py-1.5 my-2 bg-[#0a0e17]/70 rounded-r-xl text-slate-200 text-xs italic shadow-xs">
+              {renderInline(block.text)}
+            </blockquote>
+          );
         case 'rule':
-          return <hr key={index} className="my-2 border-zinc-700" />;
+          return <hr key={index} className="my-3 border-[#202b3f]" />;
         case 'paragraph':
-          return <p key={index} className="whitespace-pre-wrap">{renderInline(block.text)}</p>;
+          return <p key={index} className="whitespace-pre-wrap leading-relaxed">{renderInline(block.text)}</p>;
       }
     })}
   </div>

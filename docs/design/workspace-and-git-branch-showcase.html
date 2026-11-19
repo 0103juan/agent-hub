@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentHub // Workspace & Git Branch Lifecycle Showcase</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-void: #07090e;
+      --bg-carbon: #0a0e17;
+      --bg-surface: #0c1220;
+      --bg-card: #0e131f;
+      --border-subtle: #202b3f;
+      --border-strong: #202b3f;
+      --cyan-primary: #06b6d4;
+      --cyan-glow: rgba(6, 182, 212, 0.45);
+      --emerald-accent: #10b981;
+      --amber-accent: #f59e0b;
+      --rose-accent: #f43f5e;
+      --text-main: #f8fafc;
+      --text-muted: #cbd5e1;
+      --text-dim: #94a3b8;
+      --text-faint: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-void);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .font-mono {
+      font-family: 'Fira Code', monospace;
+    }
+
+    .grid-bg {
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.08), transparent 60%),
+        linear-gradient(to right, rgba(22, 32, 53, 0.35) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(22, 32, 53, 0.35) 1px, transparent 1px);
+      background-size: 100% 100%, 28px 28px, 28px 28px;
+    }
+
+    @keyframes modalPop {
+      0% {
+        opacity: 0;
+        transform: scale(0.96) translateY(6px);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .animate-modal-pop {
+      animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 10.5px;
+      font-family: 'Fira Code', monospace;
+      font-weight: 600;
+      border: 1px solid;
+    }
+
+    .badge-cyan {
+      background: rgba(6, 182, 212, 0.12);
+      color: #67e8f9;
+      border-color: rgba(6, 182, 212, 0.35);
+    }
+
+    .badge-emerald {
+      background: rgba(16, 185, 129, 0.12);
+      color: #6ee7b7;
+      border-color: rgba(16, 185, 129, 0.35);
+    }
+
+    .badge-amber {
+      background: rgba(245, 158, 11, 0.12);
+      color: #fcd34d;
+      border-color: rgba(245, 158, 11, 0.35);
+    }
+
+    .badge-rose {
+      background: rgba(244, 63, 94, 0.12);
+      color: #fda4af;
+      border-color: rgba(244, 63, 94, 0.35);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+
+    .btn-secondary {
+      background: #0c1220;
+      color: var(--text-muted);
+      border-color: var(--border-subtle);
+    }
+    .btn-secondary:hover {
+      background: #162035;
+      color: #fff;
+      border-color: var(--cyan-primary);
+    }
+
+    /* Popover Container */
+    .hud-popover {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      z-index: 100;
+      background: var(--bg-carbon);
+      border: 1px solid var(--border-strong);
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: 0 20px 40px -10px rgba(0,0,0,0.85);
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-subtle);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--cyan-primary);
+    }
+  </style>
+</head>
+<body class="grid-bg">
+  <div style="max-width: 1280px; margin: 0 auto; padding: 24px 20px;">
+
+    <!-- Top Master Bar -->
+    <header style="background: var(--bg-carbon); border: 1px solid var(--border-strong); border-radius: 14px; padding: 16px 20px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(16, 185, 129, 0.12); border: 1.5px solid var(--emerald-accent); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 16px rgba(16,185,129,0.35);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--emerald-accent)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="6" y1="3" x2="6" y2="15"></line>
+            <circle cx="18" cy="6" r="3"></circle>
+            <circle cx="6" cy="18" r="3"></circle>
+            <path d="M18 9a9 9 0 0 1-9 9"></path>
+          </svg>
+        </div>
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <h1 style="font-size: 16px; font-weight: 800;">AgentHub // Workspace &amp; Git Branch Controls</h1>
+            <span class="badge badge-emerald">60fps Kinetics</span>
+            <span class="badge badge-cyan">Safe CWD</span>
+          </div>
+          <p style="color: var(--text-dim); font-size: 11.5px;">
+            Selector de proyectos con favoritos, explorador breadcrumb de subcarpetas, sensor de ramas y protección contra System32.
+          </p>
+        </div>
+      </div>
+
+      <!-- Live Interactive Controls in Header -->
+      <div style="display: flex; align-items: center; gap: 10px; position: relative;">
+        
+        <!-- 1. WorkspacePicker Interactive Control -->
+        <div style="position: relative;">
+          <button id="btnWorkspace" class="btn btn-secondary" onclick="toggleWorkspacePopover()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--cyan-primary)" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            <span id="currentWorkspaceLabel" class="font-mono font-semibold" style="color: #fff;">agent-hub</span>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+
+          <!-- Workspace Popover -->
+          <div id="popoverWorkspace" class="hud-popover animate-modal-pop" style="display: none; width: 360px;">
+            <div style="padding-bottom: 8px; border-bottom: 1px solid var(--border-subtle); margin-bottom: 10px;">
+              <span style="font-size: 10px; text-transform: uppercase; font-family: 'Fira Code', monospace; color: var(--text-dim); font-weight: 700;">Espacio de Trabajo Activo</span>
+              <div id="activePathText" class="font-mono" style="font-size: 11px; color: var(--cyan-primary); background: #07090e; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border-strong); margin-top: 4px; word-break: break-all;">
+                C:/Users/juan0/Documents/GitHub/portafolio/agent-hub
+              </div>
+            </div>
+
+            <!-- Quick Action Buttons -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 12px;">
+              <button class="btn btn-secondary" style="font-size: 10.5px; justify-content: center;" onclick="alert('Abriendo explorador de archivos local...')">Explorador</button>
+              <button class="btn btn-secondary" style="font-size: 10.5px; justify-content: center; color: var(--emerald-accent);" onclick="alert('Abriendo en VS Code...')">VS Code</button>
+              <button class="btn btn-secondary" style="font-size: 10.5px; justify-content: center;" onclick="copyActivePath()">Copiar</button>
+            </div>
+
+            <!-- Favorites List -->
+            <div style="margin-bottom: 12px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; font-size: 10px; color: var(--amber-accent); font-family: 'Fira Code', monospace; font-weight: 700; margin-bottom: 6px;">
+                <span>★ CARPETAS FAVORITAS</span>
+              </div>
+              <div id="favoritesContainer" style="display: flex; flex-direction: column; gap: 4px; max-height: 100px; overflow-y: auto;">
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; border-radius: 6px; background: #0c1220; font-size: 11px; cursor: pointer;" onclick="switchWorkspace('portafolio', 'C:/Users/juan0/Documents/GitHub/portafolio')">
+                  <span>portafolio</span>
+                  <span style="color: var(--amber-accent);">★</span>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; border-radius: 6px; background: #0c1220; font-size: 11px; cursor: pointer;" onclick="switchWorkspace('agent-hub-backend', 'C:/Users/juan0/Documents/GitHub/agent-hub-backend')">
+                  <span>agent-hub-backend</span>
+                  <span style="color: var(--amber-accent);">★</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recents List -->
+            <div>
+              <span style="font-size: 10px; text-transform: uppercase; font-family: 'Fira Code', monospace; color: var(--text-dim); font-weight: 700;">PROYECTOS RECIENTES</span>
+              <div style="margin-top: 6px; display: flex; flex-direction: column; gap: 4px;">
+                <div style="padding: 6px 8px; border-radius: 6px; background: #162035; border: 1px solid rgba(6, 182, 212, 0.4); display: flex; justify-content: space-between; align-items: center; font-size: 11px;">
+                  <div>
+                    <div style="font-weight: 700; color: #fff;">agent-hub (Actual)</div>
+                    <div class="font-mono" style="font-size: 9.5px; color: var(--text-faint);">C:/.../portafolio/agent-hub</div>
+                  </div>
+                  <span style="color: var(--cyan-primary);">✓</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. GitBranchBadge Interactive Control -->
+        <div style="position: relative;">
+          <button id="btnBranch" class="btn btn-secondary font-mono" onclick="toggleBranchPopover()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--emerald-accent)" stroke-width="2.2"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>
+            <span id="currentBranchLabel" style="color: #fff;">main</span>
+            <span class="badge badge-amber" style="padding: 1px 5px; font-size: 9.5px;" id="dirtyBadge">3 dirty</span>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+
+          <!-- Branch Popover -->
+          <div id="popoverBranch" class="hud-popover animate-modal-pop" style="display: none; width: 340px;">
+            <!-- Active Branch Header -->
+            <div style="background: #07090e; border: 1px solid var(--border-subtle); border-radius: 8px; padding: 10px; margin-bottom: 10px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 10px; text-transform: uppercase; font-family: 'Fira Code', monospace; color: var(--text-dim); font-weight: 700;">Rama Activa</span>
+                <span class="badge badge-emerald font-mono" id="activeBranchPill">✓ main</span>
+              </div>
+              <div style="font-size: 11px; color: var(--amber-accent); margin-top: 6px; display: flex; align-items: center; gap: 6px;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--amber-accent);"></span>
+                <span>3 archivos modificados sin commitear</span>
+              </div>
+            </div>
+
+            <!-- Search input -->
+            <div style="margin-bottom: 10px;">
+              <input type="text" id="branchSearchInput" placeholder="Filtrar ramas..." oninput="filterBranches(this.value)" 
+                     style="width: 100%; background: #07090e; border: 1px solid var(--border-strong); border-radius: 6px; padding: 6px 10px; font-size: 11.5px; color: #fff; outline: none;">
+            </div>
+
+            <!-- Branch list -->
+            <div style="margin-bottom: 12px;">
+              <span style="font-size: 10px; text-transform: uppercase; font-family: 'Fira Code', monospace; color: var(--text-dim); font-weight: 700;">Ramas Disponibles</span>
+              <div id="branchesList" style="display: flex; flex-direction: column; gap: 4px; margin-top: 6px; max-height: 140px; overflow-y: auto;">
+                <div class="branch-item" style="padding: 6px 8px; border-radius: 6px; background: rgba(16, 185, 129, 0.12); border: 1px solid var(--emerald-accent); display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-family: 'Fira Code', monospace; cursor: pointer;">
+                  <span style="color: #6ee7b7; font-weight: 700;">✓ main</span>
+                  <span style="font-size: 10px; color: var(--emerald-accent);">Actual</span>
+                </div>
+                <div class="branch-item" style="padding: 6px 8px; border-radius: 6px; background: #0c1220; display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-family: 'Fira Code', monospace; cursor: pointer;" onclick="switchBranch('feature/tactical-hud')">
+                  <span style="color: var(--text-muted);">feature/tactical-hud</span>
+                  <span style="font-size: 10px; color: var(--cyan-primary);">Cambiar →</span>
+                </div>
+                <div class="branch-item" style="padding: 6px 8px; border-radius: 6px; background: #0c1220; display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-family: 'Fira Code', monospace; cursor: pointer;" onclick="switchBranch('fix/safe-cwd-sandbox')">
+                  <span style="color: var(--text-muted);">fix/safe-cwd-sandbox</span>
+                  <span style="font-size: 10px; color: var(--cyan-primary);">Cambiar →</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Create Branch Form -->
+            <div style="border-top: 1px solid var(--border-subtle); padding-top: 10px;">
+              <div style="display: flex; gap: 6px;">
+                <input type="text" id="newBranchName" placeholder="nueva-rama" class="font-mono"
+                       style="flex: 1; background: #07090e; border: 1px solid var(--border-strong); border-radius: 6px; padding: 5px 8px; font-size: 11px; color: #fff; outline: none;">
+                <button class="btn" style="background: var(--cyan-primary); color: #07090e; font-weight: 700; font-size: 11px; padding: 5px 10px;" onclick="createNewBranch()">Crear</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- Interactive Safe CWD Security Sandbox Test Bed -->
+    <main style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 20px;">
+      
+      <!-- Card 1: Safe CWD Sandbox Simulator -->
+      <div style="background: var(--bg-carbon); border: 1px solid var(--border-strong); border-radius: 14px; padding: 20px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+          <h2 style="font-size: 13px; font-weight: 800; color: var(--cyan-primary); font-family: 'Fira Code', monospace;">
+            SANDBOX DE SEGURIDAD // resolveSafeCwd
+          </h2>
+          <span class="badge badge-cyan">PROTECCIÓN ACTIVA</span>
+        </div>
+        <p style="font-size: 12px; color: var(--text-dim); margin-bottom: 14px;">
+          Comprueba cómo el backend de AgentHub valida las rutas de trabajo para evitar ejecuciones accidentales en carpetas del sistema operativo Windows:
+        </p>
+
+        <!-- Test Buttons -->
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+          <button class="btn btn-secondary font-mono" style="justify-content: space-between; text-align: left;" onclick="testCwd('C:/Windows/System32')">
+            <span>Probar: C:/Windows/System32</span>
+            <span class="badge badge-rose">Sistema Crítico</span>
+          </button>
+          <button class="btn btn-secondary font-mono" style="justify-content: space-between; text-align: left;" onclick="testCwd('C:/Users/juan0/AppData/Local/Programs/AgentHub')">
+            <span>Probar: AppData/.../AgentHub</span>
+            <span class="badge badge-amber">App Binaries</span>
+          </button>
+          <button class="btn btn-secondary font-mono" style="justify-content: space-between; text-align: left;" onclick="testCwd('C:/Users/juan0/Documents/GitHub/portafolio/agent-hub')">
+            <span>Probar: Documents/GitHub/agent-hub</span>
+            <span class="badge badge-emerald">Repositorio Usuario</span>
+          </button>
+        </div>
+
+        <!-- Result Box -->
+        <div id="sandboxResult" style="background: #07090e; border: 1px solid var(--border-strong); border-radius: 8px; padding: 12px; font-family: 'Fira Code', monospace; font-size: 11.5px; min-height: 90px;">
+          <span style="color: var(--text-faint);">// Selecciona una ruta arriba para verificar la resolución de aislamiento...</span>
+        </div>
+      </div>
+
+      <!-- Card 2: Git Worktree & Multi-Branch Engine Details -->
+      <div style="background: var(--bg-carbon); border: 1px solid var(--border-strong); border-radius: 14px; padding: 20px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+          <h2 style="font-size: 13px; font-weight: 800; color: var(--emerald-accent); font-family: 'Fira Code', monospace;">
+            MOTOR DE RAMAS &amp; WORKTREES AISLADOS
+          </h2>
+          <span class="badge badge-emerald">GIT ISOLATED</span>
+        </div>
+        <p style="font-size: 12px; color: var(--text-dim); margin-bottom: 14px;">
+          Arquitectura de branching táctico para escuadrones de agentes autónomos:
+        </p>
+
+        <ul style="padding-left: 18px; space-y: 8px; font-size: 12px; color: var(--text-muted); line-height: 1.6;">
+          <li><strong>Consulta local directa:</strong> Detección instantánea de cambios sin realizar llamadas <code class="font-mono">git fetch</code> de red innecesarias.</li>
+          <li><strong>Worktree Independiente:</strong> Cuando se activa la opción de copia aislada, cada agente opera en una carpeta temporal con su propia rama.</li>
+          <li><strong>Inspección HEAD ↔ Actual:</strong> El visor de diffs modal permite revisar exactamente los cambios generados antes de integrarlos a <code class="font-mono">main</code>.</li>
+        </ul>
+
+        <div style="margin-top: 16px; padding: 12px; border-radius: 8px; background: #07090e; border: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between;">
+          <span class="font-mono" style="font-size: 11px; color: var(--text-dim);">Tests de Flujos: 14/14 PASS</span>
+          <span class="badge badge-emerald">58ms Suite</span>
+        </div>
+      </div>
+
+    </main>
+
+  </div>
+
+  <script>
+    // Popover Toggles
+    function toggleWorkspacePopover() {
+      const p = document.getElementById('popoverWorkspace');
+      const isHidden = p.style.display === 'none';
+      document.getElementById('popoverBranch').style.display = 'none';
+      p.style.display = isHidden ? 'block' : 'none';
+    }
+
+    function toggleBranchPopover() {
+      const p = document.getElementById('popoverBranch');
+      const isHidden = p.style.display === 'none';
+      document.getElementById('popoverWorkspace').style.display = 'none';
+      p.style.display = isHidden ? 'block' : 'none';
+    }
+
+    // Workspace Switching Simulation
+    function switchWorkspace(name, fullPath) {
+      document.getElementById('currentWorkspaceLabel').innerText = name;
+      document.getElementById('activePathText').innerText = fullPath;
+      document.getElementById('popoverWorkspace').style.display = 'none';
+    }
+
+    function copyActivePath() {
+      const path = document.getElementById('activePathText').innerText;
+      navigator.clipboard.writeText(path).then(() => {
+        alert('Ruta copiada al portapapeles: ' + path);
+      });
+    }
+
+    // Branch Switching Simulation
+    function switchBranch(branchName) {
+      document.getElementById('currentBranchLabel').innerText = branchName;
+      document.getElementById('activeBranchPill').innerText = '✓ ' + branchName;
+      document.getElementById('popoverBranch').style.display = 'none';
+    }
+
+    function createNewBranch() {
+      const input = document.getElementById('newBranchName');
+      const name = input.value.trim().replace(/\s+/g, '-');
+      if (!name) return;
+      switchBranch(name);
+      input.value = '';
+    }
+
+    function filterBranches(term) {
+      const items = document.querySelectorAll('.branch-item');
+      items.forEach(item => {
+        const text = item.innerText.toLowerCase();
+        item.style.display = text.includes(term.toLowerCase()) ? 'flex' : 'none';
+      });
+    }
+
+    // Close on Click Outside or Escape
+    window.addEventListener('click', (e) => {
+      if (!e.target.closest('#btnWorkspace') && !e.target.closest('#popoverWorkspace')) {
+        document.getElementById('popoverWorkspace').style.display = 'none';
+      }
+      if (!e.target.closest('#btnBranch') && !e.target.closest('#popoverBranch')) {
+        document.getElementById('popoverBranch').style.display = 'none';
+      }
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.getElementById('popoverWorkspace').style.display = 'none';
+        document.getElementById('popoverBranch').style.display = 'none';
+      }
+    });
+
+    // Sandbox Test Function
+    function testCwd(path) {
+      const isSystem32 = /system32/i.test(path);
+      const isAgentHubApp = /programs[\\/]agenthub/i.test(path);
+      const resultBox = document.getElementById('sandboxResult');
+
+      if (isSystem32) {
+        resultBox.innerHTML = `
+          <div style="color: #fda4af; font-weight: 700;">[ACCESO DENEGADO // SYSTEM32 DETECTADO]</div>
+          <div style="color: #f43f5e; margin-top: 4px;">Ruta solicitada: ${path}</div>
+          <div style="color: #6ee7b7; margin-top: 6px;">→ Fallback Seguro a: C:/Users/juan0/Documents/GitHub/portafolio/agent-hub</div>
+          <div style="color: #94a3b8; font-size: 10.5px; margin-top: 4px;">Resultado: isSystemOrAppDir() = true (Protección activa)</div>
+        `;
+      } else if (isAgentHubApp) {
+        resultBox.innerHTML = `
+          <div style="color: #fcd34d; font-weight: 700;">[ACCESO DENEGADO // CARPETA DE INSTALACIÓN]</div>
+          <div style="color: #f59e0b; margin-top: 4px;">Ruta solicitada: ${path}</div>
+          <div style="color: #6ee7b7; margin-top: 6px;">→ Fallback Seguro a: Carpeta de proyecto legítimo del usuario</div>
+          <div style="color: #94a3b8; font-size: 10.5px; margin-top: 4px;">Resultado: isSystemOrAppDir() = true (Protección activa)</div>
+        `;
+      } else {
+        resultBox.innerHTML = `
+          <div style="color: #6ee7b7; font-weight: 700;">[ACCESO PERMITIDO // ESPACIO DE TRABAJO SEGURO]</div>
+          <div style="color: var(--cyan-primary); margin-top: 4px;">Ruta montada: ${path}</div>
+          <div style="color: #94a3b8; margin-top: 6px;">Permisos: LECTURA + ESCRITURA + AISLAMIENTO GIT</div>
+          <div style="color: #6ee7b7; font-size: 10.5px; margin-top: 4px;">Resultado: isSystemOrAppDir() = false (Aislamiento verificado)</div>
+        `;
+      }
+    }
+  </script>
+</body>
+</html>

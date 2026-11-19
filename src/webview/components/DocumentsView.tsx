@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertTriangle, Bold, Check, ChevronDown, ChevronRight, ChevronsDownUp, ChevronsUpDown, Code, Code2, Columns2, Copy, Eye, FilePlus,
-  FileText, Folder, FolderOpen, Heading2, Italic, Link2, List, ListChecks, ListTree, Minus, Pencil, Plus, Quote, RefreshCw, Save,
-  Search, Table, Undo2
+  FileText, Folder, FolderOpen, Heading2, Italic, Link2, List, ListChecks, ListTree, Minus, Monitor, Pencil, Plus, Quote, RefreshCw, Save,
+  Search, Smartphone, Table, Tablet, Undo2
 } from 'lucide-react';
 import { postToHost, openInVsCode } from '../vscode-api';
 import { relativeTime } from '../utils/format';
@@ -112,6 +112,8 @@ export const DocumentsView: React.FC<Props> = ({ openRequest, active }) => {
   const [creating, setCreating] = useState<string | null>(null);
   const [confirmRevert, setConfirmRevert] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [viewportMode, setViewportMode] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
+  const [previewKey, setPreviewKey] = useState(0);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const requested = useRef<string>();
   /** Carpeta sobre la que trabaja el editor; sin ella, la global. La fija quien pide abrir un archivo. */
@@ -400,13 +402,13 @@ export const DocumentsView: React.FC<Props> = ({ openRequest, active }) => {
           onClick={() => open(doc.path)}
           aria-current={selected ? 'true' : undefined}
           style={{ paddingLeft: `${depth * 12 + 6}px` }}
-          className={`hub-slide w-full flex items-center gap-1.5 py-1 pr-2 rounded text-left text-[11px] transition ${selected ? 'bg-indigo-600/20 border border-indigo-500/40' : 'border border-transparent hover:bg-zinc-800'}`}
+          className={`hub-slide w-full flex items-center gap-1.5 py-1.5 pr-2 rounded-lg text-left text-[11px] transition ${selected ? 'bg-cyan-500/20 border border-cyan-400/50 text-cyan-100 shadow-sm font-semibold' : 'border border-transparent hover:bg-[#0c1220] hover:border-[#202b3f]/70 text-slate-300'}`}
           title={`${doc.path} · ${formatSize(doc.size)}`}
         >
-          <FileText className={`w-3 h-3 shrink-0 ${isMarkdown(doc.path) ? 'text-indigo-400' : isHtml(doc.path) ? 'text-amber-400' : 'text-zinc-500'}`} />
-          <span className="truncate font-medium text-zinc-100">{doc.name}</span>
-          {doc.path.startsWith('.agent-hub/') && <span className="shrink-0 px-1 rounded bg-indigo-500/15 text-indigo-300 text-[9px] uppercase">hub</span>}
-          <span className="ml-auto shrink-0 font-mono text-[10px] text-zinc-500">{relativeTime(doc.mtime)}</span>
+          <FileText className={`w-3.5 h-3.5 shrink-0 ${isMarkdown(doc.path) ? 'text-cyan-400' : isHtml(doc.path) ? 'text-amber-400' : 'text-slate-500'}`} />
+          <span className="truncate font-medium text-slate-200">{doc.name}</span>
+          {doc.path.startsWith('.agent-hub/') && <span className="shrink-0 px-1.5 py-0.2 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-[9px] font-mono uppercase">hub</span>}
+          <span className="ml-auto shrink-0 font-mono text-[10px] text-slate-500">{relativeTime(doc.mtime)}</span>
         </button>
       </li>
     );
@@ -425,13 +427,13 @@ export const DocumentsView: React.FC<Props> = ({ openRequest, active }) => {
             aria-expanded={open}
             onClick={() => toggleFolder(folder, depth)}
             style={{ paddingLeft: `${depth * 12 + 2}px` }}
-            className="hub-slide w-full flex items-center gap-1 py-1 pr-2 rounded text-left text-[11px] text-zinc-300 hover:bg-zinc-800"
+            className="hub-slide w-full flex items-center gap-1.5 py-1.5 pr-2 rounded-lg text-left text-[11px] text-slate-300 hover:bg-[#0c1220] hover:border-[#202b3f]/70 border border-transparent transition"
             title={folder.path}
           >
-            {open ? <ChevronDown className="w-3 h-3 shrink-0 text-zinc-500" /> : <ChevronRight className="w-3 h-3 shrink-0 text-zinc-500" />}
-            {open ? <FolderOpen className="w-3 h-3 shrink-0 text-amber-400" /> : <Folder className="w-3 h-3 shrink-0 text-amber-400" />}
+            {open ? <ChevronDown className="w-3 h-3 shrink-0 text-slate-400" /> : <ChevronRight className="w-3 h-3 shrink-0 text-slate-400" />}
+            {open ? <FolderOpen className="w-3.5 h-3.5 shrink-0 text-amber-400" /> : <Folder className="w-3.5 h-3.5 shrink-0 text-amber-400" />}
             <span className="truncate font-medium">{folder.name}</span>
-            <span className="ml-auto shrink-0 font-mono text-[10px] text-zinc-500">{folder.count}</span>
+            <span className="ml-auto shrink-0 font-mono text-[10px] text-slate-500">{folder.count}</span>
           </button>
         </li>
       );
@@ -450,7 +452,7 @@ export const DocumentsView: React.FC<Props> = ({ openRequest, active }) => {
       aria-pressed={effectiveMode === id}
       disabled={!previewable && id !== 'edit'}
       onClick={() => setMode(id)}
-      className={`flex items-center gap-1 px-2 py-1 rounded text-[11px] transition disabled:opacity-30 ${effectiveMode === id ? 'bg-indigo-600 text-white' : 'text-zinc-400 hover:text-zinc-200'}`}
+      className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium transition disabled:opacity-30 ${effectiveMode === id ? 'bg-gradient-to-r from-cyan-600 to-cyan-500 text-slate-950 font-bold shadow-sm' : 'text-slate-400 hover:text-slate-200 hover:bg-[#162035]'}`}
       title={label}
     >
       {icon}
@@ -458,7 +460,7 @@ export const DocumentsView: React.FC<Props> = ({ openRequest, active }) => {
     </button>
   );
   const tool = (label: string, icon: React.ReactNode, action: () => void) => (
-    <button key={label} type="button" onClick={action} className="p-1 rounded text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition" title={label} aria-label={label}>
+    <button key={label} type="button" onClick={action} className="p-1 rounded text-slate-400 hover:text-slate-100 hover:bg-[#162035] transition" title={label} aria-label={label}>
       {icon}
     </button>
   );
@@ -466,28 +468,28 @@ export const DocumentsView: React.FC<Props> = ({ openRequest, active }) => {
   return (
     <div className="select-text flex-1 min-w-0 min-h-[480px] flex flex-col min-[900px]:flex-row gap-2.5 h-full">
       {/* Lista de documentos */}
-      <aside className="min-[900px]:w-64 shrink-0 flex flex-col gap-1.5 max-h-80 min-[900px]:max-h-none rounded-lg bg-zinc-900 border border-zinc-800 p-2 min-h-0">
-        <div className="flex flex-wrap items-center gap-x-1 gap-y-0.5">
-          <FileText className="w-3.5 h-3.5 text-indigo-400" />
-          <span className="text-xs font-bold text-zinc-100">Documentos</span>
-          <span className="font-mono text-[11px] text-zinc-500">({visibleFiles.length})</span>
-          <button type="button" onClick={() => setView(view === 'tree' ? 'list' : 'tree')} className="ml-auto p-1 rounded text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800" title={view === 'tree' ? 'Ver como lista (por fecha)' : 'Ver como árbol de carpetas'} aria-label="Cambiar entre árbol y lista">
+      <aside className="min-[900px]:w-64 shrink-0 flex flex-col gap-2 max-h-80 min-[900px]:max-h-none rounded-xl bg-[#0a0e17]/95 border border-[#202b3f] p-2.5 min-h-0 shadow-lg shadow-black/20">
+        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 pb-1 border-b border-[#202b3f]/70">
+          <FileText className="w-3.5 h-3.5 text-cyan-400" />
+          <span className="text-xs font-bold text-slate-100">Documentos</span>
+          <span className="font-mono text-[10px] px-1.5 py-0.2 rounded-full bg-[#0c1220] border border-[#202b3f] text-slate-400">({visibleFiles.length})</span>
+          <button type="button" onClick={() => setView(view === 'tree' ? 'list' : 'tree')} className="ml-auto p-1 rounded text-slate-400 hover:text-slate-100 hover:bg-[#162035] transition" title={view === 'tree' ? 'Ver como lista (por fecha)' : 'Ver como árbol de carpetas'} aria-label="Cambiar entre árbol y lista">
             {view === 'tree' ? <List className="w-3 h-3" /> : <Folder className="w-3 h-3" />}
           </button>
           {view === 'tree' && folderPaths.length > 0 && (
             <>
-              <button type="button" onClick={() => setAllFolders(true)} className="p-1 rounded text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800" title="Abrir todas las carpetas" aria-label="Abrir todas las carpetas">
+              <button type="button" onClick={() => setAllFolders(true)} className="p-1 rounded text-slate-400 hover:text-slate-100 hover:bg-[#162035] transition" title="Abrir todas las carpetas" aria-label="Abrir todas las carpetas">
                 <ChevronsUpDown className="w-3 h-3" />
               </button>
-              <button type="button" onClick={() => setAllFolders(false)} className="p-1 rounded text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800" title="Cerrar todas las carpetas" aria-label="Cerrar todas las carpetas">
+              <button type="button" onClick={() => setAllFolders(false)} className="p-1 rounded text-slate-400 hover:text-slate-100 hover:bg-[#162035] transition" title="Cerrar todas las carpetas" aria-label="Cerrar todas las carpetas">
                 <ChevronsDownUp className="w-3 h-3" />
               </button>
             </>
           )}
-          <button type="button" onClick={refreshList} className="p-1 rounded text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800" title="Actualizar la lista" aria-label="Actualizar la lista">
+          <button type="button" onClick={refreshList} className="p-1 rounded text-slate-400 hover:text-slate-100 hover:bg-[#162035] transition" title="Actualizar la lista" aria-label="Actualizar la lista">
             <RefreshCw className="w-3 h-3" />
           </button>
-          <button type="button" onClick={() => setCreating('')} className="p-1 rounded text-zinc-400 hover:text-emerald-300 hover:bg-zinc-800" title="Nuevo documento en .agent-hub" aria-label="Nuevo documento">
+          <button type="button" onClick={() => setCreating('')} className="p-1 rounded text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 border border-transparent hover:border-emerald-500/30 transition" title="Nuevo documento en .agent-hub" aria-label="Nuevo documento">
             <FilePlus className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -506,22 +508,22 @@ export const DocumentsView: React.FC<Props> = ({ openRequest, active }) => {
               onKeyDown={(event) => event.key === 'Escape' && setCreating(null)}
               placeholder="Título (se guarda en .agent-hub)"
               aria-label="Título del documento nuevo"
-              className="flex-1 min-w-0 bg-zinc-950 border border-indigo-500 rounded px-2 py-1 text-[11px] text-zinc-100 placeholder-zinc-500 focus:outline-none"
+              className="flex-1 min-w-0 bg-[#07090e] border border-cyan-500/80 rounded-lg px-2 py-1 text-[11px] text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/40"
             />
-            <button type="submit" disabled={!slugify(creating)} className="p-1 rounded bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white" aria-label="Crear">
+            <button type="submit" disabled={!slugify(creating)} className="p-1 rounded bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 disabled:opacity-40 text-slate-950 font-bold transition cursor-pointer" aria-label="Crear">
               <Plus className="w-3 h-3" />
             </button>
           </form>
         )}
         <div className="relative">
-          <Search className="w-3 h-3 text-zinc-500 absolute left-2 top-1/2 -translate-y-1/2" />
+          <Search className="w-3 h-3 text-cyan-400 absolute left-2 top-1/2 -translate-y-1/2" />
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             onKeyDown={(event) => event.key === 'Escape' && setQuery('')}
             placeholder="Buscar documento…"
             aria-label="Buscar documento"
-            className="w-full bg-zinc-950 border border-zinc-800 rounded pl-6 pr-2 py-1 text-[11px] text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-indigo-500"
+            className="w-full bg-[#07090e] border border-[#202b3f] rounded-lg pl-6 pr-2 py-1 text-[11px] text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500/80 focus:ring-1 focus:ring-cyan-500/40 transition font-mono"
           />
         </div>
         <div className="flex flex-wrap gap-1 text-[11px]">
@@ -531,19 +533,19 @@ export const DocumentsView: React.FC<Props> = ({ openRequest, active }) => {
               type="button"
               aria-pressed={filter === id}
               onClick={() => setFilter(id)}
-              className={`px-2 py-0.5 rounded-full border transition ${filter === id ? 'bg-indigo-600/30 border-indigo-500/50 text-indigo-200' : 'border-zinc-800 text-zinc-400 hover:text-zinc-200'}`}
+              className={`px-2 py-0.5 rounded-full border transition ${filter === id ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-300 font-semibold shadow-sm' : 'border-[#202b3f] bg-[#07090e]/50 text-slate-400 hover:text-slate-200 hover:border-[#202b3f]'}`}
               title={id === 'generated' ? 'Lo que AgentHub guarda en .agent-hub: borrador, memoria y tus notas' : undefined}
             >
               {label}
             </button>
           ))}
         </div>
-        <label className="flex items-center gap-1.5 text-[11px] text-zinc-400 cursor-pointer" title="Además de documentos (Markdown, JSON, YAML, texto…), lista código y scripts de todas las subcarpetas">
+        <label className="flex items-center gap-1.5 text-[11px] text-slate-400 hover:text-slate-300 cursor-pointer" title="Además de documentos (Markdown, JSON, YAML, texto…), lista código y scripts de todas las subcarpetas">
           <input type="checkbox" checked={showCode} onChange={toggleCode} />
           Incluir código y scripts
         </label>
         <ul className="flex-1 overflow-y-auto space-y-0.5 min-h-0" aria-label="Documentos del proyecto">
-          {visibleFiles.length === 0 && <li className="p-2 text-[11px] text-zinc-500">{files.length === 0 ? 'No hay documentos de texto en este proyecto.' : 'Nada coincide.'}</li>}
+          {visibleFiles.length === 0 && <li className="p-2 text-[11px] text-slate-500">{files.length === 0 ? 'No hay documentos de texto en este proyecto.' : 'Nada coincide.'}</li>}
           {view === 'tree'
             ? renderNode(tree, 0)
             : visibleFiles.slice(0, MAX_LIST_ROWS).map((doc) => {
@@ -554,14 +556,14 @@ export const DocumentsView: React.FC<Props> = ({ openRequest, active }) => {
                       type="button"
                       onClick={() => open(doc.path)}
                       aria-current={selected ? 'true' : undefined}
-                      className={`w-full text-left px-2 py-1 rounded text-[11px] transition ${selected ? 'bg-indigo-600/20 border border-indigo-500/40' : 'border border-transparent hover:bg-zinc-800'}`}
+                      className={`w-full text-left px-2 py-1.5 rounded-lg text-[11px] transition ${selected ? 'bg-cyan-500/20 border border-cyan-400/50 text-cyan-100 shadow-sm font-semibold' : 'border border-transparent hover:bg-[#0c1220] hover:border-[#202b3f]/70 text-slate-300'}`}
                       title={doc.path}
                     >
-                      <span className="flex items-center gap-1">
-                        <span className="truncate font-medium text-zinc-100">{doc.name}</span>
-                        {doc.path.startsWith('.agent-hub/') && <span className="shrink-0 px-1 rounded bg-indigo-500/15 text-indigo-300 text-[9px] uppercase">hub</span>}
+                      <span className="flex items-center gap-1.5">
+                        <span className="truncate font-medium text-slate-200">{doc.name}</span>
+                        {doc.path.startsWith('.agent-hub/') && <span className="shrink-0 px-1.5 py-0.2 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-[9px] font-mono uppercase">hub</span>}
                       </span>
-                      <span className="flex items-center justify-between gap-1 font-mono text-[10px] text-zinc-500">
+                      <span className="flex items-center justify-between gap-1 font-mono text-[10px] text-slate-500 mt-0.5">
                         <span className="truncate">{doc.path}</span>
                         <span className="shrink-0">{formatSize(doc.size)} · {relativeTime(doc.mtime)}</span>
                       </span>
@@ -570,11 +572,11 @@ export const DocumentsView: React.FC<Props> = ({ openRequest, active }) => {
                 );
               })}
           {view === 'list' && visibleFiles.length > MAX_LIST_ROWS && (
-            <li className="p-2 text-[11px] text-zinc-500">Se muestran los {MAX_LIST_ROWS} más recientes de {visibleFiles.length}. Usa el buscador o el árbol para el resto.</li>
+            <li className="p-2 text-[11px] text-slate-500">Se muestran los {MAX_LIST_ROWS} más recientes de {visibleFiles.length}. Usa el buscador o el árbol para el resto.</li>
           )}
         </ul>
         {(truncated || skipped.length > 0) && (
-          <p className="text-[10px] text-zinc-500 leading-snug" role="note">
+          <p className="text-[10px] text-slate-500 leading-snug" role="note">
             {truncated && 'Hay más archivos de los que se listan; usa el buscador. '}
             {skipped.length > 0 && <span title="Dependencias y compilados: no son documentos del proyecto">Se omiten {skipped.join(', ')}.</span>}
           </p>
@@ -582,41 +584,73 @@ export const DocumentsView: React.FC<Props> = ({ openRequest, active }) => {
       </aside>
 
       {/* Editor */}
-      <section className="flex-1 min-w-0 min-h-0 flex flex-col rounded-lg bg-zinc-900 border border-zinc-800 overflow-hidden" aria-label="Editor de documentos">
+      <section className="flex-1 min-w-0 min-h-0 flex flex-col rounded-xl bg-[#0a0e17]/95 border border-[#202b3f] overflow-hidden shadow-lg shadow-black/20" aria-label="Editor de documentos">
         {!current ? (
-          <div className="flex-1 flex flex-col items-center justify-center gap-2 p-6 text-center text-zinc-400 text-xs">
-            <FileText className="w-8 h-8 text-zinc-600" />
-            <p>Elige un documento de la lista para verlo y editarlo.</p>
-            <p className="text-[11px] text-zinc-500">Los archivos de Markdown y HTML se muestran con vista previa en vivo. «Generados» reúne lo que AgentHub guarda en <span className="font-mono">.agent-hub</span>.</p>
+          <div className="flex-1 flex flex-col items-center justify-center gap-3 p-8 text-center text-slate-400 text-xs">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shadow-lg shadow-cyan-500/10">
+              <FileText className="w-6 h-6" />
+            </div>
+            <div className="max-w-md space-y-1">
+              <h3 className="text-sm font-bold text-slate-100">Explorador y Editor de Documentos</h3>
+              <p className="text-[11px] text-slate-400 leading-relaxed">
+                Selecciona un archivo de la izquierda para ver su contenido con resaltado, división en vivo y vista previa HTML o Markdown interactiva.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => open('.agent-hub/experience.md')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0c1220] hover:bg-[#162035] border border-[#202b3f] text-[11px] text-cyan-300 hover:text-cyan-200 transition"
+              >
+                <FileText className="w-3.5 h-3.5 text-cyan-400" />
+                <span>.agent-hub/experience.md</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => open('.agent-hub/scratchpad.md')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0c1220] hover:bg-[#162035] border border-[#202b3f] text-[11px] text-slate-300 hover:text-white transition"
+              >
+                <FileText className="w-3.5 h-3.5 text-slate-400" />
+                <span>.agent-hub/scratchpad.md</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setCreating('')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-950/40 hover:bg-cyan-900/60 border border-cyan-500/40 text-[11px] text-cyan-200 transition"
+              >
+                <Plus className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Nuevo documento</span>
+              </button>
+            </div>
           </div>
         ) : (
           <>
-            <div className="flex flex-wrap items-center gap-1 px-2 py-1.5 border-b border-zinc-800 bg-zinc-950/60">
-              <span className="font-mono text-[11px] text-zinc-300 truncate max-w-[40%]" title={absolute}>{current.file}</span>
+            <div className="flex flex-wrap items-center gap-1.5 px-3 py-2 border-b border-[#202b3f] bg-[#07090e]/90 backdrop-blur-sm">
+              <span className="font-mono text-[11px] text-slate-200 truncate max-w-[40%]" title={absolute}>{current.file}</span>
               {dirty ? (
-                <span className="px-1.5 rounded bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[10px]">Sin guardar</span>
+                <span className="px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[10px] font-mono">Sin guardar</span>
               ) : (
-                <span className="text-[10px] text-zinc-500">{status?.kind === 'info' ? status.text : 'Al día'}</span>
+                <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-mono">{status?.kind === 'info' ? status.text : 'Al día'}</span>
               )}
-              <span className="flex items-center ml-auto gap-0.5 bg-zinc-900 border border-zinc-800 rounded p-0.5">
+              <span className="flex items-center ml-auto gap-0.5 bg-[#0c1220] border border-[#202b3f] rounded-lg p-0.5">
                 {modeButton('edit', 'Editar', <Pencil className="w-3 h-3" />)}
                 {modeButton('split', 'Dividido', <Columns2 className="w-3 h-3" />)}
                 {modeButton('preview', 'Vista previa', <Eye className="w-3 h-3" />)}
               </span>
-              <button type="button" onClick={copy} className="p-1 rounded text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800" title="Copiar el contenido" aria-label="Copiar el contenido">
+              <button type="button" onClick={copy} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-[#162035] transition" title="Copiar el contenido" aria-label="Copiar el contenido">
                 {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
               </button>
-              <button type="button" onClick={() => openInVsCode(absolute)} className="p-1 rounded text-zinc-400 hover:text-blue-300 hover:bg-zinc-800" title="Abrir en VS Code" aria-label="Abrir en VS Code">
+              <button type="button" onClick={() => openInVsCode(absolute)} className="p-1.5 rounded-lg text-slate-400 hover:text-cyan-300 hover:bg-cyan-500/10 transition" title="Abrir en VS Code" aria-label="Abrir en VS Code">
                 <Code2 className="w-3.5 h-3.5" />
               </button>
               {confirmRevert ? (
                 <span className="flex items-center gap-1 text-[11px] text-red-300">
                   ¿Descartar?
                   <button type="button" onClick={() => { setDraft(saved); setConfirmRevert(false); }} className="px-1.5 rounded bg-red-700 hover:bg-red-600 text-white">Sí</button>
-                  <button type="button" onClick={() => setConfirmRevert(false)} className="text-zinc-400 hover:text-zinc-200">No</button>
+                  <button type="button" onClick={() => setConfirmRevert(false)} className="text-slate-400 hover:text-slate-200">No</button>
                 </span>
               ) : (
-                <button type="button" disabled={!dirty} onClick={() => setConfirmRevert(true)} className="p-1 rounded text-zinc-400 hover:text-red-300 hover:bg-zinc-800 disabled:opacity-30" title="Descartar los cambios sin guardar" aria-label="Descartar los cambios">
+                <button type="button" disabled={!dirty} onClick={() => setConfirmRevert(true)} className="p-1.5 rounded-lg text-slate-400 hover:text-red-300 hover:bg-[#162035] disabled:opacity-30 transition" title="Descartar los cambios sin guardar" aria-label="Descartar los cambios">
                   <Undo2 className="w-3.5 h-3.5" />
                 </button>
               )}
@@ -624,7 +658,7 @@ export const DocumentsView: React.FC<Props> = ({ openRequest, active }) => {
                 type="button"
                 disabled={!dirty}
                 onClick={() => save()}
-                className="flex items-center gap-1 px-2.5 py-1 rounded bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:hover:bg-emerald-600 text-white text-[11px] font-medium transition"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:hover:bg-emerald-600 text-white text-[11px] font-medium transition shadow-md shadow-emerald-950/30"
                 title="Guardar (Ctrl+S)"
               >
                 <Save className="w-3 h-3" />
@@ -633,7 +667,7 @@ export const DocumentsView: React.FC<Props> = ({ openRequest, active }) => {
             </div>
 
             {markdown && effectiveMode !== 'preview' && (
-              <div className="flex flex-wrap items-center gap-0.5 px-2 py-1 border-b border-zinc-800/80" role="toolbar" aria-label="Formato de Markdown">
+              <div className="flex flex-wrap items-center gap-0.5 px-3 py-1.5 border-b border-[#202b3f] bg-[#07090e]/40 text-slate-400" role="toolbar" aria-label="Formato de Markdown">
                 {tool('Negrita (Ctrl+B)', <Bold className="w-3.5 h-3.5" />, () => wrap('**'))}
                 {tool('Cursiva (Ctrl+I)', <Italic className="w-3.5 h-3.5" />, () => wrap('_'))}
                 {tool('Título', <Heading2 className="w-3.5 h-3.5" />, () => prefixLines('## '))}
@@ -647,10 +681,10 @@ export const DocumentsView: React.FC<Props> = ({ openRequest, active }) => {
                 {tool('Línea separadora', <Minus className="w-3.5 h-3.5" />, () => insert('\n---\n'))}
                 {outline.length > 0 && (
                   <details className="relative ml-auto">
-                    <summary className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] text-zinc-400 hover:text-zinc-100 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
-                      <ListTree className="w-3.5 h-3.5" /> Esquema ({outline.length})
+                    <summary className="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] text-slate-400 hover:text-slate-100 cursor-pointer list-none [&::-webkit-details-marker]:hidden hover:bg-[#162035] transition">
+                      <ListTree className="w-3.5 h-3.5 text-cyan-400" /> Esquema ({outline.length})
                     </summary>
-                    <ul className="absolute right-0 top-full mt-1 z-30 w-64 max-h-64 overflow-y-auto rounded-lg border border-zinc-700 bg-zinc-900 p-1 shadow-xl">
+                    <ul className="absolute right-0 top-full mt-1.5 z-30 w-64 max-h-64 overflow-y-auto rounded-xl border border-[#202b3f] bg-[#0a0e17] p-1.5 shadow-2xl shadow-black/80">
                       {outline.map((heading) => (
                         <li key={`${heading.line}-${heading.title}`}>
                           <button
@@ -660,7 +694,7 @@ export const DocumentsView: React.FC<Props> = ({ openRequest, active }) => {
                               event.currentTarget.closest('details')?.removeAttribute('open');
                             }}
                             style={{ paddingLeft: `${(heading.level - 1) * 10 + 6}px` }}
-                            className="w-full truncate text-left py-1 pr-1.5 rounded text-[11px] text-zinc-300 hover:bg-zinc-800"
+                            className="w-full truncate text-left py-1 pr-1.5 rounded-lg text-[11px] text-slate-300 hover:bg-[#162035] hover:text-white transition"
                           >
                             {heading.title}
                           </button>
@@ -678,7 +712,7 @@ export const DocumentsView: React.FC<Props> = ({ openRequest, active }) => {
                 <span className="flex-1 min-w-0">{status.text}</span>
                 {status.kind === 'conflict' && (
                   <>
-                    <button type="button" onClick={() => save(true)} className="px-2 py-0.5 rounded bg-amber-500 hover:bg-amber-400 text-zinc-950 font-medium">Sobrescribir</button>
+                    <button type="button" onClick={() => save(true)} className="px-2 py-0.5 rounded bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold">Sobrescribir</button>
                     <button
                       type="button"
                       onClick={() => {
@@ -689,7 +723,7 @@ export const DocumentsView: React.FC<Props> = ({ openRequest, active }) => {
                         setStatus(null);
                         post({ command: 'readDocument', file: current.file });
                       }}
-                      className="px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-100"
+                      className="px-2 py-0.5 rounded bg-[#162035] hover:bg-[#202b3f] text-slate-100 border border-[#202b3f]"
                     >
                       Recargar de disco
                     </button>
@@ -698,7 +732,7 @@ export const DocumentsView: React.FC<Props> = ({ openRequest, active }) => {
               </div>
             )}
 
-            <div className={`flex-1 min-h-0 grid ${effectiveMode === 'split' ? 'grid-cols-1 min-[1000px]:grid-cols-2' : 'grid-cols-1'} divide-zinc-800 min-[1000px]:divide-x`}>
+            <div className={`flex-1 min-h-0 grid ${effectiveMode === 'split' ? 'grid-cols-1 min-[1000px]:grid-cols-2' : 'grid-cols-1'} divide-[#202b3f] min-[1000px]:divide-x`}>
               {effectiveMode !== 'preview' && (
                 <textarea
                   ref={textareaRef}
@@ -707,47 +741,109 @@ export const DocumentsView: React.FC<Props> = ({ openRequest, active }) => {
                   onKeyDown={onEditorKeyDown}
                   spellCheck={markdown}
                   aria-label={`Contenido de ${current.file}`}
-                  className="min-h-[200px] w-full h-full resize-none bg-zinc-950 p-3 font-mono text-xs leading-5 text-zinc-100 focus:outline-none select-text overflow-y-auto"
+                  className="min-h-[200px] w-full h-full resize-none bg-[#07090e] p-3.5 font-mono text-xs leading-relaxed text-slate-100 focus:outline-none select-text overflow-y-auto"
                 />
               )}
               {effectiveMode !== 'edit' && (
-                <div className="min-h-[200px] overflow-y-auto p-3 text-[13px] text-zinc-200 select-text flex flex-col" aria-label="Vista previa">
+                <div className="min-h-[200px] overflow-y-auto p-4 text-[13px] text-slate-200 select-text flex flex-col bg-[#07090e]/30" aria-label="Vista previa">
                   {html ? (
-                    <div className="w-full flex-1 flex flex-col min-h-[380px] rounded-lg overflow-hidden border border-zinc-800 bg-white">
-                      <iframe
-                        sandbox="allow-scripts"
-                        srcDoc={draft}
-                        className="w-full flex-1 border-0 min-h-[380px]"
-                        title="Vista previa HTML segura"
-                      />
+                    <div className="w-full flex-1 flex flex-col min-h-[380px] rounded-xl overflow-hidden border border-[#202b3f] bg-[#07090e] shadow-inner">
+                      <div className="flex items-center justify-between px-3 py-1.5 border-b border-[#202b3f] bg-[#0c1220]/90 text-[11px] text-slate-400">
+                        <div className="flex items-center gap-2 font-mono text-[10px]">
+                          <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+                          <span className="text-cyan-300 font-semibold uppercase tracking-wider">Sandbox HTML</span>
+                          <span className="text-slate-600">|</span>
+                          <span className="text-slate-400">
+                            {viewportMode === 'desktop' ? '100% Pantalla Completa' : viewportMode === 'tablet' ? '768 × 1024 px (Tablet)' : '375 × 667 px (Móvil)'}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => setViewportMode('desktop')}
+                            className={`p-1 rounded transition cursor-pointer ${viewportMode === 'desktop' ? 'bg-cyan-500/20 text-cyan-300 font-semibold shadow-sm' : 'text-slate-400 hover:text-slate-200 hover:bg-[#162035]'}`}
+                            title="Vista Escritorio (100%)"
+                            aria-label="Escritorio"
+                          >
+                            <Monitor className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setViewportMode('tablet')}
+                            className={`p-1 rounded transition cursor-pointer ${viewportMode === 'tablet' ? 'bg-cyan-500/20 text-cyan-300 font-semibold shadow-sm' : 'text-slate-400 hover:text-slate-200 hover:bg-[#162035]'}`}
+                            title="Vista Tablet (768px)"
+                            aria-label="Tablet"
+                          >
+                            <Tablet className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setViewportMode('mobile')}
+                            className={`p-1 rounded transition cursor-pointer ${viewportMode === 'mobile' ? 'bg-cyan-500/20 text-cyan-300 font-semibold shadow-sm' : 'text-slate-400 hover:text-slate-200 hover:bg-[#162035]'}`}
+                            title="Vista Móvil (375px)"
+                            aria-label="Móvil"
+                          >
+                            <Smartphone className="w-3.5 h-3.5" />
+                          </button>
+                          <div className="w-[1px] h-3 bg-[#202b3f] mx-1" />
+                          <button
+                            type="button"
+                            onClick={() => setPreviewKey(k => k + 1)}
+                            className="p-1 rounded text-slate-400 hover:text-cyan-300 hover:bg-[#162035] transition cursor-pointer"
+                            title="Recargar vista previa"
+                            aria-label="Recargar vista previa"
+                          >
+                            <RefreshCw className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="flex-1 min-h-[380px] bg-[#07090e]/80 p-2 overflow-auto flex items-start justify-center">
+                        <div
+                          className={`h-full transition-all duration-200 rounded-lg overflow-hidden bg-white shadow-2xl flex flex-col ${
+                            viewportMode === 'desktop'
+                              ? 'w-full min-h-[450px]'
+                              : viewportMode === 'tablet'
+                              ? 'w-[768px] max-w-full min-h-[600px] border-4 border-[#162035]'
+                              : 'w-[375px] max-w-full min-h-[600px] border-4 border-[#162035]'
+                          }`}
+                        >
+                          <iframe
+                            key={previewKey}
+                            sandbox="allow-scripts"
+                            srcDoc={draft}
+                            className="w-full flex-1 border-0 min-h-[450px]"
+                            title="Vista previa HTML segura"
+                          />
+                        </div>
+                      </div>
                     </div>
                   ) : draft.trim() ? (
                     <Markdown text={draft} withCodeActions={false} />
                   ) : (
-                    <p className="text-zinc-500 text-xs">El documento está vacío.</p>
+                    <p className="text-slate-500 text-xs">El documento está vacío.</p>
                   )}
                 </div>
               )}
             </div>
 
-            <div className="flex flex-wrap items-center gap-x-3 px-3 py-1 border-t border-zinc-800 bg-zinc-950/60 font-mono text-[10px] text-zinc-500">
+            <div className="flex flex-wrap items-center gap-x-3 px-3 py-1.5 border-t border-[#202b3f] bg-[#07090e]/90 font-mono text-[10px] text-slate-400">
               <span>{draft.split('\n').length} líneas</span>
               <span>{words.toLocaleString()} palabras</span>
               <span>{draft.length.toLocaleString()} caracteres</span>
-              {markdown && words > 0 && <span>~{Math.max(1, Math.round(words / READING_WORDS_PER_MINUTE))} min de lectura</span>}
-              <span className="ml-auto">Ctrl+S guardar</span>
+              {markdown && words > 0 && <span className="text-cyan-400">~{Math.max(1, Math.round(words / READING_WORDS_PER_MINUTE))} min de lectura</span>}
+              <span className="ml-auto text-slate-500"><kbd className="px-1 py-0.5 rounded bg-[#0c1220] border border-[#202b3f] text-slate-300">Ctrl+S</kbd> Guardar</span>
             </div>
           </>
         )}
       </section>
 
       {pendingOpen && (
-        <div role="alertdialog" aria-label="Cambios sin guardar" className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex flex-wrap items-center gap-2 px-3 py-2 rounded-lg bg-zinc-900 border border-amber-600/60 shadow-2xl text-xs text-amber-100">
+        <div role="alertdialog" aria-label="Cambios sin guardar" className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex flex-wrap items-center gap-2 px-3 py-2 rounded-xl bg-[#0a0e17] border border-amber-500/60 shadow-2xl text-xs text-amber-100">
           <AlertTriangle className="w-4 h-4 text-amber-400" />
           <span>Tienes cambios sin guardar en <span className="font-mono">{current?.file}</span>.</span>
-          <button type="button" onClick={() => { openAfterSave.current = pendingOpen; save(); setPendingOpen(null); }} className="px-2 py-0.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white">Guardar y abrir</button>
-          <button type="button" onClick={() => { const next = pendingOpen; setPendingOpen(null); setDraft(saved); load(next); }} className="px-2 py-0.5 rounded bg-red-700 hover:bg-red-600 text-white">Descartar y abrir</button>
-          <button type="button" onClick={() => setPendingOpen(null)} className="px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200">Seguir editando</button>
+          <button type="button" onClick={() => { openAfterSave.current = pendingOpen; save(); setPendingOpen(null); }} className="px-2 py-0.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-medium">Guardar y abrir</button>
+          <button type="button" onClick={() => { const next = pendingOpen; setPendingOpen(null); setDraft(saved); load(next); }} className="px-2 py-0.5 rounded bg-red-700 hover:bg-red-600 text-white font-medium">Descartar y abrir</button>
+          <button type="button" onClick={() => setPendingOpen(null)} className="px-2 py-0.5 rounded bg-[#162035] hover:bg-[#202b3f] text-slate-200 border border-[#202b3f] cursor-pointer">Seguir editando</button>
         </div>
       )}
     </div>

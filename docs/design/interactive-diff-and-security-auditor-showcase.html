@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentHub HUD • Interactive Diff &amp; Security Auditor Showcase</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            tactical: {
+              bg: '#05070c',
+              card: '#0a0e17',
+              surface: '#0e131f',
+              border: '#162035',
+              borderHover: '#202b3f',
+              cyan: '#06b6d4',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              rose: '#f43f5e',
+              purple: '#a855f7'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Fira Code', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #05070c;
+      color: #f1f5f9;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(6, 182, 212, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.05) 0%, transparent 40%),
+        linear-gradient(to right, rgba(22, 32, 53, 0.15) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(22, 32, 53, 0.15) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #07090e;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #1f2d45;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans selection:bg-cyan-500/30 selection:text-cyan-200">
+
+  <!-- Header -->
+  <header class="border-b border-[#162035] bg-[#07090e]/90 backdrop-blur-md sticky top-0 z-40 px-6 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center font-bold text-slate-950 font-mono shadow-md shadow-cyan-500/20">
+        AH
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-sm font-bold text-slate-100">AgentHub HUD Showcase</h1>
+          <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-950/60 text-cyan-300 border border-cyan-500/30 font-semibold">CARD #44</span>
+        </div>
+        <p class="text-[11px] text-slate-400">Interactive Diff Inspector &amp; Security Containment Auditor</p>
+      </div>
+    </div>
+
+    <!-- Active View Selector -->
+    <div class="flex items-center p-1 rounded-xl bg-[#0e131f] border border-[#202b3f] text-xs">
+      <button id="tabDiffBtn" onclick="switchTab('diff')" class="px-3 py-1 rounded-lg font-bold bg-cyan-500 text-slate-950 shadow-sm transition">
+        📄 Diff &amp; Patch Inspector
+      </button>
+      <button id="tabSecBtn" onclick="switchTab('sec')" class="px-3 py-1 rounded-lg font-medium text-slate-400 hover:text-slate-200 transition">
+        🛡️ Auditoría de Seguridad &amp; .env
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
+
+    <!-- ================= VIEW 1: INTERACTIVE DIFF ================= -->
+    <section id="viewDiff" class="space-y-6">
+
+      <!-- Header Card -->
+      <div class="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-[#0e131f]/95 border border-[#202b3f] shadow-lg backdrop-blur-md">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-sm font-bold text-slate-100 font-mono">src/server/standalone.ts</h2>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 font-semibold">GIT WORKTREE</span>
+            </div>
+            <p class="text-xs text-slate-400">Inspección granular de cambios con resaltado semántico y controles de aprobación</p>
+          </div>
+        </div>
+
+        <!-- Diff Stats & Controls -->
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2 bg-[#07090e] border border-[#202b3f] px-3 py-1.5 rounded-xl font-mono text-xs">
+            <span class="text-emerald-400 font-bold drop-shadow-[0_0_6px_rgba(52,211,153,0.6)]">+42</span>
+            <span class="text-slate-600">/</span>
+            <span class="text-red-400 font-bold drop-shadow-[0_0_6px_rgba(244,63,94,0.6)]">-18</span>
+          </div>
+
+          <div class="flex items-center bg-[#07090e] rounded-xl border border-[#202b3f] p-0.5 text-xs">
+            <button id="modeSplitBtn" onclick="setDiffMode('split')" class="px-2.5 py-1 rounded-lg font-bold bg-cyan-500 text-slate-950 transition">Dividido</button>
+            <button id="modeUnifiedBtn" onclick="setDiffMode('unified')" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-slate-200 transition">Unificado</button>
+          </div>
+
+          <button onclick="applyPatchSimulator()" class="flex items-center gap-1.5 text-xs font-bold px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-slate-950 transition shadow-sm cursor-pointer shadow-emerald-500/20">
+            <span>✓ Aplicar Parche</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Diff Container -->
+      <div id="diffCodeContainer" class="rounded-2xl bg-[#07090e] border border-[#202b3f] overflow-hidden font-mono text-xs shadow-xl">
+        <div class="flex items-center justify-between px-4 py-2.5 bg-[#0a0f1d] border-b border-[#182030] text-slate-400 text-[11px]">
+          <span class="text-cyan-400 font-bold">@@ -40,8 +40,9 @@ import { resolveSafeCwd } from '../host/safe-path';</span>
+          <span>Fragmento 1 de 4</span>
+        </div>
+
+        <!-- Lines -->
+        <div class="p-2 space-y-0.5 custom-scrollbar overflow-x-auto">
+          <!-- Neutral -->
+          <div class="flex items-center px-2 py-0.5 text-slate-500 hover:bg-[#131927]/40 rounded">
+            <span class="w-8 shrink-0 text-slate-600 select-none">40</span>
+            <span class="w-8 shrink-0 text-slate-600 select-none">40</span>
+            <span class="text-slate-300">const isElectron = typeof process !== 'undefined';</span>
+          </div>
+
+          <!-- Deleted 1 -->
+          <div class="flex items-center px-2 py-0.5 bg-red-950/20 text-red-300 border-l-2 border-red-500 rounded">
+            <span class="w-8 shrink-0 text-red-500 select-none font-bold">41</span>
+            <span class="w-8 shrink-0 text-slate-600 select-none">  </span>
+            <span class="text-red-300">- if (require.main === module) {</span>
+          </div>
+
+          <!-- Deleted 2 -->
+          <div class="flex items-center px-2 py-0.5 bg-red-950/20 text-red-300 border-l-2 border-red-500 rounded">
+            <span class="w-8 shrink-0 text-red-500 select-none font-bold">42</span>
+            <span class="w-8 shrink-0 text-slate-600 select-none">  </span>
+            <span class="text-red-300">-   startStandaloneServer(PORT);</span>
+          </div>
+
+          <!-- Added 1 -->
+          <div class="flex items-center px-2 py-0.5 bg-emerald-950/20 text-emerald-300 border-l-2 border-emerald-500 rounded">
+            <span class="w-8 shrink-0 text-slate-600 select-none">  </span>
+            <span class="w-8 shrink-0 text-emerald-400 select-none font-bold">41</span>
+            <span class="text-emerald-200">+ const isPackaged = !process.versions.electron;</span>
+          </div>
+
+          <!-- Added 2 -->
+          <div class="flex items-center px-2 py-0.5 bg-emerald-950/20 text-emerald-300 border-l-2 border-emerald-500 rounded">
+            <span class="w-8 shrink-0 text-slate-600 select-none">  </span>
+            <span class="w-8 shrink-0 text-emerald-400 select-none font-bold">42</span>
+            <span class="text-emerald-200">+ if (require.main === module &amp;&amp; isPackaged) {</span>
+          </div>
+
+          <!-- Added 3 -->
+          <div class="flex items-center px-2 py-0.5 bg-emerald-950/20 text-emerald-300 border-l-2 border-emerald-500 rounded">
+            <span class="w-8 shrink-0 text-slate-600 select-none">  </span>
+            <span class="w-8 shrink-0 text-emerald-400 select-none font-bold">43</span>
+            <span class="text-emerald-200">+   startStandaloneServer(PORT, resolveSafeCwd());</span>
+          </div>
+
+          <!-- Neutral -->
+          <div class="flex items-center px-2 py-0.5 text-slate-500 hover:bg-[#131927]/40 rounded">
+            <span class="w-8 shrink-0 text-slate-600 select-none">43</span>
+            <span class="w-8 shrink-0 text-slate-600 select-none">44</span>
+            <span class="text-slate-300">}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= VIEW 2: SECURITY AUDITOR ================= -->
+    <section id="viewSec" class="space-y-6 hidden">
+
+      <!-- Scorecard Header -->
+      <div class="flex flex-wrap items-center justify-between gap-4 p-5 rounded-2xl bg-[#0e131f]/95 border border-emerald-500/40 shadow-xl shadow-emerald-950/20 backdrop-blur-md">
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 border-2 border-emerald-500 flex items-center justify-center font-mono text-2xl font-black text-emerald-400 shadow-md shadow-emerald-500/20">
+            100
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-base font-bold text-slate-100">Estado de Seguridad del Proyecto: ÓPTIMO</h2>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-950/60 text-emerald-300 border border-emerald-500/40 font-bold">PASS 14/14</span>
+            </div>
+            <p class="text-xs text-slate-400">Contención estricta de rutas de Windows, bloqueo de inyecciones SQL y cero secretos en .env</p>
+          </div>
+        </div>
+
+        <button onclick="runSecurityAudit()" class="flex items-center gap-1.5 text-xs font-bold px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-slate-950 transition shadow-sm cursor-pointer shadow-cyan-500/20">
+          <span id="auditSpinner" class="inline-block w-2.5 h-2.5 rounded-full bg-slate-950"></span>
+          <span>Re-auditar Proyecto ↻</span>
+        </button>
+      </div>
+
+      <!-- Security Checkpoints -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Check 1 -->
+        <div class="p-4 rounded-xl bg-[#0a0e17] border border-emerald-500/30 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-200">Contención de Rutas (isSystemOrAppDir)</span>
+            <span class="text-[10px] font-mono text-emerald-400 font-bold px-2 py-0.5 rounded bg-emerald-950/40 border border-emerald-500/30">PASSED</span>
+          </div>
+          <p class="text-xs text-slate-400">Bloquea accesos no autorizados a C:\Windows\System32, carpetas de sistema y AppData de la aplicación.</p>
+          <div class="text-[11px] font-mono text-cyan-300 pt-1 border-t border-[#182030]">
+            Protección de Workspace: 100% activa
+          </div>
+        </div>
+
+        <!-- Check 2 -->
+        <div class="p-4 rounded-xl bg-[#0a0e17] border border-emerald-500/30 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-200">Heurística de Claves y Secretos en .env</span>
+            <span class="text-[10px] font-mono text-emerald-400 font-bold px-2 py-0.5 rounded bg-emerald-950/40 border border-emerald-500/30">PASSED</span>
+          </div>
+          <p class="text-xs text-slate-400">Escaneo de patrones sk-ant-*, ghp_*, AIzaSy* y tokens OAuth. Ningún secreto expuesto en commits.</p>
+          <div class="text-[11px] font-mono text-cyan-300 pt-1 border-t border-[#182030]">
+            .gitignore: Archivos .env excluidos correctamente
+          </div>
+        </div>
+
+        <!-- Check 3 -->
+        <div class="p-4 rounded-xl bg-[#0a0e17] border border-emerald-500/30 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-200">Protección de Servidor MCP postgres</span>
+            <span class="text-[10px] font-mono text-emerald-400 font-bold px-2 py-0.5 rounded bg-emerald-950/40 border border-emerald-500/30">PASSED</span>
+          </div>
+          <p class="text-xs text-slate-400">Restricción a sentencias SELECT de solo lectura. Sentencias destructivas (DROP, ALTER, DELETE) bloqueadas.</p>
+          <div class="text-[11px] font-mono text-cyan-300 pt-1 border-t border-[#182030]">
+            Modo Safe Query: Activado
+          </div>
+        </div>
+
+        <!-- Check 4 -->
+        <div class="p-4 rounded-xl bg-[#0a0e17] border border-emerald-500/30 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-200">Aislamiento de Ramas en Git Worktree</span>
+            <span class="text-[10px] font-mono text-emerald-400 font-bold px-2 py-0.5 rounded bg-emerald-950/40 border border-emerald-500/30">PASSED</span>
+          </div>
+          <p class="text-xs text-slate-400">Las ejecuciones de equipos paralelos operan en copias de trabajo aisladas sin colisiones en main.</p>
+          <div class="text-[11px] font-mono text-cyan-300 pt-1 border-t border-[#182030]">
+            Worktree Isolation: 0 conflictos
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    function switchTab(t) {
+      const vDiff = document.getElementById('viewDiff');
+      const vSec = document.getElementById('viewSec');
+      const bDiff = document.getElementById('tabDiffBtn');
+      const bSec = document.getElementById('tabSecBtn');
+
+      if (t === 'diff') {
+        vDiff.classList.remove('hidden');
+        vSec.classList.add('hidden');
+        bDiff.className = 'px-3 py-1 rounded-lg font-bold bg-cyan-500 text-slate-950 shadow-sm transition';
+        bSec.className = 'px-3 py-1 rounded-lg font-medium text-slate-400 hover:text-slate-200 transition';
+      } else {
+        vDiff.classList.add('hidden');
+        vSec.classList.remove('hidden');
+        bDiff.className = 'px-3 py-1 rounded-lg font-medium text-slate-400 hover:text-slate-200 transition';
+        bSec.className = 'px-3 py-1 rounded-lg font-bold bg-cyan-500 text-slate-950 shadow-sm transition';
+      }
+    }
+
+    function setDiffMode(m) {
+      const bS = document.getElementById('modeSplitBtn');
+      const bU = document.getElementById('modeUnifiedBtn');
+
+      if (m === 'split') {
+        bS.className = 'px-2.5 py-1 rounded-lg font-bold bg-cyan-500 text-slate-950 transition';
+        bU.className = 'px-2.5 py-1 rounded-lg text-slate-400 hover:text-slate-200 transition';
+      } else {
+        bS.className = 'px-2.5 py-1 rounded-lg text-slate-400 hover:text-slate-200 transition';
+        bU.className = 'px-2.5 py-1 rounded-lg font-bold bg-cyan-500 text-slate-950 transition';
+      }
+    }
+
+    function applyPatchSimulator() {
+      alert('Parche aplicado con éxito. 3 líneas añadidas, 2 eliminadas en src/server/standalone.ts.');
+    }
+
+    function runSecurityAudit() {
+      const spinner = document.getElementById('auditSpinner');
+      spinner.className = 'inline-block w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping';
+      setTimeout(() => {
+        spinner.className = 'inline-block w-2.5 h-2.5 rounded-full bg-slate-950';
+        alert('Auditoría completada: 14/14 tests aprobados. Cero vulnerabilidades encontradas.');
+      }, 600);
+    }
+  </script>
+</body>
+</html>

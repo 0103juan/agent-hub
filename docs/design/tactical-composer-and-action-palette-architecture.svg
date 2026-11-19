@@ -1,0 +1,299 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="100%" height="100%" style="background:#07090e; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <defs>
+    <linearGradient id="hud-bg-46" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#090d16" />
+      <stop offset="50%" stop-color="#07090e" />
+      <stop offset="100%" stop-color="#04060a" />
+    </linearGradient>
+    <linearGradient id="cyan-accent-line" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#06b6d4" stop-opacity="0" />
+      <stop offset="50%" stop-color="#06b6d4" stop-opacity="1" />
+      <stop offset="100%" stop-color="#14b8a6" stop-opacity="0" />
+    </linearGradient>
+    <filter id="neon-glow-46" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <pattern id="grid-46" width="28" height="28" patternUnits="userSpaceOnUse">
+      <path d="M 28 0 L 0 0 0 28" fill="none" stroke="#162035" stroke-width="0.75" stroke-opacity="0.5" />
+      <circle cx="28" cy="28" r="0.7" fill="#06b6d4" fill-opacity="0.2" />
+    </pattern>
+  </defs>
+
+  <rect width="1280" height="720" fill="url(#hud-bg-46)" />
+  <rect width="1280" height="720" fill="url(#grid-46)" />
+
+  <!-- Master Header Bar -->
+  <rect x="36" y="22" width="1208" height="68" rx="14" fill="#0c1220" stroke="#202b3f" stroke-width="1.5" />
+  <circle cx="70" cy="56" r="18" fill="#06b6d4" fill-opacity="0.15" stroke="#06b6d4" stroke-width="1.5" />
+  <path d="M62 56 L68 62 L78 48" fill="none" stroke="#06b6d4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  <text x="100" y="48" fill="#f8fafc" font-size="15" font-weight="800" letter-spacing="0.5">AGENTHUB // TACTICAL COMPOSER &amp; ACTION PALETTE ARCHITECTURE</text>
+  <text x="100" y="68" fill="#94a3b8" font-size="11" font-mono="true">TACTICAL HUD SPEC CARD #46 • MULTI-CONTEXT ATTACHMENT • SQUAD FLOWS • ACTION PALETTE • ZERO TOKENS LEAK</text>
+
+  <rect x="886" y="36" width="174" height="38" rx="8" fill="#10b981" fill-opacity="0.12" stroke="#10b981" stroke-width="1.2" />
+  <circle cx="904" cy="55" r="4" fill="#10b981" filter="url(#neon-glow-46)" />
+  <text x="916" y="59" fill="#10b981" font-size="11" font-weight="800" font-mono="true">100% UNIFIED TOKENS</text>
+
+  <rect x="1075" y="36" width="150" height="38" rx="8" fill="#06b6d4" fill-opacity="0.12" stroke="#06b6d4" stroke-width="1.2" />
+  <circle cx="1092" cy="55" r="4" fill="#06b6d4" filter="url(#neon-glow-46)" />
+  <text x="1104" y="59" fill="#06b6d4" font-size="11" font-weight="800" font-mono="true">60FPS / WCAG AAA</text>
+
+  <!-- Panel 1: Composer Anatomy & Context Bar (Top-Left) -->
+  <g transform="translate(36, 106)">
+    <rect width="386" height="286" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.5" />
+    <rect width="386" height="42" rx="14" fill="#0c1220" />
+    <rect x="0" y="40" width="386" height="2" fill="url(#cyan-accent-line)" />
+    <text x="18" y="26" fill="#06b6d4" font-size="11" font-weight="800" font-mono="true">01 // COMPOSER ANATOMY &amp; CONTEXT BAR</text>
+    <rect x="306" y="10" width="66" height="22" rx="6" fill="#06b6d4" fill-opacity="0.15" />
+    <text x="318" y="25" fill="#06b6d4" font-size="9.5" font-weight="700" font-mono="true">KINETIC</text>
+
+    <!-- Context bar pills -->
+    <g transform="translate(18, 56)">
+      <rect width="350" height="48" rx="10" fill="#07090e" stroke="#162035" stroke-width="1" />
+      <text x="12" y="18" fill="#cbd5e1" font-size="8.5" font-weight="700" font-mono="true">CONTEXT TRIGGERS ROW</text>
+      
+      <!-- Button 1: Contexto -->
+      <rect x="12" y="24" width="70" height="18" rx="4" fill="#131927" stroke="#202b3f" stroke-width="0.8" />
+      <circle cx="20" cy="33" r="2.5" fill="#06b6d4" />
+      <text x="28" y="36" fill="#f8fafc" font-size="7.5">Contexto</text>
+
+      <!-- Button 2: Archivos -->
+      <rect x="88" y="24" width="68" height="18" rx="4" fill="#131927" stroke="#202b3f" stroke-width="0.8" />
+      <circle cx="96" cy="33" r="2.5" fill="#06b6d4" />
+      <text x="104" y="36" fill="#f8fafc" font-size="7.5">Archivos</text>
+
+      <!-- Button 3: Diff -->
+      <rect x="162" y="24" width="55" height="18" rx="4" fill="#131927" stroke="#202b3f" stroke-width="0.8" />
+      <circle cx="170" cy="33" r="2.5" fill="#06b6d4" />
+      <text x="178" y="36" fill="#f8fafc" font-size="7.5">Diff</text>
+
+      <!-- Button 4: Problemas -->
+      <rect x="223" y="24" width="68" height="18" rx="4" fill="#f59e0b" fill-opacity="0.1" stroke="#f59e0b" stroke-opacity="0.3" stroke-width="0.8" />
+      <circle cx="231" cy="33" r="2.5" fill="#f59e0b" />
+      <text x="238" y="36" fill="#f59e0b" font-size="7.5">Problemas</text>
+    </g>
+
+    <!-- Textarea & Prompt Envelope -->
+    <g transform="translate(18, 116)">
+      <rect width="350" height="90" rx="10" fill="#07090e" stroke="#06b6d4" stroke-opacity="0.5" stroke-width="1.2" />
+      <text x="14" y="24" fill="#94a3b8" font-size="8.5">Pregunta a Claude 3.5 Sonnet, @ para agentes y archivos, / comandos...</text>
+      <text x="14" y="44" fill="#cbd5e1" font-size="9" font-mono="true">Refactoriza el router para soportar handoffs ODD sin fuga CWD</text>
+
+      <!-- Bottom mini bar -->
+      <rect x="0" y="62" width="350" height="28" rx="0" fill="#0a0d17" />
+      <path d="M 0 62 L 350 62" stroke="#162035" stroke-width="0.8" />
+      <text x="12" y="79" fill="#64748b" font-size="7.5" font-mono="true">[Ctrl+⏎ Enviar] · [⏎ Salto] · ~142 tokens</text>
+      
+      <!-- Send Button -->
+      <rect x="278" y="66" width="64" height="20" rx="5" fill="#06b6d4" />
+      <text x="310" y="80" fill="#07090e" font-size="8.5" font-weight="800" text-anchor="middle">Enviar ↗</text>
+    </g>
+
+    <!-- Attachment Chips Tray -->
+    <g transform="translate(18, 218)">
+      <rect width="350" height="56" rx="8" fill="#07090e" stroke="#162035" stroke-width="0.8" />
+      <text x="12" y="18" fill="#94a3b8" font-size="8" font-mono="true">CHIPS EN CONTEXTO: 2 ARCHIVOS (1,420 TOKENS)</text>
+      
+      <rect x="12" y="26" width="130" height="20" rx="4" fill="#06b6d4" fill-opacity="0.15" stroke="#06b6d4" stroke-width="0.8" />
+      <text x="22" y="39" fill="#06b6d4" font-size="8" font-mono="true">📄 src/host/safe-path.ts</text>
+
+      <rect x="148" y="26" width="120" height="20" rx="4" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="0.8" />
+      <text x="158" y="39" fill="#10b981" font-size="8" font-mono="true">± git diff main...HEAD</text>
+    </g>
+  </g>
+
+  <!-- Panel 2: Squad Workflows Drawer & Multi-Role Pipeline (Top-Center) -->
+  <g transform="translate(446, 106)">
+    <rect width="386" height="286" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.5" />
+    <rect width="386" height="42" rx="14" fill="#0c1220" />
+    <rect x="0" y="40" width="386" height="2" fill="url(#cyan-accent-line)" />
+    <text x="18" y="26" fill="#8b5cf6" font-size="11" font-weight="800" font-mono="true">02 // SQUAD WORKFLOWS &amp; PIPELINES</text>
+    <rect x="296" y="10" width="76" height="22" rx="6" fill="#8b5cf6" fill-opacity="0.15" />
+    <text x="306" y="25" fill="#8b5cf6" font-size="9.5" font-weight="700" font-mono="true">TEAMS ODD</text>
+
+    <!-- Pipeline Stages Graph -->
+    <g transform="translate(18, 56)">
+      <rect width="350" height="96" rx="10" fill="#07090e" stroke="#162035" stroke-width="1.2" />
+      <text x="12" y="20" fill="#cbd5e1" font-size="8.5" font-weight="700" font-mono="true">PIPELINE AUTÓNOMO TDD (4 ETAPAS)</text>
+
+      <!-- Stage 1 -->
+      <rect x="12" y="34" width="70" height="48" rx="6" fill="#0e131f" stroke="#8b5cf6" stroke-width="1" />
+      <text x="47" y="52" fill="#8b5cf6" font-size="8" font-weight="700" text-anchor="middle">Arquitecto</text>
+      <text x="47" y="66" fill="#64748b" font-size="7.5" text-anchor="middle">Contrato/Doc</text>
+
+      <!-- Connector 1 -->
+      <path d="M 82 58 L 96 58" stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round" />
+
+      <!-- Stage 2 -->
+      <rect x="96" y="34" width="70" height="48" rx="6" fill="#0e131f" stroke="#10b981" stroke-width="1" />
+      <text x="131" y="52" fill="#10b981" font-size="8" font-weight="700" text-anchor="middle">Tester</text>
+      <text x="131" y="66" fill="#64748b" font-size="7.5" text-anchor="middle">Test Red</text>
+
+      <!-- Connector 2 -->
+      <path d="M 166 58 L 180 58" stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round" />
+
+      <!-- Stage 3 -->
+      <rect x="180" y="34" width="76" height="48" rx="6" fill="#0e131f" stroke="#06b6d4" stroke-width="1" />
+      <text x="218" y="52" fill="#06b6d4" font-size="8" font-weight="700" text-anchor="middle">Desarrollador</text>
+      <text x="218" y="66" fill="#64748b" font-size="7.5" text-anchor="middle">Código Green</text>
+
+      <!-- Connector 3 -->
+      <path d="M 256 58 L 270 58" stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round" />
+
+      <!-- Stage 4 -->
+      <rect x="270" y="34" width="68" height="48" rx="6" fill="#0e131f" stroke="#f59e0b" stroke-width="1" />
+      <text x="304" y="52" fill="#f59e0b" font-size="8" font-weight="700" text-anchor="middle">Revisor</text>
+      <text x="304" y="66" fill="#64748b" font-size="7.5" text-anchor="middle">Audit &amp; Diff</text>
+    </g>
+
+    <!-- Options Checklist -->
+    <g transform="translate(18, 164)">
+      <rect width="350" height="110" rx="8" fill="#07090e" stroke="#162035" stroke-width="1" />
+      
+      <circle cx="22" cy="24" r="3.5" fill="#06b6d4" />
+      <text x="32" y="27" fill="#f8fafc" font-size="8.5" font-weight="700">Copia aparte (Worktree aislado):</text>
+      <text x="330" y="27" fill="#10b981" font-size="8" font-weight="700" text-anchor="end" font-mono="true">ACTIVADO</text>
+
+      <circle cx="22" cy="48" r="3.5" fill="#06b6d4" />
+      <text x="32" y="51" fill="#f8fafc" font-size="8.5" font-weight="700">Aprobar cada traspaso secuencial:</text>
+      <text x="330" y="51" fill="#f59e0b" font-size="8" font-weight="700" text-anchor="end" font-mono="true">HUMAN GATE</text>
+
+      <circle cx="22" cy="72" r="3.5" fill="#06b6d4" />
+      <text x="32" y="75" fill="#f8fafc" font-size="8.5" font-weight="700">Plan primero (solo lectura inicial):</text>
+      <text x="330" y="75" fill="#64748b" font-size="8" font-weight="700" text-anchor="end" font-mono="true">OPCIONAL</text>
+
+      <rect x="12" y="86" width="326" height="16" rx="3" fill="#162035" />
+      <text x="175" y="97" fill="#06b6d4" font-size="7.5" font-weight="700" text-anchor="middle" font-mono="true">Resolución CWD: Carpeta propia por chat sin fugas a host</text>
+    </g>
+  </g>
+
+  <!-- Panel 3: Action Palette Engine (Top-Right) -->
+  <g transform="translate(856, 106)">
+    <rect width="388" height="286" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.5" />
+    <rect width="388" height="42" rx="14" fill="#0c1220" />
+    <rect x="0" y="40" width="388" height="2" fill="url(#cyan-accent-line)" />
+    <text x="18" y="26" fill="#10b981" font-size="11" font-weight="800" font-mono="true">03 // ACTION PALETTE &amp; TOOL ENGINE</text>
+    <rect x="296" y="10" width="76" height="22" rx="6" fill="#10b981" fill-opacity="0.15" />
+    <text x="306" y="25" fill="#10b981" font-size="9.5" font-weight="700" font-mono="true">MODAL HUB</text>
+
+    <!-- Action Palette Modal Preview -->
+    <g transform="translate(18, 56)">
+      <rect width="352" height="218" rx="10" fill="#07090e" stroke="#162035" stroke-width="1.2" />
+      
+      <!-- Palette Search Box -->
+      <rect x="12" y="12" width="328" height="26" rx="6" fill="#0a0e17" stroke="#06b6d4" stroke-width="1" />
+      <text x="24" y="28" fill="#64748b" font-size="8.5" font-mono="true">🔍 Buscar acción (tests, git, secretos, arquitectura)...</text>
+
+      <!-- Category Filter Pills -->
+      <g transform="translate(12, 46)">
+        <rect x="0" y="0" width="50" height="16" rx="4" fill="#06b6d4" />
+        <text x="25" y="11" fill="#07090e" font-size="7.5" font-weight="800" text-anchor="middle">Todas (41)</text>
+
+        <rect x="56" y="0" width="55" height="16" rx="4" fill="#0e131f" stroke="#202b3f" stroke-width="0.8" />
+        <text x="83" y="11" fill="#cbd5e1" font-size="7.5" text-anchor="middle">Pruebas (6)</text>
+
+        <rect x="117" y="0" width="48" height="16" rx="4" fill="#0e131f" stroke="#202b3f" stroke-width="0.8" />
+        <text x="141" y="11" fill="#cbd5e1" font-size="7.5" text-anchor="middle">Git (8)</text>
+
+        <rect x="171" y="0" width="65" height="16" rx="4" fill="#0e131f" stroke="#202b3f" stroke-width="0.8" />
+        <text x="203" y="11" fill="#cbd5e1" font-size="7.5" text-anchor="middle">Seguridad (6)</text>
+
+        <rect x="242" y="0" width="70" height="16" rx="4" fill="#0e131f" stroke="#202b3f" stroke-width="0.8" />
+        <text x="277" y="11" fill="#cbd5e1" font-size="7.5" text-anchor="middle">Arquitectura (7)</text>
+      </g>
+
+      <!-- Action items list -->
+      <g transform="translate(12, 70)">
+        <!-- Item 1 -->
+        <rect x="0" y="0" width="328" height="32" rx="6" fill="#0c1220" stroke="#202b3f" stroke-width="0.8" />
+        <circle cx="16" cy="16" r="4" fill="#10b981" />
+        <text x="28" y="16" fill="#f8fafc" font-size="8.5" font-weight="700">Ejecutar tests del proyecto</text>
+        <text x="28" y="26" fill="#64748b" font-size="7">npm test / cargo test / pytest / go test</text>
+        <rect x="280" y="8" width="40" height="16" rx="4" fill="#10b981" fill-opacity="0.15" />
+        <text x="300" y="19" fill="#10b981" font-size="7.5" font-weight="700" text-anchor="middle" font-mono="true">RUN</text>
+
+        <!-- Item 2 -->
+        <rect x="0" y="38" width="328" height="32" rx="6" fill="#0c1220" stroke="#202b3f" stroke-width="0.8" />
+        <circle cx="16" cy="54" r="4" fill="#f59e0b" />
+        <text x="28" y="54" fill="#f8fafc" font-size="8.5" font-weight="700">Auditar rama actual contra main</text>
+        <text x="28" y="64" fill="#64748b" font-size="7">git diff main...HEAD con reporte de riesgos</text>
+        <rect x="280" y="46" width="40" height="16" rx="4" fill="#f59e0b" fill-opacity="0.15" />
+        <text x="300" y="57" fill="#f59e0b" font-size="7.5" font-weight="700" text-anchor="middle" font-mono="true">DIFF</text>
+
+        <!-- Item 3 -->
+        <rect x="0" y="76" width="328" height="32" rx="6" fill="#0c1220" stroke="#202b3f" stroke-width="0.8" />
+        <circle cx="16" cy="92" r="4" fill="#f43f5e" />
+        <text x="28" y="92" fill="#f8fafc" font-size="8.5" font-weight="700">Escanear secretos y credenciales</text>
+        <text x="28" y="102" fill="#64748b" font-size="7">Detección de API keys, JWTs y variables .env expuestas</text>
+        <rect x="280" y="84" width="40" height="16" rx="4" fill="#f43f5e" fill-opacity="0.15" />
+        <text x="300" y="95" fill="#f43f5e" font-size="7.5" font-weight="700" text-anchor="middle" font-mono="true">SCAN</text>
+
+        <!-- Item 4 -->
+        <rect x="0" y="114" width="328" height="28" rx="6" fill="#090d16" />
+        <text x="164" y="131" fill="#64748b" font-size="7.5" text-anchor="middle" font-mono="true">Enter ejecuta · ↑↓ navega · Esc cierra</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Panel 4: Interaction Matrix & Keyboard Shortcuts (Bottom Full-Width) -->
+  <g transform="translate(36, 408)">
+    <rect width="1208" height="276" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.5" />
+    <rect width="1208" height="42" rx="14" fill="#0c1220" />
+    <rect x="0" y="40" width="1208" height="2" fill="url(#cyan-accent-line)" />
+    <text x="18" y="26" fill="#f59e0b" font-size="11" font-weight="800" font-mono="true">04 // KINETIC MICRO-INTERACTIONS &amp; SHORTCUT DISPATCH TABLE</text>
+    <rect x="1090" y="10" width="102" height="22" rx="6" fill="#f59e0b" fill-opacity="0.15" />
+    <text x="1104" y="25" fill="#f59e0b" font-size="9.5" font-weight="700" font-mono="true">KEY DISPATCH</text>
+
+    <!-- 4 Feature Cards -->
+    <g transform="translate(18, 56)">
+      <!-- Card 1: Mode Switcher -->
+      <rect x="0" y="0" width="280" height="196" rx="10" fill="#0c1220" stroke="#202b3f" stroke-width="1" />
+      <rect x="0" y="0" width="280" height="26" rx="10" fill="#090d16" />
+      <circle cx="16" cy="13" r="3.5" fill="#06b6d4" />
+      <text x="26" y="17" fill="#06b6d4" font-size="8.5" font-weight="700" font-mono="true">DISPATCH 01 // ENTER LOGIC</text>
+      <text x="14" y="48" fill="#f8fafc" font-size="11" font-weight="800">Conmutador Enter / Ctrl+Enter</text>
+      <text x="14" y="66" fill="#94a3b8" font-size="8.5" leading="relaxed">Permite alternar entre envío inmediato con Enter o redacción multilínea cómoda con saltos de línea sin gatillar envíos prematuros.</text>
+      <rect x="14" y="112" width="252" height="30" rx="6" fill="#07090e" stroke="#162035" stroke-width="0.8" />
+      <text x="24" y="130" fill="#06b6d4" font-size="8.5" font-mono="true">Ctrl⏎ Enviar • ⏎ Salto de línea</text>
+      <text x="14" y="162" fill="#10b981" font-size="8" font-mono="true">✓ Persiste en LocalStorage</text>
+      <text x="14" y="176" fill="#64748b" font-size="8" font-mono="true">✓ Indicador visual en pie de caja</text>
+
+      <!-- Card 2: Voice Dictation -->
+      <rect x="296" y="0" width="280" height="196" rx="10" fill="#0c1220" stroke="#202b3f" stroke-width="1" />
+      <rect x="296" y="0" width="280" height="26" rx="10" fill="#090d16" />
+      <circle cx="312" cy="13" r="3.5" fill="#f43f5e" />
+      <text x="322" y="17" fill="#f43f5e" font-size="8.5" font-weight="700" font-mono="true">DISPATCH 02 // VOICE ENGINE</text>
+      <text x="310" y="48" fill="#f8fafc" font-size="11" font-weight="800">Dictado por Voz en Tiempo Real</text>
+      <text x="310" y="66" fill="#94a3b8" font-size="8.5" leading="relaxed">Grabación directa con Web Speech API o adjunto de audio para modelos multimodales (Gemini 1.5 Pro, GPT-4o).</text>
+      <rect x="310" y="112" width="252" height="30" rx="6" fill="#07090e" stroke="#162035" stroke-width="0.8" />
+      <circle cx="324" cy="127" r="4" fill="#f43f5e" />
+      <text x="336" y="130" fill="#f43f5e" font-size="8.5" font-mono="true">Grabando: 00:04 • Escuchando</text>
+      <text x="310" y="162" fill="#10b981" font-size="8" font-mono="true">✓ Pulsación animada a 60 FPS</text>
+      <text x="310" y="176" fill="#64748b" font-size="8" font-mono="true">✓ Detención automática con Esc</text>
+
+      <!-- Card 3: Continuous Loop -->
+      <rect x="592" y="0" width="280" height="196" rx="10" fill="#0c1220" stroke="#202b3f" stroke-width="1" />
+      <rect x="592" y="0" width="280" height="26" rx="10" fill="#090d16" />
+      <circle cx="608" cy="13" r="3.5" fill="#8b5cf6" />
+      <text x="618" y="17" fill="#8b5cf6" font-size="8.5" font-weight="700" font-mono="true">DISPATCH 03 // LOOP PROTOCOL</text>
+      <text x="606" y="48" fill="#f8fafc" font-size="11" font-weight="800">Alternador de Modo Loop Continuo</text>
+      <text x="606" y="66" fill="#94a3b8" font-size="8.5" leading="relaxed">Prefija de forma atómica `/loop` al prompt activo para mantener ciclos continuos autónomos de verificación y refinamiento.</text>
+      <rect x="606" y="112" width="252" height="30" rx="6" fill="#07090e" stroke="#162035" stroke-width="0.8" />
+      <text x="618" y="130" fill="#8b5cf6" font-size="8.5" font-mono="true">🔁 Loop Activo: [MODO LOOP]</text>
+      <text x="606" y="162" fill="#10b981" font-size="8" font-mono="true">✓ Toggle con 1 solo clic</text>
+      <text x="606" y="176" fill="#64748b" font-size="8" font-mono="true">✓ Compatibilidad total con /goal</text>
+
+      <!-- Card 4: History Recall -->
+      <rect x="888" y="0" width="284" height="196" rx="10" fill="#0c1220" stroke="#202b3f" stroke-width="1" />
+      <rect x="888" y="0" width="284" height="26" rx="10" fill="#090d16" />
+      <circle cx="904" cy="13" r="3.5" fill="#10b981" />
+      <text x="914" y="17" fill="#10b981" font-size="8.5" font-weight="700" font-mono="true">DISPATCH 04 // HISTORY RECALL</text>
+      <text x="902" y="48" fill="#f8fafc" font-size="11" font-weight="800">Navegación Histórica con Flechas</text>
+      <text x="902" y="66" fill="#94a3b8" font-size="8.5" leading="relaxed">Presionar ↑ en el cursor inicial recupera instrucciones previas del buffer histórico de 50 entradas guardadas.</text>
+      <rect x="902" y="112" width="256" height="30" rx="6" fill="#07090e" stroke="#162035" stroke-width="0.8" />
+      <text x="914" y="130" fill="#10b981" font-size="8.5" font-mono="true">↑ Prompt anterior • ↓ Siguiente</text>
+      <text x="902" y="162" fill="#10b981" font-size="8" font-mono="true">✓ Almacenamiento circular 50 prompts</text>
+      <text x="902" y="176" fill="#64748b" font-size="8" font-mono="true">✓ Sin colisiones con autocompletado</text>
+    </g>
+  </g>
+</svg>

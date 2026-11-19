@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentHub HUD • Notifications &amp; Shortcuts Showcase</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            tactical: {
+              bg: '#05070c',
+              card: '#0a0e17',
+              surface: '#0e131f',
+              border: '#162035',
+              borderHover: '#202b3f',
+              cyan: '#06b6d4',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              rose: '#f43f5e',
+              purple: '#a855f7'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Fira Code', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #05070c;
+      color: #f1f5f9;
+      background-image: 
+        radial-gradient(circle at 10% 10%, rgba(6, 182, 212, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 90%, rgba(244, 63, 94, 0.05) 0%, transparent 40%),
+        linear-gradient(to right, rgba(22, 32, 53, 0.15) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(22, 32, 53, 0.15) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #07090e;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #1f2d45;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans selection:bg-cyan-500/30 selection:text-cyan-200">
+
+  <!-- Header -->
+  <header class="border-b border-[#162035] bg-[#07090e]/90 backdrop-blur-md sticky top-0 z-40 px-6 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center font-bold text-slate-950 font-mono shadow-md shadow-cyan-500/20">
+        AH
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-sm font-bold text-slate-100">AgentHub HUD Showcase</h1>
+          <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-950/60 text-cyan-300 border border-cyan-500/30 font-semibold">CARD #43</span>
+        </div>
+        <p class="text-[11px] text-slate-400">Tactical Notifications System &amp; Shortcuts Modal Matrix</p>
+      </div>
+    </div>
+
+    <!-- Active View Selector -->
+    <div class="flex items-center gap-3">
+      <div class="flex items-center p-1 rounded-xl bg-[#0e131f] border border-[#202b3f] text-xs">
+        <button id="tabNotifBtn" onclick="switchTab('notif')" class="px-3 py-1 rounded-lg font-bold bg-cyan-500 text-slate-950 shadow-sm transition">
+          🔔 Avisos &amp; Notificaciones
+        </button>
+        <button id="tabShortcutsBtn" onclick="switchTab('shortcuts')" class="px-3 py-1 rounded-lg font-medium text-slate-400 hover:text-slate-200 transition">
+          ⌨️ Matriz de Atajos
+        </button>
+      </div>
+
+      <!-- Live Bell Trigger Simulator -->
+      <div class="relative">
+        <button onclick="toggleBellDropdown()" class="relative p-2 rounded-xl bg-[#131927] hover:bg-slate-800 text-cyan-300 border border-cyan-500/40 text-xs font-mono transition shadow-sm cursor-pointer hover:border-cyan-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+          <span id="headerBellBadge" class="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red-600 text-white text-[10px] leading-[18px] text-center font-mono font-bold shadow-sm shadow-red-500/50">
+            3
+          </span>
+        </button>
+
+        <!-- Dropdown Menu -->
+        <div id="bellDropdown" class="absolute right-0 top-full mt-2 w-80 rounded-2xl bg-[#0a0f1d] border border-cyan-500/40 p-2 shadow-2xl shadow-black/90 space-y-2 hidden z-50">
+          <div class="flex items-center justify-between px-2 py-1 border-b border-[#182030] text-xs font-mono text-slate-400">
+            <span class="text-cyan-300 font-bold">AVISOS ACTIVOS (3)</span>
+            <button onclick="clearAllNotices()" class="text-[10px] hover:text-slate-200">Limpiar todo</button>
+          </div>
+          <div id="bellDropdownList" class="space-y-1.5 custom-scrollbar max-h-64 overflow-y-auto">
+            <!-- Notices rendered here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
+
+    <!-- ================= VIEW 1: NOTIFICATIONS HUB ================= -->
+    <section id="viewNotif" class="space-y-6">
+
+      <div class="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-[#0e131f]/95 border border-[#202b3f] shadow-lg backdrop-blur-md">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-sm font-bold text-slate-100">Bandeja de Eventos y Notificaciones Reactivas</h2>
+              <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold">FEED ACTIVO</span>
+            </div>
+            <p class="text-xs text-slate-400">Simula disparadores de éxito, fallos de compilación y avisos de límites de cuota</p>
+          </div>
+        </div>
+
+        <!-- Simulation Buttons -->
+        <div class="flex items-center gap-2">
+          <button onclick="dispatchNotice('success')" class="px-3 py-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 text-xs font-semibold transition cursor-pointer">
+            + Simular Éxito
+          </button>
+          <button onclick="dispatchNotice('failure')" class="px-3 py-1.5 rounded-lg bg-red-600/20 hover:bg-red-600/30 text-red-300 border border-red-500/40 text-xs font-semibold transition cursor-pointer">
+            + Simular Fallo
+          </button>
+          <button onclick="dispatchNotice('quota')" class="px-3 py-1.5 rounded-lg bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/40 text-xs font-semibold transition cursor-pointer">
+            + Simular Cuota
+          </button>
+        </div>
+      </div>
+
+      <!-- Notices Feed Container -->
+      <div class="rounded-2xl bg-[#0a0e17] border border-[#202b3f] p-4 space-y-3">
+        <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider font-mono">Historial de Notificaciones en Vivo</h3>
+        <div id="fullNoticesFeed" class="space-y-2">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= VIEW 2: SHORTCUTS MATRIX ================= -->
+    <section id="viewShortcuts" class="space-y-6 hidden">
+
+      <div class="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-[#0e131f]/95 border border-[#202b3f] shadow-lg backdrop-blur-md">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-sm font-bold text-slate-100">Matriz de Atajos de Teclado del HUD</h2>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">22 ATAJOS ACTIVOS</span>
+            </div>
+            <p class="text-xs text-slate-400">Atajos optimizados para operación sin ratón (Mouse-free Workflow) y teclas biseladas</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <input
+            id="shortcutSearchInput"
+            type="text"
+            oninput="filterShortcuts(this.value)"
+            placeholder="Buscar por atajo o acción (ej: Ctrl K, plan)..."
+            class="bg-[#07090e] border border-[#202b3f] focus:border-cyan-500 rounded-lg px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none font-mono w-64"
+          >
+        </div>
+      </div>
+
+      <!-- Categories Filter -->
+      <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+        <button onclick="setShortcutCategory('Todos')" id="scat-Todos" class="px-2.5 py-1 rounded-lg font-bold bg-cyan-500 text-slate-950 shadow-sm transition">Todos</button>
+        <button onclick="setShortcutCategory('Navegación')" id="scat-Navegación" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-[#131927] transition">Navegación</button>
+        <button onclick="setShortcutCategory('Chat')" id="scat-Chat" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-[#131927] transition">Chat</button>
+        <button onclick="setShortcutCategory('Ventanas')" id="scat-Ventanas" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-[#131927] transition">Ventanas</button>
+        <button onclick="setShortcutCategory('Herramientas')" id="scat-Herramientas" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-[#131927] transition">Herramientas</button>
+        <button onclick="setShortcutCategory('Agente')" id="scat-Agente" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-[#131927] transition">Agente</button>
+      </div>
+
+      <!-- Shortcuts Grid -->
+      <div id="shortcutsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <!-- Dynamically rendered shortcuts -->
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    let activeNotices = [
+      { id: 1, text: 'Fallo de compilación en hook post-commit (Error TS2322)', failed: true, time: 'hace 2 min', target: 'feat-auth' },
+      { id: 2, text: 'Tests de flujos completados exitosamente (14/14 pasando en 62ms)', failed: false, time: 'hace 8 min', target: 'test-runner' },
+      { id: 3, text: 'Aviso de cuota: Ventana de 5 horas alcanzó el 78%', failed: false, time: 'hace 40 min', target: 'telemetria' }
+    ];
+
+    const shortcutsData = [
+      { keys: 'Ctrl K', label: 'Paleta global de comandos', group: 'Navegación' },
+      { keys: 'Ctrl /', label: 'Esta ayuda de atajos', group: 'Navegación' },
+      { keys: 'Ctrl N', label: 'Nueva conversación', group: 'Chat' },
+      { keys: 'Ctrl 1 – 8', label: 'Cambiar de pestaña (1: HUD Center, 2: Chat, 5: Documentos)', group: 'Navegación' },
+      { keys: 'Alt ↑ / ↓', label: 'Conversación anterior / siguiente', group: 'Chat' },
+      { keys: 'Ctrl Alt 1 – 4', label: 'Enfocar una columna (vista en columnas)', group: 'Ventanas' },
+      { keys: 'Ctrl Shift F', label: 'Modo enfoque (Focus Mode)', group: 'Ventanas' },
+      { keys: 'Alt Espacio', label: 'Lanzador rápido flotante (Spotlight Bar)', group: 'Navegación' },
+      { keys: 'Ctrl `', label: 'Terminal integrada CRT con ANSI', group: 'Herramientas' },
+      { keys: 'Ctrl B', label: 'Panel de archivos y cambios Git', group: 'Herramientas' },
+      { keys: 'Ctrl E', label: 'Borrador de notas y tareas (scratchpad.md)', group: 'Herramientas' },
+      { keys: 'Ctrl Shift D', label: 'Iniciar o detener el dictado por voz', group: 'Chat' },
+      { keys: 'Ctrl Shift P', label: 'Activar o desactivar «Plan primero»', group: 'Agente' },
+      { keys: 'Enter / Shift Enter', label: 'Enviar mensaje / Salto de línea', group: 'Chat' }
+    ];
+
+    let activeCategory = 'Todos';
+
+    function renderNotices() {
+      const feed = document.getElementById('fullNoticesFeed');
+      const dd = document.getElementById('bellDropdownList');
+      const badge = document.getElementById('headerBellBadge');
+
+      badge.innerText = activeNotices.length;
+      badge.style.display = activeNotices.length ? 'block' : 'none';
+
+      const renderItem = n => `
+        <div class="flex items-center justify-between p-3 rounded-xl border ${n.failed ? 'bg-red-950/20 border-red-900/40 text-red-200' : 'bg-[#07090e] border-[#1e2a3f] text-slate-200'} transition">
+          <div class="flex items-center gap-3">
+            <span class="w-2.5 h-2.5 rounded-full ${n.failed ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]' : 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]'}"></span>
+            <div>
+              <div class="text-xs font-semibold">${n.text}</div>
+              <div class="text-[10px] text-slate-500 font-mono mt-0.5">${n.time} • Destino: #${n.target}</div>
+            </div>
+          </div>
+          <button onclick="dismissNotice(${n.id})" class="text-slate-500 hover:text-slate-300 text-xs font-mono px-2 py-1 rounded bg-[#131927]">
+            Descartar
+          </button>
+        </div>
+      `;
+
+      feed.innerHTML = activeNotices.map(renderItem).join('') || '<div class="p-6 text-center text-xs text-slate-500 font-mono">Bandeja vacía. Sin avisos pendientes.</div>';
+      dd.innerHTML = activeNotices.map(renderItem).join('') || '<div class="p-4 text-center text-xs text-slate-500 font-mono">Sin avisos pendientes.</div>';
+    }
+
+    function renderShortcuts(query = '', cat = 'Todos') {
+      const grid = document.getElementById('shortcutsGrid');
+      const q = query.toLowerCase().trim();
+
+      const filtered = shortcutsData.filter(s => {
+        const matchesCat = cat === 'Todos' || s.group === cat;
+        const matchesQ = !q || s.label.toLowerCase().includes(q) || s.keys.toLowerCase().includes(q);
+        return matchesCat && matchesQ;
+      });
+
+      grid.innerHTML = filtered.map(s => `
+        <div class="flex items-center justify-between p-3 rounded-xl bg-[#0a0d16] border border-[#202b3f] hover:border-cyan-500/40 transition">
+          <div class="flex items-center gap-2">
+            <span class="px-1.5 py-0.5 rounded font-mono text-[9px] font-bold border uppercase text-cyan-300 bg-cyan-950/40 border-cyan-500/40">
+              ${s.group}
+            </span>
+            <span class="text-xs font-medium text-slate-200">${s.label}</span>
+          </div>
+          <kbd class="px-2.5 py-1 rounded-md bg-[#070b14] border border-[#202b3f] font-mono text-[11px] text-cyan-300 font-bold shadow-[inset_0_-2px_0_#162035,0_1px_2px_rgba(0,0,0,0.5)]">
+            ${s.keys}
+          </kbd>
+        </div>
+      `).join('');
+    }
+
+    function switchTab(t) {
+      const vNotif = document.getElementById('viewNotif');
+      const vShort = document.getElementById('viewShortcuts');
+      const bNotif = document.getElementById('tabNotifBtn');
+      const bShort = document.getElementById('tabShortcutsBtn');
+
+      if (t === 'notif') {
+        vNotif.classList.remove('hidden');
+        vShort.classList.add('hidden');
+        bNotif.className = 'px-3 py-1 rounded-lg font-bold bg-cyan-500 text-slate-950 shadow-sm transition';
+        bShort.className = 'px-3 py-1 rounded-lg font-medium text-slate-400 hover:text-slate-200 transition';
+      } else {
+        vNotif.classList.add('hidden');
+        vShort.classList.remove('hidden');
+        bNotif.className = 'px-3 py-1 rounded-lg font-medium text-slate-400 hover:text-slate-200 transition';
+        bShort.className = 'px-3 py-1 rounded-lg font-bold bg-cyan-500 text-slate-950 shadow-sm transition';
+        renderShortcuts();
+      }
+    }
+
+    function toggleBellDropdown() {
+      const dd = document.getElementById('bellDropdown');
+      dd.classList.toggle('hidden');
+    }
+
+    function clearAllNotices() {
+      activeNotices = [];
+      renderNotices();
+    }
+
+    function dismissNotice(id) {
+      activeNotices = activeNotices.filter(n => n.id !== id);
+      renderNotices();
+    }
+
+    function dispatchNotice(type) {
+      if (type === 'success') {
+        activeNotices.unshift({ id: Date.now(), text: 'Turno de agente finalizado con éxito', failed: false, time: 'ahora', target: 'squad-turn' });
+      } else if (type === 'failure') {
+        activeNotices.unshift({ id: Date.now(), text: 'Fallo de conectividad al servidor MCP postgres', failed: true, time: 'ahora', target: 'mcp-error' });
+      } else {
+        activeNotices.unshift({ id: Date.now(), text: 'Cuota semanal al 85% (Alerta de límite cercano)', failed: false, time: 'ahora', target: 'telemetry' });
+      }
+      renderNotices();
+    }
+
+    function filterShortcuts(val) {
+      renderShortcuts(val, activeCategory);
+    }
+
+    function setShortcutCategory(cat) {
+      activeCategory = cat;
+      ['Todos', 'Navegación', 'Chat', 'Ventanas', 'Herramientas', 'Agente'].forEach(c => {
+        const btn = document.getElementById(`scat-${c}`);
+        if (c === cat) {
+          btn.className = 'px-2.5 py-1 rounded-lg font-bold bg-cyan-500 text-slate-950 shadow-sm transition';
+        } else {
+          btn.className = 'px-2.5 py-1 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-[#131927] transition';
+        }
+      });
+      const input = document.getElementById('shortcutSearchInput');
+      renderShortcuts(input.value, cat);
+    }
+
+    // Initial render
+    renderNotices();
+    renderShortcuts();
+  </script>
+</body>
+</html>

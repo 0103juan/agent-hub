@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentHub HUD • MCP Mesh &amp; Memory Matrix Showcase</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            tactical: {
+              bg: '#05070c',
+              card: '#0a0e17',
+              surface: '#0e131f',
+              border: '#162035',
+              borderHover: '#202b3f',
+              cyan: '#06b6d4',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              rose: '#f43f5e',
+              purple: '#a855f7'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Fira Code', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #05070c;
+      color: #f1f5f9;
+      background-image: 
+        radial-gradient(circle at 20% 0%, rgba(6, 182, 212, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 80% 90%, rgba(168, 85, 247, 0.05) 0%, transparent 40%),
+        linear-gradient(to right, rgba(22, 32, 53, 0.15) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(22, 32, 53, 0.15) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+    }
+    .hud-bar {
+      transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #07090e;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #1f2d45;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans selection:bg-cyan-500/30 selection:text-cyan-200">
+
+  <!-- Header -->
+  <header class="border-b border-[#162035] bg-[#07090e]/90 backdrop-blur-md sticky top-0 z-40 px-6 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center font-bold text-slate-950 font-mono shadow-md shadow-cyan-500/20">
+        AH
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-sm font-bold text-slate-100">AgentHub Architecture Showcase</h1>
+          <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-950/60 text-cyan-300 border border-cyan-500/30 font-semibold">CARD #42</span>
+        </div>
+        <p class="text-[11px] text-slate-400">MCP Mesh Network, Memory Tail Injection &amp; Split Workspace Hub</p>
+      </div>
+    </div>
+
+    <!-- Tab Selector -->
+    <div class="flex items-center p-1 rounded-xl bg-[#0e131f] border border-[#202b3f] text-xs">
+      <button id="tabMcpBtn" onclick="switchTab('mcp')" class="px-3 py-1 rounded-lg font-bold bg-cyan-500 text-slate-950 shadow-sm transition">
+        🛠️ Servidores &amp; Malla MCP
+      </button>
+      <button id="tabMemoryBtn" onclick="switchTab('memory')" class="px-3 py-1 rounded-lg font-medium text-slate-400 hover:text-slate-200 transition">
+        🧠 Matriz de Memoria &amp; Split
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
+
+    <!-- ================= VIEW 1: MCP MESH ================= -->
+    <section id="viewMcp" class="space-y-6">
+
+      <!-- Header Card -->
+      <div class="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-[#0e131f]/95 border border-[#202b3f] shadow-lg backdrop-blur-md">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-sm font-bold text-slate-100">Centro de Servidores &amp; Herramientas MCP</h2>
+              <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                11 SERVIDORES SINCRONIZADOS
+              </span>
+            </div>
+            <p class="text-xs text-slate-400">Conectores de contexto duales: Claude Desktop / Code y Google Antigravity</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="testMcpHealth()" class="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-[#0c1220] hover:bg-[#162035] text-slate-200 border border-[#202b3f] hover:border-cyan-500/40 transition cursor-pointer">
+            <span id="healthSpinner" class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+            <span>Probar Salud de Servidores</span>
+          </button>
+          <button onclick="syncMcps()" class="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-slate-950 transition shadow-sm cursor-pointer shadow-cyan-500/20">
+            <span>Sincronizar Todo</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Dual Configuration Inspector -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="p-4 rounded-xl bg-[#0a0e17] border border-[#202b3f] space-y-2">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-orange-400 font-mono">CLAUDE DESKTOP / CODE</span>
+            <span class="text-[10px] text-slate-400 font-mono">claude_desktop_config.json</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-[#07090e] border border-[#182030] font-mono text-[11px] text-slate-300 space-y-1">
+            <div class="text-emerald-400">✓ filesystem: 15 herramientas cargadas</div>
+            <div class="text-emerald-400">✓ postgres: DB query safety activo</div>
+            <div class="text-emerald-400">✓ playwright: navegador headless listo</div>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-[#0a0e17] border border-[#202b3f] space-y-2">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-cyan-400 font-mono">GOOGLE ANTIGRAVITY (AGY)</span>
+            <span class="text-[10px] text-slate-400 font-mono">~/.gemini/antigravity-cli/mcp/</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-[#07090e] border border-[#182030] font-mono text-[11px] text-slate-300 space-y-1">
+            <div class="text-emerald-400">✓ bigquery &amp; context7 sincronizados</div>
+            <div class="text-emerald-400">✓ jira &amp; memory nodes online</div>
+            <div class="text-emerald-400">✓ google-cloud-storage lazy schemas</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Servers Grid -->
+      <div id="mcpListContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Dynamically rendered MCP cards -->
+      </div>
+    </section>
+
+    <!-- ================= VIEW 2: MEMORY MATRIX & SPLIT ================= -->
+    <section id="viewMemory" class="space-y-6 hidden">
+
+      <!-- Header Card -->
+      <div class="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-[#0e131f]/95 border border-[#202b3f] shadow-lg backdrop-blur-md">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-sm font-bold text-slate-100">Matriz de Memoria &amp; Split Workspace</h2>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">.agent-hub/experience.md</span>
+            </div>
+            <p class="text-xs text-slate-400">Inyección de cola (Tail Injection) y panel de trabajo multi-chat con broadcast</p>
+          </div>
+        </div>
+
+        <button onclick="addNewLessonModal()" class="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-slate-950 transition shadow-sm cursor-pointer shadow-cyan-500/20">
+          <span>+ Añadir Lección</span>
+        </button>
+      </div>
+
+      <!-- Memory Injection Gauge -->
+      <div class="p-4 rounded-xl bg-[#0a0e17] border border-[#202b3f] space-y-2">
+        <div class="flex items-center justify-between text-xs font-medium">
+          <span class="text-slate-300">Capacidad de Inyección Activa en el Prompt</span>
+          <span id="memGaugeText" class="font-mono font-bold text-emerald-400">12,840 / 20,000 car. (64%)</span>
+        </div>
+        <div class="h-2.5 rounded-full bg-[#07090e] border border-[#1c2638] overflow-hidden">
+          <div id="memGaugeBar" class="hud-bar h-full rounded-full bg-gradient-to-r from-cyan-500 to-emerald-400" style="width: 64%;"></div>
+        </div>
+        <div class="text-[10px] font-mono text-slate-500 flex justify-between">
+          <span>Reglas antiguas en disco</span>
+          <span class="text-cyan-400">Ventana inyectada al agente en cada turno</span>
+        </div>
+      </div>
+
+      <!-- Split Workspace Interactive Columns Visualizer -->
+      <div class="rounded-2xl bg-[#0a0e17] border border-[#202b3f] p-4 space-y-4">
+        <div class="flex items-center justify-between border-b border-[#182030] pb-2">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-slate-200">Split Workspace (Columnas Concurrentes)</span>
+            <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-cyan-950/60 text-cyan-300 border border-cyan-500/30">2 Columnas</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <form onsubmit="broadcastMessage(event)" class="flex items-center gap-2">
+              <input id="broadcastInput" type="text" placeholder="Broadcast a todas las columnas..." class="bg-[#07090e] border border-[#202b3f] rounded-lg px-2.5 py-1 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-mono w-64">
+              <button type="submit" class="px-2.5 py-1 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-lg text-xs transition cursor-pointer">
+                Enviar ↵
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 min-h-[220px]">
+          <!-- Column 1 -->
+          <div class="rounded-xl border border-cyan-500/50 bg-[#0e131f] p-3 space-y-3 shadow-md shadow-cyan-950/20">
+            <div class="flex items-center justify-between border-b border-[#182030] pb-2">
+              <span class="text-xs font-bold text-cyan-300">#1: Arquitecto &amp; Spec</span>
+              <span class="text-[10px] font-mono text-slate-400">Claude 3.7 Sonnet</span>
+            </div>
+            <div id="col1Feed" class="text-xs space-y-1.5 font-sans custom-scrollbar max-h-36 overflow-y-auto">
+              <div class="p-2 rounded-lg bg-[#07090e] border border-[#182030] text-slate-300">
+                Ficha #42 diseñada: MCP Mesh &amp; Memory Matrix validados sin tokens índigo residuales.
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 2 -->
+          <div class="rounded-xl border border-[#202b3f] bg-[#0e131f] p-3 space-y-3">
+            <div class="flex items-center justify-between border-b border-[#182030] pb-2">
+              <span class="text-xs font-bold text-purple-300">#2: Desarrollador &amp; Tests</span>
+              <span class="text-[10px] font-mono text-slate-400">Antigravity 2.0 Flash Lite</span>
+            </div>
+            <div id="col2Feed" class="text-xs space-y-1.5 font-sans custom-scrollbar max-h-36 overflow-y-auto">
+              <div class="p-2 rounded-lg bg-[#07090e] border border-[#182030] text-slate-300">
+                Tests de flujos: 14/14 aprobados en 62ms. Bundle reducido a 847.00 kB.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Structured Lessons List -->
+      <div class="space-y-3">
+        <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider font-mono">Lecciones del Proyecto Persistidas</h3>
+        <div id="lessonsContainer" class="space-y-3">
+          <!-- Dynamically generated lesson cards -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    const mcpsData = [
+      { id: 'filesystem', name: 'filesystem', tools: 15, status: 'online', desc: 'Acceso seguro al workspace permitido' },
+      { id: 'postgres', name: 'postgres', tools: 1, status: 'online', desc: 'Consultas SQL analíticas en modo read-only' },
+      { id: 'playwright', name: 'playwright', tools: 18, status: 'online', desc: 'Automatización y auditoría visual E2E' },
+      { id: 'github', name: 'github', tools: 24, status: 'online', desc: 'Pull requests, issues y gestión de branches' },
+      { id: 'bigquery', name: 'bigquery', tools: 9, status: 'online', desc: 'Consultas masivas y telemetría de eventos' },
+      { id: 'jira', name: 'jira', tools: 41, status: 'online', desc: 'Gestión de tickets, boards y sprints' }
+    ];
+
+    const lessonsData = [
+      {
+        id: 1,
+        signal: 'require.main === module en entorno empaquetado Electron',
+        evidence: 'src/server/standalone.ts #L42-L48 • tests/flows.test.ts',
+        lesson: 'Validar siempre !process.versions.electron antes de auto-iniciar el servidor standalone para evitar loops de procesos.'
+      },
+      {
+        id: 2,
+        signal: 'Rutas con caracteres escapados o directorios de sistema de Windows',
+        evidence: 'src/host/safe-path.ts (isSystemOrAppDir)',
+        lesson: 'Bloquear inmediatamente C:\\Windows\\System32 o AppData de la aplicación para impedir escalamiento fuera del workspace.'
+      },
+      {
+        id: 3,
+        signal: 'Clases heredadas de Tailwind sin tokens HUD obsidian',
+        evidence: 'src/webview/components/ • 100% tokens migrados a cyan/emerald/teal/purple',
+        lesson: 'Mantener consistencia cromática WCAG AAA en todos los modales, botones y badges evitando clases residuales índigo.'
+      }
+    ];
+
+    function renderMcps() {
+      const container = document.getElementById('mcpListContainer');
+      container.innerHTML = mcpsData.map(m => `
+        <div class="p-4 rounded-xl bg-[#0a0e17] border border-[#202b3f] hover:border-cyan-500/40 transition space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-sm text-slate-100 font-mono">${m.name}</span>
+            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              ${m.status.toUpperCase()}
+            </span>
+          </div>
+          <p class="text-xs text-slate-400">${m.desc}</p>
+          <div class="text-[11px] font-mono text-cyan-300 pt-1 border-t border-[#182030] flex justify-between">
+            <span>${m.tools} herramientas</span>
+            <span class="text-slate-500">Latencia: ~12ms</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderLessons() {
+      const container = document.getElementById('lessonsContainer');
+      container.innerHTML = lessonsData.map(l => `
+        <div class="p-4 rounded-xl bg-[#0a0e17] border border-[#202b3f] hover:border-cyan-500/30 transition space-y-2">
+          <div class="flex items-center justify-between border-b border-[#182030] pb-2">
+            <span class="text-xs font-bold text-cyan-300 font-mono">SEÑAL: ${l.signal}</span>
+            <span class="text-[10px] font-mono text-emerald-400 bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-500/30">VERIFICADA</span>
+          </div>
+          <div class="text-xs text-slate-300 font-sans">
+            <strong class="text-purple-300 font-mono">LECCIÓN:</strong> ${l.lesson}
+          </div>
+          <div class="text-[11px] font-mono text-slate-400 pt-1">
+            <span class="text-slate-500">Evidencia:</span> <span class="text-cyan-400">${l.evidence}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function switchTab(tab) {
+      const viewMcp = document.getElementById('viewMcp');
+      const viewMemory = document.getElementById('viewMemory');
+      const btnMcp = document.getElementById('tabMcpBtn');
+      const btnMemory = document.getElementById('tabMemoryBtn');
+
+      if (tab === 'mcp') {
+        viewMcp.classList.remove('hidden');
+        viewMemory.classList.add('hidden');
+        btnMcp.className = 'px-3 py-1 rounded-lg font-bold bg-cyan-500 text-slate-950 shadow-sm transition';
+        btnMemory.className = 'px-3 py-1 rounded-lg font-medium text-slate-400 hover:text-slate-200 transition';
+      } else {
+        viewMcp.classList.add('hidden');
+        viewMemory.classList.remove('hidden');
+        btnMcp.className = 'px-3 py-1 rounded-lg font-medium text-slate-400 hover:text-slate-200 transition';
+        btnMemory.className = 'px-3 py-1 rounded-lg font-bold bg-cyan-500 text-slate-950 shadow-sm transition';
+        renderLessons();
+      }
+    }
+
+    function testMcpHealth() {
+      const spinner = document.getElementById('healthSpinner');
+      spinner.className = 'inline-block w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping';
+      setTimeout(() => {
+        spinner.className = 'inline-block w-2.5 h-2.5 rounded-full bg-emerald-400';
+        alert('Salud de red MCP: 11/11 servidores respondiendo con latencia promedio de 14ms.');
+      }, 700);
+    }
+
+    function syncMcps() {
+      alert('Sincronización completada con claude_desktop_config.json y entorno Google Antigravity sin reiniciar procesos.');
+    }
+
+    function broadcastMessage(e) {
+      e.preventDefault();
+      const input = document.getElementById('broadcastInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const f1 = document.getElementById('col1Feed');
+      const f2 = document.getElementById('col2Feed');
+
+      f1.innerHTML += `<div class="p-2 rounded-lg bg-cyan-950/40 border border-cyan-500/30 text-cyan-200"><strong>[BROADCAST]:</strong> ${text}</div>`;
+      f2.innerHTML += `<div class="p-2 rounded-lg bg-cyan-950/40 border border-cyan-500/30 text-cyan-200"><strong>[BROADCAST]:</strong> ${text}</div>`;
+
+      input.value = '';
+    }
+
+    function addNewLessonModal() {
+      const signal = prompt('Ingresa la Señal (contexto de error o bug):', 'Prueba de regresión de tokens');
+      if (!signal) return;
+      const lesson = prompt('Ingresa la Lección aprendida (regla no obvia):', 'Mantener 100% de coherencia HUD');
+      if (!lesson) return;
+
+      lessonsData.unshift({
+        id: Date.now(),
+        signal,
+        evidence: 'src/webview/App.tsx #L837',
+        lesson
+      });
+
+      renderLessons();
+    }
+
+    // Initial render
+    renderMcps();
+  </script>
+</body>
+</html>

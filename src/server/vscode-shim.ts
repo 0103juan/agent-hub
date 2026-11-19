@@ -1,9 +1,12 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { isSystemOrAppDir } from '../host/safe-path';
+
+const initialCwd = !isSystemOrAppDir(process.cwd()) ? process.cwd() : undefined;
 
 export const workspace = {
-  workspaceFolders: [{ uri: { fsPath: process.cwd() } }],
-  asRelativePath: (p: any) => path.relative(process.cwd(), typeof p === 'string' ? p : (p?.fsPath ?? '')),
+  workspaceFolders: initialCwd ? [{ uri: { fsPath: initialCwd } }] : [],
+  asRelativePath: (p: any) => path.relative(initialCwd ?? process.cwd(), typeof p === 'string' ? p : (p?.fsPath ?? '')),
   openTextDocument: async () => ({
     lineCount: 1,
     lineAt: () => ({ text: '' })

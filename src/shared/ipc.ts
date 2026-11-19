@@ -47,7 +47,7 @@ export type WebviewMessage =
   | { command: 'moveSession'; sessionId: string; projectName?: string }
   | { command: 'renameProject'; from: string; to: string }
   | { command: 'deleteProject'; projectName: string }
-  | { command: 'spawnAgents'; projectName?: string; roles: Array<ProtocolRole | undefined>; prompt: string; isolate?: boolean }
+  | { command: 'spawnAgents'; projectName?: string; roles: Array<ProtocolRole | undefined>; prompt: string; isolate?: boolean; flowName?: string }
   | { command: 'removeQueued'; sessionId: string; queuedId: string }
   | { command: 'resumeQueue'; sessionId: string }
   | { command: 'updateSession'; sessionId: string; patch: SessionPatch }
@@ -63,7 +63,7 @@ export type WebviewMessage =
   | { command: 'attachGit'; sessionId?: string }
   | { command: 'saveCodeToFile'; filePath: string; code: string }
   | { command: 'rollbackTurn'; sessionId: string; checkpointHash: string }
-  | { command: 'startPipeline'; projectName?: string; prompt: string; requireApproval?: boolean; template?: string; isolate?: boolean }
+  | { command: 'startPipeline'; sessionId?: string; projectName?: string; prompt: string; requireApproval?: boolean; template?: string; isolate?: boolean }
   | { command: 'compareModels'; prompt: string }
   | { command: 'searchSessions'; query: string }
   | { command: 'teamReport'; sessionId: string }

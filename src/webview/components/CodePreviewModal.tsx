@@ -53,33 +53,33 @@ export const CodePreviewModal: React.FC<Props> = ({ file, content, line, onClose
   return (
     <ModalShell
       title={fileName}
-      icon={<FileCode className="w-4 h-4 text-indigo-400" />}
+      icon={<FileCode className="w-4 h-4 text-cyan-400" />}
       widthClass="max-w-4xl"
       onClose={onClose}
     >
-      <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2 border-b border-zinc-800 bg-zinc-900/90 text-xs text-zinc-400">
+      <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 border-b border-[#202b3f] bg-[#07090e] text-xs text-slate-300">
         <button
           type="button"
           onClick={() => copy('path')}
-          className="font-mono truncate max-w-lg text-left hover:text-zinc-200"
+          className="font-mono truncate max-w-lg text-left text-slate-300 hover:text-cyan-300 transition-colors cursor-pointer"
           title="Copiar la ruta"
         >
           {copied === 'path' ? 'Ruta copiada' : file} {line ? `(Línea ${line})` : `(${lines.length} líneas)`}
         </button>
         <div className="flex items-center gap-2 shrink-0">
           {isPreviewable && (
-            <div className="flex items-center bg-zinc-800 rounded p-0.5 border border-zinc-700 text-xs">
+            <div className="flex items-center bg-[#07090e] rounded-lg p-0.5 border border-[#202b3f] text-xs">
               <button
                 type="button"
                 onClick={() => setViewMode('code')}
-                className={`px-2 py-0.5 rounded transition ${viewMode === 'code' ? 'bg-zinc-900 text-zinc-100 font-medium' : 'text-zinc-400 hover:text-zinc-200'}`}
+                className={`px-2.5 py-1 rounded-md transition cursor-pointer font-mono ${viewMode === 'code' ? 'bg-[#0c1220] text-cyan-300 border border-cyan-500/40 shadow-xs font-semibold' : 'text-slate-400 hover:text-slate-200'}`}
               >
                 Código
               </button>
               <button
                 type="button"
                 onClick={() => setViewMode('preview')}
-                className={`flex items-center gap-1 px-2 py-0.5 rounded transition ${viewMode === 'preview' ? 'bg-indigo-600 text-white font-medium' : 'text-zinc-400 hover:text-zinc-200'}`}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-md transition cursor-pointer font-mono ${viewMode === 'preview' ? 'bg-cyan-600 text-slate-950 font-bold shadow-md shadow-cyan-600/30' : 'text-slate-400 hover:text-slate-200'}`}
               >
                 <Eye className="w-3 h-3" />
                 <span>Vista previa</span>
@@ -91,7 +91,7 @@ export const CodePreviewModal: React.FC<Props> = ({ file, content, line, onClose
               type="button"
               onClick={() => setWrap(!wrap)}
               aria-pressed={wrap}
-              className={`p-1.5 rounded transition ${wrap ? 'bg-zinc-700 text-white' : 'bg-zinc-800 text-zinc-300 hover:text-white'}`}
+              className={`p-1.5 rounded-lg border transition cursor-pointer ${wrap ? 'bg-[#0c1220] text-cyan-300 border-cyan-500/40' : 'bg-[#07090e] border-[#202b3f] text-slate-400 hover:text-white'}`}
               title="Ajustar líneas largas"
               aria-label="Ajustar líneas largas"
             >
@@ -101,7 +101,7 @@ export const CodePreviewModal: React.FC<Props> = ({ file, content, line, onClose
           <button
             type="button"
             onClick={() => copy('content')}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white transition"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#0c1220] hover:bg-[#162035] text-slate-300 hover:text-white border border-[#202b3f] transition cursor-pointer shadow-xs font-mono text-xs"
           >
             {copied === 'content' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
             <span>{copied === 'content' ? 'Copiado' : 'Copiar'}</span>
@@ -110,7 +110,7 @@ export const CodePreviewModal: React.FC<Props> = ({ file, content, line, onClose
             <button
               type="button"
               onClick={() => window.dispatchEvent(new CustomEvent('agenthub:open-document', { detail: file }))}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 border border-indigo-500/40 transition"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-cyan-950/40 hover:bg-cyan-900/50 text-cyan-200 border border-cyan-500/40 transition cursor-pointer font-mono text-xs"
               title="Abrir en el editor de documentos"
             >
               <Pencil className="w-3.5 h-3.5" />
@@ -120,7 +120,7 @@ export const CodePreviewModal: React.FC<Props> = ({ file, content, line, onClose
           <button
             type="button"
             onClick={() => openInVsCode(file, line)}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-blue-600/30 hover:bg-blue-600/50 text-blue-300 border border-blue-500/40 transition"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-600/20 hover:bg-blue-600/35 text-blue-300 border border-blue-500/40 transition cursor-pointer font-mono text-xs"
             title="Abrir en VS Code en la línea exacta"
           >
             <Code2 className="w-3.5 h-3.5 text-blue-400" />
@@ -130,9 +130,9 @@ export const CodePreviewModal: React.FC<Props> = ({ file, content, line, onClose
       </div>
 
       {viewMode === 'code' && (
-        <div className="flex items-center gap-2 px-4 py-1.5 border-b border-zinc-800 bg-zinc-900/60 text-[11px]">
+        <div className="flex items-center gap-2 px-4 py-2 border-b border-[#202b3f] bg-[#07090e]/80 text-[11px]">
           <span className="relative flex-1 min-w-0">
-            <Search className="w-3 h-3 text-zinc-500 absolute left-2 top-1/2 -translate-y-1/2" />
+            <Search className="w-3.5 h-3.5 text-cyan-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
             <input
               value={query}
               onChange={(event) => {
@@ -144,16 +144,16 @@ export const CodePreviewModal: React.FC<Props> = ({ file, content, line, onClose
               }}
               placeholder="Buscar en el archivo (Enter: siguiente, Mayús+Enter: anterior)"
               aria-label="Buscar en el archivo"
-              className="w-full bg-zinc-950 border border-zinc-800 rounded pl-6 pr-2 py-1 text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-indigo-500"
+              className="w-full bg-[#07090e] border border-[#202b3f] rounded-lg pl-7 pr-2 py-1 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-mono"
             />
           </span>
           {query.trim() && (
-            <span className="font-mono text-zinc-400 shrink-0">{matches.length > 0 ? `${(matchIndex % matches.length) + 1} de ${matches.length}` : 'sin resultados'}</span>
+            <span className="font-mono text-slate-400 shrink-0">{matches.length > 0 ? `${(matchIndex % matches.length) + 1} de ${matches.length}` : 'sin resultados'}</span>
           )}
-          <button type="button" onClick={() => step(-1)} disabled={matches.length === 0} aria-label="Resultado anterior" className="p-1 rounded text-zinc-400 hover:text-zinc-100 disabled:opacity-30">
+          <button type="button" onClick={() => step(-1)} disabled={matches.length === 0} aria-label="Resultado anterior" className="p-1.5 rounded hover:bg-[#0c1220] text-slate-400 hover:text-slate-100 disabled:opacity-30 cursor-pointer">
             <ArrowUp className="w-3.5 h-3.5" />
           </button>
-          <button type="button" onClick={() => step(1)} disabled={matches.length === 0} aria-label="Resultado siguiente" className="p-1 rounded text-zinc-400 hover:text-zinc-100 disabled:opacity-30">
+          <button type="button" onClick={() => step(1)} disabled={matches.length === 0} aria-label="Resultado siguiente" className="p-1.5 rounded hover:bg-[#0c1220] text-slate-400 hover:text-slate-100 disabled:opacity-30 cursor-pointer">
             <ArrowDown className="w-3.5 h-3.5" />
           </button>
           <input
@@ -170,28 +170,28 @@ export const CodePreviewModal: React.FC<Props> = ({ file, content, line, onClose
                 setJumpTo(target);
               }
             }}
-            className="w-24 shrink-0 bg-zinc-950 border border-zinc-800 rounded px-2 py-1 text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-indigo-500"
+            className="w-24 shrink-0 bg-[#07090e] border border-[#202b3f] rounded-lg px-2.5 py-1 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-mono"
           />
         </div>
       )}
 
       {viewMode === 'preview' ? (
         isHtml ? (
-          <div className="h-[65vh] p-3 bg-zinc-950 flex flex-col">
+          <div className="h-[65vh] p-3 bg-[#07090e] flex flex-col">
             <iframe
               sandbox="allow-scripts"
               srcDoc={content}
-              className="w-full flex-1 border-0 bg-white rounded-lg shadow-inner"
+              className="w-full flex-1 border-0 bg-white rounded-xl shadow-inner"
               title="Vista previa HTML"
             />
           </div>
         ) : (
-          <div className="max-h-[70vh] overflow-auto p-4 bg-zinc-950 text-xs text-zinc-200">
+          <div className="max-h-[70vh] overflow-auto p-4 bg-[#07090e] text-xs text-slate-200">
             <Markdown text={content} />
           </div>
         )
       ) : (
-        <div ref={bodyRef} className="max-h-[70vh] overflow-auto p-4 bg-zinc-950 font-mono text-xs leading-relaxed text-zinc-200">
+        <div ref={bodyRef} className="max-h-[70vh] overflow-auto p-4 bg-[#07090e] font-mono text-xs leading-relaxed text-slate-200">
           <div className="table w-full">
             {lines.map((l, idx) => {
               const lineNum = idx + 1;
@@ -201,9 +201,9 @@ export const CodePreviewModal: React.FC<Props> = ({ file, content, line, onClose
                 <div
                   key={lineNum}
                   data-line={lineNum}
-                  className={`table-row hover:bg-zinc-900/60 ${isTargetLine ? 'bg-indigo-950/60 text-indigo-200' : isMatch ? 'bg-amber-500/10' : ''}`}
+                  className={`table-row hover:bg-[#0c1220]/60 ${isTargetLine ? 'bg-cyan-950/70 text-cyan-200 border-l-2 border-cyan-400 font-semibold' : isMatch ? 'bg-amber-500/15 text-amber-200 font-medium' : ''}`}
                 >
-                  <span className="table-cell select-none pr-4 text-right text-zinc-600 font-mono text-[11px] w-12 border-r border-zinc-800/80">
+                  <span className="table-cell select-none pr-4 text-right text-slate-400 font-mono text-[11px] w-12 border-r border-[#202b3f]/70">
                     {lineNum}
                   </span>
                   <span className={`table-cell pl-4 font-mono ${wrap ? 'whitespace-pre-wrap break-words' : 'whitespace-pre'}`}>

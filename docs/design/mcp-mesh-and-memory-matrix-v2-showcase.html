@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-[#07090e]">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentHub :: MCP Mesh & Memory Matrix (v2) Interactive Showcase</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #07090e;
+      color: #cbd5e1;
+    }
+    code, kbd, pre, .font-mono {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #07090e;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #202b3f;
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #06b6d4;
+    }
+    .hud-glow-cyan {
+      box-shadow: 0 0 25px -5px rgba(6, 182, 212, 0.25);
+    }
+    .hud-glow-purple {
+      box-shadow: 0 0 25px -5px rgba(139, 92, 246, 0.25);
+    }
+  </style>
+</head>
+<body class="h-full flex flex-col overflow-hidden text-slate-300">
+
+  <!-- Top Tactical Nav Header -->
+  <header class="h-14 border-b border-[#202b3f] bg-[#0a0e17]/90 backdrop-blur px-4 flex items-center justify-between shrink-0 z-30">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-[#0c1220] border border-[#06b6d4] flex items-center justify-center text-cyan-400 font-mono font-bold text-sm shadow-sm">
+        AH
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-bold text-slate-100 tracking-tight">AGENTHUB TACTICAL HUD</span>
+          <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#162035] text-cyan-400 border border-[#202b3f]">SPEC #52</span>
+        </div>
+        <div class="text-[10px] font-mono text-slate-500">MCP MESH &amp; PERSISTENT EXPERIENCE MEMORY MATRIX v2</div>
+      </div>
+    </div>
+
+    <!-- Center Mode Switch -->
+    <div class="flex items-center gap-1 bg-[#07090e] p-1 rounded-xl border border-[#202b3f]">
+      <button id="tabAllBtn" onclick="switchMainTab('split')" class="px-3 py-1 rounded-lg text-xs font-mono font-semibold bg-[#162035] text-cyan-300 border border-[#202b3f] transition">
+        Dual Mesh View
+      </button>
+      <button id="tabMcpBtn" onclick="switchMainTab('mcp')" class="px-3 py-1 rounded-lg text-xs font-mono text-slate-400 hover:text-slate-200 transition">
+        MCP Only
+      </button>
+      <button id="tabMemoryBtn" onclick="switchMainTab('memory')" class="px-3 py-1 rounded-lg text-xs font-mono text-slate-400 hover:text-slate-200 transition">
+        Memory Matrix Only
+      </button>
+    </div>
+
+    <!-- Right Actions / Status -->
+    <div class="flex items-center gap-2.5">
+      <div class="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-[#07090e] border border-[#202b3f] text-xs font-mono">
+        <span class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+        </span>
+        <span class="text-slate-300">BUS HEALTH: <span class="text-emerald-400 font-bold">100% OK</span></span>
+      </div>
+      <button onclick="triggerSimulatedLoop()" class="px-3 py-1 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-xs font-mono font-semibold transition flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        Simular Loop Agente
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content Layout -->
+  <main class="flex-1 flex overflow-hidden p-3 gap-3">
+    
+    <!-- LEFT PANEL: MCP SERVICE MESH (Model Context Protocol) -->
+    <section id="mcpSection" class="flex-1 flex flex-col rounded-xl bg-[#0a0e17] border border-[#202b3f] overflow-hidden transition-all duration-300">
+      
+      <!-- Panel Header -->
+      <div class="p-3.5 border-b border-[#202b3f] bg-[#0c1220]/60 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-6 h-6 rounded-md bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          </div>
+          <div>
+            <h2 class="text-xs font-bold text-slate-100 tracking-wide font-mono">MCP SERVICE MESH</h2>
+            <p class="text-[10px] text-slate-400">Servidores Conectados y Catálogo Dinámico de Herramientas</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <span id="activeServersCount" class="text-[11px] font-mono px-2 py-0.5 rounded-md bg-[#07090e] border border-[#202b3f] text-cyan-400">
+            7/8 Online
+          </span>
+          <button onclick="reconnectAllMcp()" class="text-[11px] font-mono px-2 py-0.5 rounded-md bg-[#162035] hover:bg-[#202b3f] text-slate-300 border border-[#202b3f] transition">
+            ↻ Reiniciar Bus
+          </button>
+        </div>
+      </div>
+
+      <!-- Server Cards Scroll Area -->
+      <div class="flex-1 overflow-y-auto p-3 space-y-2.5 custom-scrollbar" id="mcpServersList">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Tool Inspector Drawer -->
+      <div class="h-44 border-t border-[#202b3f] bg-[#07090e] p-3 flex flex-col shrink-0">
+        <div class="flex items-center justify-between pb-1.5 border-b border-[#202b3f]">
+          <span class="text-[10px] font-mono text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+            Inspector de Herramienta MCP Seleccionada
+          </span>
+          <span id="inspectedToolName" class="text-[10px] font-mono text-cyan-300 bg-[#162035] px-2 py-0.5 rounded border border-[#202b3f]">
+            filesystem:read_file
+          </span>
+        </div>
+        <div id="toolSchemaBox" class="flex-1 overflow-y-auto mt-2 font-mono text-[11px] text-slate-300 p-2 rounded bg-[#0a0e17] border border-[#202b3f] custom-scrollbar">
+          <!-- Schema JSON -->
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: PERSISTENT EXPERIENCE MEMORY MATRIX -->
+    <section id="memorySection" class="flex-1 flex flex-col rounded-xl bg-[#0a0e17] border border-[#202b3f] overflow-hidden transition-all duration-300">
+      
+      <!-- Panel Header -->
+      <div class="p-3.5 border-b border-[#202b3f] bg-[#0c1220]/60 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-6 h-6 rounded-md bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+          </div>
+          <div>
+            <h2 class="text-xs font-bold text-slate-100 tracking-wide font-mono">EXPERIENCE MEMORY MATRIX</h2>
+            <p class="text-[10px] text-slate-400">Autoaprendizaje, Reglas Tácticas y Lecciones Adquiridas</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <div class="text-[11px] font-mono px-2 py-0.5 rounded-md bg-[#07090e] border border-[#202b3f] text-purple-400">
+            Presupuesto: <span id="tokenBudgetDisplay">920 / 2048</span> tk
+          </div>
+          <button onclick="openAddMemoryModal()" class="text-[11px] font-mono px-2 py-0.5 rounded-md bg-[#8b5cf6]/20 hover:bg-[#8b5cf6]/30 text-purple-300 border border-[#8b5cf6]/40 transition">
+            + Añadir Regla
+          </button>
+        </div>
+      </div>
+
+      <!-- Category Filter Pills & Search -->
+      <div class="p-2.5 border-b border-[#202b3f] bg-[#07090e]/40 flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-1 overflow-x-auto text-xs font-mono" id="categoryPills">
+          <button onclick="setCategoryFilter('ALL')" class="cat-pill active px-2 py-0.5 rounded bg-[#162035] text-cyan-300 border border-[#202b3f]">TODAS</button>
+          <button onclick="setCategoryFilter('ARCHITECTURE')" class="cat-pill px-2 py-0.5 rounded bg-[#0c1220] text-slate-400 hover:text-slate-200 border border-[#202b3f]">ARQUITECTURA</button>
+          <button onclick="setCategoryFilter('SECURITY')" class="cat-pill px-2 py-0.5 rounded bg-[#0c1220] text-slate-400 hover:text-slate-200 border border-[#202b3f]">SEGURIDAD</button>
+          <button onclick="setCategoryFilter('ACCESSIBILITY')" class="cat-pill px-2 py-0.5 rounded bg-[#0c1220] text-slate-400 hover:text-slate-200 border border-[#202b3f]">ACCESIBILIDAD</button>
+          <button onclick="setCategoryFilter('TESTING')" class="cat-pill px-2 py-0.5 rounded bg-[#0c1220] text-slate-400 hover:text-slate-200 border border-[#202b3f]">PRUEBAS</button>
+        </div>
+
+        <input type="text" id="memorySearchInput" placeholder="Buscar lecciones..." oninput="handleMemorySearch(this.value)" class="text-xs font-mono bg-[#07090e] border border-[#202b3f] rounded-lg px-2.5 py-1 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-purple-500/60 w-36 sm:w-44">
+      </div>
+
+      <!-- Memory Entries List -->
+      <div class="flex-1 overflow-y-auto p-3 space-y-2.5 custom-scrollbar" id="memoryEntriesList">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Injected Prompt Simulator Box -->
+      <div class="h-44 border-t border-[#202b3f] bg-[#07090e] p-3 flex flex-col shrink-0">
+        <div class="flex items-center justify-between pb-1.5 border-b border-[#202b3f]">
+          <span class="text-[10px] font-mono text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
+            Simulador de Inyección Automática en Context Window
+          </span>
+          <span class="text-[10px] font-mono text-emerald-400 bg-[#065f46]/20 px-2 py-0.5 rounded border border-emerald-500/30">
+            AUTO-INJECT ON
+          </span>
+        </div>
+        <div id="injectedContextBox" class="flex-1 overflow-y-auto mt-2 font-mono text-[11px] text-slate-300 p-2 rounded bg-[#0a0e17] border border-[#202b3f] custom-scrollbar leading-relaxed">
+          <!-- Live context stream -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Interactive Modal for Adding Experience Rule -->
+  <div id="addMemoryModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="w-full max-w-lg rounded-xl bg-[#0a0e17] border border-[#202b3f] p-5 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-[#202b3f] pb-3">
+        <h3 class="text-sm font-bold font-mono text-slate-100 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-purple-500"></span>
+          Nueva Regla de Memoria Persistente
+        </h3>
+        <button onclick="closeAddMemoryModal()" class="text-slate-400 hover:text-slate-200 font-mono text-sm">✕</button>
+      </div>
+
+      <div class="space-y-3 text-xs font-mono">
+        <div>
+          <label class="block text-slate-400 mb-1">Categoría</label>
+          <select id="modalCategory" class="w-full bg-[#07090e] border border-[#202b3f] rounded-lg px-2.5 py-1.5 text-slate-200">
+            <option value="ARCHITECTURE">ARCHITECTURE</option>
+            <option value="SECURITY">SECURITY</option>
+            <option value="ACCESSIBILITY">ACCESSIBILITY</option>
+            <option value="TESTING">TESTING</option>
+            <option value="UI/UX">UI/UX</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Título / Regla Clave</label>
+          <input type="text" id="modalTitle" placeholder="Ej: Restricción de CWD en Workspaces" class="w-full bg-[#07090e] border border-[#202b3f] rounded-lg px-2.5 py-1.5 text-slate-200">
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Detalle / Hallazgo Técnico</label>
+          <textarea id="modalDetail" rows="3" placeholder="Descripción clara del hallazgo para que los futuros agentes no repitan errores." class="w-full bg-[#07090e] border border-[#202b3f] rounded-lg px-2.5 py-1.5 text-slate-200 resize-none"></textarea>
+        </div>
+        <div class="flex items-center justify-between">
+          <div>
+            <label class="block text-slate-400 mb-1">Importancia (Peso)</label>
+            <select id="modalWeight" class="bg-[#07090e] border border-[#202b3f] rounded-lg px-2 py-1 text-slate-200">
+              <option value="5">★5 (Crítica - Inyección Obligatoria)</option>
+              <option value="4">★4 (Alta - Contextos Relacionados)</option>
+              <option value="3">★3 (Media - Soporte Secundario)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2 border-t border-[#202b3f]">
+        <button onclick="closeAddMemoryModal()" class="px-3 py-1.5 rounded-lg bg-[#0c1220] text-slate-400 hover:text-slate-200 border border-[#202b3f] text-xs font-mono">
+          Cancelar
+        </button>
+        <button onclick="saveMemoryEntry()" class="px-4 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-mono text-xs font-semibold shadow-sm">
+          Guardar en .agent-hub/memory.json
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Application State & Logic -->
+  <script>
+    // State: MCP Servers
+    const mcpServers = [
+      {
+        id: 'filesystem',
+        name: 'filesystem',
+        transport: 'stdio',
+        command: 'npx -y @modelcontextprotocol/server-filesystem',
+        status: 'online',
+        latency: '3.2ms',
+        toolsCount: 14,
+        tools: [
+          { name: 'read_file', desc: 'Lee el contenido de un archivo dentro del workspace seguro.', schema: { type: 'object', properties: { path: { type: 'string' } }, required: ['path'] } },
+          { name: 'write_file', desc: 'Crea o sobrescribe un archivo en ruta autorizada.', schema: { type: 'object', properties: { path: { type: 'string' }, content: { type: 'string' } }, required: ['path', 'content'] } },
+          { name: 'list_directory', desc: 'Enumera ficheros y carpetas permitidas.', schema: { type: 'object', properties: { path: { type: 'string' } } } }
+        ]
+      },
+      {
+        id: 'github',
+        name: 'github',
+        transport: 'stdio',
+        command: 'docker run -i --rm -e GITHUB_PERSONAL_ACCESS_TOKEN',
+        status: 'online',
+        latency: '28.4ms',
+        toolsCount: 26,
+        tools: [
+          { name: 'create_pull_request', desc: 'Abre un PR con commits de un worktree.', schema: { type: 'object', properties: { title: { type: 'string' }, head: { type: 'string' }, base: { type: 'string' } } } },
+          { name: 'list_issues', desc: 'Obtiene lista de issues abiertos.', schema: { type: 'object', properties: { state: { type: 'string', enum: ['open', 'closed'] } } } }
+        ]
+      },
+      {
+        id: 'playwright',
+        name: 'playwright',
+        transport: 'stdio',
+        command: 'npx @modelcontextprotocol/server-puppeteer',
+        status: 'online',
+        latency: '45.1ms',
+        toolsCount: 18,
+        tools: [
+          { name: 'browser_snapshot', desc: 'Captura el árbol DOM accesible actual.', schema: { type: 'object', properties: {} } },
+          { name: 'browser_click', desc: 'Hace clic en un selector interactivo.', schema: { type: 'object', properties: { selector: { type: 'string' } }, required: ['selector'] } }
+        ]
+      },
+      {
+        id: 'postgres',
+        name: 'postgres',
+        transport: 'stdio',
+        command: 'postgresql://user:***@localhost:5432/main_db',
+        status: 'online',
+        latency: '5.8ms',
+        toolsCount: 1,
+        tools: [
+          { name: 'query', desc: 'Ejecuta consulta SQL solo de lectura de esquema.', schema: { type: 'object', properties: { sql: { type: 'string' } }, required: ['sql'] } }
+        ]
+      },
+      {
+        id: 'memory-mcp',
+        name: 'memory-mcp',
+        transport: 'stdio',
+        command: 'Knowledge Graph & Observation Sync',
+        status: 'online',
+        latency: '2.1ms',
+        toolsCount: 9,
+        tools: [
+          { name: 'create_entities', desc: 'Registra entidades persistentes en el grafo.', schema: { type: 'object', properties: { entities: { type: 'array' } } } },
+          { name: 'search_nodes', desc: 'Búsqueda semántica en nodos de memoria.', schema: { type: 'object', properties: { query: { type: 'string' } } } }
+        ]
+      },
+      {
+        id: 'context7',
+        name: 'context7',
+        transport: 'stdio',
+        command: 'Official framework doc resolver',
+        status: 'online',
+        latency: '31.0ms',
+        toolsCount: 2,
+        tools: [
+          { name: 'query-docs', desc: 'Consulta fragmentos de documentación oficial.', schema: { type: 'object', properties: { library: { type: 'string' }, query: { type: 'string' } } } }
+        ]
+      },
+      {
+        id: 'jira',
+        name: 'jira',
+        transport: 'sse',
+        command: 'https://jira.company.internal/mcp-sse',
+        status: 'online',
+        latency: '62.0ms',
+        toolsCount: 12,
+        tools: [
+          { name: 'jira_get_issue', desc: 'Consulta el estado y changelog de un ticket.', schema: { type: 'object', properties: { issueKey: { type: 'string' } } } }
+        ]
+      },
+      {
+        id: 'bigquery',
+        name: 'bigquery',
+        transport: 'stdio',
+        command: 'gcloud auth application-default (standby)',
+        status: 'offline',
+        latency: '--',
+        toolsCount: 9,
+        tools: [
+          { name: 'execute_sql', desc: 'Ejecuta consultas analíticas en data warehouse.', schema: { type: 'object', properties: { query: { type: 'string' } } } }
+        ]
+      }
+    ];
+
+    // State: Experience Memory Entries
+    let memoryEntries = [
+      {
+        id: 'mem-1',
+        category: 'ARCHITECTURE',
+        title: 'Tactical Dark HUD 5-Layer Color Token Hierarchy',
+        detail: 'Void: #07090e · Base: #0a0e17 · Card: #0c1220 · Hover: #162035 · Border: #202b3f. Erradicar todo token residual antiguo (#202b3f, #202b3f).',
+        weight: 5,
+        hits: 142
+      },
+      {
+        id: 'mem-2',
+        category: 'SECURITY',
+        title: 'Workspace CWD Anti-System32 Isolation Barrier',
+        detail: 'isSystemOrAppDir() bloquea ejecución en System32 y directorios de instalación de Windows. Handoffs de agentes conservan cwd seguro.',
+        weight: 5,
+        hits: 98
+      },
+      {
+        id: 'mem-3',
+        category: 'ACCESSIBILITY',
+        title: 'Cyclic Focus Trap & Opener Restoration (WCAG AAA)',
+        detail: 'ModalShell, DiffModal y SpotlightBar atrapan el foco cíclico de Tab/Shift+Tab y devuelven el cursor al elemento que lo abrió.',
+        weight: 4,
+        hits: 64
+      },
+      {
+        id: 'mem-4',
+        category: 'TESTING',
+        title: 'Fast Flow Test Verification & Mocked Shims',
+        detail: 'npm run test:flows ejecuta 14 suites en < 60ms usando alias vscode-shim.ts para validar ordenación de flujos sin depender de VS Code.',
+        weight: 4,
+        hits: 112
+      },
+      {
+        id: 'mem-5',
+        category: 'UI/UX',
+        title: '60 FPS Pan-Zoom Engine en Diagramas Mermaid/SVG',
+        detail: 'Markdown.tsx implementa canvas con aceleración por hardware, rueda de zoom, paneo con ratón y vista a pantalla completa con Escape.',
+        weight: 3,
+        hits: 39
+      }
+    ];
+
+    let currentCategoryFilter = 'ALL';
+    let searchQuery = '';
+    let selectedTool = mcpServers[0].tools[0];
+
+    // Render MCP Servers
+    function renderMcpServers() {
+      const container = document.getElementById('mcpServersList');
+      container.innerHTML = '';
+
+      let onlineCount = 0;
+      mcpServers.forEach(server => {
+        if (server.status === 'online') onlineCount++;
+        const card = document.createElement('div');
+        const isOnline = server.status === 'online';
+        
+        card.className = `p-3 rounded-xl border transition-all ${
+          isOnline 
+            ? 'bg-[#0a0e17] border-[#202b3f] hover:border-cyan-500/40' 
+            : 'bg-[#07090e]/60 border-[#202b3f]/50 opacity-60'
+        }`;
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between mb-1.5">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-400' : 'bg-rose-500'}"></span>
+              <span class="text-xs font-bold font-mono text-slate-100">${server.name}</span>
+              <span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-[#162035] text-slate-400 border border-[#202b3f]">${server.transport}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-mono ${isOnline ? 'text-emerald-400' : 'text-slate-500'}">${server.latency}</span>
+              <button onclick="toggleServer('${server.id}')" class="text-[10px] font-mono px-2 py-0.5 rounded ${isOnline ? 'bg-rose-500/10 text-rose-300 hover:bg-rose-500/20 border border-rose-500/30' : 'bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 border border-emerald-500/30'} transition">
+                ${isOnline ? 'Detener' : 'Iniciar'}
+              </button>
+            </div>
+          </div>
+          <div class="text-[10px] font-mono text-slate-500 truncate mb-2">${server.command}</div>
+          <div class="flex flex-wrap gap-1.5 pt-1.5 border-t border-[#202b3f]/60">
+            ${server.tools.map(t => `
+              <button onclick="inspectTool('${server.name}', '${t.name}')" class="text-[10px] font-mono px-2 py-0.5 rounded bg-[#0c1220] hover:bg-[#162035] text-slate-300 hover:text-cyan-300 border border-[#202b3f] hover:border-cyan-500/40 transition">
+                ⚡ ${t.name}
+              </button>
+            `).join('')}
+            <span class="text-[10px] font-mono text-slate-500 self-center ml-auto">${server.toolsCount} herramientas</span>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      document.getElementById('activeServersCount').innerText = `${onlineCount}/${mcpServers.length} Online`;
+    }
+
+    function toggleServer(id) {
+      const s = mcpServers.find(x => x.id === id);
+      if (s) {
+        s.status = s.status === 'online' ? 'offline' : 'online';
+        s.latency = s.status === 'online' ? (Math.random() * 20 + 2).toFixed(1) + 'ms' : '--';
+        renderMcpServers();
+        updateInjectedContext();
+      }
+    }
+
+    function reconnectAllMcp() {
+      mcpServers.forEach(s => {
+        s.status = 'online';
+        s.latency = (Math.random() * 15 + 2).toFixed(1) + 'ms';
+      });
+      renderMcpServers();
+      updateInjectedContext();
+    }
+
+    function inspectTool(serverName, toolName) {
+      const server = mcpServers.find(s => s.name === serverName);
+      if (!server) return;
+      const tool = server.tools.find(t => t.name === toolName);
+      if (!tool) return;
+
+      selectedTool = tool;
+      document.getElementById('inspectedToolName').innerText = `${serverName}:${toolName}`;
+      document.getElementById('toolSchemaBox').innerHTML = `
+        <div class="text-cyan-400 font-bold mb-1">// ${tool.desc}</div>
+        <pre class="text-slate-300">${JSON.stringify(tool.schema, null, 2)}</pre>
+      `;
+    }
+
+    // Render Memory Matrix
+    function renderMemoryEntries() {
+      const container = document.getElementById('memoryEntriesList');
+      container.innerHTML = '';
+
+      const filtered = memoryEntries.filter(entry => {
+        const matchesCategory = currentCategoryFilter === 'ALL' || entry.category === currentCategoryFilter;
+        const matchesSearch = searchQuery === '' || 
+          entry.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+          entry.detail.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesCategory && matchesSearch;
+      });
+
+      filtered.forEach(entry => {
+        const card = document.createElement('div');
+        const badgeColor = 
+          entry.category === 'ARCHITECTURE' ? 'text-cyan-300 border-cyan-500/40 bg-cyan-500/10' :
+          entry.category === 'SECURITY' ? 'text-amber-300 border-amber-500/40 bg-amber-500/10' :
+          entry.category === 'ACCESSIBILITY' ? 'text-purple-300 border-purple-500/40 bg-purple-500/10' :
+          'text-emerald-300 border-emerald-500/40 bg-emerald-500/10';
+
+        card.className = "p-3 rounded-xl bg-[#0a0e17] border border-[#202b3f] hover:border-purple-500/40 transition space-y-1.5";
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-[9px] font-mono px-2 py-0.5 rounded border ${badgeColor}">${entry.category}</span>
+              <span class="text-xs font-bold text-slate-100">${entry.title}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-mono text-purple-400 font-bold">★${entry.weight}</span>
+              <button onclick="removeMemoryEntry('${entry.id}')" class="text-slate-500 hover:text-rose-400 text-xs transition" title="Eliminar lección">✕</button>
+            </div>
+          </div>
+          <div class="text-xs text-slate-300 font-mono leading-relaxed pl-1 border-l-2 border-[#202b3f]">
+            ${entry.detail}
+          </div>
+          <div class="flex items-center justify-between text-[10px] font-mono text-slate-500 pt-1">
+            <span>Invocaciones previas: ${entry.hits} veces</span>
+            <span class="text-slate-400">Estado: Activa en runtime</span>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      updateInjectedContext();
+    }
+
+    function setCategoryFilter(cat) {
+      currentCategoryFilter = cat;
+      document.querySelectorAll('.cat-pill').forEach(btn => {
+        if (btn.innerText.includes(cat) || (cat === 'ALL' && btn.innerText === 'TODAS')) {
+          btn.className = 'cat-pill active px-2 py-0.5 rounded bg-[#162035] text-cyan-300 border border-[#202b3f]';
+        } else {
+          btn.className = 'cat-pill px-2 py-0.5 rounded bg-[#0c1220] text-slate-400 hover:text-slate-200 border border-[#202b3f]';
+        }
+      });
+      renderMemoryEntries();
+    }
+
+    function handleMemorySearch(val) {
+      searchQuery = val;
+      renderMemoryEntries();
+    }
+
+    function removeMemoryEntry(id) {
+      memoryEntries = memoryEntries.filter(m => m.id !== id);
+      renderMemoryEntries();
+    }
+
+    function openAddMemoryModal() {
+      document.getElementById('addMemoryModal').classList.remove('hidden');
+    }
+
+    function closeAddMemoryModal() {
+      document.getElementById('addMemoryModal').classList.add('hidden');
+    }
+
+    function saveMemoryEntry() {
+      const category = document.getElementById('modalCategory').value;
+      const title = document.getElementById('modalTitle').value.trim();
+      const detail = document.getElementById('modalDetail').value.trim();
+      const weight = parseInt(document.getElementById('modalWeight').value, 10);
+
+      if (!title || !detail) {
+        alert('Por favor completa el título y detalle de la regla.');
+        return;
+      }
+
+      memoryEntries.unshift({
+        id: 'mem-' + Date.now(),
+        category,
+        title,
+        detail,
+        weight,
+        hits: 1
+      });
+
+      closeAddMemoryModal();
+      document.getElementById('modalTitle').value = '';
+      document.getElementById('modalDetail').value = '';
+      renderMemoryEntries();
+    }
+
+    // Live Injected Context Simulation
+    function updateInjectedContext() {
+      const box = document.getElementById('injectedContextBox');
+      const activeMem = memoryEntries.slice(0, 3);
+      
+      let approxTokens = 420;
+      activeMem.forEach(m => approxTokens += 110);
+      document.getElementById('tokenBudgetDisplay').innerText = `${approxTokens} / 2048`;
+
+      box.innerHTML = `
+<span class="text-purple-400 font-bold">&lt;experience_memory_context active_rules="${activeMem.length}"&gt;</span>
+${activeMem.map(m => `
+  <span class="text-cyan-300 font-bold">[${m.category}]</span> <span class="text-slate-200">${m.title}</span> (weight: ${m.weight})
+  <span class="text-slate-400">  ↳ ${m.detail}</span>`).join('')}
+<span class="text-purple-400 font-bold">&lt;/experience_memory_context&gt;</span>
+<span class="text-emerald-400 font-bold">&lt;active_mcp_capabilities tools_online="76"&gt;</span>
+  <span class="text-slate-400">Servers ready: ${mcpServers.filter(s => s.status === 'online').map(s => s.name).join(', ')}</span>
+<span class="text-emerald-400 font-bold">&lt;/active_mcp_capabilities&gt;</span>
+      `;
+    }
+
+    // Dual/Single Tab Switcher
+    function switchMainTab(mode) {
+      const mcpSec = document.getElementById('mcpSection');
+      const memSec = document.getElementById('memorySection');
+
+      if (mode === 'split') {
+        mcpSec.classList.remove('hidden');
+        memSec.classList.remove('hidden');
+        document.getElementById('tabAllBtn').className = "px-3 py-1 rounded-lg text-xs font-mono font-semibold bg-[#162035] text-cyan-300 border border-[#202b3f] transition";
+        document.getElementById('tabMcpBtn').className = "px-3 py-1 rounded-lg text-xs font-mono text-slate-400 hover:text-slate-200 transition";
+        document.getElementById('tabMemoryBtn').className = "px-3 py-1 rounded-lg text-xs font-mono text-slate-400 hover:text-slate-200 transition";
+      } else if (mode === 'mcp') {
+        mcpSec.classList.remove('hidden');
+        memSec.classList.add('hidden');
+        document.getElementById('tabAllBtn').className = "px-3 py-1 rounded-lg text-xs font-mono text-slate-400 hover:text-slate-200 transition";
+        document.getElementById('tabMcpBtn').className = "px-3 py-1 rounded-lg text-xs font-mono font-semibold bg-[#162035] text-cyan-300 border border-[#202b3f] transition";
+        document.getElementById('tabMemoryBtn').className = "px-3 py-1 rounded-lg text-xs font-mono text-slate-400 hover:text-slate-200 transition";
+      } else if (mode === 'memory') {
+        mcpSec.classList.add('hidden');
+        memSec.classList.remove('hidden');
+        document.getElementById('tabAllBtn').className = "px-3 py-1 rounded-lg text-xs font-mono text-slate-400 hover:text-slate-200 transition";
+        document.getElementById('tabMcpBtn').className = "px-3 py-1 rounded-lg text-xs font-mono text-slate-400 hover:text-slate-200 transition";
+        document.getElementById('tabMemoryBtn').className = "px-3 py-1 rounded-lg text-xs font-mono font-semibold bg-[#162035] text-cyan-300 border border-[#202b3f] transition";
+      }
+    }
+
+    // Simulation Trigger
+    function triggerSimulatedLoop() {
+      const box = document.getElementById('injectedContextBox');
+      box.innerHTML = `
+        <div class="text-cyan-400 animate-pulse">// 1. Prompt de usuario recibido: "Verifica integridad de archivos en repo"</div>
+        <div class="text-purple-400">// 2. Buscando lecciones relevantes en Experience Memory Matrix...</div>
+        <div class="text-slate-300">// 3. Inyectando regla de SEGURIDAD: Workspace CWD Anti-System32</div>
+        <div class="text-emerald-400">// 4. Despachando llamada a MCP: filesystem:read_file... Status: 200 OK (3.1ms)</div>
+        <div class="text-cyan-300 font-bold">// 5. Ciclo completado sin errores. Lección consolidada en .agent-hub/memory.json</div>
+      `;
+      setTimeout(updateInjectedContext, 4500);
+    }
+
+    // Initialize
+    window.addEventListener('DOMContentLoaded', () => {
+      renderMcpServers();
+      renderMemoryEntries();
+      inspectTool('filesystem', 'read_file');
+    });
+  </script>
+</body>
+</html>

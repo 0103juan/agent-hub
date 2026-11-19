@@ -85,15 +85,15 @@ const DEFAULT_QUICK_COMMANDS: QuickCommand[] = [
 ];
 
 const ANSI_COLORS: Record<number, string> = {
-  30: 'text-zinc-500',
+  30: 'text-slate-500',
   31: 'text-rose-400',
   32: 'text-emerald-400',
   33: 'text-amber-300',
   34: 'text-sky-400',
   35: 'text-fuchsia-400',
   36: 'text-cyan-400',
-  37: 'text-zinc-200',
-  90: 'text-zinc-500',
+  37: 'text-slate-200',
+  90: 'text-slate-500',
   91: 'text-rose-300',
   92: 'text-emerald-300',
   93: 'text-amber-200',
@@ -142,7 +142,7 @@ function renderInteractiveText(
           key={`${keyPrefix}-f-${match.index}`}
           type="button"
           onClick={() => onPreviewFile(filePath, lineNum)}
-          className="underline decoration-indigo-400/60 text-indigo-300 hover:text-indigo-200 cursor-pointer font-mono"
+          className="underline decoration-cyan-400/60 text-cyan-300 hover:text-cyan-200 cursor-pointer font-mono"
           title={`Abrir ${filePath}${lineNum ? `:${lineNum}` : ''}`}
         >
           {token}
@@ -482,8 +482,8 @@ export const TerminalDrawer: React.FC<Props> = ({
       style={dock === 'bottom' ? { height: isExpanded ? '85vh' : `${height}px` } : undefined}
       className={
         dock === 'right'
-          ? 'w-[42vw] min-w-[320px] max-w-[680px] h-full border-l border-zinc-800 bg-zinc-950 flex flex-col shrink-0 z-20 relative'
-          : 'border-t border-zinc-800 bg-zinc-950 flex flex-col shrink-0 z-20 relative'
+          ? 'w-[42vw] min-w-[320px] max-w-[680px] h-full border-l border-[#202b3f] bg-[#07090e] flex flex-col shrink-0 z-20 relative shadow-2xl'
+          : 'border-t border-[#202b3f] bg-[#07090e] flex flex-col shrink-0 z-20 relative shadow-2xl'
       }
       onKeyDown={(e) => {
         if (e.ctrlKey && e.key.toLowerCase() === 'f') {
@@ -497,34 +497,34 @@ export const TerminalDrawer: React.FC<Props> = ({
       {dock === 'bottom' && (
         <div
           onMouseDown={startResize}
-          className="h-1.5 w-full cursor-ns-resize hover:bg-indigo-500/40 transition-colors shrink-0"
+          className="h-1.5 w-full cursor-ns-resize hover:bg-cyan-500/50 bg-[#0a0e17] border-b border-[#202b3f]/50 transition-colors shrink-0"
           title="Arrastra para ajustar la altura de la terminal"
         />
       )}
 
       {/* Barra superior del drawer */}
-      <div className="flex items-center justify-between px-3 py-1 bg-zinc-900 border-b border-zinc-800 text-xs shrink-0 select-none gap-2 overflow-hidden">
+      <div className="flex items-center justify-between px-3 py-1.5 bg-[#0a0e17]/95 border-b border-[#202b3f] text-xs shrink-0 select-none gap-2 overflow-hidden backdrop-blur-md">
         <div className="flex items-center gap-1.5 min-w-0 flex-1 overflow-x-auto no-scrollbar">
-          <div className="flex items-center gap-1.5 text-zinc-300 font-medium shrink-0">
+          <div className="flex items-center gap-1.5 text-slate-200 font-semibold tracking-wide shrink-0">
             <TerminalIcon className="w-3.5 h-3.5 text-emerald-400" />
             <span className="hidden min-[540px]:inline">Terminal</span>
             {currentCwd && (
-              <span className="text-[10px] font-mono text-zinc-400 bg-zinc-800 px-1.5 py-0.5 rounded" title={currentCwd}>
+              <span className="text-[10px] font-mono text-cyan-300 bg-cyan-950/40 border border-cyan-800/40 px-1.5 py-0.5 rounded-md" title={currentCwd}>
                 {formatCwdLabel(currentCwd)}
               </span>
             )}
           </div>
-          <div className="h-3.5 w-px bg-zinc-700 mx-1 shrink-0" />
+          <div className="h-4 w-px bg-[#202b3f] mx-1 shrink-0" />
           <div className="flex items-center gap-1">
             {tabs.map((tab) => {
               const isSelected = tab.id === activeTab.id;
               return (
                 <div
                   key={tab.id}
-                  className={`flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium whitespace-nowrap transition ${
+                  className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium whitespace-nowrap transition ${
                     isSelected
-                      ? 'bg-zinc-800 text-zinc-100 border border-zinc-700'
-                      : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'
+                      ? 'bg-[#0c1220] text-cyan-200 border border-cyan-500/40 font-semibold shadow-xs'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-[#0c1220]/60 border border-transparent'
                   }`}
                 >
                   <button
@@ -533,10 +533,10 @@ export const TerminalDrawer: React.FC<Props> = ({
                     className="flex items-center gap-1.5 cursor-pointer"
                   >
                     {tab.running ? (
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shadow-[0_0_6px_rgba(251,191,36,0.8)]" />
                     ) : tab.lastExitCode !== undefined ? (
                       <span
-                        className={`text-[10px] font-mono ${tab.lastExitCode === 0 ? 'text-emerald-400' : 'text-rose-400'}`}
+                        className={`text-[10px] font-mono font-bold ${tab.lastExitCode === 0 ? 'text-emerald-400' : 'text-rose-400'}`}
                         title={`Último código de salida: ${tab.lastExitCode}`}
                       >
                         {tab.lastExitCode === 0 ? '✓' : `✗${tab.lastExitCode}`}
@@ -548,7 +548,7 @@ export const TerminalDrawer: React.FC<Props> = ({
                     <button
                       type="button"
                       onClick={() => onCloseTab(tab.id)}
-                      className="text-zinc-500 hover:text-zinc-200 cursor-pointer ml-0.5"
+                      className="text-slate-500 hover:text-rose-400 cursor-pointer ml-1 transition-colors"
                       title="Cerrar pestaña"
                       aria-label={`Cerrar ${tab.title}`}
                     >
@@ -561,7 +561,7 @@ export const TerminalDrawer: React.FC<Props> = ({
             <button
               type="button"
               onClick={onNewTab}
-              className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition cursor-pointer"
+              className="p-1 rounded-md hover:bg-[#0c1220] text-slate-400 hover:text-cyan-400 border border-transparent hover:border-[#202b3f] transition cursor-pointer"
               title="Nueva pestaña de terminal"
               aria-label="Nueva pestaña de terminal"
             >
@@ -577,7 +577,7 @@ export const TerminalDrawer: React.FC<Props> = ({
               value={activeTab.shell ?? 'default'}
               onChange={(e) => onChangeShell(e.target.value as TerminalShell, activeTab.id)}
               disabled={running}
-              className="bg-zinc-950 border border-zinc-800 rounded px-1.5 py-0.5 text-[10px] font-mono text-zinc-300 focus:outline-none focus:border-indigo-500 disabled:opacity-50 cursor-pointer"
+              className="bg-[#07090e] border border-[#202b3f] rounded-lg px-2 py-1 text-[10px] font-mono text-slate-300 focus:outline-none focus:border-cyan-500 disabled:opacity-50 cursor-pointer"
               title="Shell de esta pestaña"
               aria-label="Selector de shell"
             >
@@ -595,7 +595,7 @@ export const TerminalDrawer: React.FC<Props> = ({
                   key={qc.cmd}
                   type="button"
                   onClick={() => onRunCommand(qc.cmd, activeTab.id)}
-                  className="px-2 py-0.5 rounded bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 hover:text-white border border-zinc-700/60 text-[10px] font-mono transition cursor-pointer"
+                  className="px-2 py-1 rounded-lg bg-[#0c1220] hover:bg-[#202b3f] text-slate-300 hover:text-cyan-300 border border-[#202b3f] text-[10px] font-mono font-medium transition cursor-pointer shadow-xs"
                   title={`Ejecutar: ${qc.cmd}`}
                 >
                   {qc.label}
@@ -611,20 +611,24 @@ export const TerminalDrawer: React.FC<Props> = ({
                 const tail = lines.slice(-50).join('\n');
                 onAskAI?.(activeTab.lastCommand!, activeTab.lastExitCode!, tail);
               }}
-              className="flex items-center gap-1 px-2 py-0.5 rounded bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 border border-indigo-500/40 text-[11px] font-medium transition cursor-pointer"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-violet-500/15 hover:bg-violet-500/25 text-violet-300 border border-violet-500/35 text-[11px] font-semibold transition cursor-pointer shadow-xs hover:border-violet-400/50"
               title="Enviar error al agente para analizar y corregir"
             >
-              <Sparkles className="w-3 h-3" />
+              <Sparkles className="w-3 h-3 text-violet-300" />
               <span className="hidden sm:inline">Corregir con IA</span>
             </button>
           )}
 
-          {running && <span className="font-mono text-[11px] text-amber-300" title="Tiempo del comando en curso">{elapsed} s</span>}
+          {running && (
+            <span className="font-mono text-[11px] text-amber-300 font-bold bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-md" title="Tiempo del comando en curso">
+              {elapsed} s
+            </span>
+          )}
           {history.length > 0 && !running && (
             <button
               type="button"
               onClick={() => onRunCommand(history[history.length - 1], activeTab.id)}
-              className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition"
+              className="p-1.5 rounded-lg hover:bg-[#0c1220] text-slate-400 hover:text-slate-200 border border-transparent hover:border-[#202b3f] transition cursor-pointer"
               title={`Volver a ejecutar: ${history[history.length - 1]}`}
               aria-label="Volver a ejecutar el último comando"
             >
@@ -634,7 +638,11 @@ export const TerminalDrawer: React.FC<Props> = ({
           <button
             type="button"
             onClick={() => setBlockView((v) => !v)}
-            className={`p-1 rounded transition ${blockView ? 'bg-zinc-800 text-indigo-300' : 'hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200'}`}
+            className={`p-1.5 rounded-lg transition cursor-pointer border ${
+              blockView
+                ? 'bg-[#0c1220] text-cyan-400 border-cyan-500/40'
+                : 'hover:bg-[#0c1220] text-slate-400 hover:text-slate-200 border-transparent hover:border-[#202b3f]'
+            }`}
             title={blockView ? 'Vista continua' : 'Agrupar por bloques de comando'}
             aria-label="Alternar vista por bloques"
           >
@@ -645,15 +653,19 @@ export const TerminalDrawer: React.FC<Props> = ({
               <button
                 type="button"
                 onClick={() => setIsSnippetsOpen((v) => !v)}
-                className={`p-1 rounded transition ${isSnippetsOpen ? 'bg-zinc-800 text-amber-300' : 'hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200'}`}
+                className={`p-1.5 rounded-lg transition cursor-pointer border ${
+                  isSnippetsOpen
+                    ? 'bg-[#0c1220] text-amber-300 border-amber-500/40'
+                    : 'hover:bg-[#0c1220] text-slate-400 hover:text-slate-200 border-transparent hover:border-[#202b3f]'
+                }`}
                 title="Snippets del proyecto (.agent-hub/terminal-snippets.json)"
                 aria-label="Snippets del proyecto"
               >
                 <Bookmark className="w-3.5 h-3.5" />
               </button>
               {isSnippetsOpen && (
-                <div className="absolute right-0 top-full mt-1 w-64 rounded-lg border border-zinc-700 bg-zinc-900 shadow-xl p-2 z-30 space-y-1.5">
-                  <div className="flex items-center justify-between text-[11px] font-medium text-zinc-300">
+                <div className="absolute right-0 top-full mt-1.5 w-64 rounded-xl border border-[#202b3f] bg-[#0a0e17] shadow-2xl p-2.5 z-30 space-y-1.5 backdrop-blur-md">
+                  <div className="flex items-center justify-between text-[11px] font-semibold text-slate-200 pb-1 border-b border-[#202b3f]">
                     <span>Snippets del proyecto</span>
                     {(command.trim() || activeTab.lastCommand) && (
                       <button
@@ -664,14 +676,14 @@ export const TerminalDrawer: React.FC<Props> = ({
                           const next = [...snippets.filter((s) => s.cmd !== cmdToSave), { label: cmdToSave, cmd: cmdToSave }];
                           onSaveSnippets(next);
                         }}
-                        className="text-indigo-300 hover:text-indigo-200 text-[10px] cursor-pointer"
+                        className="text-cyan-400 hover:text-cyan-300 text-[10px] font-medium cursor-pointer"
                       >
                         + Guardar actual
                       </button>
                     )}
                   </div>
                   {snippets.length === 0 ? (
-                    <div className="text-[11px] text-zinc-500 py-1">Sin snippets guardados aún.</div>
+                    <div className="text-[11px] text-slate-500 py-1.5 text-center font-mono">Sin snippets guardados aún.</div>
                   ) : (
                     <div className="max-h-40 overflow-y-auto space-y-1">
                       {snippets.map((s) => (
@@ -682,7 +694,7 @@ export const TerminalDrawer: React.FC<Props> = ({
                               onRunCommand(s.cmd, activeTab.id);
                               setIsSnippetsOpen(false);
                             }}
-                            className="flex-1 text-left px-1.5 py-1 rounded hover:bg-zinc-800 font-mono text-[11px] text-zinc-200 truncate cursor-pointer"
+                            className="flex-1 text-left px-2 py-1 rounded-lg hover:bg-[#0c1220] font-mono text-[11px] text-slate-200 hover:text-cyan-300 truncate cursor-pointer transition-colors"
                             title={s.cmd}
                           >
                             {s.label}
@@ -690,7 +702,7 @@ export const TerminalDrawer: React.FC<Props> = ({
                           <button
                             type="button"
                             onClick={() => onSaveSnippets(snippets.filter((item) => item.cmd !== s.cmd))}
-                            className="p-0.5 text-zinc-500 hover:text-rose-400 opacity-0 group-hover:opacity-100 cursor-pointer"
+                            className="p-1 text-slate-500 hover:text-rose-400 opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity"
                             title="Eliminar snippet"
                           >
                             <X className="w-3 h-3" />
@@ -709,7 +721,11 @@ export const TerminalDrawer: React.FC<Props> = ({
               setIsSearchOpen((v) => !v);
               setTimeout(() => searchInputRef.current?.focus(), 0);
             }}
-            className={`p-1 rounded transition ${isSearchOpen ? 'bg-zinc-800 text-indigo-300' : 'hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200'}`}
+            className={`p-1.5 rounded-lg transition cursor-pointer border ${
+              isSearchOpen
+                ? 'bg-[#0c1220] text-cyan-400 border-cyan-500/40'
+                : 'hover:bg-[#0c1220] text-slate-400 hover:text-slate-200 border-transparent hover:border-[#202b3f]'
+            }`}
             title="Buscar en la salida (Ctrl+F)"
             aria-label="Buscar en la salida"
           >
@@ -720,7 +736,7 @@ export const TerminalDrawer: React.FC<Props> = ({
               type="button"
               onClick={() => onAttachToChat(lines.slice(-60).join('\n'), activeTab.lastCommand)}
               disabled={!output}
-              className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition disabled:opacity-30"
+              className="p-1.5 rounded-lg hover:bg-[#0c1220] text-slate-400 hover:text-slate-200 border border-transparent hover:border-[#202b3f] transition disabled:opacity-30 cursor-pointer"
               title="Adjuntar salida al chat"
               aria-label="Adjuntar salida al chat"
             >
@@ -731,7 +747,7 @@ export const TerminalDrawer: React.FC<Props> = ({
             type="button"
             onClick={() => downloadText(`terminal-${activeTab.id}-${Date.now()}.log`, output)}
             disabled={!output}
-            className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition disabled:opacity-30"
+            className="p-1.5 rounded-lg hover:bg-[#0c1220] text-slate-400 hover:text-slate-200 border border-transparent hover:border-[#202b3f] transition disabled:opacity-30 cursor-pointer"
             title="Guardar la salida en un archivo .log"
             aria-label="Guardar la salida en un archivo"
           >
@@ -741,7 +757,7 @@ export const TerminalDrawer: React.FC<Props> = ({
             type="button"
             onClick={copyOutput}
             disabled={!output}
-            className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition disabled:opacity-30"
+            className="p-1.5 rounded-lg hover:bg-[#0c1220] text-slate-400 hover:text-slate-200 border border-transparent hover:border-[#202b3f] transition disabled:opacity-30 cursor-pointer"
             title="Copiar la salida de la consola"
             aria-label="Copiar la salida de la consola"
           >
@@ -750,7 +766,7 @@ export const TerminalDrawer: React.FC<Props> = ({
           <button
             type="button"
             onClick={() => onClear(activeTab.id)}
-            className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition"
+            className="p-1.5 rounded-lg hover:bg-[#0c1220] text-slate-400 hover:text-slate-200 border border-transparent hover:border-[#202b3f] transition cursor-pointer"
             title="Limpiar consola"
           >
             <Trash2 className="w-3.5 h-3.5" />
@@ -759,7 +775,7 @@ export const TerminalDrawer: React.FC<Props> = ({
             <button
               type="button"
               onClick={onToggleDock}
-              className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition"
+              className="p-1.5 rounded-lg hover:bg-[#0c1220] text-slate-400 hover:text-slate-200 border border-transparent hover:border-[#202b3f] transition cursor-pointer"
               title={dock === 'bottom' ? 'Acoplar a la derecha' : 'Acoplar abajo'}
               aria-label="Cambiar posición de la terminal"
             >
@@ -770,7 +786,7 @@ export const TerminalDrawer: React.FC<Props> = ({
             <button
               type="button"
               onClick={() => setIsExpanded(!isExpanded)}
-              className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition"
+              className="p-1.5 rounded-lg hover:bg-[#0c1220] text-slate-400 hover:text-slate-200 border border-transparent hover:border-[#202b3f] transition cursor-pointer"
               title={isExpanded ? 'Reducir altura' : 'Expandir altura'}
             >
               {isExpanded ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
@@ -779,7 +795,7 @@ export const TerminalDrawer: React.FC<Props> = ({
           <button
             type="button"
             onClick={onToggle}
-            className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition"
+            className="p-1.5 rounded-lg hover:bg-[#0c1220] text-slate-400 hover:text-rose-400 border border-transparent hover:border-[#202b3f] transition cursor-pointer"
             title="Cerrar terminal"
           >
             <X className="w-3.5 h-3.5" />
@@ -789,8 +805,8 @@ export const TerminalDrawer: React.FC<Props> = ({
 
       {/* Barra de búsqueda en salida (Ctrl+F) */}
       {isSearchOpen && (
-        <div className="flex items-center gap-2 px-3 py-1 bg-zinc-900/95 border-b border-zinc-800 text-xs shrink-0">
-          <Search className="w-3.5 h-3.5 text-zinc-400" />
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-[#0a0e17]/95 border-b border-[#202b3f] text-xs shrink-0">
+          <Search className="w-3.5 h-3.5 text-cyan-400" />
           <input
             ref={searchInputRef}
             type="text"
@@ -804,17 +820,17 @@ export const TerminalDrawer: React.FC<Props> = ({
               }
             }}
             placeholder="Buscar en la salida..."
-            className="flex-1 bg-zinc-950 border border-zinc-700 rounded px-2 py-0.5 text-xs text-zinc-200 focus:outline-none focus:border-indigo-500"
+            className="flex-1 bg-[#07090e] border border-[#202b3f] rounded-lg px-2.5 py-1 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 font-mono"
           />
           {searchQuery && (
-            <span className="text-[11px] font-mono text-zinc-400">
+            <span className="text-[11px] font-mono text-slate-400">
               {matchCount} {matchCount === 1 ? 'coincidencia' : 'coincidencias'}
             </span>
           )}
           <button
             type="button"
             onClick={() => { setIsSearchOpen(false); setSearchQuery(''); }}
-            className="p-0.5 text-zinc-400 hover:text-zinc-200"
+            className="p-1 text-slate-400 hover:text-slate-200 rounded hover:bg-[#0c1220] cursor-pointer"
             title="Cerrar búsqueda"
           >
             <X className="w-3.5 h-3.5" />
@@ -829,25 +845,25 @@ export const TerminalDrawer: React.FC<Props> = ({
           const el = e.currentTarget;
           follow.current = el.scrollHeight - el.scrollTop - el.clientHeight < FOLLOW_PX;
         }}
-        className="flex-1 overflow-y-auto p-3 font-mono text-xs text-zinc-300 bg-black/40 leading-relaxed selection:bg-indigo-600/30 whitespace-pre-wrap break-all"
+        className="flex-1 overflow-y-auto p-3.5 font-mono text-xs text-slate-300 bg-[#07090e] leading-relaxed selection:bg-cyan-600/40 selection:text-white whitespace-pre-wrap break-all"
       >
         {lines.length > 0 ? (
           blockView ? (
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               {commandBlocks.map((blk) => {
                 const isCollapsed = Boolean(collapsedBlocks[blk.id]);
                 return (
-                  <div key={blk.id} className="rounded border border-zinc-800 bg-zinc-950/80 overflow-hidden">
-                    <div className="flex items-center justify-between gap-2 px-2.5 py-1 bg-zinc-900/90 border-b border-zinc-800/80">
+                  <div key={blk.id} className="rounded-xl border border-[#202b3f] bg-[#07090e] overflow-hidden shadow-sm">
+                    <div className="flex items-center justify-between gap-2 px-3 py-1.5 bg-[#0a0e17] border-b border-[#202b3f]/80">
                       <button
                         type="button"
                         onClick={() => setCollapsedBlocks((prev) => ({ ...prev, [blk.id]: !prev[blk.id] }))}
                         className="flex items-center gap-1.5 text-left min-w-0 flex-1 cursor-pointer"
                       >
-                        {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-zinc-400 shrink-0" /> : <ChevronDown className="w-3.5 h-3.5 text-zinc-400 shrink-0" />}
+                        {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" /> : <ChevronDown className="w-3.5 h-3.5 text-slate-400 shrink-0" />}
                         <span className="text-emerald-400 font-semibold truncate">$ {blk.command}</span>
                         {blk.exitCode !== undefined && (
-                          <span className={`text-[10px] px-1 rounded ${blk.exitCode === 0 ? 'bg-emerald-500/15 text-emerald-300' : 'bg-rose-500/15 text-rose-300'}`}>
+                          <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded-md font-bold ${blk.exitCode === 0 ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : 'bg-rose-500/15 text-rose-300 border border-rose-500/30'}`}>
                             {blk.exitCode === 0 ? '✓ 0' : `✗ ${blk.exitCode}`}
                           </span>
                         )}
@@ -856,7 +872,7 @@ export const TerminalDrawer: React.FC<Props> = ({
                         <button
                           type="button"
                           onClick={() => void navigator.clipboard.writeText(blk.lines.join('\n'))}
-                          className="p-0.5 text-zinc-400 hover:text-zinc-200 cursor-pointer"
+                          className="p-1 rounded text-slate-400 hover:text-slate-200 hover:bg-[#0c1220] cursor-pointer transition-colors"
                           title="Copiar salida del bloque"
                         >
                           <Copy className="w-3 h-3" />
@@ -865,7 +881,7 @@ export const TerminalDrawer: React.FC<Props> = ({
                           <button
                             type="button"
                             onClick={() => onRunCommand(blk.command, activeTab.id)}
-                            className="p-0.5 text-zinc-400 hover:text-emerald-300 cursor-pointer"
+                            className="p-1 rounded text-slate-400 hover:text-emerald-300 hover:bg-[#0c1220] cursor-pointer transition-colors"
                             title="Volver a ejecutar este comando"
                           >
                             <RotateCcw className="w-3 h-3" />
@@ -874,7 +890,7 @@ export const TerminalDrawer: React.FC<Props> = ({
                       </div>
                     </div>
                     {!isCollapsed && (
-                      <div className="p-2">
+                      <div className="p-3 bg-[#07090e]/60">
                         {blk.lines.map((line, lIdx) => (
                           <div key={lIdx}>
                             {renderAnsiLine(line, lIdx, isSearchOpen ? searchQuery : '', onPreviewFile)}
@@ -891,7 +907,7 @@ export const TerminalDrawer: React.FC<Props> = ({
               const lineClass = /^\$ /.test(line)
                 ? 'text-emerald-400 font-semibold'
                 : /^> /.test(line)
-                  ? 'text-indigo-300'
+                  ? 'text-cyan-300'
                   : !line.includes('\x1b[') && /\b(error|fail(ed)?|ERR!|fatal|exception)\b/i.test(line)
                     ? 'text-rose-300'
                     : !line.includes('\x1b[') && /\bwarn(ing)?\b/i.test(line)
@@ -905,7 +921,7 @@ export const TerminalDrawer: React.FC<Props> = ({
             })
           )
         ) : (
-          <div className="text-zinc-400 text-center py-6 font-sans text-xs [overflow-wrap:normal] break-normal">
+          <div className="text-slate-400 text-center py-8 font-sans text-xs [overflow-wrap:normal] break-normal">
             Escribe un comando abajo o selecciona una acción rápida para iniciar.
           </div>
         )}
@@ -913,9 +929,9 @@ export const TerminalDrawer: React.FC<Props> = ({
 
       {/* Búsqueda inversa en historial (Ctrl+R) */}
       {isHistorySearchOpen && history.length > 0 && (
-        <div className="border-t border-zinc-800 bg-zinc-900/95 px-2.5 py-1.5 text-xs shrink-0 space-y-1">
+        <div className="border-t border-[#202b3f] bg-[#0a0e17]/95 px-3 py-2 text-xs shrink-0 space-y-1.5 backdrop-blur-md">
           <div className="flex items-center gap-2">
-            <History className="w-3.5 h-3.5 text-indigo-400" />
+            <History className="w-3.5 h-3.5 text-cyan-400" />
             <input
               type="text"
               value={historyFilter}
@@ -932,13 +948,13 @@ export const TerminalDrawer: React.FC<Props> = ({
                 }
               }}
               placeholder="Filtrar historial (Ctrl+R)..."
-              className="flex-1 bg-zinc-950 border border-zinc-700 rounded px-2 py-0.5 text-xs font-mono text-zinc-200 focus:outline-none focus:border-indigo-500"
+              className="flex-1 bg-[#07090e] border border-[#202b3f] rounded-lg px-2.5 py-1 text-xs font-mono text-slate-200 focus:outline-none focus:border-cyan-500"
               autoFocus
             />
             <button
               type="button"
               onClick={() => setIsHistorySearchOpen(false)}
-              className="text-zinc-400 hover:text-zinc-200"
+              className="p-1 text-slate-400 hover:text-slate-200 rounded hover:bg-[#0c1220]"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -953,7 +969,7 @@ export const TerminalDrawer: React.FC<Props> = ({
                   setIsHistorySearchOpen(false);
                   inputRef.current?.focus();
                 }}
-                className="w-full text-left px-2 py-0.5 rounded font-mono text-[11px] text-zinc-300 hover:bg-zinc-800 hover:text-white truncate cursor-pointer"
+                className="w-full text-left px-2 py-1 rounded-md font-mono text-[11px] text-slate-300 hover:bg-[#0c1220] hover:text-cyan-300 truncate cursor-pointer transition-colors"
               >
                 {item}
               </button>
@@ -963,15 +979,15 @@ export const TerminalDrawer: React.FC<Props> = ({
       )}
 
       {/* Input de comandos o stdin */}
-      <form onSubmit={handleSubmit} className="flex items-center gap-2 p-2 bg-zinc-900 border-t border-zinc-800 shrink-0">
-        <span className="text-emerald-400 font-mono text-xs font-bold pl-1">
+      <form onSubmit={handleSubmit} className="flex items-center gap-2 p-2.5 bg-[#0a0e17] border-t border-[#202b3f] shrink-0">
+        <span className="text-emerald-400 font-mono text-sm font-bold pl-1.5 select-none drop-shadow-[0_0_8px_rgba(52,211,153,0.4)]">
           {running ? '>' : '$'}
         </span>
-        <div className="relative flex-1 flex items-center bg-zinc-950 border border-zinc-800 rounded focus-within:border-indigo-500 overflow-hidden">
+        <div className="relative flex-1 flex items-center bg-[#07090e] border border-[#202b3f] rounded-xl focus-within:border-cyan-500 focus-within:ring-1 focus-within:ring-cyan-500/30 overflow-hidden shadow-inner">
           {suggestion && (
             <div
               aria-hidden="true"
-              className="absolute inset-0 px-2.5 py-1 text-xs font-mono pointer-events-none whitespace-pre overflow-hidden text-zinc-600"
+              className="absolute inset-0 px-3 py-1.5 text-xs font-mono pointer-events-none whitespace-pre overflow-hidden text-slate-600"
             >
               <span className="invisible">{command}</span>
               <span>{suggestion.slice(command.length)}</span>
@@ -988,7 +1004,7 @@ export const TerminalDrawer: React.FC<Props> = ({
                 ? 'Proceso en ejecución: escribe entrada para stdin (ej. y) o Ctrl+C para detener...'
                 : 'Escribe un comando shell (Tab autocompleta, Ctrl+R historial, Ctrl+F buscar)...'
             }
-            className="w-full bg-transparent px-2.5 py-1 text-xs text-zinc-200 font-mono focus:outline-none placeholder-zinc-600 relative z-10"
+            className="w-full bg-transparent px-3 py-1.5 text-xs text-slate-100 font-mono focus:outline-none placeholder-slate-600 relative z-10"
             autoFocus
           />
         </div>
@@ -996,8 +1012,10 @@ export const TerminalDrawer: React.FC<Props> = ({
           <button
             type="button"
             onClick={() => setIsHistorySearchOpen((v) => !v)}
-            className={`p-1.5 rounded border border-zinc-800 transition cursor-pointer ${
-              isHistorySearchOpen ? 'bg-zinc-800 text-indigo-300' : 'bg-zinc-950 text-zinc-400 hover:text-zinc-200'
+            className={`p-2 rounded-xl border transition cursor-pointer ${
+              isHistorySearchOpen
+                ? 'bg-[#0c1220] text-cyan-400 border-cyan-500/40'
+                : 'bg-[#07090e] text-slate-400 hover:text-slate-200 border-[#202b3f] hover:border-slate-600'
             }`}
             title="Buscar en historial (Ctrl+R)"
             aria-label="Buscar en historial"
@@ -1009,7 +1027,7 @@ export const TerminalDrawer: React.FC<Props> = ({
           <>
             <button
               type="submit"
-              className="flex items-center gap-1 px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded text-xs font-medium transition cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0c1220] hover:bg-slate-700 text-slate-200 border border-[#202b3f] rounded-xl text-xs font-semibold transition cursor-pointer"
               title="Enviar línea a stdin"
             >
               <CornerDownLeft className="w-3 h-3" />
@@ -1018,7 +1036,7 @@ export const TerminalDrawer: React.FC<Props> = ({
             <button
               type="button"
               onClick={() => onStop(activeTab.id)}
-              className="flex items-center gap-1 px-3 py-1 bg-red-600 hover:bg-red-500 text-white rounded text-xs font-medium transition cursor-pointer"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-semibold shadow-md transition cursor-pointer"
             >
               <Square className="w-3 h-3 fill-current" />
               <span>Detener</span>
@@ -1027,7 +1045,7 @@ export const TerminalDrawer: React.FC<Props> = ({
         ) : (
           <button
             type="submit"
-            className="flex items-center gap-1 px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-xs font-medium transition cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-slate-950 font-bold rounded-xl text-xs shadow-md shadow-cyan-950/50 transition cursor-pointer"
           >
             <Play className="w-3 h-3 fill-current" />
             <span>Ejecutar</span>

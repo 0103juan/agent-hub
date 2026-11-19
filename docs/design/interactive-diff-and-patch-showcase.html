@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentHub // Interactive Git Diff &amp; Patch Showcase</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-void: #07090e;
+      --bg-carbon: #0a0e17;
+      --bg-surface: #0c1220;
+      --bg-card: #0e131f;
+      --border-subtle: #202b3f;
+      --border-strong: #202b3f;
+      --cyan-primary: #06b6d4;
+      --cyan-glow: rgba(6, 182, 212, 0.45);
+      --emerald-accent: #10b981;
+      --amber-accent: #f59e0b;
+      --rose-accent: #f43f5e;
+      --text-main: #f8fafc;
+      --text-muted: #cbd5e1;
+      --text-dim: #94a3b8;
+      --text-faint: #64748b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-void);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .font-mono { font-family: 'Fira Code', monospace; }
+
+    .grid-bg {
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(6, 182, 212, 0.08), transparent 60%),
+        linear-gradient(to right, rgba(22, 32, 53, 0.35) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(22, 32, 53, 0.35) 1px, transparent 1px);
+      background-size: 100% 100%, 28px 28px, 28px 28px;
+    }
+
+    @keyframes modalPop {
+      0% { opacity: 0; transform: scale(0.96) translateY(6px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .animate-modal-pop {
+      animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 10.5px;
+      font-family: 'Fira Code', monospace;
+      font-weight: 600;
+      border: 1px solid;
+    }
+    .badge-cyan { background: rgba(6, 182, 212, 0.12); color: #67e8f9; border-color: rgba(6, 182, 212, 0.35); }
+    .badge-emerald { background: rgba(16, 185, 129, 0.12); color: #6ee7b7; border-color: rgba(16, 185, 129, 0.35); }
+    .badge-amber { background: rgba(245, 158, 11, 0.12); color: #fcd34d; border-color: rgba(245, 158, 11, 0.35); }
+    .badge-rose { background: rgba(244, 63, 94, 0.12); color: #fda4af; border-color: rgba(244, 63, 94, 0.35); }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+    .btn:active { transform: scale(0.97); }
+
+    .btn-primary { background: var(--cyan-primary); color: #07090e; font-weight: 700; box-shadow: 0 0 14px var(--cyan-glow); }
+    .btn-secondary { background: #0c1220; color: var(--text-muted); border-color: var(--border-subtle); }
+    .btn-secondary:hover { background: #162035; color: #fff; border-color: var(--cyan-primary); }
+
+    .hud-card {
+      background: var(--bg-carbon);
+      border: 1px solid var(--border-strong);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--cyan-primary); }
+  </style>
+</head>
+<body class="grid-bg">
+  <div style="max-width: 1340px; margin: 0 auto; padding: 24px 20px;">
+
+    <!-- Top Master Bar -->
+    <header style="background: var(--bg-carbon); border: 1px solid var(--border-strong); border-radius: 14px; padding: 16px 20px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(6, 182, 212, 0.12); border: 1.5px solid var(--cyan-primary); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 16px var(--cyan-glow);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--cyan-primary)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="18" cy="18" r="3"></circle>
+            <circle cx="6" cy="6" r="3"></circle>
+            <path d="M13 6h3a2 2 0 0 1 2 2v7"></path>
+            <line x1="6" y1="9" x2="6" y2="21"></line>
+          </svg>
+        </div>
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <h1 style="font-size: 16px; font-weight: 800;">AgentHub // Interactive Git Diff &amp; Rollback Showcase</h1>
+            <span class="badge badge-emerald">+18 / −6</span>
+            <span class="badge badge-cyan">Split &amp; Unified</span>
+          </div>
+          <p style="color: var(--text-dim); font-size: 11.5px;">
+            Inspección interactiva de diferencias Git con vistas dividida y unificada, exportación a archivo .diff y confirmación de rollback segura.
+          </p>
+        </div>
+      </div>
+
+      <!-- Live Action Trigger -->
+      <div>
+        <button class="btn btn-primary" onclick="openDiffModal()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M13 6h3a2 2 0 0 1 2 2v7"></path><line x1="6" y1="9" x2="6" y2="21"></line></svg>
+          <span>Abrir Visor Diff Interactivo</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Cards -->
+    <main style="display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 24px;">
+
+      <!-- Card 1: Features -->
+      <div class="hud-card" style="padding: 24px;">
+        <h2 style="font-size: 14px; font-weight: 800; color: var(--cyan-primary); font-family: 'Fira Code', monospace; margin-bottom: 12px;">
+          01 // MOTOR DE DIFERENCIAS HUNK
+        </h2>
+        <p style="font-size: 12px; color: var(--text-dim); margin-bottom: 16px;">
+          Permite revisar exactamente qué cambió antes de confirmar o fusionar ramas de agentes autónomos:
+        </p>
+        <ul style="padding-left: 18px; space-y: 8px; font-size: 12px; color: var(--text-muted); line-height: 1.6;">
+          <li><strong>Vista Split:</strong> Comparación sincronizada entre el estado <code class="font-mono text-rose-400">HEAD</code> y el <code class="font-mono text-emerald-400">Actual</code>.</li>
+          <li><strong>Vista Unified:</strong> Formato clásico de parche Git con bloques <code class="font-mono text-cyan-400">@@ ... @@</code>.</li>
+          <li><strong>Descarga de Parches:</strong> Generación instantánea de archivos <code class="font-mono">.diff</code> listos para aplicar vía terminal.</li>
+        </ul>
+      </div>
+
+      <!-- Card 2: Revert Safety Guard -->
+      <div class="hud-card" style="padding: 24px;">
+        <h2 style="font-size: 14px; font-weight: 800; color: var(--rose-accent); font-family: 'Fira Code', monospace; margin-bottom: 12px;">
+          02 // GUARDA DE ROLLBACK SEGURO
+        </h2>
+        <p style="font-size: 12px; color: var(--text-dim); margin-bottom: 16px;">
+          Mecanismo de reversión por archivo con doble verificación en dos pasos:
+        </p>
+        <div style="background: #1f1118; border: 1px solid var(--rose-accent); border-radius: 8px; padding: 12px; margin-bottom: 14px;">
+          <div style="font-weight: 700; color: #fda4af; font-size: 11.5px;">Doble Confirmación Visual</div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">
+            Al pulsar "Revertir", se despliega una barra de confirmación con opciones explícitas de "Sí, revertir" y "Cancelar", eliminando descartes accidentales.
+          </div>
+        </div>
+        <button class="btn btn-secondary" style="width: 100%; justify-content: center;" onclick="openDiffModal()">
+          Probar en el Modal Interactivo →
+        </button>
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- Simulated InteractiveDiffModal -->
+  <div id="modalDiff" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); z-index: 500; align-items: center; justify-content: center; padding: 20px;" onclick="if(event.target===this) closeDiffModal()">
+    <div class="animate-modal-pop" style="background: var(--bg-card); border: 1px solid var(--border-strong); border-radius: 16px; width: 100%; max-width: 960px; height: 80vh; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.85); display: flex; flex-direction: column; overflow: hidden;">
+      
+      <!-- Modal Header -->
+      <div style="padding: 12px 18px; border-bottom: 1px solid var(--border-strong); background: rgba(10,13,22,0.95); display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="padding: 6px; border-radius: 8px; background: rgba(6,182,212,0.15); border: 1px solid rgba(6,182,212,0.3); color: var(--cyan-primary);">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M13 6h3a2 2 0 0 1 2 2v7"></path><line x1="6" y1="9" x2="6" y2="21"></line></svg>
+          </div>
+          <span class="font-mono font-bold" style="color: #fff; font-size: 12px;">src/host/safe-path.ts</span>
+          <span class="badge badge-cyan">Diff HEAD ↔ Actual</span>
+          <span class="badge" style="background: #07090e; border-color: var(--border-strong);">
+            <span style="color: var(--emerald-accent); font-weight: 700;">+18</span>
+            <span style="color: var(--rose-accent); font-weight: 700; margin-left: 4px;">−6</span>
+          </span>
+        </div>
+
+        <!-- Header Actions -->
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <!-- View mode toggle -->
+          <div style="background: #07090e; border: 1px solid var(--border-strong); border-radius: 8px; padding: 2px; display: flex;">
+            <button id="btnSplit" style="padding: 4px 10px; border-radius: 6px; font-size: 11px; font-family: 'Fira Code', monospace; border: none; cursor: pointer; background: #131927; color: var(--cyan-primary); border: 1px solid rgba(6,182,212,0.4);" onclick="setDiffMode('split')">Split</button>
+            <button id="btnUnified" style="padding: 4px 10px; border-radius: 6px; font-size: 11px; font-family: 'Fira Code', monospace; border: none; cursor: pointer; background: transparent; color: var(--text-dim);" onclick="setDiffMode('unified')">Unified</button>
+          </div>
+
+          <button class="btn btn-secondary" style="font-size: 10.5px; padding: 4px 10px;" onclick="downloadDiff()">Descargar .diff</button>
+          <button class="btn btn-secondary" style="font-size: 10.5px; padding: 4px 10px;" onclick="copyDiff()">Copiar</button>
+          
+          <button id="btnRevert" class="btn" style="background: rgba(244,63,94,0.15); border: 1px solid rgba(244,63,94,0.35); color: #fda4af; font-size: 10.5px; padding: 4px 10px;" onclick="showRevertConfirm()">Revertir</button>
+          <div id="confirmRevertBar" style="display: none; align-items: center; gap: 6px; background: rgba(244,63,94,0.25); border: 1px solid var(--rose-accent); padding: 2px 8px; border-radius: 6px;">
+            <span style="font-size: 10.5px; color: #fda4af;">¿Confirmar?</span>
+            <button style="background: var(--rose-accent); color: #fff; border: none; border-radius: 4px; padding: 2px 6px; font-size: 10px; font-weight: 700; cursor: pointer;" onclick="doRevert()">Sí</button>
+            <button style="background: none; border: none; color: var(--text-dim); cursor: pointer;" onclick="cancelRevert()">✕</button>
+          </div>
+
+          <button style="background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 4px;" onclick="closeDiffModal()">✕</button>
+        </div>
+      </div>
+
+      <!-- Diff Body Container -->
+      <div id="diffBody" style="flex: 1; overflow-y: auto; background: #05070c; font-family: 'Fira Code', monospace; font-size: 11.5px; line-height: 1.6;">
+        <!-- Split View Render -->
+        <div id="viewSplit" style="display: grid; grid-template-columns: 1fr 1fr; min-height: 100%;">
+          <!-- Left Column (HEAD) -->
+          <div style="border-right: 1px solid var(--border-strong); padding: 12px;">
+            <div style="color: var(--rose-accent); font-weight: 700; font-size: 10.5px; margin-bottom: 8px;">ORIGINAL (HEAD)</div>
+            <div style="display: flex; gap: 10px; color: var(--text-faint);"><span>80</span><span>function resolveCwd(path) {</span></div>
+            <div style="display: flex; gap: 10px; background: rgba(244,63,94,0.15); border-left: 2px solid var(--rose-accent); color: #fda4af; padding: 2px 6px; border-radius: 3px;"><span>81</span><span>-   return path || process.cwd();</span></div>
+            <div style="display: flex; gap: 10px; color: var(--text-faint);"><span>82</span><span>}</span></div>
+          </div>
+          <!-- Right Column (Actual) -->
+          <div style="padding: 12px;">
+            <div style="color: var(--emerald-accent); font-weight: 700; font-size: 10.5px; margin-bottom: 8px;">ACTUAL (MODIFICADO)</div>
+            <div style="display: flex; gap: 10px; color: var(--text-faint);"><span>80</span><span>function resolveCwd(path) {</span></div>
+            <div style="display: flex; gap: 10px; background: rgba(16,185,129,0.15); border-left: 2px solid var(--emerald-accent); color: #6ee7b7; font-weight: 700; padding: 2px 6px; border-radius: 3px;"><span>81</span><span>+   const safe = resolveSafeCwd(path);</span></div>
+            <div style="display: flex; gap: 10px; background: rgba(16,185,129,0.15); border-left: 2px solid var(--emerald-accent); color: #6ee7b7; font-weight: 700; padding: 2px 6px; border-radius: 3px;"><span>82</span><span>+   return safe;</span></div>
+            <div style="display: flex; gap: 10px; color: var(--text-faint);"><span>83</span><span>}</span></div>
+          </div>
+        </div>
+
+        <!-- Unified View Render (Initially hidden) -->
+        <div id="viewUnified" style="display: none; padding: 16px;">
+          <div style="background: rgba(8,47,73,0.4); border-left: 3px solid var(--cyan-primary); color: #38bdf8; font-weight: 700; padding: 4px 10px; margin-bottom: 8px; border-radius: 4px;">@@ -80,3 +80,4 @@ function resolveCwd</div>
+          <div style="color: var(--text-faint); padding: 2px 8px;"> function resolveCwd(path) {</div>
+          <div style="background: rgba(244,63,94,0.15); border-left: 3px solid var(--rose-accent); color: #fda4af; padding: 2px 8px;">-   return path || process.cwd();</div>
+          <div style="background: rgba(16,185,129,0.15); border-left: 3px solid var(--emerald-accent); color: #6ee7b7; font-weight: 700; padding: 2px 8px;">+   const safe = resolveSafeCwd(path);</div>
+          <div style="background: rgba(16,185,129,0.15); border-left: 3px solid var(--emerald-accent); color: #6ee7b7; font-weight: 700; padding: 2px 8px;">+   return safe;</div>
+          <div style="color: var(--text-faint); padding: 2px 8px;"> }</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openDiffModal() {
+      document.getElementById('modalDiff').style.display = 'flex';
+    }
+    function closeDiffModal() {
+      document.getElementById('modalDiff').style.display = 'none';
+      cancelRevert();
+    }
+
+    function setDiffMode(mode) {
+      const bSplit = document.getElementById('btnSplit');
+      const bUnified = document.getElementById('btnUnified');
+      const vSplit = document.getElementById('viewSplit');
+      const vUnified = document.getElementById('viewUnified');
+
+      if (mode === 'split') {
+        bSplit.style.background = '#131927';
+        bSplit.style.color = 'var(--cyan-primary)';
+        bSplit.style.border = '1px solid rgba(6,182,212,0.4)';
+        bUnified.style.background = 'transparent';
+        bUnified.style.color = 'var(--text-dim)';
+        bUnified.style.border = 'none';
+        vSplit.style.display = 'grid';
+        vUnified.style.display = 'none';
+      } else {
+        bUnified.style.background = '#131927';
+        bUnified.style.color = 'var(--cyan-primary)';
+        bUnified.style.border = '1px solid rgba(6,182,212,0.4)';
+        bSplit.style.background = 'transparent';
+        bSplit.style.color = 'var(--text-dim)';
+        bSplit.style.border = 'none';
+        vSplit.style.display = 'none';
+        vUnified.style.display = 'block';
+      }
+    }
+
+    function showRevertConfirm() {
+      document.getElementById('btnRevert').style.display = 'none';
+      document.getElementById('confirmRevertBar').style.display = 'flex';
+    }
+    function cancelRevert() {
+      document.getElementById('btnRevert').style.display = 'inline-flex';
+      document.getElementById('confirmRevertBar').style.display = 'none';
+    }
+    function doRevert() {
+      alert('Archivo revertido con éxito al estado HEAD.');
+      closeDiffModal();
+    }
+
+    function downloadDiff() {
+      const content = `diff --git a/src/host/safe-path.ts b/src/host/safe-path.ts\n--- a/src/host/safe-path.ts\n+++ b/src/host/safe-path.ts\n@@ -80,3 +80,4 @@\n function resolveCwd(path) {\n-   return path || process.cwd();\n+   const safe = resolveSafeCwd(path);\n+   return safe;\n }`;
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'safe-path.diff';
+      a.click();
+    }
+
+    function copyDiff() {
+      navigator.clipboard.writeText('diff --git ...').then(() => alert('Diff copiado al portapapeles.'));
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeDiffModal();
+    });
+  </script>
+</body>
+</html>

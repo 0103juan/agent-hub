@@ -1,0 +1,183 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 620" width="100%" height="100%">
+  <defs>
+    <radialGradient id="msgBgGlow" cx="50%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#141c2e" stop-opacity="0.9" />
+      <stop offset="60%" stop-color="#0a0e17" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#07090e" stop-opacity="1" />
+    </radialGradient>
+    <linearGradient id="userBubbleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e1b4b" stop-opacity="0.7" />
+      <stop offset="50%" stop-color="#0e131f" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#07090e" stop-opacity="1" />
+    </linearGradient>
+    <linearGradient id="agentBubbleGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#131927" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#0e131f" stop-opacity="0.98" />
+    </linearGradient>
+    <filter id="msgShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#000000" flood-opacity="0.5" />
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="960" height="620" fill="url(#msgBgGlow)" />
+
+  <!-- Title & Header -->
+  <g transform="translate(40, 24)">
+    <text x="0" y="20" fill="#f1f5f9" font-family="'Plus Jakarta Sans', sans-serif" font-size="15" font-weight="800" letter-spacing="1">ANATOMÍA DEL STREAM DE MENSAJES // HUD MESSAGE LIST</text>
+    <text x="0" y="38" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="11">CICLO DE TURNO: RAZONAMIENTO · TOOL CALLS · RESPUESTA · OPCIONES DE DECISIÓN · DIFF DE CÓDIGO</text>
+  </g>
+
+  <!-- 1. USER MESSAGE (Right-aligned feel) -->
+  <g transform="translate(260, 75)">
+    <rect width="660" height="74" rx="14" fill="url(#userBubbleGrad)" stroke="#4f46e5" stroke-width="1.2" stroke-opacity="0.5" filter="url(#msgShadow)" />
+    
+    <!-- User Header meta -->
+    <g transform="translate(16, 14)">
+      <circle cx="8" cy="8" r="8" fill="#6366f1" fill-opacity="0.2" />
+      <text x="8" y="11" fill="#a5b4fc" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" font-weight="700" text-anchor="middle">TÚ</text>
+      <text x="24" y="12" fill="#818cf8" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="700">Usuario</text>
+      <text x="80" y="12" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="10">23:40 · 18 tokens</text>
+
+      <!-- Action buttons -->
+      <g transform="translate(560, -2)">
+        <rect width="45" height="18" rx="4" fill="#202b3f" stroke="#334155" stroke-width="0.8" />
+        <text x="22" y="12" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="9" text-anchor="middle">Editar</text>
+      </g>
+    </g>
+
+    <!-- Content -->
+    <text x="16" y="52" fill="#e2e8f0" font-family="'Plus Jakarta Sans', sans-serif" font-size="12">
+      "Por favor analiza la estructura de costos y crea un prototipo táctico para el Command Center."
+    </text>
+  </g>
+
+  <!-- 2. AGENT MESSAGE (Complex multi-stage bubble) -->
+  <g transform="translate(40, 165)">
+    <rect width="880" height="420" rx="16" fill="url(#agentBubbleGrad)" stroke="#202b3f" stroke-width="1.2" filter="url(#msgShadow)" />
+
+    <!-- Agent Header Bar -->
+    <g transform="translate(20, 16)">
+      <!-- Provider & Model Badge -->
+      <rect x="0" y="0" width="60" height="20" rx="5" fill="#f59e0b" fill-opacity="0.12" stroke="#f59e0b" stroke-width="0.8" />
+      <text x="30" y="13" fill="#fcd34d" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" text-anchor="middle">CLAUDE</text>
+      
+      <text x="70" y="14" fill="#f1f5f9" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="700">claude-3-5-sonnet-20241022</text>
+      
+      <!-- Role Badge -->
+      <rect x="250" y="0" width="85" height="20" rx="5" fill="#a855f7" fill-opacity="0.15" stroke="#a855f7" stroke-width="0.8" />
+      <text x="292" y="13" fill="#d8b4fe" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" text-anchor="middle">DISEÑADOR</text>
+
+      <!-- Turn Stats -->
+      <text x="350" y="14" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="10">23:41 · 2.4s · 340 palabras · $0.0084 USD</text>
+
+      <!-- Action Buttons Toolbar -->
+      <g transform="translate(680, 0)">
+        <rect x="0" y="0" width="48" height="20" rx="5" fill="#131927" stroke="#202b3f" stroke-width="0.8" />
+        <text x="24" y="13" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="9" text-anchor="middle">Copiar</text>
+        
+        <rect x="54" y="0" width="36" height="20" rx="5" fill="#131927" stroke="#202b3f" stroke-width="0.8" />
+        <text x="72" y="13" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="9" text-anchor="middle">Pin</text>
+
+        <rect x="96" y="0" width="58" height="20" rx="5" fill="#131927" stroke="#202b3f" stroke-width="0.8" />
+        <text x="125" y="13" fill="#38bdf8" font-family="'JetBrains Mono', monospace" font-size="9" text-anchor="middle">Bifurcar</text>
+      </g>
+    </g>
+
+    <!-- Sub-block A: Execution Process & Deep Thinking -->
+    <g transform="translate(20, 50)">
+      <rect width="840" height="74" rx="8" fill="#090d16" stroke="#1c2638" stroke-width="1" />
+      <path d="M12 18 L16 14 L12 10" fill="none" stroke="#64748b" stroke-width="1.5" />
+      <text x="24" y="16" fill="#cbd5e1" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="700">Proceso de Ejecución</text>
+      <text x="165" y="16" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="10">· 3 herramientas ejecutadas · 4,200 tokens razonamiento</text>
+      
+      <!-- Tool step pills -->
+      <g transform="translate(24, 30)">
+        <rect x="0" y="0" width="140" height="24" rx="6" fill="#131927" stroke="#202b3f" stroke-width="0.8" />
+        <circle cx="12" cy="12" r="3" fill="#38bdf8" />
+        <text x="22" y="15" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="9">read_file: TacticalHud</text>
+
+        <rect x="150" y="0" width="150" height="24" rx="6" fill="#131927" stroke="#202b3f" stroke-width="0.8" />
+        <circle cx="162" cy="12" r="3" fill="#34d399" />
+        <text x="172" y="15" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="9">edit_file: Webview</text>
+
+        <rect x="310" y="0" width="165" height="24" rx="6" fill="#131927" stroke="#202b3f" stroke-width="0.8" />
+        <circle cx="322" cy="12" r="3" fill="#a855f7" />
+        <text x="332" y="15" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="9">npm test: 11 tests pass</text>
+      </g>
+    </g>
+
+    <!-- Sub-block B: Markdown Answer Body -->
+    <g transform="translate(20, 138)">
+      <text x="0" y="16" fill="#f1f5f9" font-family="'Plus Jakarta Sans', sans-serif" font-size="13" font-weight="700">
+        He completado la especificación visual y los componentes del Command Center:
+      </text>
+      <text x="0" y="38" fill="#cbd5e1" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" leading="1.6">
+        • Se integró el dial orbital animado con cuotas de cuentas y MCPs conectados en tiempo real.
+      </text>
+      <text x="0" y="58" fill="#cbd5e1" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" leading="1.6">
+        • La cinta de avisos (marquee ticker) sincroniza eventos con saltos interactivos directos al chat.
+      </text>
+    </g>
+
+    <!-- Sub-block C: Interactive Decision Card (QuestionOptions) -->
+    <g transform="translate(20, 215)">
+      <rect width="840" height="115" rx="10" fill="#0b0f19" stroke="#6366f1" stroke-width="1.2" stroke-opacity="0.4" />
+      <g transform="translate(14, 14)">
+        <polygon points="6,2 8,6 12,8 8,10 6,14 4,10 0,8 4,6" fill="#818cf8" />
+        <text x="18" y="10" fill="#c7d2fe" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="700">
+          ¿Cuál es la siguiente prioridad visual que deseas abordar?
+        </text>
+
+        <!-- Option 1 (Recommended) -->
+        <g transform="translate(0, 22)">
+          <rect width="812" height="30" rx="6" fill="#131927" stroke="#3730a3" stroke-width="0.8" />
+          <rect x="8" y="6" width="18" height="18" rx="4" fill="#312e81" />
+          <text x="17" y="18" fill="#c7d2fe" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" text-anchor="middle">1</text>
+          <text x="34" y="18" fill="#f1f5f9" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="600">
+            Perfeccionar MessageList y burbujas de ejecución del chat
+          </text>
+          <rect x="680" y="6" width="90" height="18" rx="4" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="0.8" />
+          <text x="725" y="18" fill="#6ee7b7" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" text-anchor="middle">RECOMENDADO</text>
+        </g>
+
+        <!-- Option 2 -->
+        <g transform="translate(0, 56)">
+          <rect width="812" height="28" rx="6" fill="#090d16" stroke="#202b3f" stroke-width="0.8" />
+          <rect x="8" y="5" width="18" height="18" rx="4" fill="#202b3f" />
+          <text x="17" y="17" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" text-anchor="middle">2</text>
+          <text x="34" y="17" fill="#cbd5e1" font-family="'Plus Jakarta Sans', sans-serif" font-size="11">
+            Rediseñar el Explorador de Archivos de Proyecto (ProjectFilesSidebar)
+          </text>
+        </g>
+      </g>
+    </g>
+
+    <!-- Sub-block D: Code Checkpoint & File Rollback -->
+    <g transform="translate(20, 345)">
+      <line x1="0" y1="0" x2="840" y2="0" stroke="#1c2638" stroke-width="1" />
+      <g transform="translate(0, 12)">
+        <text x="0" y="12" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="10">
+          ARCHIVOS MODIFICADOS EN ESTE TURNO (2):
+        </text>
+
+        <!-- File Chip 1 -->
+        <rect x="230" y="-3" width="170" height="22" rx="5" fill="#131927" stroke="#202b3f" stroke-width="0.8" />
+        <circle cx="242" cy="8" r="3" fill="#34d399" />
+        <text x="252" y="11" fill="#e2e8f0" font-family="'JetBrains Mono', monospace" font-size="9">TacticalHudView.tsx</text>
+
+        <!-- File Chip 2 -->
+        <rect x="410" y="-3" width="170" height="22" rx="5" fill="#131927" stroke="#202b3f" stroke-width="0.8" />
+        <circle cx="422" cy="8" r="3" fill="#34d399" />
+        <text x="432" y="11" fill="#e2e8f0" font-family="'JetBrains Mono', monospace" font-size="9">TelemetryBar.tsx</text>
+
+        <!-- Rollback button -->
+        <g transform="translate(730, -3)">
+          <rect width="110" height="22" rx="5" fill="#78350f" fill-opacity="0.3" stroke="#f59e0b" stroke-width="0.8" />
+          <text x="55" y="12" fill="#fbbf24" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" text-anchor="middle">↺ Deshacer turno</text>
+        </g>
+      </g>
+    </g>
+
+  </g>
+</svg>

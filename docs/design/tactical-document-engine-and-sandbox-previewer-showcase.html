@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentHub • Motor Táctico de Documentos & Sandbox Multi-Viewport</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            tactical: {
+              base: '#07090e',
+              card: '#0a0e17',
+              inset: '#0c1220',
+              hover: '#162035',
+              border: '#202b3f',
+              cyan: '#06b6d4',
+              cyanGlow: '#22d3ee',
+              emerald: '#10b981',
+              amber: '#f59e0b'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #07090e;
+      color: #f8fafc;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scroll::-webkit-scrollbar-track { background: #07090e; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #202b3f; border-radius: 4px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: #06b6d4; }
+  </style>
+</head>
+<body class="h-full flex flex-col overflow-hidden select-none">
+
+  <!-- HUD Top Bar -->
+  <header class="h-14 bg-[#0a0e17] border-b border-[#202b3f] flex items-center justify-between px-4 shrink-0 z-30">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500/20 to-blue-500/10 border border-cyan-500/40 flex items-center justify-center text-cyan-400 font-bold shadow-md shadow-cyan-500/10">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold tracking-wider text-slate-100 font-mono">AGENTHUB DOCS ENGINE</span>
+          <span class="px-2 py-0.5 rounded-full text-[9px] font-mono bg-cyan-500/15 border border-cyan-500/30 text-cyan-300">SPEC #58</span>
+          <span class="px-2 py-0.5 rounded-full text-[9px] font-mono bg-emerald-500/15 border border-emerald-500/30 text-emerald-300">ZERO REGRESSION</span>
+        </div>
+        <p class="text-[10px] text-slate-400 font-mono">Workspace: C:/Users/juan0/Documents/GitHub/portafolio/agent-hub</p>
+      </div>
+    </div>
+
+    <!-- Right Quick Links / Actions -->
+    <div class="flex items-center gap-2">
+      <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#0c1220] border border-[#202b3f] text-[11px] font-mono text-slate-300">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
+        <span>Anti-System32 Shield: Active</span>
+      </div>
+      <a href="master-design-portal-and-component-gallery-showcase.html" class="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#0c1220] hover:bg-[#162035] border border-[#202b3f] hover:border-cyan-500/40 text-[11px] text-cyan-300 font-medium transition">
+        <span>← Portal Maestro</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Workstation Layout -->
+  <main class="flex-1 min-h-0 flex overflow-hidden">
+
+    <!-- ================= LEFT SIDEBAR: DOCUMENT EXPLORER ================= -->
+    <aside class="w-72 bg-[#0a0e17] border-r border-[#202b3f] flex flex-col shrink-0">
+      <!-- Search & Filters -->
+      <div class="p-3 border-b border-[#202b3f] space-y-2">
+        <div class="relative">
+          <svg class="w-3.5 h-3.5 text-cyan-400 absolute left-2.5 top-1/2 -translate-y-1/2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input
+            id="search-input"
+            type="text"
+            placeholder="Buscar documento..."
+            class="w-full bg-[#07090e] border border-[#202b3f] rounded-lg pl-8 pr-2.5 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500/80 font-mono transition"
+            oninput="filterFiles()"
+          />
+        </div>
+        <!-- Taxonomy Pills -->
+        <div class="flex flex-wrap gap-1 text-[10px]">
+          <button onclick="setFilter('all')" id="filter-all" class="filter-chip px-2 py-0.5 rounded-full border bg-cyan-500/20 border-cyan-500/50 text-cyan-300 font-semibold transition">Todos</button>
+          <button onclick="setFilter('generated')" id="filter-generated" class="filter-chip px-2 py-0.5 rounded-full border border-[#202b3f] bg-[#07090e]/60 text-slate-400 hover:text-slate-200 transition">Generados</button>
+          <button onclick="setFilter('markdown')" id="filter-markdown" class="filter-chip px-2 py-0.5 rounded-full border border-[#202b3f] bg-[#07090e]/60 text-slate-400 hover:text-slate-200 transition">Markdown</button>
+          <button onclick="setFilter('html')" id="filter-html" class="filter-chip px-2 py-0.5 rounded-full border border-[#202b3f] bg-[#07090e]/60 text-slate-400 hover:text-slate-200 transition">HTML</button>
+        </div>
+      </div>
+
+      <!-- File List -->
+      <div class="flex-1 overflow-y-auto custom-scroll p-2 space-y-1" id="file-list">
+        <!-- Rendered via JS -->
+      </div>
+
+      <!-- Quick Metrics Footer -->
+      <div class="p-2.5 border-t border-[#202b3f] bg-[#07090e]/80 text-[10px] font-mono text-slate-500 flex items-center justify-between">
+        <span id="file-count-indicator">8 documentos</span>
+        <span class="text-cyan-400 font-semibold">220 WPM calc</span>
+      </div>
+    </aside>
+
+    <!-- ================= CENTER & RIGHT: DOCUMENT WORKSTATION ================= -->
+    <section class="flex-1 min-w-0 flex flex-col bg-[#07090e]">
+
+      <!-- Action & Mode Toolbar -->
+      <div class="h-11 bg-[#0a0e17] border-b border-[#202b3f] flex items-center justify-between px-3 shrink-0">
+        <div class="flex items-center gap-2 min-w-0">
+          <svg class="w-3.5 h-3.5 text-cyan-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <span id="active-filename" class="font-mono text-xs font-semibold text-slate-200 truncate">.agent-hub/experience.md</span>
+          <span id="save-status-badge" class="px-2 py-0.5 rounded-full text-[9px] font-mono bg-emerald-500/15 border border-emerald-500/30 text-emerald-300">Al día</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+          <!-- Tri-Mode Segment Switcher -->
+          <div class="flex items-center bg-[#0c1220] border border-[#202b3f] rounded-lg p-0.5">
+            <button onclick="setMode('edit')" id="mode-edit" class="mode-btn px-2.5 py-1 rounded text-[11px] font-medium text-slate-400 hover:text-slate-200 transition flex items-center gap-1">
+              <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+              <span>Editar</span>
+            </button>
+            <button onclick="setMode('split')" id="mode-split" class="mode-btn px-2.5 py-1 rounded text-[11px] font-semibold bg-cyan-500/20 text-cyan-300 shadow-sm transition flex items-center gap-1">
+              <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
+              <span>Dividido</span>
+            </button>
+            <button onclick="setMode('preview')" id="mode-preview" class="mode-btn px-2.5 py-1 rounded text-[11px] font-medium text-slate-400 hover:text-slate-200 transition flex items-center gap-1">
+              <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <span>Vista previa</span>
+            </button>
+          </div>
+
+          <div class="w-[1px] h-4 bg-[#202b3f] mx-1"></div>
+
+          <button onclick="copyContent()" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-[#162035] transition" title="Copiar al portapapeles">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+          <button onclick="saveDocument()" class="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-medium transition shadow-md shadow-emerald-950/30">
+            <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            <span>Guardar</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Markdown AST Formatting Toolbar (Shown when markdown is active) -->
+      <div id="format-toolbar" class="h-9 bg-[#07090e] border-b border-[#202b3f] flex items-center px-3 gap-1 shrink-0 text-slate-400 text-xs">
+        <button onclick="insertSyntax('**', '**')" class="p-1 hover:text-slate-100 hover:bg-[#162035] rounded font-bold transition" title="Negrita">B</button>
+        <button onclick="insertSyntax('_', '_')" class="p-1 hover:text-slate-100 hover:bg-[#162035] rounded italic transition" title="Cursiva">I</button>
+        <button onclick="prefixLine('## ')" class="px-1.5 py-0.5 hover:text-cyan-300 hover:bg-[#162035] rounded font-mono font-bold transition" title="Encabezado H2">H2</button>
+        <button onclick="prefixLine('- ')" class="px-1.5 py-0.5 hover:text-slate-100 hover:bg-[#162035] rounded transition" title="Lista">• Lista</button>
+        <button onclick="prefixLine('- [ ] ')" class="px-1.5 py-0.5 hover:text-slate-100 hover:bg-[#162035] rounded transition" title="Tareas">☑ Tarea</button>
+        <button onclick="prefixLine('> ')" class="px-1.5 py-0.5 hover:text-slate-100 hover:bg-[#162035] rounded transition" title="Cita">” Cita</button>
+        <button onclick="insertSyntax('`', '`')" class="px-1.5 py-0.5 hover:text-slate-100 hover:bg-[#162035] rounded font-mono transition" title="Código">&lt;/&gt;</button>
+        <button onclick="insertSyntax('```typescript\n', '\n```')" class="px-1.5 py-0.5 hover:text-slate-100 hover:bg-[#162035] rounded font-mono transition" title="Bloque Código">Bloque</button>
+
+        <div class="ml-auto flex items-center gap-2">
+          <select id="outline-select" onchange="jumpToSection(this.value)" class="bg-[#0c1220] border border-[#202b3f] rounded px-2 py-0.5 text-[10px] text-cyan-300 font-mono focus:outline-none">
+            <option value="">📑 Ir a sección (TOC)...</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Dual Split Editor & Preview Grid -->
+      <div id="content-grid" class="flex-1 min-h-0 grid grid-cols-2 divide-x divide-[#202b3f]">
+
+        <!-- Left: Code / Markdown Textarea -->
+        <div id="editor-pane" class="h-full flex flex-col min-h-0">
+          <textarea
+            id="editor-textarea"
+            class="flex-1 w-full bg-[#07090e] p-4 text-xs font-mono text-slate-200 leading-relaxed resize-none focus:outline-none custom-scroll select-text"
+            oninput="onContentEdited()"
+            spellcheck="false"
+          ></textarea>
+        </div>
+
+        <!-- Right: Sandbox Multi-Viewport HTML or Markdown Preview -->
+        <div id="preview-pane" class="h-full flex flex-col min-h-0 bg-[#07090e]/40 overflow-hidden">
+
+          <!-- HTML Viewport Switcher Toolbar (Appears for HTML files) -->
+          <div id="viewport-toolbar" class="h-8 bg-[#0c1220] border-b border-[#202b3f] flex items-center justify-between px-3 shrink-0">
+            <div class="flex items-center gap-2 font-mono text-[10px]">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
+              <span class="text-cyan-300 font-semibold uppercase tracking-wider">SANDBOX HTML ENGINE</span>
+              <span class="text-slate-600">|</span>
+              <span id="viewport-label" class="text-slate-400">100% Pantalla Completa</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <button onclick="setViewport('desktop')" id="vp-desktop" class="vp-btn p-1 rounded bg-cyan-500/20 text-cyan-300 transition" title="Escritorio (100%)">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              </button>
+              <button onclick="setViewport('tablet')" id="vp-tablet" class="vp-btn p-1 rounded text-slate-400 hover:text-slate-200 hover:bg-[#162035] transition" title="Tablet (768px)">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+              </button>
+              <button onclick="setViewport('mobile')" id="vp-mobile" class="vp-btn p-1 rounded text-slate-400 hover:text-slate-200 hover:bg-[#162035] transition" title="Móvil (375px)">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+              </button>
+              <div class="w-[1px] h-3 bg-[#202b3f] mx-1"></div>
+              <button onclick="reloadPreview()" class="p-1 rounded text-slate-400 hover:text-cyan-300 hover:bg-[#162035] transition" title="Recargar Sandbox">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Sandbox Content / Device Container -->
+          <div id="preview-container" class="flex-1 min-h-0 p-3 overflow-auto custom-scroll flex items-start justify-center bg-[#07090e]/60">
+            <!-- Rendered either as responsive iframe or formatted markdown -->
+            <div id="device-wrapper" class="w-full h-full rounded-lg overflow-hidden bg-white shadow-2xl transition-all duration-200 flex flex-col">
+              <iframe id="sandbox-iframe" sandbox="allow-scripts" class="w-full flex-1 border-0 min-h-[400px]"></iframe>
+            </div>
+            <!-- Markdown Container -->
+            <div id="markdown-wrapper" class="hidden w-full h-full p-4 text-slate-200 text-xs leading-relaxed overflow-y-auto custom-scroll select-text"></div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Real-Time Metrics Telemetry Bar -->
+      <footer class="h-7 bg-[#07090e] border-t border-[#202b3f] px-3 flex items-center justify-between font-mono text-[10px] text-slate-400 shrink-0">
+        <div class="flex items-center gap-4">
+          <span id="metric-lines">0 líneas</span>
+          <span id="metric-words">0 palabras</span>
+          <span id="metric-chars">0 caracteres</span>
+          <span id="metric-reading" class="text-cyan-400 font-semibold">~1 min de lectura</span>
+        </div>
+        <div class="flex items-center gap-2 text-slate-500">
+          <span>Atajo: <kbd class="px-1.5 py-0.5 rounded bg-[#0c1220] border border-[#202b3f] text-slate-300">Ctrl+S</kbd> Guardar</span>
+          <span>•</span>
+          <span class="text-emerald-400">WCAG AAA Certified</span>
+        </div>
+      </footer>
+
+    </section>
+
+  </main>
+
+  <script>
+    // State
+    const FILES = [
+      {
+        path: '.agent-hub/experience.md',
+        name: 'experience.md',
+        size: 3420,
+        mtime: Date.now() - 120000,
+        type: 'markdown',
+        content: `# Aprendizajes y Reglas Persistentes de AgentHub
+
+> Registro acumulativo de mejores prácticas, directrices de arquitectura y seguridad aprendidas durante el ciclo de vida de los proyectos.
+
+## 1. Arquitectura y Protección del Entorno
+- La función de seguridad \`isSystemOrAppDir\` intercepta cualquier intento de escape de ruta hacia \`System32\`, \`SysWOW64\` o directorios de aplicación.
+- Cada agente de un escuadrón ejecuta en su propio subdirectorio de trabajo aislado o rama git.
+
+## 2. Lenguaje Visual Tactical Dark HUD
+- Estricto uso de las 5 capas canónicas de elevación:
+  - Base: \`#07090e\`
+  - Card: \`#0a0e17\`
+  - Inset: \`#0c1220\`
+  - Hover: \`#162035\`
+  - Border: \`#202b3f\`
+- Ratio de contraste mínimo WCAG 2.2 AAA superior a 7:1 en todos los componentes.
+
+## 3. Sandboxing Seguro de Documentos
+- Las previsualizaciones HTML se aíslan rigurosamente dentro de un \`iframe\` con atributo \`sandbox="allow-scripts"\`.
+- Se prohíbe la delegación de credenciales del host o \`allow-same-origin\`.`
+      },
+      {
+        path: 'docs/design/tactical-hud-command-center.html',
+        name: 'tactical-hud-command-center.html',
+        size: 8940,
+        mtime: Date.now() - 600000,
+        type: 'html',
+        content: `<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { margin: 0; background: #07090e; color: #f8fafc; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
+    .card { background: #0a0e17; border: 1px solid #202b3f; border-radius: 12px; padding: 24px; max-width: 480px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    h1 { color: #22d3ee; margin-top: 0; font-size: 20px; }
+    p { color: #94a3b8; font-size: 13px; line-height: 1.6; }
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; background: rgba(6,182,212,0.15); border: 1px solid rgba(6,182,212,0.4); color: #22d3ee; font-size: 11px; font-weight: bold; margin-bottom: 12px; }
+    button { background: #06b6d4; color: #07090e; font-weight: bold; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
+    button:hover { background: #22d3ee; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="badge">SANDBOX PROTOTYPE</div>
+    <h1>Centro de Mando Táctico</h1>
+    <p>Esta es una demostración en vivo ejecutándose dentro del Sandbox aislado con protección total contra scripts maliciosos y soporte de viewports responsivos.</p>
+    <button onclick="alert('Ejecución segura confirmada en sandbox')">Probar Interacción</button>
+  </div>
+</body>
+</html>`
+      },
+      {
+        path: '.agent-hub/memory.json',
+        name: 'memory.json',
+        size: 1840,
+        mtime: Date.now() - 3600000,
+        type: 'markdown',
+        content: `{\n  "version": 2,\n  "budgetTokens": 2048,\n  "taxonomy": [\n    "ARCHITECTURE",\n    "SECURITY",\n    "ACCESSIBILITY",\n    "TESTING",\n    "UI/UX"\n  ],\n  "lastSynced": "${new Date().toISOString()}"\n}`
+      },
+      {
+        path: 'docs/design/command-palette-redesign.html',
+        name: 'command-palette-redesign.html',
+        size: 6120,
+        mtime: Date.now() - 7200000,
+        type: 'html',
+        content: `<!DOCTYPE html>
+<html>
+<body style="background:#0a0e17; color:#f8fafc; font-family:sans-serif; padding:20px; text-align:center;">
+  <h2 style="color:#22d3ee;">Paleta de Comandos Táctica</h2>
+  <p style="color:#94a3b8; font-size:12px;">Busca de comandos rápidos con fuzzy matching y focus-trap W3C APG.</p>
+</body>
+</html>`
+      }
+    ];
+
+    let currentFile = FILES[0];
+    let currentFilter = 'all';
+    let currentMode = 'split'; // 'edit' | 'split' | 'preview'
+    let currentViewport = 'desktop'; // 'desktop' | 'tablet' | 'mobile'
+
+    function init() {
+      renderFileList();
+      loadFile(FILES[0]);
+    }
+
+    function renderFileList() {
+      const container = document.getElementById('file-list');
+      const query = document.getElementById('search-input').value.toLowerCase();
+
+      const filtered = FILES.filter(f => {
+        const matchesQuery = f.path.toLowerCase().includes(query);
+        if (!matchesQuery) return false;
+        if (currentFilter === 'all') return true;
+        if (currentFilter === 'generated') return f.path.startsWith('.agent-hub/');
+        if (currentFilter === 'markdown') return f.type === 'markdown';
+        if (currentFilter === 'html') return f.type === 'html';
+        return true;
+      });
+
+      document.getElementById('file-count-indicator').textContent = `${filtered.length} documentos`;
+
+      container.innerHTML = filtered.map(f => {
+        const isSelected = f.path === currentFile.path;
+        return `
+          <button
+            onclick="selectFile('${f.path}')"
+            class="w-full text-left p-2 rounded-lg text-xs transition border ${
+              isSelected
+                ? 'bg-cyan-500/15 border-cyan-400/50 text-cyan-100 shadow-sm font-semibold'
+                : 'border-transparent hover:bg-[#0c1220] hover:border-[#202b3f] text-slate-300'
+            }"
+          >
+            <div class="flex items-center justify-between gap-1">
+              <span class="truncate font-medium text-slate-200">${f.name}</span>
+              ${f.path.startsWith('.agent-hub/') ? '<span class="px-1.5 py-0.2 rounded-full bg-cyan-500/20 text-cyan-300 text-[9px] font-mono border border-cyan-500/30">HUB</span>' : ''}
+            </div>
+            <div class="flex items-center justify-between text-[10px] text-slate-500 font-mono mt-0.5">
+              <span class="truncate">${f.path}</span>
+              <span>${(f.size / 1024).toFixed(1)} KB</span>
+            </div>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectFile(path) {
+      const found = FILES.find(f => f.path === path);
+      if (found) {
+        loadFile(found);
+        renderFileList();
+      }
+    }
+
+    function loadFile(file) {
+      currentFile = file;
+      document.getElementById('active-filename').textContent = file.path;
+      document.getElementById('editor-textarea').value = file.content;
+      document.getElementById('save-status-badge').textContent = 'Al día';
+      document.getElementById('save-status-badge').className = 'px-2 py-0.5 rounded-full text-[9px] font-mono bg-emerald-500/15 border border-emerald-500/30 text-emerald-300';
+
+      const isHtml = file.type === 'html';
+      const toolbar = document.getElementById('viewport-toolbar');
+      const formatToolbar = document.getElementById('format-toolbar');
+
+      if (isHtml) {
+        toolbar.classList.remove('hidden');
+        formatToolbar.classList.add('hidden');
+        document.getElementById('device-wrapper').classList.remove('hidden');
+        document.getElementById('markdown-wrapper').classList.add('hidden');
+        updateSandbox(file.content);
+      } else {
+        toolbar.classList.add('hidden');
+        formatToolbar.classList.remove('hidden');
+        document.getElementById('device-wrapper').classList.add('hidden');
+        document.getElementById('markdown-wrapper').classList.remove('hidden');
+        renderMarkdownPreview(file.content);
+      }
+
+      updateOutline(file.content);
+      updateMetrics(file.content);
+    }
+
+    function onContentEdited() {
+      const content = document.getElementById('editor-textarea').value;
+      currentFile.content = content;
+      document.getElementById('save-status-badge').textContent = 'Sin guardar';
+      document.getElementById('save-status-badge').className = 'px-2 py-0.5 rounded-full text-[9px] font-mono bg-amber-500/15 border border-amber-500/30 text-amber-300';
+
+      if (currentFile.type === 'html') {
+        updateSandbox(content);
+      } else {
+        renderMarkdownPreview(content);
+      }
+      updateOutline(content);
+      updateMetrics(content);
+    }
+
+    function updateSandbox(html) {
+      const iframe = document.getElementById('sandbox-iframe');
+      iframe.srcdoc = html;
+    }
+
+    function renderMarkdownPreview(text) {
+      const wrapper = document.getElementById('markdown-wrapper');
+      // Simple preview parser
+      let html = text
+        .replace(/^# (.*$)/gim, '<h1 class="text-xl font-bold text-cyan-300 border-b border-[#202b3f] pb-2 mb-3">$1</h1>')
+        .replace(/^## (.*$)/gim, '<h2 class="text-base font-bold text-slate-100 border-b border-[#202b3f]/60 pb-1 mt-4 mb-2">$1</h2>')
+        .replace(/^> (.*$)/gim, '<blockquote class="border-l-2 border-cyan-500 pl-3 py-1 my-2 bg-[#0c1220] text-slate-300 italic">$1</blockquote>')
+        .replace(/\*\*(.*?)\*\*/gim, '<strong class="font-bold text-white">$1</strong>')
+        .replace(/\_(.*?)\_/gim, '<em class="italic text-slate-300">$1</em>')
+        .replace(/`(.*?)`/gim, '<code class="bg-[#0c1220] border border-[#202b3f] px-1 py-0.5 rounded text-cyan-300 font-mono text-[11px]">$1</code>')
+        .replace(/\n\n/gim, '<br><br>');
+      wrapper.innerHTML = html;
+    }
+
+    function updateOutline(text) {
+      const select = document.getElementById('outline-select');
+      const lines = text.split('\n');
+      const headings = [];
+      lines.forEach((l, idx) => {
+        const m = l.match(/^(#{1,3})\s+(.*)$/);
+        if (m) headings.push({ level: m[1].length, title: m[2], line: idx });
+      });
+
+      select.innerHTML = '<option value="">📑 Ir a sección (TOC)...</option>' +
+        headings.map(h => `<option value="${h.line}">${'—'.repeat(h.level - 1)} ${h.title}</option>`).join('');
+    }
+
+    function jumpToSection(line) {
+      if (!line) return;
+      const textarea = document.getElementById('editor-textarea');
+      const lines = textarea.value.split('\n');
+      let pos = 0;
+      for (let i = 0; i < parseInt(line); i++) pos += lines[i].length + 1;
+      textarea.focus();
+      textarea.setSelectionRange(pos, pos);
+    }
+
+    function updateMetrics(text) {
+      const lines = text.split('\n').length;
+      const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+      const chars = text.length;
+      const readMin = Math.max(1, Math.round(words / 220));
+
+      document.getElementById('metric-lines').textContent = `${lines} líneas`;
+      document.getElementById('metric-words').textContent = `${words} palabras`;
+      document.getElementById('metric-chars').textContent = `${chars} caracteres`;
+      document.getElementById('metric-reading').textContent = `~${readMin} min de lectura`;
+    }
+
+    function setFilter(filter) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-chip').forEach(btn => {
+        btn.className = 'filter-chip px-2 py-0.5 rounded-full border border-[#202b3f] bg-[#07090e]/60 text-slate-400 hover:text-slate-200 transition';
+      });
+      document.getElementById(`filter-${filter}`).className = 'filter-chip px-2 py-0.5 rounded-full border bg-cyan-500/20 border-cyan-500/50 text-cyan-300 font-semibold transition';
+      renderFileList();
+    }
+
+    function filterFiles() {
+      renderFileList();
+    }
+
+    function setMode(mode) {
+      currentMode = mode;
+      document.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.className = 'mode-btn px-2.5 py-1 rounded text-[11px] font-medium text-slate-400 hover:text-slate-200 transition flex items-center gap-1';
+      });
+      document.getElementById(`mode-${mode}`).className = 'mode-btn px-2.5 py-1 rounded text-[11px] font-semibold bg-cyan-500/20 text-cyan-300 shadow-sm transition flex items-center gap-1';
+
+      const grid = document.getElementById('content-grid');
+      const editorPane = document.getElementById('editor-pane');
+      const previewPane = document.getElementById('preview-pane');
+
+      if (mode === 'edit') {
+        grid.className = 'flex-1 min-h-0 grid grid-cols-1';
+        editorPane.classList.remove('hidden');
+        previewPane.classList.add('hidden');
+      } else if (mode === 'preview') {
+        grid.className = 'flex-1 min-h-0 grid grid-cols-1';
+        editorPane.classList.add('hidden');
+        previewPane.classList.remove('hidden');
+      } else {
+        grid.className = 'flex-1 min-h-0 grid grid-cols-2 divide-x divide-[#202b3f]';
+        editorPane.classList.remove('hidden');
+        previewPane.classList.remove('hidden');
+      }
+    }
+
+    function setViewport(vp) {
+      currentViewport = vp;
+      document.querySelectorAll('.vp-btn').forEach(b => {
+        b.className = 'vp-btn p-1 rounded text-slate-400 hover:text-slate-200 hover:bg-[#162035] transition';
+      });
+      document.getElementById(`vp-${vp}`).className = 'vp-btn p-1 rounded bg-cyan-500/20 text-cyan-300 transition';
+
+      const wrapper = document.getElementById('device-wrapper');
+      const label = document.getElementById('viewport-label');
+
+      if (vp === 'desktop') {
+        label.textContent = '100% Pantalla Completa';
+        wrapper.className = 'w-full h-full rounded-lg overflow-hidden bg-white shadow-2xl transition-all duration-200 flex flex-col';
+      } else if (vp === 'tablet') {
+        label.textContent = '768 × 1024 px (Tablet Frame)';
+        wrapper.className = 'w-[768px] max-w-full h-full border-4 border-[#162035] rounded-xl overflow-hidden bg-white shadow-2xl transition-all duration-200 flex flex-col';
+      } else if (vp === 'mobile') {
+        label.textContent = '375 × 667 px (Mobile Frame)';
+        wrapper.className = 'w-[375px] max-w-full h-full border-4 border-[#162035] rounded-2xl overflow-hidden bg-white shadow-2xl transition-all duration-200 flex flex-col';
+      }
+    }
+
+    function reloadPreview() {
+      const iframe = document.getElementById('sandbox-iframe');
+      const content = iframe.srcdoc;
+      iframe.srcdoc = '';
+      setTimeout(() => { iframe.srcdoc = content; }, 50);
+    }
+
+    function insertSyntax(before, after) {
+      const textarea = document.getElementById('editor-textarea');
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const selected = textarea.value.substring(start, end);
+      const replacement = before + selected + after;
+      textarea.setRangeText(replacement, start, end, 'select');
+      onContentEdited();
+    }
+
+    function prefixLine(prefix) {
+      const textarea = document.getElementById('editor-textarea');
+      const start = textarea.selectionStart;
+      const text = textarea.value;
+      const lineStart = text.lastIndexOf('\n', start - 1) + 1;
+      textarea.setRangeText(prefix, lineStart, lineStart, 'end');
+      onContentEdited();
+    }
+
+    function saveDocument() {
+      document.getElementById('save-status-badge').textContent = 'Guardado';
+      document.getElementById('save-status-badge').className = 'px-2 py-0.5 rounded-full text-[9px] font-mono bg-emerald-500/15 border border-emerald-500/30 text-emerald-300';
+    }
+
+    function copyContent() {
+      const textarea = document.getElementById('editor-textarea');
+      navigator.clipboard.writeText(textarea.value);
+      alert('Contenido copiado al portapapeles');
+    }
+
+    // Keyboard Shortcuts
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        saveDocument();
+      }
+    });
+
+    init();
+  </script>
+</body>
+</html>

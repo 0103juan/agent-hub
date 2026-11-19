@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentHub // Squad Orchestrator & Agents Matrix Showcase</title>
+  <style>
+    :root {
+      --bg-base: #07090e;
+      --bg-panel: #0c1220;
+      --bg-card: #0e131f;
+      --bg-surface: #101625;
+      --border-subtle: #162035;
+      --border-strong: #202b3f;
+      --cyan: #06b6d4;
+      --cyan-glow: rgba(6, 182, 212, 0.25);
+      --teal: #14b8a6;
+      --teal-glow: rgba(20, 184, 166, 0.25);
+      --emerald: #10b981;
+      --amber: #f59e0b;
+      --rose: #f43f5e;
+      --violet: #8b5cf6;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.5;
+      padding: 24px;
+      min-height: 100vh;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(20, 184, 166, 0.04) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.04) 0%, transparent 40%),
+        linear-gradient(to right, rgba(22, 32, 53, 0.15) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(22, 32, 53, 0.15) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 28px 28px, 28px 28px;
+    }
+
+    .container {
+      max-width: 1240px;
+      margin: 0 auto;
+    }
+
+    /* Master Top Bar */
+    .header {
+      background: var(--bg-panel);
+      border: 1.5px solid var(--border-strong);
+      border-radius: 16px;
+      padding: 18px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(20, 184, 166, 0.15);
+      border: 1.5px solid var(--teal);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--teal);
+      box-shadow: 0 0 16px var(--teal-glow);
+    }
+
+    .header-title h1 {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-title p {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: monospace;
+      margin-top: 2px;
+    }
+
+    .header-badges {
+      display: flex;
+      gap: 10px;
+    }
+
+    .hud-badge {
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      font-family: monospace;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge-teal {
+      background: rgba(20, 184, 166, 0.12);
+      border: 1px solid rgba(20, 184, 166, 0.4);
+      color: var(--teal);
+    }
+
+    .badge-emerald {
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: var(--emerald);
+    }
+
+    /* Main Dashboard Grid */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 460px 1fr;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: var(--bg-panel);
+      border: 1.5px solid var(--border-strong);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: var(--text-main);
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 10px;
+    }
+
+    .tag-spec {
+      font-size: 10px;
+      font-family: monospace;
+      color: var(--teal);
+      background: rgba(20, 184, 166, 0.1);
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid rgba(20, 184, 166, 0.3);
+    }
+
+    /* Formations Selector */
+    .formation-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .formation-item {
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: #07090e;
+      border: 1.5px solid var(--border-strong);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .formation-item:hover, .formation-item.selected {
+      background: #0e1524;
+      border-color: var(--teal);
+      box-shadow: 0 0 14px var(--teal-glow);
+    }
+
+    .formation-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .formation-sub {
+      font-size: 10.5px;
+      color: var(--text-muted);
+      font-family: monospace;
+      margin-top: 2px;
+    }
+
+    .formation-pill {
+      font-size: 10px;
+      font-family: monospace;
+      font-weight: bold;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(20, 184, 166, 0.15);
+      color: var(--teal);
+    }
+
+    .input-textarea {
+      width: 100%;
+      background: #07090e;
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: var(--text-main);
+      font-size: 12px;
+      font-family: monospace;
+      resize: none;
+      margin-bottom: 14px;
+    }
+
+    .input-textarea:focus {
+      outline: none;
+      border-color: var(--teal);
+      box-shadow: 0 0 0 2px var(--teal-glow);
+    }
+
+    .btn-dispatch {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #0d9488, #14b8a6);
+      border: none;
+      color: #040810;
+      font-size: 12px;
+      font-weight: 900;
+      font-family: monospace;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-dispatch:hover {
+      background: linear-gradient(135deg, #14b8a6, #2dd4bf);
+      box-shadow: 0 0 18px var(--teal-glow);
+      transform: translateY(-1px);
+    }
+
+    /* Right View Switcher & Container */
+    .view-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .switcher-pill {
+      display: flex;
+      background: #07090e;
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      padding: 3px;
+    }
+
+    .switcher-btn {
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-family: monospace;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .switcher-btn.active {
+      background: rgba(20, 184, 166, 0.2);
+      color: var(--teal);
+      font-weight: bold;
+    }
+
+    /* Topology Canvas */
+    .topology-canvas {
+      height: 380px;
+      background: #07090e;
+      border: 1px solid var(--border-strong);
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+      background-image: radial-gradient(circle, #162035 1px, transparent 1px);
+      background-size: 20px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nodes-flow {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .agent-node {
+      width: 140px;
+      padding: 12px;
+      border-radius: 12px;
+      background: #0c1220;
+      border: 1.5px solid var(--border-strong);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+
+    .agent-node.active {
+      border-color: var(--teal);
+      box-shadow: 0 0 16px var(--teal-glow);
+    }
+
+    .node-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .node-name {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .node-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--emerald);
+      box-shadow: 0 0 6px rgba(16, 185, 129, 0.8);
+    }
+
+    .node-model {
+      font-size: 9.5px;
+      font-family: monospace;
+      color: var(--text-muted);
+    }
+
+    .node-status {
+      font-size: 10px;
+      font-family: monospace;
+      color: var(--teal);
+      margin-top: 4px;
+    }
+
+    .flow-arrow {
+      color: var(--teal);
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    /* Live Intercom Stream */
+    .intercom-stream {
+      margin-top: 14px;
+      background: #07090e;
+      border: 1px solid var(--border-strong);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-family: monospace;
+      font-size: 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .intercom-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .intercom-badge {
+      background: rgba(6, 182, 212, 0.15);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      color: var(--cyan);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    /* Telemetry Footer */
+    .telemetry-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .telemetry-card {
+      background: var(--bg-panel);
+      border: 1.5px solid var(--border-strong);
+      border-radius: 14px;
+      padding: 16px;
+    }
+
+    .telemetry-card-title {
+      font-size: 10.5px;
+      font-family: monospace;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .telemetry-card-val {
+      font-size: 20px;
+      font-weight: 900;
+      font-family: monospace;
+      color: var(--teal);
+      margin-bottom: 4px;
+    }
+
+    .telemetry-card-sub {
+      font-size: 10.5px;
+      font-family: monospace;
+      color: var(--emerald);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <div class="logo-badge">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+        </div>
+        <div class="header-title">
+          <h1>AGENTHUB // SQUAD ORCHESTRATOR & AGENTS MATRIX</h1>
+          <p>TACTICAL HUD SPEC CARD #51 • FORMATION PRESETS • 3-VIEW SYNC • WORKTREE ISOLATION SAFE</p>
+        </div>
+      </div>
+      <div class="header-badges">
+        <div class="hud-badge badge-teal">
+          <span>●</span>
+          <span>ORCHESTRATOR ACTIVE</span>
+        </div>
+        <div class="hud-badge badge-emerald">
+          <span>✓</span>
+          <span>SYSTEM32 PROTECTED</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Grid -->
+    <div class="dashboard-grid">
+      <!-- Left: Formations & Dispatcher -->
+      <section class="card">
+        <div class="card-title">
+          <span>DESPACHADOR DE ESCUADRONES</span>
+          <span class="tag-spec">SPEC CARD #51.A</span>
+        </div>
+
+        <div class="formation-grid" id="formation-list">
+          <div class="formation-item selected" data-formation="full-protocol">
+            <div>
+              <div class="formation-title">Full Protocol</div>
+              <div class="formation-sub">Arquitecto ➔ Tester ➔ Dev ➔ Revisor</div>
+            </div>
+            <span class="formation-pill">4 AGENTES</span>
+          </div>
+
+          <div class="formation-item" data-formation="tdd-pair">
+            <div>
+              <div class="formation-title">TDD Pair (Pruebas primero)</div>
+              <div class="formation-sub">Tester (Falla) ➔ Dev (Pasa pruebas)</div>
+            </div>
+            <span class="formation-pill">2 AGENTES</span>
+          </div>
+
+          <div class="formation-item" data-formation="fast-fix">
+            <div>
+              <div class="formation-title">Fast Fix (Solución Rápida)</div>
+              <div class="formation-sub">Desarrollador ➔ Revisor</div>
+            </div>
+            <span class="formation-pill">2 AGENTES</span>
+          </div>
+
+          <div class="formation-item" data-formation="code-review">
+            <div>
+              <div class="formation-title">Code Review &amp; Security</div>
+              <div class="formation-sub">Revisor ➔ Auditor de Seguridad</div>
+            </div>
+            <span class="formation-pill">2 AGENTES</span>
+          </div>
+        </div>
+
+        <label style="font-size: 11px; font-family: monospace; color: var(--text-muted); display: block; margin-bottom: 6px;">
+          MISIÓN INICIAL DEL EQUIPO:
+        </label>
+        <textarea class="input-textarea" rows="3" id="task-input">Implementar la suite de pruebas unitarias para safe-path.ts y verificar aislamiento en worktree...</textarea>
+
+        <button type="button" class="btn-dispatch" id="btn-dispatch-squad">
+          ⚡ DESPACHAR ESCUADRÓN EN WORKTREE
+        </button>
+      </section>
+
+      <!-- Right: Live Topology & Multi-View -->
+      <section class="card">
+        <div class="card-title">
+          <span>TOPOLOGÍA Y RELEVOS EN VIVO</span>
+          <span class="tag-spec">SPEC CARD #51.B</span>
+        </div>
+
+        <div class="view-toolbar">
+          <div class="switcher-pill">
+            <button type="button" class="switcher-btn active" data-view="topology">Topología</button>
+            <button type="button" class="switcher-btn" data-view="list">Lista</button>
+            <button type="button" class="switcher-btn" data-view="board">Tablero</button>
+          </div>
+          <span style="font-size: 11px; font-family: monospace; color: var(--emerald);">
+            ● Worktree: <code style="color:var(--text-main);">branch: squad/safe-path-refactor</code>
+          </span>
+        </div>
+
+        <!-- Dynamic View Canvas -->
+        <div class="topology-canvas" id="canvas-area">
+          <div class="nodes-flow" id="nodes-container">
+            <div class="agent-node active">
+              <div class="node-header">
+                <span class="node-name">Arquitecto</span>
+                <span class="node-dot"></span>
+              </div>
+              <span class="node-model">gemini-2.5-pro</span>
+              <span class="node-status">✓ Especificado</span>
+            </div>
+
+            <div class="flow-arrow">➔</div>
+
+            <div class="agent-node active">
+              <div class="node-header">
+                <span class="node-name">Tester</span>
+                <span class="node-dot"></span>
+              </div>
+              <span class="node-model">gemini-2.5-flash</span>
+              <span class="node-status">✓ 14/14 tests</span>
+            </div>
+
+            <div class="flow-arrow">➔</div>
+
+            <div class="agent-node active">
+              <div class="node-header">
+                <span class="node-name">Desarrollador</span>
+                <span class="node-dot" style="background:var(--cyan);"></span>
+              </div>
+              <span class="node-model">claude-3.7-sonnet</span>
+              <span class="node-status" style="color:var(--cyan);">⚡ Codificando</span>
+            </div>
+
+            <div class="flow-arrow">➔</div>
+
+            <div class="agent-node">
+              <div class="node-header">
+                <span class="node-name">Revisor</span>
+                <span class="node-dot" style="background:var(--text-dim);"></span>
+              </div>
+              <span class="node-model">gemini-2.5-pro</span>
+              <span class="node-status" style="color:var(--text-muted);">En espera</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Intercom Stream -->
+        <div class="intercom-stream">
+          <div class="intercom-row">
+            <span class="intercom-badge">Arquitecto ➔ Tester</span>
+            <span style="color:#cbd5e1;">«Especificación completada en /docs/specs. Escribe tests de caja negra.»</span>
+          </div>
+          <div class="intercom-row">
+            <span class="intercom-badge" style="color:var(--amber); border-color:rgba(245,158,11,0.3); background:rgba(245,158,11,0.15);">Tester ➔ Dev</span>
+            <span style="color:#cbd5e1;">«14 tests fallidos listos en tests/flows.test.js. Aplica safe-path.»</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Telemetry Strip -->
+    <div class="telemetry-strip">
+      <div class="telemetry-card">
+        <div class="telemetry-card-title">FORMACIÓN ACTIVA</div>
+        <div class="telemetry-card-val" id="hud-formation-name">Full Protocol</div>
+        <div class="telemetry-card-sub">4 agentes encadenados</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-card-title">AISLAMIENTO WORKTREE</div>
+        <div class="telemetry-card-val" style="color:var(--emerald);">100% SEGURO</div>
+        <div class="telemetry-card-sub">Rama independiente git</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-card-title">FILTRO ANTI-SYSTEM32</div>
+        <div class="telemetry-card-val" style="color:var(--teal);">ACTIVO</div>
+        <div class="telemetry-card-sub">isSystemOrAppDir validado</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-card-title">ESTADO DE COMPILACIÓN</div>
+        <div class="telemetry-card-val">846 kB OK</div>
+        <div class="telemetry-card-sub">0 errores de tipado</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const formationItems = Array.from(document.querySelectorAll('.formation-item'));
+    const hudFormationName = document.getElementById('hud-formation-name');
+    const nodesContainer = document.getElementById('nodes-container');
+    const switcherBtns = Array.from(document.querySelectorAll('.switcher-btn'));
+    const canvasArea = document.getElementById('canvas-area');
+
+    const FORMATIONS_DATA = {
+      'full-protocol': {
+        name: 'Full Protocol',
+        nodes: [
+          { name: 'Arquitecto', model: 'gemini-2.5-pro', status: '✓ Especificado', color: 'var(--emerald)' },
+          { name: 'Tester', model: 'gemini-2.5-flash', status: '✓ 14/14 tests', color: 'var(--emerald)' },
+          { name: 'Desarrollador', model: 'claude-3.7-sonnet', status: '⚡ Codificando', color: 'var(--cyan)' },
+          { name: 'Revisor', model: 'gemini-2.5-pro', status: 'En espera', color: 'var(--text-dim)' }
+        ]
+      },
+      'tdd-pair': {
+        name: 'TDD Pair',
+        nodes: [
+          { name: 'Tester', model: 'gemini-2.5-flash', status: '✓ Tests fallidos', color: 'var(--emerald)' },
+          { name: 'Desarrollador', model: 'claude-3.7-sonnet', status: '⚡ Pasando tests', color: 'var(--cyan)' }
+        ]
+      },
+      'fast-fix': {
+        name: 'Fast Fix',
+        nodes: [
+          { name: 'Desarrollador', model: 'claude-3.7-sonnet', status: '⚡ Parcheando', color: 'var(--cyan)' },
+          { name: 'Revisor', model: 'gemini-2.5-pro', status: 'En espera', color: 'var(--text-dim)' }
+        ]
+      },
+      'code-review': {
+        name: 'Code Review',
+        nodes: [
+          { name: 'Revisor', model: 'gemini-2.5-pro', status: '✓ Código limpio', color: 'var(--emerald)' },
+          { name: 'Auditor', model: 'gemini-2.5-flash', status: '⚡ Buscando leaks', color: 'var(--amber)' }
+        ]
+      }
+    };
+
+    function renderNodes(formationKey) {
+      const data = FORMATIONS_DATA[formationKey];
+      if (!data) return;
+      hudFormationName.textContent = data.name;
+
+      nodesContainer.innerHTML = '';
+      data.nodes.forEach((node, idx) => {
+        const nodeEl = document.createElement('div');
+        nodeEl.className = 'agent-node active';
+        nodeEl.innerHTML = `
+          <div class="node-header">
+            <span class="node-name">${node.name}</span>
+            <span class="node-dot" style="background:${node.color};"></span>
+          </div>
+          <span class="node-model">${node.model}</span>
+          <span class="node-status">${node.status}</span>
+        `;
+        nodesContainer.appendChild(nodeEl);
+
+        if (idx < data.nodes.length - 1) {
+          const arrow = document.createElement('div');
+          arrow.className = 'flow-arrow';
+          arrow.textContent = '➔';
+          nodesContainer.appendChild(arrow);
+        }
+      });
+    }
+
+    formationItems.forEach(item => {
+      item.addEventListener('click', () => {
+        formationItems.forEach(i => i.classList.remove('selected'));
+        item.classList.add('selected');
+        const key = item.getAttribute('data-formation');
+        renderNodes(key);
+      });
+    });
+
+    switcherBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        switcherBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const view = btn.getAttribute('data-view');
+        if (view === 'list') {
+          canvasArea.innerHTML = `
+            <div style="padding: 20px; font-family: monospace; font-size: 12px; width: 100%; display: flex; flex-direction: column; gap: 8px;">
+              <div style="background:#0c1220; padding:10px 14px; border-radius:8px; border:1px solid #202b3f; display:flex; justify-content:space-between;">
+                <span>● squad/safe-path-refactor</span>
+                <span style="color:var(--emerald);">4 agentes activos</span>
+              </div>
+              <div style="background:#0a0e17; padding:8px 12px; border-radius:6px; border:1px solid #162035; color:#cbd5e1;">
+                1. Arquitecto: Especificación en docs/specs/safe-path.md
+              </div>
+              <div style="background:#0a0e17; padding:8px 12px; border-radius:6px; border:1px solid #162035; color:#cbd5e1;">
+                2. Tester: 14 tests creados en tests/flows.test.ts
+              </div>
+              <div style="background:#0a0e17; padding:8px 12px; border-radius:6px; border:1px solid #162035; color:#06b6d4;">
+                3. Desarrollador: Ejecutando esbuild y vitest...
+              </div>
+            </div>
+          `;
+        } else if (view === 'board') {
+          canvasArea.innerHTML = `
+            <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; padding: 14px; font-family: monospace; font-size: 11px;">
+              <div style="background:#0c1220; border:1px solid #202b3f; border-radius:8px; padding:10px;">
+                <div style="color:var(--teal); font-weight:bold; margin-bottom:8px;">ESPERANDO (1)</div>
+                <div style="background:#07090e; padding:6px; border-radius:6px;">Revisor</div>
+              </div>
+              <div style="background:#0c1220; border:1px solid #202b3f; border-radius:8px; padding:10px;">
+                <div style="color:var(--cyan); font-weight:bold; margin-bottom:8px;">TRABAJANDO (1)</div>
+                <div style="background:#07090e; padding:6px; border-radius:6px; border:1px solid var(--cyan);">Desarrollador</div>
+              </div>
+              <div style="background:#0c1220; border:1px solid #202b3f; border-radius:8px; padding:10px;">
+                <div style="color:var(--amber); font-weight:bold; margin-bottom:8px;">TE ESPERA (0)</div>
+                <div style="color:var(--text-dim);">Sin pendientes</div>
+              </div>
+              <div style="background:#0c1220; border:1px solid #202b3f; border-radius:8px; padding:10px;">
+                <div style="color:var(--emerald); font-weight:bold; margin-bottom:8px;">COMPLETADO (2)</div>
+                <div style="background:#07090e; padding:6px; border-radius:6px; margin-bottom:4px;">Arquitecto</div>
+                <div style="background:#07090e; padding:6px; border-radius:6px;">Tester</div>
+              </div>
+            </div>
+          `;
+        } else {
+          canvasArea.innerHTML = '<div class="nodes-flow" id="nodes-container"></div>';
+          const activeItem = document.querySelector('.formation-item.selected');
+          const key = activeItem ? activeItem.getAttribute('data-formation') : 'full-protocol';
+          renderNodes(key);
+        }
+      });
+    });
+
+    document.getElementById('btn-dispatch-squad').addEventListener('click', () => {
+      alert('¡Escuadrón autónomo despachado exitosamente en Git Worktree aislado!');
+    });
+  </script>
+</body>
+</html>

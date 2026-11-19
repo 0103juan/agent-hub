@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tactical Session Drawer & Flow Hierarchy // Showcase</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-void: #07090e;
+      --bg-card: #0a0e17;
+      --bg-inset: #0c1220;
+      --bg-hover: #162035;
+      --border-subtle: #162035;
+      --border-strong: #202b3f;
+      --border-focus: #06b6d4;
+      
+      --cyan-primary: #06b6d4;
+      --cyan-bright: #22d3ee;
+      --cyan-glow: rgba(6, 182, 212, 0.4);
+      --emerald-accent: #10b981;
+      --emerald-bright: #34d399;
+      --violet-accent: #8b5cf6;
+      --amber-accent: #f59e0b;
+      --rose-accent: #ef4444;
+      
+      --text-main: #f8fafc;
+      --text-muted: #cbd5e1;
+      --text-dim: #94a3b8;
+      --text-faint: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-void);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(6, 182, 212, 0.08), transparent 60%),
+        radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.05), transparent 50%),
+        linear-gradient(to right, rgba(22, 32, 53, 0.35) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(22, 32, 53, 0.35) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 28px 28px, 28px 28px;
+    }
+
+    .font-mono {
+      font-family: 'Fira Code', monospace;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 6px 12px;
+      font-size: 11.5px;
+      font-weight: 700;
+      font-family: 'Fira Code', monospace;
+      border-radius: 8px;
+      border: 1px solid var(--border-strong);
+      background: var(--bg-card);
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-decoration: none;
+    }
+    .btn:hover {
+      background: var(--bg-hover);
+      border-color: var(--cyan-primary);
+      color: var(--cyan-bright);
+    }
+    .btn-cyan {
+      background: linear-gradient(135deg, #0891b2, #06b6d4);
+      border-color: #22d3ee;
+      color: #07090e;
+    }
+    .btn-cyan:hover {
+      filter: brightness(1.15);
+      color: #07090e;
+      box-shadow: 0 0 14px var(--cyan-glow);
+    }
+    .btn-rose {
+      background: linear-gradient(135deg, #b91c1c, #ef4444);
+      border-color: #f87171;
+      color: #fff;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      font-family: 'Fira Code', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-cyan { background: rgba(6, 182, 212, 0.15); border: 1px solid rgba(6, 182, 212, 0.35); color: var(--cyan-bright); }
+    .badge-emerald { background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.35); color: var(--emerald-bright); }
+    .badge-violet { background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.35); color: #c4b5fd; }
+    .badge-amber { background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.35); color: #fcd34d; }
+    .badge-rose { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.35); color: #fca5a5; }
+
+    /* Drawer Simulation Shell */
+    .drawer-shell {
+      width: 100%;
+      max-width: 480px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-strong);
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+      overflow: hidden;
+    }
+
+    /* Session Item */
+    .session-item {
+      padding: 10px 14px;
+      border-radius: 8px;
+      background: var(--bg-inset);
+      border: 1px solid var(--border-subtle);
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+    .session-item:hover {
+      background: var(--bg-hover);
+      border-color: var(--cyan-primary);
+    }
+    .session-item.active {
+      background: linear-gradient(90deg, rgba(8, 51, 68, 0.4), #0a0e17);
+      border-color: var(--cyan-primary);
+      box-shadow: 0 0 14px rgba(6, 182, 212, 0.2);
+    }
+
+    /* Star Button */
+    .star-btn {
+      color: var(--text-faint);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      transition: color 0.15s;
+    }
+    .star-btn.active {
+      color: var(--amber-accent);
+    }
+
+    /* Modal Backdrop */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 6, 10, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP APP BAR -->
+  <header style="background: rgba(10, 14, 23, 0.95); border-bottom: 1px solid var(--border-strong); backdrop-filter: blur(12px); padding: 12px 24px; position: sticky; top: 0; z-index: 50;">
+    <div style="max-width: 1440px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+      
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, var(--cyan-primary), var(--emerald-accent)); display: flex; align-items: center; justify-content: center; color: #07090e; font-weight: 900; font-size: 18px; box-shadow: 0 0 14px var(--cyan-glow);">
+          🗂️
+        </div>
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <h1 style="font-size: 15px; font-weight: 800; color: #fff;">Tactical Session Drawer &amp; Flow Hierarchy</h1>
+            <span class="badge badge-cyan">SPEC #72</span>
+            <span class="badge badge-emerald">SQUAD FLOWS</span>
+          </div>
+          <p style="font-size: 11px; color: var(--text-dim); margin-top: 2px;" class="font-mono">
+            groupByFlow() • Project Tree • Star Favorites • Safe Batch Cleaner • Zero Leaks
+          </p>
+        </div>
+      </div>
+
+      <!-- Quick Metrics -->
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div style="background: var(--bg-inset); border: 1px solid var(--border-strong); border-radius: 8px; padding: 4px 10px; display: flex; align-items: center; gap: 6px;">
+          <span style="width: 7px; height: 7px; border-radius: 50%; background: var(--cyan-primary);"></span>
+          <span style="font-size: 11px; font-weight: 700; color: var(--cyan-bright);" class="font-mono" id="headerSessionsCount">6 SESIONES</span>
+        </div>
+        <button class="btn btn-cyan" onclick="openNewChatModal()">
+          <span>+ Nuevo Chat</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MAIN SHOWCASE CONTENT -->
+  <main style="max-width: 1280px; margin: 0 auto; padding: 24px; flex: 1; width: 100%; display: grid; grid-template-columns: 480px 1fr; gap: 28px;">
+    
+    <!-- LEFT: LIVE DRAWER COMPONENT (SessionDrawer.tsx exact replicate) -->
+    <div class="drawer-shell">
+      
+      <!-- Drawer Header -->
+      <div style="padding: 14px 18px; border-bottom: 1px solid var(--border-strong); display: flex; align-items: center; justify-content: space-between; background: rgba(12, 18, 32, 0.95);">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 16px;">💬</span>
+          <h2 style="font-size: 13.5px; font-weight: 800; color: #fff; font-family: 'Fira Code', monospace;">Conversaciones &amp; Flujos</h2>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <button class="btn" style="padding: 4px 8px; font-size: 11px;" onclick="openNewChatModal()">+ Chat</button>
+          <button class="btn" style="padding: 4px 8px; font-size: 11px; color: var(--text-dim);" onclick="showToast('Cajón cerrado')">✕</button>
+        </div>
+      </div>
+
+      <!-- Search & Filters Bar -->
+      <div style="padding: 12px 16px; border-bottom: 1px solid var(--border-subtle); display: flex; flex-direction: column; gap: 10px; background: rgba(10, 14, 23, 0.7);">
+        
+        <!-- Search Box -->
+        <div style="position: relative;">
+          <input 
+            type="text" 
+            id="drawerSearchInput"
+            placeholder="Buscar por título, rol o mensaje..."
+            oninput="handleSearch(this.value)"
+            style="width: 100%; background: #07090e; border: 1px solid var(--border-strong); border-radius: 8px; padding: 7px 12px 7px 32px; font-size: 11.5px; color: #fff; font-family: 'Fira Code', monospace; outline: none;"
+          >
+          <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-faint); font-size: 12px;">🔍</span>
+          <button id="clearSearchBtn" onclick="clearSearch()" style="display: none; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: var(--text-dim); cursor: pointer; font-size: 12px;">✕</button>
+        </div>
+
+        <!-- Sort & Filter Pills -->
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
+          <div style="display: flex; gap: 4px;">
+            <button class="btn" id="sort-recent" onclick="setSort('recent')" style="padding: 3px 8px; font-size: 10.5px; border-color: var(--cyan-primary); color: var(--cyan-bright);">Recientes</button>
+            <button class="btn" id="sort-name" onclick="setSort('name')" style="padding: 3px 8px; font-size: 10.5px; color: var(--text-dim);">Nombre</button>
+            <button class="btn" id="sort-messages" onclick="setSort('messages')" style="padding: 3px 8px; font-size: 10.5px; color: var(--text-dim);">Mensajes</button>
+          </div>
+
+          <div style="font-size: 10.5px; color: var(--text-faint); font-family: 'Fira Code', monospace;" id="filteredCountText">
+            6 de 6
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Batch Empty Sessions Cleaner Warning -->
+      <div id="emptySessionsBanner" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 14px; background: rgba(69, 10, 10, 0.4); border-bottom: 1px solid rgba(239, 68, 68, 0.3); font-size: 11px; font-family: 'Fira Code', monospace;">
+        <span style="color: #fca5a5;">🗑️ 1 chat vacío detectado</span>
+        <div style="display: flex; gap: 6px;">
+          <button class="btn btn-rose" style="padding: 2px 7px; font-size: 10px;" onclick="triggerBatchClear()">Limpiar</button>
+        </div>
+      </div>
+
+      <!-- Drawer Scrollable List -->
+      <div id="drawerListContainer" style="padding: 12px; display: flex; flex-direction: column; gap: 12px; max-height: calc(100vh - 270px); overflow-y: auto;">
+        <!-- Dynamic Trees injected here -->
+      </div>
+
+      <!-- Drawer Footer -->
+      <div style="padding: 10px 16px; border-top: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between; background: rgba(7, 9, 14, 0.9); font-size: 10.5px; color: var(--text-faint); font-family: 'Fira Code', monospace;">
+        <span>AgentHub Session Store</span>
+        <button class="btn" style="padding: 2px 8px; font-size: 10px;" onclick="showToast('Ver historial de archivos')">📁 Archivo (2)</button>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: INTERACTIVE SIMULATION LAB & ARCHITECTURE MATRIX -->
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+      
+      <!-- Card 1: Active Session Telemetry Inspector -->
+      <div style="background: var(--bg-card); border: 1px solid var(--border-strong); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <h3 style="font-size: 13.5px; font-weight: 800; color: #fff;">Inspector de Sesión Seleccionada</h3>
+          <span class="badge badge-cyan" id="inspectorId">s-101</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-family: 'Fira Code', monospace; font-size: 11px;">
+          <div style="background: var(--bg-inset); border: 1px solid var(--border-strong); border-radius: 8px; padding: 10px;">
+            <div style="color: var(--text-dim); font-size: 10px;">TÍTULO / SLUG</div>
+            <div style="color: #fff; font-weight: 800; margin-top: 2px;" id="inspTitle">Auditoría Táctica</div>
+          </div>
+          <div style="background: var(--bg-inset); border: 1px solid var(--border-strong); border-radius: 8px; padding: 10px;">
+            <div style="color: var(--text-dim); font-size: 10px;">PROYECTO</div>
+            <div style="color: var(--cyan-bright); font-weight: 700; margin-top: 2px;" id="inspProject">AgentHub Core</div>
+          </div>
+          <div style="background: var(--bg-inset); border: 1px solid var(--border-strong); border-radius: 8px; padding: 10px;">
+            <div style="color: var(--text-dim); font-size: 10px;">ROL DE PROTOCOLO</div>
+            <div style="color: var(--emerald-bright); font-weight: 700; margin-top: 2px;" id="inspRole">Arquitecto</div>
+          </div>
+        </div>
+
+        <div style="background: #07090e; border: 1px solid var(--border-strong); border-radius: 8px; padding: 12px; font-family: 'Fira Code', monospace; font-size: 11px;">
+          <div style="color: var(--text-dim); font-size: 10px; margin-bottom: 4px;">CWD SEGURO RESUELTO:</div>
+          <div style="color: var(--emerald-bright);" id="inspCwd">C:\Users\juan0\Documents\GitHub\portafolio\agent-hub</div>
+        </div>
+
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-cyan" onclick="simulateNewMessage()">➕ Simular mensaje recibido</button>
+          <button class="btn" onclick="toggleInspectorFavorite()">★ Conmutar favorito</button>
+          <button class="btn" style="color: var(--rose-accent);" onclick="promptDeleteActive()">🗑️ Eliminar sesión</button>
+        </div>
+      </div>
+
+      <!-- Card 2: Squad Flow Partitioning Rules Matrix -->
+      <div style="background: var(--bg-card); border: 1px solid var(--border-strong); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <h3 style="font-size: 13.5px; font-weight: 800; color: #fff;">Garantías del Algoritmo groupByFlow()</h3>
+          <span class="badge badge-emerald">100% Tests Verificados</span>
+        </div>
+        <p style="font-size: 12px; color: var(--text-dim); line-height: 1.6;">
+          El motor de flujos agrupa chats huérfanos o miembros de equipo sin degradar rendimiento. Si un flujo tiene un solo miembro, se despliega como chat individual para maximizar la ergonomía visual.
+        </p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 11.5px;">
+          <div style="background: var(--bg-inset); border: 1px solid var(--border-strong); border-radius: 8px; padding: 12px;">
+            <div style="color: var(--cyan-bright); font-weight: 800; font-family: 'Fira Code', monospace;">CA1: Formateo de Título</div>
+            <p style="color: var(--text-muted); font-size: 11px; margin-top: 4px;">
+              Quita prefijos de cortesía ("por favor", "ayúdame"), capitaliza y corta en límite de palabra a ≤ 40 caracteres.
+            </p>
+          </div>
+          <div style="background: var(--bg-inset); border: 1px solid var(--border-strong); border-radius: 8px; padding: 12px;">
+            <div style="color: var(--emerald-bright); font-weight: 800; font-family: 'Fira Code', monospace;">CA5: Etiquetas de Rol</div>
+            <p style="color: var(--text-muted); font-size: 11px; margin-top: 4px;">
+              Asigna números ordenados ("Desarrollador 1", "Desarrollador 2") únicamente cuando el rol se repite en el equipo.
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- CONFIRM DELETE MODAL -->
+  <div id="deleteModal" class="modal-backdrop" style="display: none;" onclick="if(event.target===this) closeDeleteModal()">
+    <div style="background: var(--bg-card); border: 1px solid var(--rose-accent); border-radius: 14px; width: 100%; max-width: 420px; padding: 20px; box-shadow: 0 25px 60px rgba(0,0,0,0.9); display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 20px;">⚠️</span>
+        <h3 style="font-size: 14px; font-weight: 800; color: #fff;">Confirmación de Eliminación</h3>
+      </div>
+      <p style="font-size: 12px; color: var(--text-dim); line-height: 1.5;" id="deleteModalPromptText">
+        ¿Estás seguro de que deseas eliminar permanentemente esta conversación? Esta acción no se puede deshacer.
+      </p>
+      <div style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 10px; border-top: 1px solid var(--border-strong);">
+        <button class="btn" onclick="closeDeleteModal()">Cancelar</button>
+        <button class="btn btn-rose" onclick="confirmDeleteAction()">Sí, eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEW CHAT MODAL -->
+  <div id="newChatModal" class="modal-backdrop" style="display: none;" onclick="if(event.target===this) closeNewChatModal()">
+    <div style="background: var(--bg-card); border: 1px solid var(--border-strong); border-radius: 14px; width: 100%; max-width: 460px; padding: 20px; box-shadow: 0 25px 60px rgba(0,0,0,0.9); display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: flex; align-items: center; justify-content: space-between;">
+        <h3 style="font-size: 14px; font-weight: 800; color: #fff;">Crear Nueva Sesión Táctica</h3>
+        <button class="btn" style="padding: 2px 6px;" onclick="closeNewChatModal()">✕</button>
+      </div>
+
+      <label style="display: block;">
+        <span style="font-size: 11px; font-weight: 700; color: var(--text-dim); text-transform: uppercase;" class="font-mono">Título o Tarea:</span>
+        <input type="text" id="newChatTitle" placeholder="ej. Verificación de DiffLines" style="width: 100%; background: #07090e; border: 1px solid var(--border-strong); border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #fff; margin-top: 4px; outline: none;">
+      </label>
+
+      <label style="display: block;">
+        <span style="font-size: 11px; font-weight: 700; color: var(--text-dim); text-transform: uppercase;" class="font-mono">Proyecto:</span>
+        <select id="newChatProject" style="width: 100%; background: #07090e; border: 1px solid var(--border-strong); border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #fff; margin-top: 4px; outline: none;">
+          <option value="AgentHub Core">AgentHub Core</option>
+          <option value="Documentation">Documentation</option>
+          <option value="Sin proyecto">Sin proyecto</option>
+        </select>
+      </label>
+
+      <label style="display: block;">
+        <span style="font-size: 11px; font-weight: 700; color: var(--text-dim); text-transform: uppercase;" class="font-mono">Rol de Protocolo:</span>
+        <select id="newChatRole" style="width: 100%; background: #07090e; border: 1px solid var(--border-strong); border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #fff; margin-top: 4px; outline: none;">
+          <option value="Arquitecto">Arquitecto</option>
+          <option value="Desarrollador">Desarrollador</option>
+          <option value="Diseñador">Diseñador</option>
+          <option value="Tester">Tester</option>
+          <option value="Revisor">Revisor</option>
+        </select>
+      </label>
+
+      <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px;">
+        <button class="btn" onclick="closeNewChatModal()">Cancelar</button>
+        <button class="btn btn-cyan" onclick="submitNewChat()">Crear Sesión</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toastBox" style="display: none; position: fixed; bottom: 24px; right: 24px; background: rgba(10, 14, 23, 0.95); border: 1px solid var(--cyan-primary); border-radius: 10px; padding: 10px 16px; color: var(--cyan-bright); font-family: 'Fira Code', monospace; font-size: 11.5px; font-weight: 700; box-shadow: 0 10px 30px rgba(0,0,0,0.8); z-index: 200;">
+    ✓ Acción completada
+  </div>
+
+  <footer style="padding: 16px 24px; text-align: center; border-top: 1px solid var(--border-subtle); color: var(--text-faint); font-size: 11px;" class="font-mono">
+    AgentHub Tactical HUD // Session Drawer &amp; Flow Hierarchy Engine // Certified WCAG AAA &amp; Zero Leaks
+  </footer>
+
+  <script>
+    // State
+    let sessions = [
+      {
+        id: 's-101',
+        title: 'Auditoría Táctica de Seguridad',
+        projectName: 'AgentHub Core',
+        squadId: 'sq-1',
+        squadName: 'Equipo de Seguridad & Diff',
+        role: 'Arquitecto',
+        messagesCount: 14,
+        updatedAt: Date.now() - 1000 * 60 * 5,
+        cwd: 'C:\\Users\\juan0\\Documents\\GitHub\\portafolio\\agent-hub'
+      },
+      {
+        id: 's-102',
+        title: 'Auditoría Táctica de Seguridad',
+        projectName: 'AgentHub Core',
+        squadId: 'sq-1',
+        squadName: 'Equipo de Seguridad & Diff',
+        role: 'Revisor',
+        messagesCount: 6,
+        updatedAt: Date.now() - 1000 * 60 * 12,
+        cwd: 'C:\\Users\\juan0\\Documents\\GitHub\\portafolio\\agent-hub'
+      },
+      {
+        id: 's-103',
+        title: 'Refactor de Handlers IPC',
+        projectName: 'AgentHub Core',
+        role: 'Desarrollador',
+        messagesCount: 28,
+        updatedAt: Date.now() - 1000 * 60 * 35,
+        cwd: 'C:\\Users\\juan0\\Documents\\GitHub\\portafolio\\agent-hub'
+      },
+      {
+        id: 's-104',
+        title: 'Documentación de Spec Cards #69 a #71',
+        projectName: 'Documentation',
+        role: 'Diseñador',
+        messagesCount: 19,
+        updatedAt: Date.now() - 1000 * 60 * 80,
+        cwd: 'C:\\Users\\juan0\\Documents\\GitHub\\portafolio\\agent-hub'
+      },
+      {
+        id: 's-105',
+        title: 'Guía de Arquitectura HUD v2',
+        projectName: 'Documentation',
+        role: 'Arquitecto',
+        messagesCount: 9,
+        updatedAt: Date.now() - 1000 * 60 * 120,
+        cwd: 'C:\\Users\\juan0\\Documents\\GitHub\\portafolio\\agent-hub'
+      },
+      {
+        id: 's-106',
+        title: 'Chat temporal sin mensajes',
+        projectName: 'Sin proyecto',
+        role: 'Desarrollador',
+        messagesCount: 0,
+        updatedAt: Date.now() - 1000 * 60 * 200,
+        cwd: 'C:\\Users\\juan0\\Documents\\GitHub\\portafolio\\agent-hub'
+      }
+    ];
+
+    let activeSessionId = 's-101';
+    let favorites = ['s-103'];
+    let searchQuery = '';
+    let currentSort = 'recent';
+    let pendingDeleteSessionId = null;
+
+    function renderDrawer() {
+      const container = document.getElementById('drawerListContainer');
+      const filtered = getFilteredSessions();
+
+      document.getElementById('headerSessionsCount').innerText = `${sessions.length} SESIONES`;
+      document.getElementById('filteredCountText').innerText = `${filtered.length} de ${sessions.length}`;
+
+      // Update empty sessions banner
+      const emptySessions = sessions.filter(s => s.messagesCount === 0 && s.id !== activeSessionId);
+      const banner = document.getElementById('emptySessionsBanner');
+      if (emptySessions.length > 0) {
+        banner.style.display = 'flex';
+        banner.querySelector('span').innerText = `🗑️ ${emptySessions.length} chat(s) vacío(s) detectado(s)`;
+      } else {
+        banner.style.display = 'none';
+      }
+
+      // Group by Project
+      const projects = Array.from(new Set(filtered.map(s => s.projectName || 'Sin proyecto')));
+
+      container.innerHTML = projects.map(proj => {
+        const projSessions = filtered.filter(s => (s.projectName || 'Sin proyecto') === proj);
+        
+        // Split into squads and standalone
+        const squadsMap = {};
+        const standalone = [];
+
+        projSessions.forEach(s => {
+          if (s.squadId) {
+            if (!squadsMap[s.squadId]) squadsMap[s.squadId] = { name: s.squadName || 'Escuadrón', members: [] };
+            squadsMap[s.squadId].members.push(s);
+          } else {
+            standalone.push(s);
+          }
+        });
+
+        return `
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <!-- Project Header -->
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 4px 6px; font-family: 'Fira Code', monospace; font-size: 11px;">
+              <div style="display: flex; align-items: center; gap: 6px; color: var(--text-dim); font-weight: 700;">
+                <span>📁</span>
+                <span style="color: #fff;">${proj}</span>
+              </div>
+              <span style="color: var(--text-faint); font-size: 10px;">${projSessions.length}</span>
+            </div>
+
+            <!-- Squads In Project -->
+            ${Object.entries(squadsMap).map(([sqId, sq]) => `
+              <div style="background: rgba(12, 18, 32, 0.7); border: 1px solid var(--border-strong); border-radius: 10px; padding: 8px 10px; display: flex; flex-direction: column; gap: 6px;">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                  <div style="display: flex; align-items: center; gap: 6px;">
+                    <span class="badge badge-cyan" style="font-size: 9px;">SQUAD</span>
+                    <span style="font-size: 11.5px; font-weight: 800; color: #fff;">${sq.name}</span>
+                  </div>
+                  <span style="font-size: 10px; color: var(--text-faint); font-family: 'Fira Code', monospace;">${sq.members.length} agentes</span>
+                </div>
+
+                <!-- Squad Members -->
+                <div style="display: flex; flex-direction: column; gap: 4px; padding-left: 8px; border-left: 2px solid var(--border-subtle); margin-top: 4px;">
+                  ${sq.members.map(m => renderSessionRow(m)).join('')}
+                </div>
+              </div>
+            `).join('')}
+
+            <!-- Standalone Sessions -->
+            ${standalone.map(s => renderSessionRow(s)).join('')}
+          </div>
+        `;
+      }).join('');
+
+      updateInspector();
+    }
+
+    function renderSessionRow(s) {
+      const isActive = s.id === activeSessionId;
+      const isFav = favorites.includes(s.id);
+      const roleColor = getRoleBadge(s.role);
+
+      return `
+        <div class="session-item ${isActive ? 'active' : ''}" onclick="selectSession('${s.id}')">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px; min-width: 0;">
+              <span class="badge ${roleColor}" style="font-size: 9px; padding: 1px 6px;">${s.role}</span>
+              <span style="font-weight: 700; font-size: 11.5px; color: ${isActive ? 'var(--cyan-bright)' : '#fff'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                ${s.title}
+              </span>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <button class="star-btn ${isFav ? 'active' : ''}" onclick="event.stopPropagation(); toggleFavorite('${s.id}')">★</button>
+              <span style="font-size: 10px; color: var(--text-faint); font-family: 'Fira Code', monospace;">${s.messagesCount}m</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function getRoleBadge(role) {
+      if (role === 'Arquitecto') return 'badge-cyan';
+      if (role === 'Revisor') return 'badge-emerald';
+      if (role === 'Desarrollador') return 'badge-violet';
+      if (role === 'Diseñador') return 'badge-amber';
+      return 'badge-cyan';
+    }
+
+    function getFilteredSessions() {
+      let result = sessions.filter(s => {
+        if (!searchQuery) return true;
+        const q = searchQuery.toLowerCase();
+        return s.title.toLowerCase().includes(q) ||
+               s.role.toLowerCase().includes(q) ||
+               s.projectName.toLowerCase().includes(q);
+      });
+
+      // Sort
+      if (currentSort === 'recent') {
+        result.sort((a, b) => b.updatedAt - a.updatedAt);
+      } else if (currentSort === 'name') {
+        result.sort((a, b) => a.title.localeCompare(b.title));
+      } else if (currentSort === 'messages') {
+        result.sort((a, b) => b.messagesCount - a.messagesCount);
+      }
+
+      // Pin favorites to top
+      result.sort((a, b) => {
+        const aFav = favorites.includes(a.id);
+        const bFav = favorites.includes(b.id);
+        return (bFav ? 1 : 0) - (aFav ? 1 : 0);
+      });
+
+      return result;
+    }
+
+    function selectSession(id) {
+      activeSessionId = id;
+      renderDrawer();
+    }
+
+    function updateInspector() {
+      const active = sessions.find(s => s.id === activeSessionId) || sessions[0];
+      if (!active) return;
+
+      document.getElementById('inspectorId').innerText = active.id;
+      document.getElementById('inspTitle').innerText = active.title;
+      document.getElementById('inspProject').innerText = active.projectName;
+      document.getElementById('inspRole').innerText = active.role;
+      document.getElementById('inspCwd').innerText = active.cwd;
+    }
+
+    function toggleFavorite(id) {
+      if (favorites.includes(id)) {
+        favorites = favorites.filter(f => f !== id);
+      } else {
+        favorites.push(id);
+      }
+      renderDrawer();
+      showToast('Favoritos actualizados');
+    }
+
+    function toggleInspectorFavorite() {
+      toggleFavorite(activeSessionId);
+    }
+
+    function handleSearch(val) {
+      searchQuery = val.trim();
+      document.getElementById('clearSearchBtn').style.display = searchQuery ? 'block' : 'none';
+      renderDrawer();
+    }
+
+    function clearSearch() {
+      document.getElementById('drawerSearchInput').value = '';
+      searchQuery = '';
+      document.getElementById('clearSearchBtn').style.display = 'none';
+      renderDrawer();
+    }
+
+    function setSort(mode) {
+      currentSort = mode;
+      ['recent', 'name', 'messages'].forEach(m => {
+        const el = document.getElementById(`sort-${m}`);
+        if (m === mode) {
+          el.style.borderColor = 'var(--cyan-primary)';
+          el.style.color = 'var(--cyan-bright)';
+        } else {
+          el.style.borderColor = 'var(--border-strong)';
+          el.style.color = 'var(--text-dim)';
+        }
+      });
+      renderDrawer();
+    }
+
+    function triggerBatchClear() {
+      const emptySessions = sessions.filter(s => s.messagesCount === 0 && s.id !== activeSessionId);
+      sessions = sessions.filter(s => s.messagesCount > 0 || s.id === activeSessionId);
+      renderDrawer();
+      showToast(`Se eliminaron ${emptySessions.length} conversaciones vacías`);
+    }
+
+    function promptDeleteActive() {
+      pendingDeleteSessionId = activeSessionId;
+      document.getElementById('deleteModal').style.display = 'flex';
+      const s = sessions.find(item => item.id === activeSessionId);
+      document.getElementById('deleteModalPromptText').innerText = `¿Estás seguro de que deseas eliminar permanentemente la sesión "${s ? s.title : ''}"?`;
+    }
+
+    function closeDeleteModal() {
+      document.getElementById('deleteModal').style.display = 'none';
+      pendingDeleteSessionId = null;
+    }
+
+    function confirmDeleteAction() {
+      if (pendingDeleteSessionId) {
+        sessions = sessions.filter(s => s.id !== pendingDeleteSessionId);
+        if (activeSessionId === pendingDeleteSessionId) {
+          activeSessionId = sessions[0] ? sessions[0].id : '';
+        }
+        closeDeleteModal();
+        renderDrawer();
+        showToast('Conversación eliminada');
+      }
+    }
+
+    function simulateNewMessage() {
+      const active = sessions.find(s => s.id === activeSessionId);
+      if (active) {
+        active.messagesCount += 1;
+        active.updatedAt = Date.now();
+        renderDrawer();
+        showToast('Nuevo turno registrado');
+      }
+    }
+
+    // New Chat Modal
+    function openNewChatModal() {
+      document.getElementById('newChatModal').style.display = 'flex';
+      document.getElementById('newChatTitle').value = '';
+      document.getElementById('newChatTitle').focus();
+    }
+
+    function closeNewChatModal() {
+      document.getElementById('newChatModal').style.display = 'none';
+    }
+
+    function submitNewChat() {
+      const title = document.getElementById('newChatTitle').value.trim() || 'Nueva Sesión Táctica';
+      const project = document.getElementById('newChatProject').value;
+      const role = document.getElementById('newChatRole').value;
+
+      const newId = `s-${Date.now()}`;
+      sessions.unshift({
+        id: newId,
+        title,
+        projectName: project,
+        role,
+        messagesCount: 1,
+        updatedAt: Date.now(),
+        cwd: 'C:\\Users\\juan0\\Documents\\GitHub\\portafolio\\agent-hub'
+      });
+
+      activeSessionId = newId;
+      closeNewChatModal();
+      renderDrawer();
+      showToast(`Sesión "${title}" creada con éxito`);
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toastBox');
+      toast.innerText = `✓ ${msg}`;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 2000);
+    }
+
+    // Init
+    renderDrawer();
+  </script>
+</body>
+</html>

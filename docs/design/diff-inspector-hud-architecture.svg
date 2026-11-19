@@ -1,0 +1,214 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#07090e" />
+      <stop offset="50%" stop-color="#0a0d16" />
+      <stop offset="100%" stop-color="#07090e" />
+    </linearGradient>
+    <linearGradient id="roseAccent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f43f5e" />
+      <stop offset="100%" stop-color="#fb7185" />
+    </linearGradient>
+    <linearGradient id="emeraldAccent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#34d399" />
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0e131f" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#0a0d16" stop-opacity="0.98" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <style>
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    .sans { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+  </style>
+
+  <!-- Background Canvas -->
+  <rect width="960" height="540" fill="url(#bgGrad)" />
+
+  <!-- Subtle Blueprint Grid -->
+  <g opacity="0.08" stroke="#38bdf8" stroke-width="1">
+    <path d="M 0 40 L 960 40 M 0 80 L 960 80 M 0 120 L 960 120 M 0 160 L 960 160 M 0 200 L 960 200 M 0 240 L 960 240 M 0 280 L 960 280 M 0 320 L 960 320 M 0 360 L 960 360 M 0 400 L 960 400 M 0 440 L 960 440 M 0 480 L 960 480 M 0 520 L 960 520" />
+    <path d="M 60 0 L 60 540 M 120 0 L 120 540 M 180 0 L 180 540 M 240 0 L 240 540 M 300 0 L 300 540 M 360 0 L 360 540 M 420 0 L 420 540 M 480 0 L 480 540 M 540 0 L 540 540 M 600 0 L 600 540 M 660 0 L 660 540 M 720 0 L 720 540 M 780 0 L 780 540 M 840 0 L 840 540 M 900 0 L 900 540" />
+  </g>
+
+  <!-- Header Banner -->
+  <g transform="translate(60, 28)">
+    <rect x="0" y="0" width="840" height="42" rx="8" fill="#0e131f" stroke="#202b3f" stroke-width="1.5" />
+    <circle cx="24" cy="21" r="5" fill="#06b6d4" filter="url(#glow)" />
+    <text x="42" y="26" fill="#f8fafc" font-size="13" font-weight="700" class="sans" letter-spacing="0.5">AGENTHUB HUD :: INTERACTIVE DIFF &amp; CODE INSPECTION ARCHITECTURE</text>
+    <rect x="680" y="9" width="140" height="24" rx="4" fill="#06b6d4" fill-opacity="0.15" stroke="#06b6d4" stroke-width="1" />
+    <text x="750" y="25" fill="#38bdf8" font-size="11" font-weight="600" text-anchor="middle" class="mono">GIT DIFF HEAD ↔ WORKING</text>
+  </g>
+
+  <!-- Central Modal Diff Inspector Window -->
+  <g transform="translate(60, 86)">
+    <!-- Window Outer Shell -->
+    <rect x="0" y="0" width="840" height="424" rx="12" fill="url(#cardGrad)" stroke="#202b3f" stroke-width="1.5" />
+
+    <!-- Top Modal Header Bar -->
+    <rect x="0" y="0" width="840" height="46" rx="12" fill="#0a0d16" />
+    <rect x="0" y="45" width="840" height="1" fill="#202b3f" />
+
+    <!-- File Path and Badges -->
+    <g transform="translate(18, 12)">
+      <rect x="0" y="0" width="22" height="22" rx="4" fill="#6366f1" fill-opacity="0.2" stroke="#6366f1" stroke-width="1" />
+      <path d="M 6 11 L 16 11 M 11 6 L 16 11 L 11 16" stroke="#818cf8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+      <text x="32" y="16" fill="#f8fafc" font-size="12" font-weight="600" class="mono">src/webview/components/TerminalDrawer.tsx</text>
+      
+      <rect x="360" y="1" width="115" height="20" rx="4" fill="#0e131f" stroke="#202b3f" />
+      <text x="417" y="15" fill="#38bdf8" font-size="10" font-weight="600" text-anchor="middle" class="mono">HEAD ↔ ACTUAL</text>
+      
+      <rect x="484" y="1" width="76" height="20" rx="4" fill="#07090e" stroke="#202b3f" />
+      <text x="502" y="15" fill="#34d399" font-size="10" font-weight="700" class="mono">+48</text>
+      <text x="528" y="15" fill="#f43f5e" font-size="10" font-weight="700" class="mono">−12</text>
+    </g>
+
+    <!-- Header Actions Toolbar -->
+    <g transform="translate(600, 10)">
+      <!-- View Mode Toggle (Split / Unified) -->
+      <rect x="0" y="0" width="56" height="26" rx="6" fill="#07090e" stroke="#202b3f" />
+      <rect x="2" y="2" width="26" height="22" rx="4" fill="#131927" stroke="#38bdf8" stroke-opacity="0.5" />
+      <path d="M 9 7 L 9 19 M 21 7 L 21 19 M 15 7 L 15 19" stroke="#38bdf8" stroke-width="1" />
+      <path d="M 35 9 L 49 9 M 35 13 L 49 13 M 35 17 L 49 17" stroke="#64748b" stroke-width="1.2" />
+
+      <!-- Copy & Revert Buttons -->
+      <rect x="64" y="0" width="52" height="26" rx="6" fill="#131927" stroke="#202b3f" />
+      <text x="90" y="17" fill="#cbd5e1" font-size="10" font-weight="600" text-anchor="middle" class="mono">.diff</text>
+
+      <rect x="122" y="0" width="56" height="26" rx="6" fill="#f43f5e" fill-opacity="0.15" stroke="#f43f5e" stroke-opacity="0.4" />
+      <text x="150" y="17" fill="#fb7185" font-size="10" font-weight="700" text-anchor="middle" class="mono">Revertir</text>
+
+      <rect x="186" y="2" width="22" height="22" rx="4" fill="#131927" stroke="#202b3f" />
+      <path d="M 192 8 L 202 18 M 202 8 L 192 18" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" />
+    </g>
+
+    <!-- Split Diff Container Area -->
+    <g transform="translate(0, 46)">
+      <!-- Split Column 1 Header: Original HEAD -->
+      <rect x="0" y="0" width="420" height="28" fill="#101420" stroke="#202b3f" stroke-width="1" />
+      <circle cx="16" cy="14" r="4" fill="#f43f5e" />
+      <text x="28" y="18" fill="#fb7185" font-size="11" font-weight="700" class="mono">ORIGINAL (HEAD)</text>
+      <text x="390" y="18" fill="#64748b" font-size="10" text-anchor="end" class="mono">1,039 líneas</text>
+
+      <!-- Split Column 2 Header: Modified Working Tree -->
+      <rect x="420" y="0" width="420" height="28" fill="#101420" stroke="#202b3f" stroke-width="1" />
+      <circle cx="436" cy="14" r="4" fill="#10b981" />
+      <text x="448" y="18" fill="#34d399" font-size="11" font-weight="700" class="mono">ACTUAL (MODIFICADO)</text>
+      <text x="810" y="18" fill="#64748b" font-size="10" text-anchor="end" class="mono">1,075 líneas</text>
+
+      <!-- Code Stream Display -->
+      <g transform="translate(0, 28)">
+        <!-- Line 1: Normal unchanged -->
+        <g transform="translate(0, 0)">
+          <!-- Left -->
+          <rect x="0" y="0" width="420" height="24" fill="#07090e" />
+          <text x="24" y="16" fill="#475569" font-size="10" text-anchor="end" class="mono">480</text>
+          <text x="40" y="16" fill="#94a3b8" font-size="11" class="mono">  return (</text>
+          <!-- Right -->
+          <rect x="420" y="0" width="420" height="24" fill="#07090e" />
+          <text x="444" y="16" fill="#475569" font-size="10" text-anchor="end" class="mono">480</text>
+          <text x="460" y="16" fill="#94a3b8" font-size="11" class="mono">  return (</text>
+        </g>
+
+        <!-- Line 2: Diff line (Red Removed vs Green Added) -->
+        <g transform="translate(0, 24)">
+          <!-- Left: Removed -->
+          <rect x="0" y="0" width="420" height="24" fill="#f43f5e" fill-opacity="0.12" />
+          <rect x="0" y="0" width="3" height="24" fill="#f43f5e" />
+          <text x="24" y="16" fill="#f43f5e" font-size="10" text-anchor="end" class="mono">481</text>
+          <text x="40" y="16" fill="#fda4af" font-size="11" class="mono">−   className="bg-zinc-950 border-zinc-800"</text>
+
+          <!-- Right: Added -->
+          <rect x="420" y="0" width="420" height="24" fill="#10b981" fill-opacity="0.12" />
+          <rect x="420" y="0" width="3" height="24" fill="#10b981" />
+          <text x="444" y="16" fill="#10b981" font-size="10" text-anchor="end" class="mono">481</text>
+          <text x="460" y="16" fill="#a7f3d0" font-size="11" class="mono">+   className="bg-[#07090e] border-[#202b3f] shadow-2xl"</text>
+        </g>
+
+        <!-- Line 3: Diff line 2 -->
+        <g transform="translate(0, 48)">
+          <!-- Left: Removed -->
+          <rect x="0" y="0" width="420" height="24" fill="#f43f5e" fill-opacity="0.12" />
+          <rect x="0" y="0" width="3" height="24" fill="#f43f5e" />
+          <text x="24" y="16" fill="#f43f5e" font-size="10" text-anchor="end" class="mono">482</text>
+          <text x="40" y="16" fill="#fda4af" font-size="11" class="mono">−   &lt;div className="bg-zinc-900 px-3 py-1"&gt;</text>
+
+          <!-- Right: Added -->
+          <rect x="420" y="0" width="420" height="24" fill="#10b981" fill-opacity="0.12" />
+          <rect x="420" y="0" width="3" height="24" fill="#10b981" />
+          <text x="444" y="16" fill="#10b981" font-size="10" text-anchor="end" class="mono">482</text>
+          <text x="460" y="16" fill="#a7f3d0" font-size="11" class="mono">+   &lt;div className="bg-[#0e131f]/95 border-[#202b3f]"&gt;</text>
+        </g>
+
+        <!-- Line 4: Diff line 3 -->
+        <g transform="translate(0, 72)">
+          <!-- Left: Removed -->
+          <rect x="0" y="0" width="420" height="24" fill="#f43f5e" fill-opacity="0.12" />
+          <rect x="0" y="0" width="3" height="24" fill="#f43f5e" />
+          <text x="24" y="16" fill="#f43f5e" font-size="10" text-anchor="end" class="mono">483</text>
+          <text x="40" y="16" fill="#fda4af" font-size="11" class="mono">−     &lt;button className="bg-zinc-800 text-zinc-100"&gt;</text>
+
+          <!-- Right: Added -->
+          <rect x="420" y="0" width="420" height="24" fill="#10b981" fill-opacity="0.12" />
+          <rect x="420" y="0" width="3" height="24" fill="#10b981" />
+          <text x="444" y="16" fill="#10b981" font-size="10" text-anchor="end" class="mono">483</text>
+          <text x="460" y="16" fill="#a7f3d0" font-size="11" class="mono">+     &lt;button className="bg-[#131927] border-indigo-500/40"&gt;</text>
+        </g>
+
+        <!-- Line 5: Unchanged line -->
+        <g transform="translate(0, 96)">
+          <rect x="0" y="0" width="420" height="24" fill="#07090e" />
+          <text x="24" y="16" fill="#475569" font-size="10" text-anchor="end" class="mono">484</text>
+          <text x="40" y="16" fill="#94a3b8" font-size="11" class="mono">        &lt;span&gt;Terminal&lt;/span&gt;</text>
+          <rect x="420" y="0" width="420" height="24" fill="#07090e" />
+          <text x="444" y="16" fill="#475569" font-size="10" text-anchor="end" class="mono">484</text>
+          <text x="460" y="16" fill="#94a3b8" font-size="11" class="mono">        &lt;span&gt;Terminal&lt;/span&gt;</text>
+        </g>
+
+        <!-- Line 6: Unchanged line -->
+        <g transform="translate(0, 120)">
+          <rect x="0" y="0" width="420" height="24" fill="#07090e" />
+          <text x="24" y="16" fill="#475569" font-size="10" text-anchor="end" class="mono">485</text>
+          <text x="40" y="16" fill="#94a3b8" font-size="11" class="mono">      &lt;/button&gt;</text>
+          <rect x="420" y="0" width="420" height="24" fill="#07090e" />
+          <text x="444" y="16" fill="#475569" font-size="10" text-anchor="end" class="mono">485</text>
+          <text x="460" y="16" fill="#94a3b8" font-size="11" class="mono">      &lt;/button&gt;</text>
+        </g>
+
+        <!-- Line 7: Unchanged line -->
+        <g transform="translate(0, 144)">
+          <rect x="0" y="0" width="420" height="24" fill="#07090e" />
+          <text x="24" y="16" fill="#475569" font-size="10" text-anchor="end" class="mono">486</text>
+          <text x="40" y="16" fill="#94a3b8" font-size="11" class="mono">    &lt;/div&gt;</text>
+          <rect x="420" y="0" width="420" height="24" fill="#07090e" />
+          <text x="444" y="16" fill="#475569" font-size="10" text-anchor="end" class="mono">486</text>
+          <text x="460" y="16" fill="#94a3b8" font-size="11" class="mono">    &lt;/div&gt;</text>
+        </g>
+      </g>
+    </g>
+
+    <!-- Bottom Status Bar -->
+    <g transform="translate(0, 380)">
+      <rect x="0" y="0" width="840" height="44" rx="12" fill="#0a0d16" />
+      <rect x="0" y="0" width="840" height="1" fill="#202b3f" />
+
+      <g transform="translate(20, 14)">
+        <text x="0" y="12" fill="#94a3b8" font-size="10" class="mono">MODO: VISTA DIVIDIDA (SPLIT) · SINFLICTOS DE MERGE DETECTADOS</text>
+      </g>
+      <g transform="translate(700, 11)">
+        <rect x="0" y="0" width="120" height="22" rx="4" fill="#131927" stroke="#202b3f" />
+        <circle cx="12" cy="11" r="3" fill="#10b981" />
+        <text x="65" y="15" fill="#e2e8f0" font-size="10" font-weight="600" text-anchor="middle" class="mono">SINTAXIS: TSX</text>
+      </g>
+    </g>
+
+    <!-- Central Split Divider Line -->
+    <line x1="420" y1="46" x2="420" y2="380" stroke="#202b3f" stroke-width="1.5" />
+  </g>
+</svg>

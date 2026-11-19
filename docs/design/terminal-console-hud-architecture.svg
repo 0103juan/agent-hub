@@ -1,0 +1,165 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" width="100%" height="100%">
+  <defs>
+    <radialGradient id="termBgGlow" cx="50%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#141c2e" stop-opacity="0.9" />
+      <stop offset="60%" stop-color="#0a0e17" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#07090e" stop-opacity="1" />
+    </radialGradient>
+    <linearGradient id="termCardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#131927" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#0e131f" stop-opacity="0.98" />
+    </linearGradient>
+    <filter id="hudDrop" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.6" />
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="960" height="560" fill="url(#termBgGlow)" />
+
+  <!-- Header Section -->
+  <g transform="translate(40, 26)">
+    <text x="0" y="20" fill="#f1f5f9" font-family="'Plus Jakarta Sans', sans-serif" font-size="15" font-weight="800" letter-spacing="1">ARQUITECTURA DE LA TERMINAL TÁCTICA // TERMINAL DRAWER ENGINE</text>
+    <text x="0" y="38" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="11">MULTIPLEXOR MULTI-SHELL · STREAM ANSI BUFFER · CORRECCIÓN CON IA · BLOQUES COLAPSABLES</text>
+  </g>
+
+  <!-- 4 Architecture Blocks Top Pipeline -->
+  <g transform="translate(40, 85)">
+    <!-- Node 1: Shell Multiplexer -->
+    <g transform="translate(0, 0)">
+      <rect width="200" height="125" rx="12" fill="url(#termCardGrad)" stroke="#202b3f" stroke-width="1.2" filter="url(#hudDrop)" />
+      <rect x="12" y="12" width="28" height="28" rx="6" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="1" />
+      <text x="26" y="30" fill="#34d399" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" text-anchor="middle">&gt;_</text>
+      <text x="48" y="26" fill="#f1f5f9" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="700">Multi-Shell Hub</text>
+      <text x="48" y="38" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="9">pwsh · cmd · bash · wsl</text>
+      <line x1="12" y1="48" x2="188" y2="48" stroke="#202b3f" stroke-width="1" />
+      <text x="12" y="68" fill="#cbd5e1" font-family="'Plus Jakarta Sans', sans-serif" font-size="10">• Pestañas independientes</text>
+      <text x="12" y="86" fill="#cbd5e1" font-family="'Plus Jakarta Sans', sans-serif" font-size="10">• Auto-detección por OS</text>
+      <text x="12" y="104" fill="#34d399" font-family="'JetBrains Mono', monospace" font-size="9 font-semibold">CWD dinámico por chat</text>
+    </g>
+
+    <!-- Arrow 1 -> 2 -->
+    <path d="M 205 62 L 225 62" fill="none" stroke="#6366f1" stroke-width="2" />
+
+    <!-- Node 2: Stream ANSI Parser -->
+    <g transform="translate(230, 0)">
+      <rect width="210" height="125" rx="12" fill="url(#termCardGrad)" stroke="#202b3f" stroke-width="1.2" filter="url(#hudDrop)" />
+      <rect x="12" y="12" width="28" height="28" rx="6" fill="#38bdf8" fill-opacity="0.15" stroke="#38bdf8" stroke-width="1" />
+      <text x="26" y="30" fill="#38bdf8" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" text-anchor="middle">🎨</text>
+      <text x="48" y="26" fill="#f1f5f9" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="700">ANSI &amp; Link Engine</text>
+      <text x="48" y="38" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="9">Colores y Rutas Clicables</text>
+      <line x1="12" y1="48" x2="198" y2="48" stroke="#202b3f" stroke-width="1" />
+      <text x="12" y="68" fill="#cbd5e1" font-family="'Plus Jakarta Sans', sans-serif" font-size="10">• 16 colores ANSI reales</text>
+      <text x="12" y="86" fill="#cbd5e1" font-family="'Plus Jakarta Sans', sans-serif" font-size="10">• Detección file:line</text>
+      <text x="12" y="104" fill="#38bdf8" font-family="'JetBrains Mono', monospace" font-size="9 font-semibold">Previsualización con un clic</text>
+    </g>
+
+    <!-- Arrow 2 -> 3 -->
+    <path d="M 445 62 L 465 62" fill="none" stroke="#6366f1" stroke-width="2" />
+
+    <!-- Node 3: AI Auto-Diagnosis -->
+    <g transform="translate(470, 0)">
+      <rect width="210" height="125" rx="12" fill="url(#termCardGrad)" stroke="#202b3f" stroke-width="1.2" filter="url(#hudDrop)" />
+      <rect x="12" y="12" width="28" height="28" rx="6" fill="#a855f7" fill-opacity="0.15" stroke="#a855f7" stroke-width="1" />
+      <text x="26" y="30" fill="#c084fc" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" text-anchor="middle">✨</text>
+      <text x="48" y="26" fill="#f1f5f9" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="700">Corregir con IA</text>
+      <text x="48" y="38" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="9">Inspección de Errores</text>
+      <line x1="12" y1="48" x2="198" y2="48" stroke="#202b3f" stroke-width="1" />
+      <text x="12" y="68" fill="#cbd5e1" font-family="'Plus Jakarta Sans', sans-serif" font-size="10">• Inyecta error al chat</text>
+      <text x="12" y="86" fill="#cbd5e1" font-family="'Plus Jakarta Sans', sans-serif" font-size="10">• Contexto del último comando</text>
+      <text x="12" y="104" fill="#c084fc" font-family="'JetBrains Mono', monospace" font-size="9 font-semibold">Salto de salida a asistente</text>
+    </g>
+
+    <!-- Arrow 3 -> 4 -->
+    <path d="M 685 62 L 705 62" fill="none" stroke="#6366f1" stroke-width="2" />
+
+    <!-- Node 4: Dock & Placement Manager -->
+    <g transform="translate(710, 0)">
+      <rect width="170" height="125" rx="12" fill="url(#termCardGrad)" stroke="#6366f1" stroke-width="1.2" filter="url(#hudDrop)" />
+      <rect x="12" y="12" width="28" height="28" rx="6" fill="#6366f1" fill-opacity="0.2" stroke="#6366f1" stroke-width="1" />
+      <text x="26" y="30" fill="#a5b4fc" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" text-anchor="middle">⧉</text>
+      <text x="48" y="26" fill="#f1f5f9" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="700">Docking Flexible</text>
+      <text x="48" y="38" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="9">Bottom o Lateral</text>
+      <line x1="12" y1="48" x2="158" y2="48" stroke="#202b3f" stroke-width="1" />
+      <text x="12" y="68" fill="#cbd5e1" font-family="'Plus Jakarta Sans', sans-serif" font-size="10">• Acoplar a la derecha</text>
+      <text x="12" y="86" fill="#cbd5e1" font-family="'Plus Jakarta Sans', sans-serif" font-size="10">• Altura ajustable</text>
+      <text x="12" y="104" fill="#fbbf24" font-family="'JetBrains Mono', monospace" font-size="9 font-semibold">Pantalla dividida lista</text>
+    </g>
+  </g>
+
+  <!-- Bottom Detailed Tactical Console Frame in SVG -->
+  <g transform="translate(40, 235)">
+    <rect width="880" height="295" rx="14" fill="#05070c" stroke="#202b3f" stroke-width="1.2" filter="url(#hudDrop)" />
+    
+    <!-- Console Toolbar -->
+    <g transform="translate(0, 0)">
+      <rect width="880" height="38" rx="14" fill="#0e131f" />
+      <line x1="0" y1="38" x2="880" y2="38" stroke="#202b3f" stroke-width="1" />
+      
+      <!-- Pestañas -->
+      <g transform="translate(14, 8)">
+        <rect width="110" height="22" rx="6" fill="#131927" stroke="#202b3f" stroke-width="0.8" />
+        <circle cx="12" cy="11" r="3" fill="#10b981" />
+        <text x="22" y="14" fill="#f1f5f9" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700">Terminal 1</text>
+        <text x="100" y="14" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="9" text-anchor="end">✓0</text>
+
+        <rect x="116" y="0" width="110" height="22" rx="6" fill="#07090e" stroke="#202b3f" stroke-width="0.8" />
+        <text x="128" y="14" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="9">Terminal 2</text>
+      </g>
+
+      <!-- Quick Commands Bar -->
+      <g transform="translate(260, 8)">
+        <rect x="0" y="0" width="75" height="22" rx="5" fill="#131927" stroke="#202b3f" stroke-width="0.8" />
+        <text x="37" y="14" fill="#cbd5e1" font-family="'JetBrains Mono', monospace" font-size="9" text-anchor="middle">npm test</text>
+
+        <rect x="82" y="0" width="75" height="22" rx="5" fill="#131927" stroke="#202b3f" stroke-width="0.8" />
+        <text x="119" y="14" fill="#cbd5e1" font-family="'JetBrains Mono', monospace" font-size="9" text-anchor="middle">git status</text>
+
+        <rect x="164" y="0" width="90" height="22" rx="5" fill="#131927" stroke="#202b3f" stroke-width="0.8" />
+        <text x="209" y="14" fill="#cbd5e1" font-family="'JetBrains Mono', monospace" font-size="9" text-anchor="middle">npm run build</text>
+      </g>
+
+      <!-- Right controls -->
+      <g transform="translate(640, 8)">
+        <rect x="0" y="0" width="115" height="22" rx="6" fill="#a855f7" fill-opacity="0.15" stroke="#a855f7" stroke-width="0.8" />
+        <text x="57" y="14" fill="#d8b4fe" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" font-weight="700" text-anchor="middle">✨ Corregir con IA</text>
+
+        <rect x="122" y="0" width="50" height="22" rx="6" fill="#131927" stroke="#202b3f" stroke-width="0.8" />
+        <text x="147" y="14" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="9" text-anchor="middle">Ctrl+R</text>
+
+        <rect x="178" y="0" width="50" height="22" rx="6" fill="#131927" stroke="#202b3f" stroke-width="0.8" />
+        <text x="203" y="14" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="9" text-anchor="middle">Ctrl+F</text>
+      </g>
+    </g>
+
+    <!-- Terminal Output Lines -->
+    <g transform="translate(20, 52)" font-family="'JetBrains Mono', monospace" font-size="10" leading="1.6">
+      <text x="0" y="16" fill="#34d399" font-weight="700">$ npm run build:webview</text>
+      <text x="0" y="34" fill="#94a3b8">&gt; vite build</text>
+      <text x="0" y="52" fill="#e2e8f0">✓ 1565 modules transformed.</text>
+      <text x="0" y="70" fill="#38bdf8">../../dist/webview/assets/index.js 812.72 kB │ gzip: 199.40 kB</text>
+      <text x="0" y="88" fill="#10b981 font-bold">✓ built in 2.06s</text>
+
+      <text x="0" y="116" fill="#34d399" font-weight="700">$ npm run test:flows</text>
+      <text x="0" y="134" fill="#a3e635">ℹ tests 11 · pass 11 · fail 0 · duration_ms 55.68ms</text>
+      <text x="0" y="152" fill="#64748b">----------------------------------------------------</text>
+      <text x="0" y="170" fill="#38bdf8">Terminal session ready. PID 4820 active.</text>
+    </g>
+
+    <!-- Command Prompt Bottom Bar -->
+    <g transform="translate(0, 245)">
+      <rect width="880" height="50" rx="14" fill="#0e131f" />
+      <line x1="0" y1="0" x2="880" y2="0" stroke="#202b3f" stroke-width="1" />
+      <text x="18" y="30" fill="#10b981" font-family="'JetBrains Mono', monospace" font-size="14" font-weight="800">$</text>
+      
+      <!-- Input Frame -->
+      <rect x="36" y="10" width="720" height="30" rx="8" fill="#07090e" stroke="#202b3f" stroke-width="1" />
+      <text x="50" y="30" fill="#f1f5f9" font-family="'JetBrains Mono', monospace" font-size="11">git status --short</text>
+      <line x1="175" y1="18" x2="175" y2="32" stroke="#6366f1" stroke-width="1.5" />
+
+      <!-- Run Action Button -->
+      <rect x="768" y="10" width="98" height="30" rx="8" fill="#4f46e5" />
+      <text x="817" y="29" fill="#ffffff" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="700" text-anchor="middle">▶ Ejecutar</text>
+    </g>
+  </g>
+</svg>

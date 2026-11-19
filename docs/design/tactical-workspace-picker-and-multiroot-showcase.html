@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tactical Workspace Picker &amp; Multi-Root Switcher — Showcase</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* 5 Canonical Elevation Layers */
+    .bg-layer-1 { background-color: #07090e; }
+    .bg-layer-2 { background-color: #0a0e17; }
+    .bg-layer-3 { background-color: #0c1220; }
+    .bg-layer-4 { background-color: #162035; }
+    .border-layer-5 { border-color: #202b3f; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-[#07090e] text-slate-200 font-sans h-full overflow-hidden flex flex-col antialiased selection:bg-cyan-500/30 selection:text-cyan-200">
+
+  <!-- Top Tactical Navigation Bar -->
+  <header class="h-14 border-b border-[#202b3f] bg-[#0a0e17] flex items-center justify-between px-6 shrink-0 z-20">
+    <div class="flex items-center gap-4">
+      <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 font-mono font-bold text-sm">
+        #63
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-sm font-bold tracking-tight text-white">Selector Táctico de Espacios de Trabajo</h1>
+          <span class="px-2 py-0.5 text-[10px] font-mono rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">SPEC CARD #63</span>
+        </div>
+        <p class="text-[11px] text-slate-400 font-mono">Multi-Root Tree · Filtro Git · Favoritos en LocalStorage · Open VS Code</p>
+      </div>
+    </div>
+
+    <!-- Live Workspace Trigger Component Inside Header -->
+    <div class="flex items-center gap-4">
+      <!-- Simulated WorkspacePicker React Component -->
+      <div class="relative" id="picker-wrapper">
+        <button id="picker-btn" class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#0a0e17] hover:bg-[#162035] text-slate-300 hover:text-slate-100 border border-[#202b3f] hover:border-cyan-500/50 transition cursor-pointer max-w-[240px] shadow-sm">
+          <svg class="w-3.5 h-3.5 text-cyan-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+          <span id="current-folder-label" class="truncate font-mono text-[11px] font-semibold">agent-hub</span>
+          <svg id="picker-chevron" class="w-2.5 h-2.5 text-slate-500 shrink-0 ml-auto transition-transform duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+
+        <!-- Dropdown Menu replicating WorkspacePicker.tsx -->
+        <div id="picker-dropdown" class="hidden absolute right-0 sm:left-0 top-full mt-1.5 z-50 w-88 sm:w-96 p-2.5 rounded-xl bg-[#0a0e17] border border-[#202b3f] shadow-2xl shadow-black/90 space-y-2.5 text-xs">
+          <!-- Active Workspace Box -->
+          <div class="space-y-1 pb-1.5 border-b border-[#202b3f]">
+            <span class="text-[10px] uppercase font-mono font-semibold text-slate-400 tracking-wider">Espacio de Trabajo Activo</span>
+            <div id="active-path-box" class="text-[11px] font-mono text-cyan-300 break-all p-2 rounded-lg bg-[#07090e] border border-[#202b3f]">
+              C:\Users\juan0\Documents\GitHub\portafolio\agent-hub
+            </div>
+          </div>
+
+          <!-- Actions Grid -->
+          <div class="space-y-1.5">
+            <button id="choose-dir-btn" class="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg bg-cyan-950/40 hover:bg-cyan-900/50 text-cyan-200 border border-cyan-500/40 transition text-left cursor-pointer shadow-sm shadow-cyan-500/10">
+              <svg class="w-3.5 h-3.5 text-cyan-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"/></svg>
+              <span class="font-semibold text-xs">Abrir otra carpeta...</span>
+            </button>
+
+            <div class="grid grid-cols-3 gap-1 pt-0.5">
+              <button id="open-explorer-btn" class="flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg bg-[#0c1220] hover:bg-[#162035] text-slate-300 text-[11px] transition cursor-pointer border border-[#202b3f]" title="Abrir en el Explorador de Windows">
+                <svg class="w-3 h-3 text-cyan-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                <span>Explorador</span>
+              </button>
+              <button id="open-vscode-btn" class="flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg bg-[#0c1220] hover:bg-[#162035] text-slate-300 text-[11px] transition cursor-pointer border border-[#202b3f]" title="Abrir en Visual Studio Code">
+                <svg class="w-3 h-3 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                <span>VS Code</span>
+              </button>
+              <button id="copy-path-btn" class="flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg bg-[#0c1220] hover:bg-[#162035] text-slate-300 text-[11px] transition cursor-pointer border border-[#202b3f]" title="Copiar la ruta del proyecto actual">
+                <svg class="w-3 h-3 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                <span id="copy-text">Copiar</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Directory Tree & Filter Section -->
+          <div class="space-y-1.5 pt-1.5 border-t border-[#202b3f]">
+            <div class="flex items-center gap-1.5">
+              <button id="up-level-btn" class="p-1 rounded-lg hover:bg-[#162035] text-slate-400 hover:text-slate-200 cursor-pointer transition border border-transparent hover:border-[#202b3f]" title="Subir un nivel">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+              </button>
+              <span id="breadcrumb-text" class="flex-1 truncate text-[11px] font-mono text-slate-300">portafolio / agent-hub</span>
+              <button id="use-this-dir-btn" class="px-2 py-0.5 rounded-md bg-cyan-600/25 hover:bg-cyan-600/40 text-cyan-200 border border-cyan-500/40 text-[10px] font-medium transition cursor-pointer">
+                Usar esta
+              </button>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+              <div class="relative flex-1">
+                <svg class="w-3 h-3 text-slate-500 absolute left-2 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" id="filter-input" placeholder="Filtrar carpetas…" class="w-full bg-[#07090e] border border-[#202b3f] rounded-lg pl-7 pr-2 py-1 text-[11px] text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500">
+              </div>
+              <button id="toggle-git-only" class="p-1.5 rounded-lg border text-[10px] cursor-pointer transition border-[#202b3f] text-slate-400 hover:text-slate-200 hover:bg-[#162035]" title="Mostrar solo repositorios git">
+                <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+              </button>
+            </div>
+
+            <!-- Entries List -->
+            <div id="dir-entries-list" class="max-h-44 overflow-y-auto space-y-0.5 no-scrollbar">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Favorites Section -->
+          <div id="favorites-section" class="space-y-1 pt-1.5 border-t border-[#202b3f]">
+            <span class="text-[10px] uppercase font-mono font-semibold text-slate-400 tracking-wider flex items-center gap-1.5">
+              <svg class="w-3 h-3 text-amber-400 fill-amber-400/30" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              Carpetas Favoritas
+            </span>
+            <div id="favorites-list" class="max-h-20 overflow-y-auto space-y-0.5 no-scrollbar">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Recents Section -->
+          <div class="space-y-1 pt-1.5 border-t border-[#202b3f]">
+            <span class="text-[10px] uppercase font-mono font-semibold text-slate-400 tracking-wider flex items-center gap-1.5">
+              <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              Proyectos Recientes
+            </span>
+            <div id="recents-list" class="max-h-24 overflow-y-auto space-y-0.5 no-scrollbar">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <a href="master-design-portal-and-component-gallery-showcase.html" class="px-3 py-1.5 rounded-lg bg-[#0c1220] hover:bg-[#162035] text-slate-300 hover:text-white border border-[#202b3f] text-xs font-medium transition cursor-pointer">
+        Volver al Portal
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Canvas: Multi-Root Project Explorer & Environment Inspector -->
+  <main class="flex-1 p-6 overflow-y-auto bg-[#07090e] space-y-6">
+    <!-- Top Hero Banner -->
+    <div class="p-6 rounded-2xl bg-[#0a0e17] border border-[#202b3f] flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl">
+      <div class="space-y-1">
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-mono text-xs font-bold border border-cyan-500/40">HOST ENVIRONMENT</span>
+          <h2 class="text-lg font-bold text-white">Espacio de Trabajo Confinado y Seguro</h2>
+        </div>
+        <p class="text-xs text-slate-400 max-w-2xl">
+          El selector de espacios de trabajo permite alternar sin fricción entre múltiples proyectos locales, filtrando repositorios Git y protegiendo al agente contra accesos fuera de directorio o carpetas del sistema operativo.
+        </p>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button onclick="document.getElementById('picker-btn').click()" class="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold text-xs font-mono transition shadow-md shadow-cyan-600/20 cursor-pointer">
+          PROBAR SELECTOR DESPLEGABLE
+        </button>
+      </div>
+    </div>
+
+    <!-- 3 Metrics & Security Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="p-4 rounded-xl bg-[#0a0e17] border border-[#202b3f] space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-mono text-slate-400 font-bold">RUTA ACTIVA</span>
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+        </div>
+        <div id="inspector-active-dir" class="text-xs font-mono text-cyan-300 truncate">agent-hub</div>
+        <div class="text-[10px] text-slate-500 font-mono">CWD validado por resolveSafeCwd()</div>
+      </div>
+
+      <div class="p-4 rounded-xl bg-[#0a0e17] border border-[#202b3f] space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-mono text-slate-400 font-bold">REPOSITORIOS GIT DETECTADOS</span>
+          <span class="px-1.5 py-0.5 text-[9px] font-mono rounded bg-emerald-950/60 text-emerald-300 border border-emerald-500/30">VCS SYNC</span>
+        </div>
+        <div class="text-xs font-mono text-emerald-300 font-bold">4 Repositorios (.git)</div>
+        <div class="text-[10px] text-slate-500 font-mono">agent-hub, frontend-showcases, mcp-host, docs</div>
+      </div>
+
+      <div class="p-4 rounded-xl bg-[#0a0e17] border border-[#202b3f] space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-mono text-slate-400 font-bold">FAVORITOS GUARDADOS</span>
+          <svg class="w-3.5 h-3.5 text-amber-400 fill-amber-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        </div>
+        <div id="favorites-count-display" class="text-xs font-mono text-amber-300 font-bold">2 Carpetas</div>
+        <div class="text-[10px] text-slate-500 font-mono">Persistido en localStorage 'agent-hub.favoriteDirs'</div>
+      </div>
+    </div>
+
+    <!-- Simulated Log Console -->
+    <div class="rounded-xl bg-[#0a0e17] border border-[#202b3f] overflow-hidden">
+      <div class="h-9 px-4 bg-[#0c1220] border-b border-[#202b3f] flex items-center justify-between text-xs font-mono text-slate-400">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+          <span>TERMINAL DE EVENTOS HOST (IPC EMITTER)</span>
+        </div>
+        <button id="clear-events" class="text-[10px] text-slate-500 hover:text-slate-300 transition">Limpiar</button>
+      </div>
+      <div id="events-log" class="p-4 max-h-48 overflow-y-auto font-mono text-xs text-slate-300 space-y-1.5 no-scrollbar">
+        <div class="text-slate-500">[01:25:00] postToHost({ command: 'listDirs' }) -> Recibidas 5 subcarpetas</div>
+        <div class="text-cyan-400">[01:25:01] Workspace activo establecido en: C:\Users\juan0\Documents\GitHub\portafolio\agent-hub</div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Interactive Logic -->
+  <script>
+    // State replicating WorkspacePicker.tsx
+    let currentDir = 'C:\\Users\\juan0\\Documents\\GitHub\\portafolio\\agent-hub';
+    let recentDirs = [
+      'C:\\Users\\juan0\\Documents\\GitHub\\portafolio\\agent-hub',
+      'C:\\Users\\juan0\\Documents\\GitHub\\portafolio\\frontend-showcases',
+      'C:\\Users\\juan0\\Documents\\GitHub\\mcp-servers\\postgres-mcp'
+    ];
+    let favorites = JSON.parse(localStorage.getItem('agent-hub.favoriteDirs') || '["C:\\\\Users\\\\juan0\\\\Documents\\\\GitHub\\\\portafolio\\\\agent-hub"]');
+    let reposOnly = false;
+    let filter = '';
+    let isOpen = false;
+
+    // Simulated filesystem tree
+    const fileSystem = {
+      root: 'C:\\Users\\juan0\\Documents\\GitHub\\portafolio',
+      dir: 'C:\\Users\\juan0\\Documents\\GitHub\\portafolio',
+      entries: [
+        { name: 'agent-hub', path: 'C:\\Users\\juan0\\Documents\\GitHub\\portafolio\\agent-hub', isGit: true },
+        { name: 'frontend-showcases', path: 'C:\\Users\\juan0\\Documents\\GitHub\\portafolio\\frontend-showcases', isGit: true },
+        { name: 'design-tokens-v2', path: 'C:\\Users\\juan0\\Documents\\GitHub\\portafolio\\design-tokens-v2', isGit: false },
+        { name: 'mcp-servers', path: 'C:\\Users\\juan0\\Documents\\GitHub\\portafolio\\mcp-servers', isGit: true },
+        { name: 'legacy-archive', path: 'C:\\Users\\juan0\\Documents\\GitHub\\portafolio\\legacy-archive', isGit: false }
+      ]
+    };
+
+    const pickerBtn = document.getElementById('picker-btn');
+    const pickerDropdown = document.getElementById('picker-dropdown');
+    const pickerChevron = document.getElementById('picker-chevron');
+    const currentFolderLabel = document.getElementById('current-folder-label');
+    const activePathBox = document.getElementById('active-path-box');
+    const filterInput = document.getElementById('filter-input');
+    const toggleGitBtn = document.getElementById('toggle-git-only');
+    const entriesList = document.getElementById('dir-entries-list');
+    const favoritesList = document.getElementById('favorites-list');
+    const recentsList = document.getElementById('recents-list');
+    const eventsLog = document.getElementById('events-log');
+    const inspectorActiveDir = document.getElementById('inspector-active-dir');
+    const favCountDisplay = document.getElementById('favorites-count-display');
+    const copyPathBtn = document.getElementById('copy-path-btn');
+    const copyText = document.getElementById('copy-text');
+
+    function logEvent(text, color = 'text-slate-300') {
+      const time = new Date().toTimeString().split(' ')[0];
+      const div = document.createElement('div');
+      div.className = color;
+      div.textContent = `[${time}] ${text}`;
+      eventsLog.appendChild(div);
+      eventsLog.scrollTop = eventsLog.scrollHeight;
+    }
+
+    function toggleDropdown() {
+      isOpen = !isOpen;
+      if (isOpen) {
+        pickerDropdown.classList.remove('hidden');
+        pickerBtn.classList.add('border-cyan-500/60', 'bg-[#162035]', 'ring-1', 'ring-cyan-500/30', 'text-cyan-200');
+        pickerChevron.classList.add('rotate-180', 'text-cyan-400');
+        filterInput.value = '';
+        filter = '';
+        render();
+        logEvent("postToHost({ command: 'listDirs' })");
+      } else {
+        pickerDropdown.classList.add('hidden');
+        pickerBtn.classList.remove('border-cyan-500/60', 'bg-[#162035]', 'ring-1', 'ring-cyan-500/30', 'text-cyan-200');
+        pickerChevron.classList.remove('rotate-180', 'text-cyan-400');
+      }
+    }
+
+    pickerBtn.addEventListener('click', toggleDropdown);
+
+    document.addEventListener('click', (e) => {
+      const wrapper = document.getElementById('picker-wrapper');
+      if (isOpen && !wrapper.contains(e.target)) {
+        toggleDropdown();
+      }
+    });
+
+    function selectDir(path) {
+      currentDir = path;
+      const folderName = path.split(/[\\/]/).filter(Boolean).pop() || path;
+      currentFolderLabel.textContent = folderName;
+      activePathBox.textContent = path;
+      inspectorActiveDir.textContent = path;
+
+      if (!recentDirs.includes(path)) {
+        recentDirs.unshift(path);
+      }
+
+      logEvent(`postToHost({ command: 'setWorkspaceDir', dir: '${path}' })`, 'text-cyan-300');
+      toggleDropdown();
+    }
+
+    function toggleFavorite(path) {
+      if (favorites.includes(path)) {
+        favorites = favorites.filter(d => d !== path);
+        logEvent(`Favorito removido: ${path}`, 'text-amber-400');
+      } else {
+        favorites.push(path);
+        logEvent(`Favorito añadido: ${path}`, 'text-amber-400');
+      }
+      localStorage.setItem('agent-hub.favoriteDirs', JSON.stringify(favorites));
+      favCountDisplay.textContent = `${favorites.length} Carpetas`;
+      render();
+    }
+
+    function render() {
+      // Filter entries
+      const normalizedFilter = filter.toLowerCase().trim();
+      const visible = fileSystem.entries.filter(entry => {
+        if (reposOnly && !entry.isGit) return false;
+        return entry.name.toLowerCase().includes(normalizedFilter);
+      });
+
+      // Render entries
+      entriesList.innerHTML = '';
+      if (visible.length === 0) {
+        entriesList.innerHTML = `<div class="px-2 py-2 text-[11px] text-slate-500 font-mono text-center">Nada coincide</div>`;
+      } else {
+        visible.forEach(entry => {
+          const isFav = favorites.includes(entry.path);
+          const row = document.createElement('div');
+          row.className = "flex items-center gap-1 rounded-lg hover:bg-[#162035] text-slate-300 hover:text-white transition";
+          row.innerHTML = `
+            <button type="button" class="flex-1 min-w-0 flex items-center gap-2 px-2 py-1.5 text-left text-[11px] cursor-pointer" title="Entrar a ${entry.path}">
+              ${entry.isGit
+                ? '<svg class="w-3.5 h-3.5 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>'
+                : '<svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>'
+              }
+              <span class="truncate">${entry.name}</span>
+              <svg class="w-3 h-3 text-slate-500 shrink-0 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
+            <button type="button" class="fav-btn p-1 rounded text-slate-500 hover:text-amber-300 cursor-pointer" title="${isFav ? 'Quitar de favoritos' : 'Añadir a favoritos'}">
+              <svg class="w-3 h-3 ${isFav ? 'text-amber-400 fill-amber-400' : ''}" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" fill="${isFav ? '#fbbf24' : 'none'}" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            </button>
+            <button type="button" class="select-btn p-1 mr-1 rounded text-slate-400 hover:text-cyan-300 cursor-pointer" title="Seleccionar esta carpeta">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            </button>
+          `;
+
+          row.querySelector('.fav-btn').addEventListener('click', () => toggleFavorite(entry.path));
+          row.querySelector('.select-btn').addEventListener('click', () => selectDir(entry.path));
+          row.querySelector('button:first-child').addEventListener('click', () => {
+            logEvent(`browse(${entry.path})`, 'text-slate-400');
+          });
+
+          entriesList.appendChild(row);
+        });
+      }
+
+      // Render Favorites
+      favoritesList.innerHTML = '';
+      if (favorites.length === 0) {
+        document.getElementById('favorites-section').classList.add('hidden');
+      } else {
+        document.getElementById('favorites-section').classList.remove('hidden');
+        favorites.forEach(dir => {
+          const name = dir.split(/[\\/]/).filter(Boolean).pop() || dir;
+          const btn = document.createElement('button');
+          btn.className = "w-full truncate text-left px-2 py-1.5 rounded-lg text-[11px] text-slate-300 hover:bg-[#162035] hover:text-white transition cursor-pointer";
+          btn.textContent = name;
+          btn.title = dir;
+          btn.addEventListener('click', () => selectDir(dir));
+          favoritesList.appendChild(btn);
+        });
+      }
+
+      // Render Recents
+      recentsList.innerHTML = '';
+      recentDirs.forEach(dir => {
+        const isCurrent = dir.toLowerCase() === currentDir.toLowerCase();
+        const name = dir.split(/[\\/]/).filter(Boolean).pop() || dir;
+        const btn = document.createElement('button');
+        btn.className = `w-full flex items-center justify-between gap-1.5 px-2.5 py-1.5 rounded-lg text-left transition cursor-pointer text-[11px] ${
+          isCurrent
+            ? 'bg-[#0c1220] text-cyan-300 font-semibold border border-cyan-500/30'
+            : 'hover:bg-[#162035] text-slate-300 hover:text-white'
+        }`;
+        btn.innerHTML = `
+          <div class="truncate">
+            <div class="font-medium truncate">${name}</div>
+            <div class="text-[9px] font-mono text-slate-500 truncate">${dir}</div>
+          </div>
+          ${isCurrent ? '<svg class="w-3 h-3 text-cyan-400 shrink-0 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>' : ''}
+        `;
+        btn.addEventListener('click', () => selectDir(dir));
+        recentsList.appendChild(btn);
+      });
+    }
+
+    filterInput.addEventListener('input', (e) => {
+      filter = e.target.value;
+      render();
+    });
+
+    toggleGitBtn.addEventListener('click', () => {
+      reposOnly = !reposOnly;
+      if (reposOnly) {
+        toggleGitBtn.className = "p-1.5 rounded-lg border text-[10px] cursor-pointer transition bg-emerald-950/40 border-emerald-500/50 text-emerald-300";
+      } else {
+        toggleGitBtn.className = "p-1.5 rounded-lg border text-[10px] cursor-pointer transition border-[#202b3f] text-slate-400 hover:text-slate-200 hover:bg-[#162035]";
+      }
+      render();
+    });
+
+    document.getElementById('choose-dir-btn').addEventListener('click', () => {
+      logEvent("postToHost({ command: 'chooseWorkspaceDir' }) -> Dialogo nativo abierto");
+      toggleDropdown();
+    });
+
+    document.getElementById('open-explorer-btn').addEventListener('click', () => {
+      logEvent(`postToHost({ command: 'openFolderInExplorer', dir: '${currentDir}' })`);
+      toggleDropdown();
+    });
+
+    document.getElementById('open-vscode-btn').addEventListener('click', () => {
+      logEvent(`openInVsCode('${currentDir}') -> VS Code lanzado`);
+      toggleDropdown();
+    });
+
+    copyPathBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(currentDir).then(() => {
+        copyText.textContent = "¡Copiado!";
+        logEvent(`Ruta copiada al portapapeles: ${currentDir}`);
+        setTimeout(() => { copyText.textContent = "Copiar"; }, 1500);
+      });
+    });
+
+    document.getElementById('use-this-dir-btn').addEventListener('click', () => {
+      selectDir(fileSystem.dir);
+    });
+
+    document.getElementById('clear-events').addEventListener('click', () => {
+      eventsLog.innerHTML = '';
+    });
+
+    render();
+  </script>
+</body>
+</html>

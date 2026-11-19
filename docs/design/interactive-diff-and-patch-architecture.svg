@@ -1,0 +1,244 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="100%" height="100%" style="background:#07090e; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <defs>
+    <linearGradient id="hud-bg-37" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0a0e17" />
+      <stop offset="60%" stop-color="#060910" />
+      <stop offset="100%" stop-color="#04060a" />
+    </linearGradient>
+    <filter id="neon-glow-37" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="5" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <pattern id="grid-37" width="28" height="28" patternUnits="userSpaceOnUse">
+      <path d="M 28 0 L 0 0 0 28" fill="none" stroke="#162035" stroke-width="0.75" stroke-opacity="0.5" />
+      <circle cx="28" cy="28" r="0.8" fill="#06b6d4" fill-opacity="0.2" />
+    </pattern>
+  </defs>
+
+  <rect width="1280" height="720" fill="url(#hud-bg-37)" />
+  <rect width="1280" height="720" fill="url(#grid-37)" />
+
+  <!-- Master Header Bar -->
+  <rect x="36" y="22" width="1208" height="68" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.5" />
+  <circle cx="70" cy="56" r="18" fill="#06b6d4" fill-opacity="0.12" stroke="#06b6d4" stroke-width="1.5" />
+  <!-- Git Compare Icon -->
+  <circle cx="64" cy="50" r="3.5" fill="#f43f5e" />
+  <circle cx="64" cy="62" r="3.5" fill="#10b981" />
+  <path d="M64 53.5 L64 58.5 M72 50 C76 50 76 62 72 62" fill="none" stroke="#06b6d4" stroke-width="2" stroke-linecap="round" />
+  <circle cx="72" cy="50" r="3.5" fill="#f43f5e" />
+  <circle cx="72" cy="62" r="3.5" fill="#10b981" />
+
+  <text x="102" y="48" fill="#f8fafc" font-size="15" font-weight="800" letter-spacing="0.5">AGENTHUB // INTERACTIVE GIT DIFF &amp; PATCH ENGINE</text>
+  <text x="102" y="68" fill="#94a3b8" font-size="11" font-mono="true">TACTICAL HUD SPEC CARD #37 • SIDE-BY-SIDE SPLIT &amp; UNIFIED RAW DIFF • HUNK INSPECTOR • ZERO-LEAK ROLLBACK</text>
+
+  <rect x="910" y="36" width="150" height="38" rx="8" fill="#10b981" fill-opacity="0.12" stroke="#10b981" stroke-width="1.2" />
+  <circle cx="926" cy="55" r="4" fill="#10b981" filter="url(#neon-glow-37)" />
+  <text x="938" y="59" fill="#10b981" font-size="11" font-weight="800" font-mono="true">+18 / −6 LINES</text>
+
+  <rect x="1070" y="36" width="155" height="38" rx="8" fill="#06b6d4" fill-opacity="0.12" stroke="#06b6d4" stroke-width="1.2" />
+  <circle cx="1086" cy="55" r="4" fill="#06b6d4" filter="url(#neon-glow-37)" />
+  <text x="1098" y="59" fill="#06b6d4" font-size="11" font-weight="800" font-mono="true">HEAD ↔ ACTUAL</text>
+
+  <!-- Panel 1: Split View Architecture (Left) -->
+  <g transform="translate(36, 106)">
+    <rect width="386" height="584" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.5" />
+    <rect width="386" height="42" rx="14" fill="#0e131f" />
+    <text x="18" y="26" fill="#06b6d4" font-size="11" font-weight="800" font-mono="true">01 // SIDE-BY-SIDE SPLIT VIEW</text>
+    <rect x="306" y="10" width="66" height="22" rx="6" fill="#06b6d4" fill-opacity="0.15" />
+    <text x="318" y="25" fill="#06b6d4" font-size="9.5" font-weight="700" font-mono="true">SPLIT</text>
+
+    <!-- Side-by-side Columns diagram -->
+    <g transform="translate(18, 56)">
+      <rect width="350" height="40" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1" />
+      <rect x="6" y="6" width="165" height="28" rx="6" fill="#1f1418" stroke="#f43f5e" stroke-width="1" />
+      <text x="88" y="24" fill="#fda4af" font-size="10.5" font-weight="700" text-anchor="middle" font-mono="true">ORIGINAL (HEAD)</text>
+
+      <rect x="178" y="6" width="165" height="28" rx="6" fill="#0f261e" stroke="#10b981" stroke-width="1" />
+      <text x="260" y="24" fill="#6ee7b7" font-size="10.5" font-weight="700" text-anchor="middle" font-mono="true">ACTUAL (MODIFICADO)</text>
+    </g>
+
+    <g transform="translate(18, 108)">
+      <rect width="350" height="456" rx="10" fill="#07090e" stroke="#162035" stroke-width="1.2" />
+
+      <!-- Row with Deleted line in Left -->
+      <g transform="translate(10, 16)">
+        <rect width="160" height="36" rx="4" fill="#1f1418" stroke="#f43f5e" stroke-width="0.8" />
+        <text x="8" y="22" fill="#fda4af" font-size="9" font-mono="true">- const cwd = "system32";</text>
+
+        <rect x="170" width="160" height="36" rx="4" fill="#0f261e" stroke="#10b981" stroke-width="0.8" />
+        <text x="178" y="22" fill="#6ee7b7" font-size="9" font-weight="700" font-mono="true">+ const cwd = resolveSafeCwd();</text>
+      </g>
+
+      <!-- Row Unchanged -->
+      <g transform="translate(10, 60)">
+        <rect width="160" height="28" rx="4" fill="#0a0e17" />
+        <text x="8" y="18" fill="#64748b" font-size="9" font-mono="true">  return execSync(cmd, { cwd });</text>
+
+        <rect x="170" width="160" height="28" rx="4" fill="#0a0e17" />
+        <text x="178" y="18" fill="#64748b" font-size="9" font-mono="true">  return execSync(cmd, { cwd });</text>
+      </g>
+
+      <!-- Specs box -->
+      <g transform="translate(14, 110)">
+        <rect width="322" height="330" rx="8" fill="#0a0e17" stroke="#162035" stroke-width="1" />
+        <text x="14" y="24" fill="#f8fafc" font-size="11" font-weight="700">Ventajas de Vista Dividida (Split)</text>
+
+        <circle cx="20" cy="54" r="3" fill="#10b981" />
+        <text x="32" y="58" fill="#cbd5e1" font-size="10.5">Comparativa síncrona línea a línea</text>
+
+        <circle cx="20" cy="84" r="3" fill="#10b981" />
+        <text x="32" y="88" fill="#cbd5e1" font-size="10.5">Números de línea independientes en cada panel</text>
+
+        <circle cx="20" cy="114" r="3" fill="#10b981" />
+        <text x="32" y="118" fill="#cbd5e1" font-size="10.5">Borde lateral rojo para eliminados y verde para nuevos</text>
+
+        <circle cx="20" cy="144" r="3" fill="#10b981" />
+        <text x="32" y="148" fill="#cbd5e1" font-size="10.5">Desplazamiento horizontal para líneas largas</text>
+
+        <circle cx="20" cy="174" r="3" fill="#10b981" />
+        <text x="32" y="178" fill="#cbd5e1" font-size="10.5">Cabeceras pegajosas (sticky) en tope de tabla</text>
+
+        <rect x="14" y="220" width="294" height="80" rx="6" fill="#07090e" stroke="#202b3f" stroke-width="0.8" />
+        <text x="26" y="244" fill="#06b6d4" font-size="10" font-weight="800" font-mono="true">STATS SUMMARY</text>
+        <text x="26" y="266" fill="#10b981" font-size="10" font-mono="true">+18 adiciones (75%)</text>
+        <text x="26" y="286" fill="#f43f5e" font-size="10" font-mono="true">−6 eliminaciones (25%)</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Panel 2: Unified Raw Diff & Hunk Tokens (Center) -->
+  <g transform="translate(444, 106)">
+    <rect width="392" height="584" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.5" />
+    <rect width="392" height="42" rx="14" fill="#0e131f" />
+    <text x="18" y="26" fill="#10b981" font-size="11" font-weight="800" font-mono="true">02 // UNIFIED RAW GIT DIFF HUNK VIEW</text>
+    <rect x="290" y="10" width="88" height="22" rx="6" fill="#10b981" fill-opacity="0.15" />
+    <text x="300" y="25" fill="#10b981" font-size="9.5" font-weight="700" font-mono="true">UNIFIED</text>
+
+    <!-- Raw Hunk Preview -->
+    <g transform="translate(18, 56)">
+      <rect width="356" height="40" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1" />
+      <text x="14" y="24" fill="#67e8f9" font-size="11" font-mono="true">@@ -40,7 +40,9 @@ workspace-actions.ts</text>
+    </g>
+
+    <g transform="translate(18, 108)">
+      <rect width="356" height="456" rx="10" fill="#07090e" stroke="#162035" stroke-width="1.2" />
+
+      <!-- Unified lines -->
+      <g transform="translate(12, 16)">
+        <rect width="332" height="28" rx="4" fill="#082f49" fill-opacity="0.4" />
+        <rect width="3" height="28" fill="#06b6d4" />
+        <text x="12" y="18" fill="#38bdf8" font-size="10" font-weight="700" font-mono="true">@@ -82,6 +82,9 @@ validateWorkspace</text>
+
+        <g transform="translate(0, 34)">
+          <rect width="332" height="24" rx="3" fill="#1f1418" />
+          <rect width="3" height="24" fill="#f43f5e" />
+          <text x="12" y="16" fill="#fda4af" font-size="10" font-mono="true">-  return runCommand(cmd, path);</text>
+        </g>
+
+        <g transform="translate(0, 64)">
+          <rect width="332" height="24" rx="3" fill="#0f261e" />
+          <rect width="3" height="24" fill="#10b981" />
+          <text x="12" y="16" fill="#6ee7b7" font-size="10" font-weight="700" font-mono="true">+  const safeCwd = resolveSafeCwd(path);</text>
+        </g>
+
+        <g transform="translate(0, 92)">
+          <rect width="332" height="24" rx="3" fill="#0f261e" />
+          <rect width="3" height="24" fill="#10b981" />
+          <text x="12" y="16" fill="#6ee7b7" font-size="10" font-weight="700" font-mono="true">+  return runCommand(cmd, safeCwd);</text>
+        </g>
+
+        <g transform="translate(0, 120)">
+          <rect width="332" height="24" rx="3" fill="#0a0e17" />
+          <text x="12" y="16" fill="#64748b" font-size="10" font-mono="true">   return true;</text>
+        </g>
+      </g>
+
+      <!-- Patch Export Tools -->
+      <g transform="translate(14, 180)">
+        <rect width="328" height="260" rx="8" fill="#0a0e17" stroke="#162035" stroke-width="1" />
+        <text x="14" y="24" fill="#f8fafc" font-size="11" font-weight="700">Herramientas de Exportación &amp; Patch</text>
+
+        <circle cx="20" cy="52" r="3" fill="#06b6d4" />
+        <text x="32" y="56" fill="#cbd5e1" font-size="10.5">Descarga directa en formato estándar .diff</text>
+
+        <circle cx="20" cy="80" r="3" fill="#06b6d4" />
+        <text x="32" y="84" fill="#cbd5e1" font-size="10.5">Copia en portapapeles para revisiones PR</text>
+
+        <circle cx="20" cy="108" r="3" fill="#06b6d4" />
+        <text x="32" y="112" fill="#cbd5e1" font-size="10.5">Sintaxis compatible con `git apply patch.diff`</text>
+
+        <rect x="14" y="136" width="300" height="104" rx="6" fill="#07090e" stroke="#202b3f" stroke-width="0.8" />
+        <text x="24" y="160" fill="#fcd34d" font-size="10" font-mono="true">GIT CLI SYNERGY</text>
+        <text x="24" y="182" fill="#94a3b8" font-size="9.5" font-mono="true">&gt; git diff HEAD -- safe-path.ts</text>
+        <text x="24" y="202" fill="#94a3b8" font-size="9.5" font-mono="true">&gt; git checkout -- safe-path.ts (revert)</text>
+        <text x="24" y="222" fill="#10b981" font-size="9.5" font-mono="true">✓ HEAD STATE SYNCHRONIZED</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Panel 3: Zero-Leak Rollback & Confirmation Guard (Right) -->
+  <g transform="translate(858, 106)">
+    <rect width="386" height="584" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.5" />
+    <rect width="386" height="42" rx="14" fill="#0e131f" />
+    <text x="18" y="26" fill="#f43f5e" font-size="11" font-weight="800" font-mono="true">03 // SAFE ROLLBACK &amp; DISCARD GUARD</text>
+    <rect x="296" y="10" width="76" height="22" rx="6" fill="#f43f5e" fill-opacity="0.15" />
+    <text x="306" y="25" fill="#fda4af" font-size="9.5" font-weight="700" font-mono="true">ROLLBACK</text>
+
+    <!-- Revert Confirmation Bar Mockup -->
+    <g transform="translate(18, 56)">
+      <rect width="350" height="52" rx="8" fill="#1f1118" stroke="#f43f5e" stroke-width="1.2" />
+      <text x="14" y="22" fill="#fda4af" font-size="11" font-weight="700">¿Descartar cambios de safe-path.ts?</text>
+      <text x="14" y="38" fill="#94a3b8" font-size="9.5" font-mono="true">Restaura el archivo al estado exacto de HEAD.</text>
+
+      <rect x="248" y="10" width="90" height="30" rx="6" fill="#f43f5e" />
+      <text x="293" y="29" fill="#fff" font-size="10.5" font-weight="800" text-anchor="middle">Sí, revertir</text>
+    </g>
+
+    <!-- Guard Mechanics -->
+    <g transform="translate(18, 120)">
+      <rect width="350" height="444" rx="10" fill="#07090e" stroke="#162035" stroke-width="1.2" />
+
+      <!-- Step 1 -->
+      <g transform="translate(14, 16)">
+        <rect width="322" height="74" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1" />
+        <circle cx="20" cy="22" r="8" fill="#06b6d4" fill-opacity="0.15" />
+        <text x="20" y="26" fill="#06b6d4" font-size="10" font-weight="800" text-anchor="middle">1</text>
+        <text x="36" y="22" fill="#f8fafc" font-size="11" font-weight="700">Doble Confirmación Visual</text>
+        <text x="36" y="38" fill="#94a3b8" font-size="10">El botón "Revertir" requiere un segundo clic.</text>
+        <text x="36" y="54" fill="#6ee7b7" font-size="9.5" font-mono="true">Previene descartes accidentales de código.</text>
+      </g>
+
+      <!-- Step 2 -->
+      <g transform="translate(14, 102)">
+        <rect width="322" height="74" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1" />
+        <circle cx="20" cy="22" r="8" fill="#06b6d4" fill-opacity="0.15" />
+        <text x="20" y="26" fill="#06b6d4" font-size="10" font-weight="800" text-anchor="middle">2</text>
+        <text x="36" y="22" fill="#f8fafc" font-size="11" font-weight="700">Aislamiento por Archivo Individual</text>
+        <text x="36" y="38" fill="#94a3b8" font-size="10">No descarta todo el working tree: sólo el archivo</text>
+        <text x="36" y="54" fill="#6ee7b7" font-size="9.5" font-mono="true">seleccionado en la inspección modal.</text>
+      </g>
+
+      <!-- Step 3 -->
+      <g transform="translate(14, 188)">
+        <rect width="322" height="74" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1" />
+        <circle cx="20" cy="22" r="8" fill="#06b6d4" fill-opacity="0.15" />
+        <text x="20" y="26" fill="#06b6d4" font-size="10" font-weight="800" text-anchor="middle">3</text>
+        <text x="36" y="22" fill="#f8fafc" font-size="11" font-weight="700">Refresco Inmediato de Lista Git</text>
+        <text x="36" y="38" fill="#94a3b8" font-size="10">Al revertir, la barra lateral actualiza el contador</text>
+        <text x="36" y="54" fill="#6ee7b7" font-size="9.5" font-mono="true">de archivos modificados automáticamente.</text>
+      </g>
+
+      <!-- Safety Summary -->
+      <g transform="translate(14, 276)">
+        <rect width="322" height="152" rx="8" fill="#0a0e17" stroke="#162035" stroke-width="1" />
+        <text x="14" y="24" fill="#f8fafc" font-size="11" font-weight="700">Garantía de Integridad Git</text>
+        <text x="14" y="46" fill="#94a3b8" font-size="10.5">• Conexión directa mediante host git IPC</text>
+        <text x="14" y="66" fill="#94a3b8" font-size="10.5">• Validación estricta con resolveSafeCwd</text>
+        <text x="14" y="86" fill="#94a3b8" font-size="10.5">• Cierre reactivo con tecla Escape</text>
+        
+        <rect x="14" y="106" width="294" height="28" rx="6" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="0.8" />
+        <text x="161" y="124" fill="#6ee7b7" font-size="10" font-weight="800" text-anchor="middle" font-mono="true">GIT INTEGRITY: ZERO_DATA_LOSS</text>
+      </g>
+    </g>
+  </g>
+</svg>

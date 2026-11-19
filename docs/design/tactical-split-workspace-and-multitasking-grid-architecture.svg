@@ -1,0 +1,279 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" style="background:#07090e; font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;">
+  <defs>
+    <!-- Background Grid -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#162035" stroke-width="0.8" opacity="0.4"/>
+    </pattern>
+    <radialGradient id="cyan-glow" cx="50%" cy="0%" r="70%">
+      <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#07090e" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow-drop" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.65"/>
+    </filter>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="1600" height="900" fill="#07090e"/>
+  <rect width="1600" height="900" fill="url(#grid)"/>
+  <rect width="1600" height="500" fill="url(#cyan-glow)"/>
+
+  <!-- Master Header -->
+  <g transform="translate(48, 36)">
+    <!-- Brand / Badge -->
+    <rect x="0" y="0" width="132" height="26" rx="6" fill="#0c1220" stroke="#06b6d4" stroke-width="1.2"/>
+    <text x="12" y="17" fill="#22d3ee" font-size="11" font-weight="700" letter-spacing="1.5" font-family="ui-monospace, monospace">SPEC CARD #67</text>
+
+    <text x="148" y="18" fill="#64748b" font-size="12" font-family="ui-monospace, monospace">|</text>
+    <text x="164" y="18" fill="#94a3b8" font-size="12" font-weight="600" letter-spacing="0.5">SECTION 2.T TACTICAL SPLIT WORKSPACE &amp; MULTITASKING GRID</text>
+
+    <!-- Master Title -->
+    <text x="0" y="62" fill="#f8fafc" font-size="28" font-weight="800" letter-spacing="-0.5">Espacio de Trabajo Dividido y Malla Multitarea Concurrente</text>
+    <text x="0" y="86" fill="#94a3b8" font-size="14">Malla de hasta 4 agentes concurrentes, layouts dinámicos (columnas, filas, grid 2x2), memoización granular sameChat y CWD independiente</text>
+
+    <!-- Top Right Telemetry Badges -->
+    <g transform="translate(1120, 10)">
+      <rect x="0" y="0" width="384" height="64" rx="10" fill="#0a0e17" stroke="#202b3f" stroke-width="1.2" filter="url(#shadow-drop)"/>
+      <circle cx="24" cy="32" r="6" fill="#06b6d4"/>
+      <circle cx="24" cy="32" r="10" fill="none" stroke="#06b6d4" stroke-width="1.5" opacity="0.4"/>
+      <text x="42" y="27" fill="#f8fafc" font-size="12" font-weight="700">GRID CONCURRENCY: ACTIVE</text>
+      <text x="42" y="45" fill="#64748b" font-size="10" font-family="ui-monospace, monospace">4 Max Panes • sameChat Memo • Multi-Root Isolated</text>
+      <rect x="300" y="16" width="70" height="32" rx="6" fill="#0c1220" stroke="#06b6d4" stroke-width="1"/>
+      <text x="314" y="36" fill="#22d3ee" font-size="12" font-weight="800" font-family="ui-monospace, monospace">60 FPS</text>
+    </g>
+  </g>
+
+  <!-- Three Architecture Pillars -->
+
+  <!-- ================= PILLAR 1: LAYOUT STRATEGIES & PANE CONCURRENCY ================= -->
+  <g transform="translate(48, 150)">
+    <rect x="0" y="0" width="470" height="540" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.4" filter="url(#shadow-drop)"/>
+    <rect x="0" y="0" width="470" height="48" rx="14" fill="#0c1220"/>
+    <path d="M 0 48 L 470 48" stroke="#202b3f" stroke-width="1.2"/>
+
+    <!-- Pillar 1 Header -->
+    <rect x="16" y="12" width="24" height="24" rx="6" fill="#06b6d4" fill-opacity="0.15" stroke="#06b6d4" stroke-width="1"/>
+    <path d="M 21 20 L 26 20 M 31 20 L 35 20 M 21 28 L 26 28 M 31 28 L 35 28" stroke="#22d3ee" stroke-width="1.5"/>
+    <text x="48" y="28" fill="#f8fafc" font-size="14" font-weight="700">1. Estrategias de Layout (useSplit)</text>
+    <rect x="340" y="14" width="114" height="20" rx="4" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+    <text x="352" y="28" fill="#22d3ee" font-size="10" font-family="ui-monospace, monospace">Cols / Rows / Grid</text>
+
+    <!-- Content 1 -->
+    <g transform="translate(20, 68)">
+      <!-- 3 Layout Modes Cards -->
+      <rect x="0" y="0" width="430" height="136" rx="8" fill="#07090e" stroke="#202b3f" stroke-width="1"/>
+      <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700" font-family="ui-monospace, monospace">MODOS DE DISPOSICIÓN VISUAL</text>
+
+      <!-- Mode 1: Columns -->
+      <g transform="translate(14, 34)">
+        <rect x="0" y="0" width="124" height="60" rx="6" fill="#162035" stroke="#06b6d4" stroke-width="1"/>
+        <text x="10" y="20" fill="#22d3ee" font-size="11" font-weight="700">Cols (Columnas)</text>
+        <text x="10" y="36" fill="#94a3b8" font-size="9">Lado a lado (1 a 4)</text>
+        <text x="10" y="50" fill="#64748b" font-size="8" font-family="ui-monospace, monospace">MIN_WIDTH: 340px</text>
+      </g>
+
+      <!-- Mode 2: Rows -->
+      <g transform="translate(148, 34)">
+        <rect x="0" y="0" width="124" height="60" rx="6" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="10" y="20" fill="#e2e8f0" font-size="11" font-weight="700">Rows (Filas)</text>
+        <text x="10" y="36" fill="#94a3b8" font-size="9">Bandas apiladas</text>
+        <text x="10" y="50" fill="#64748b" font-size="8" font-family="ui-monospace, monospace">Layout vertical</text>
+      </g>
+
+      <!-- Mode 3: Grid -->
+      <g transform="translate(282, 34)">
+        <rect x="0" y="0" width="124" height="60" rx="6" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="10" y="20" fill="#e2e8f0" font-size="11" font-weight="700">Grid (Malla 2x2)</text>
+        <text x="10" y="36" fill="#94a3b8" font-size="9">Cuadrícula balanceada</text>
+        <text x="10" y="50" fill="#64748b" font-size="8" font-family="ui-monospace, monospace">Multi-agente squad</text>
+      </g>
+      <text x="14" y="118" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">Almacenado reactivo en 'agent-hub.splitLayout'</text>
+
+      <!-- Maximize / Minimize toggle card -->
+      <g transform="translate(0, 150)">
+        <rect x="0" y="0" width="430" height="126" rx="8" fill="#07090e" stroke="#06b6d4" stroke-width="1.2"/>
+        <text x="14" y="22" fill="#22d3ee" font-size="11" font-weight="700" font-family="ui-monospace, monospace">FOCO MAXIMIZADO POR PANEL (maximized)</text>
+        <text x="14" y="42" fill="#e2e8f0" font-size="11">Permite enfocar 1 panel al 100% sin destruir la sesión compartida:</text>
+        <rect x="14" y="52" width="402" height="36" rx="4" fill="#162035"/>
+        <text x="22" y="68" fill="#22d3ee" font-size="10" font-family="ui-monospace, monospace">setMaximized(maximized === id ? null : id)</text>
+        <text x="22" y="81" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">Alterna entre vista individual y cuadrícula con 1-clic</text>
+        <text x="14" y="112" fill="#94a3b8" font-size="9">Preserva el estado de scroll y texto del compositor en todos los paneles.</text>
+      </g>
+
+      <!-- Saved Sets Card -->
+      <g transform="translate(0, 290)">
+        <rect x="0" y="0" width="430" height="136" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">CONJUNTOS GUARDADOS (SavedSet[])</text>
+        <text x="14" y="42" fill="#94a3b8" font-size="11">Guarda configuraciones de pantalla con nombre en disco:</text>
+        <rect x="14" y="52" width="402" height="34" rx="4" fill="#162035"/>
+        <text x="22" y="67" fill="#fbbf24" font-size="10" font-family="ui-monospace, monospace">interface SavedSet { name: string; ids: string[] }</text>
+        <text x="22" y="80" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">Persistido en localStorage 'agent-hub.splitSets'</text>
+        <text x="14" y="114" fill="#34d399" font-size="10">Permite recargar vistas de escuadrón predefinidas en 1-clic.</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ================= PILLAR 2: SAMECHAT MEMOIZATION & PERFORMANCE ================= -->
+  <g transform="translate(565, 150)">
+    <rect x="0" y="0" width="470" height="540" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.4" filter="url(#shadow-drop)"/>
+    <rect x="0" y="0" width="470" height="48" rx="14" fill="#0c1220"/>
+    <path d="M 0 48 L 470 48" stroke="#202b3f" stroke-width="1.2"/>
+
+    <!-- Pillar 2 Header -->
+    <rect x="16" y="12" width="24" height="24" rx="6" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="1"/>
+    <path d="M 22 24 L 26 28 L 34 20" fill="none" stroke="#34d399" stroke-width="1.5"/>
+    <text x="48" y="28" fill="#f8fafc" font-size="14" font-weight="700">2. Memoización sameChat (60 FPS)</text>
+    <rect x="340" y="14" width="114" height="20" rx="4" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+    <text x="352" y="28" fill="#34d399" font-size="10" font-family="ui-monospace, monospace">React.memo()</text>
+
+    <!-- Content 2 -->
+    <g transform="translate(20, 68)">
+      <!-- Render Pipeline Problem vs Solution -->
+      <rect x="0" y="0" width="430" height="142" rx="8" fill="#07090e" stroke="#202b3f" stroke-width="1"/>
+      <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700" font-family="ui-monospace, monospace">DESAFÍO DE RENDIMIENTO: STREAMING MULTI-LLM</text>
+      <text x="14" y="42" fill="#e2e8f0" font-size="11">Cada token recibido actualiza el objeto raíz `state.sessions`.</text>
+      <text x="14" y="58" fill="#f87171" font-size="10">Sin memoización: Los 4 paneles se repintarían 60 veces/s.</text>
+
+      <rect x="14" y="70" width="402" height="42" rx="4" fill="#064e3b" stroke="#10b981" stroke-width="1"/>
+      <text x="22" y="87" fill="#34d399" font-size="10" font-weight="700" font-family="ui-monospace, monospace">SOLUCIÓN CANÓNICA: COMPARADOR sameChat</text>
+      <text x="22" y="102" fill="#a7f3d0" font-size="9" font-family="ui-monospace, monospace">const Chat = React.memo(ChatView, sameChat);</text>
+      <text x="14" y="130" fill="#64748b" font-size="9">Aísla repintados estrictamente al panel que recibe tokens.</text>
+
+      <!-- Comparator Logic Breakdown -->
+      <g transform="translate(0, 156)">
+        <rect x="0" y="0" width="430" height="144" rx="8" fill="#07090e" stroke="#10b981" stroke-width="1.2"/>
+        <text x="14" y="22" fill="#34d399" font-size="11" font-weight="700" font-family="ui-monospace, monospace">PROPIEDADES EVALUADAS POR sameChat</text>
+
+        <g transform="translate(14, 34)">
+          <text x="0" y="14" fill="#e2e8f0" font-size="10 font-mono">1. `a.session === b.session` &amp;&amp; `focusMode` &amp;&amp; `embedded`</text>
+          <text x="0" y="32" fill="#e2e8f0" font-size="10 font-mono">2. `state.live[id]` (token stream aislado por id de sesión)</text>
+          <text x="0" y="50" fill="#e2e8f0" font-size="10 font-mono">3. `state.attachments[id]` (chips de adjuntos del panel)</text>
+          <text x="0" y="68" fill="#e2e8f0" font-size="10 font-mono">4. `state.sessions` evaluado únicamente por cambios reales</text>
+        </g>
+        <text x="14" y="130" fill="#38bdf8" font-size="9" font-family="ui-monospace, monospace">-> 0 caídas de frames garantizadas durante handoffs de squad</text>
+      </g>
+
+      <!-- Drag & Drop Reordering -->
+      <g transform="translate(0, 314)">
+        <rect x="0" y="0" width="430" height="112" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">REORDENAMIENTO DE PANELES (move(from, to))</text>
+        <text x="14" y="42" fill="#94a3b8" font-size="11">Desplazamiento horizontal fluido entre columnas:</text>
+        <rect x="14" y="52" width="402" height="30" rx="4" fill="#162035"/>
+        <text x="22" y="71" fill="#22d3ee" font-size="10" font-family="ui-monospace, monospace">move(from, to) => slice &amp; splice sin desmontar estado</text>
+        <text x="14" y="98" fill="#64748b" font-size="9">Preserva conexiones WebSocket y procesos de agentes activos.</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ================= PILLAR 3: PER-PANE CWD & INDEPENDENT ROUTING ================= -->
+  <g transform="translate(1082, 150)">
+    <rect x="0" y="0" width="470" height="540" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.4" filter="url(#shadow-drop)"/>
+    <rect x="0" y="0" width="470" height="48" rx="14" fill="#0c1220"/>
+    <path d="M 0 48 L 470 48" stroke="#202b3f" stroke-width="1.2"/>
+
+    <!-- Pillar 3 Header -->
+    <rect x="16" y="12" width="24" height="24" rx="6" fill="#8b5cf6" fill-opacity="0.15" stroke="#8b5cf6" stroke-width="1"/>
+    <circle cx="28" cy="24" r="5" fill="#c084fc"/>
+    <text x="48" y="28" fill="#f8fafc" font-size="14" font-weight="700">3. Enrutamiento CWD Independiente</text>
+    <rect x="350" y="14" width="104" height="20" rx="4" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+    <text x="364" y="28" fill="#c084fc" font-size="10" font-family="ui-monospace, monospace">Multi-Workspace</text>
+
+    <!-- Content 3 -->
+    <g transform="translate(20, 68)">
+      <!-- Per-pane header anatomy -->
+      <rect x="0" y="0" width="430" height="120" rx="8" fill="#07090e" stroke="#8b5cf6" stroke-width="1.2"/>
+      <text x="14" y="22" fill="#c084fc" font-size="11" font-weight="700" font-family="ui-monospace, monospace">ANATOMÍA DEL ENCABEZADO POR PANEL</text>
+      <text x="14" y="42" fill="#e2e8f0" font-size="11">Cada columna incluye sus propios selectores de entorno:</text>
+
+      <g transform="translate(14, 52)">
+        <rect x="0" y="0" width="190" height="34" rx="6" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+        <text x="10" y="16" fill="#22d3ee" font-size="10" font-weight="700">WorkspacePicker</text>
+        <text x="10" y="28" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">sessionId={session.id}</text>
+
+        <rect x="204" y="0" width="198" height="34" rx="6" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+        <text x="10" y="16" fill="#34d399" font-size="10" font-weight="700">GitBranchBadge</text>
+        <text x="10" y="28" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">currentDir={projectPath}</text>
+      </g>
+      <text x="14" y="106" fill="#94a3b8" font-size="9">Permite tener paneles en repositorios y ramas completamente distintos.</text>
+
+      <!-- Multi-Project Matrix Mock -->
+      <g transform="translate(0, 134)">
+        <rect x="0" y="0" width="430" height="146" rx="8" fill="#07090e" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700" font-family="ui-monospace, monospace">EJEMPLO: ESCUADRÓN EN MALLA CONCURRENTE</text>
+
+        <g transform="translate(14, 34)">
+          <!-- Pane 1 -->
+          <rect x="0" y="0" width="196" height="44" rx="6" fill="#0c1220" stroke="#06b6d4" stroke-width="1"/>
+          <text x="8" y="18" fill="#22d3ee" font-size="10" font-weight="700">Panel 1: Arquitecto</text>
+          <text x="8" y="32" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">agent-hub (main)</text>
+
+          <!-- Pane 2 -->
+          <rect x="206" y="0" width="196" height="44" rx="6" fill="#0c1220" stroke="#10b981" stroke-width="1"/>
+          <text x="8" y="18" fill="#34d399" font-size="10" font-weight="700">Panel 2: Tester</text>
+          <text x="8" y="32" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">agent-hub (feat/tests)</text>
+
+          <!-- Pane 3 -->
+          <rect x="0" y="52" width="196" height="44" rx="6" fill="#0c1220" stroke="#8b5cf6" stroke-width="1"/>
+          <text x="8" y="18" fill="#c084fc" font-size="10" font-weight="700">Panel 3: Desarrollador</text>
+          <text x="8" y="32" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">mcp-server (main)</text>
+
+          <!-- Pane 4 -->
+          <rect x="206" y="52" width="196" height="44" rx="6" fill="#0c1220" stroke="#f59e0b" stroke-width="1"/>
+          <text x="8" y="18" fill="#fbbf24" font-size="10" font-weight="700">Panel 4: Revisor</text>
+          <text x="8" y="32" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">docs (review-diff)</text>
+        </g>
+      </g>
+
+      <!-- Horizontal Scroll Assurance -->
+      <g transform="translate(0, 294)">
+        <rect x="0" y="0" width="430" height="132" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">RESPONSIVIDAD &amp; SCROLL HORIZONTAL SUAVE</text>
+        <text x="14" y="42" fill="#94a3b8" font-size="11">Si el ancho del contenedor no permite 340px por columna,</text>
+        <text x="14" y="58" fill="#94a3b8" font-size="11">la fila activa un scroll horizontal suave con `no-scrollbar`</text>
+        <text x="14" y="74" fill="#94a3b8" font-size="11">sin colapsar los controles ni romper el diseño HUD.</text>
+        <text x="14" y="104" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">Compatible con pantallas de laptop (1366px) y monitores ultrawide.</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ================= BOTTOM TELEMETRY / ARCHITECTURE SUMMARY BAR ================= -->
+  <g transform="translate(48, 712)">
+    <rect x="0" y="0" width="1504" height="152" rx="12" fill="#0a0e17" stroke="#202b3f" stroke-width="1.2" filter="url(#shadow-drop)"/>
+
+    <g transform="translate(24, 20)">
+      <text x="0" y="18" fill="#f8fafc" font-size="14" font-weight="700" letter-spacing="0.5">RESUMEN DE ELEVACIÓN &amp; SISTEMA DE MALLA CONCURRENTE SPLIT</text>
+
+      <g transform="translate(0, 36)">
+        <!-- Layer 1 -->
+        <rect x="0" y="0" width="280" height="66" rx="8" fill="#07090e" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">CAPA 1: #07090e</text>
+        <text x="14" y="40" fill="#94a3b8" font-size="10">Split Column Canvas &amp; Composer Area</text>
+        <text x="14" y="54" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">Fondo de trabajo no reflectivo</text>
+
+        <!-- Layer 2 -->
+        <rect x="296" y="0" width="280" height="66" rx="8" fill="#0a0e17" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">CAPA 2: #0a0e17</text>
+        <text x="14" y="40" fill="#94a3b8" font-size="10">Column Header &amp; Layout Controls Deck</text>
+        <text x="14" y="54" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">Superficie base de elevación</text>
+
+        <!-- Layer 3 -->
+        <rect x="592" y="0" width="280" height="66" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">CAPA 3: #0c1220</text>
+        <text x="14" y="40" fill="#94a3b8" font-size="10">Active Pane Inset &amp; Layout Pills</text>
+        <text x="14" y="54" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">Cols / Rows / Grid selectors</text>
+
+        <!-- Layer 4 -->
+        <rect x="888" y="0" width="280" height="66" rx="8" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">CAPA 4: #162035</text>
+        <text x="14" y="40" fill="#94a3b8" font-size="10">Hover Row States &amp; Pane Actions</text>
+        <text x="14" y="54" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">Maximize, Close, Move buttons</text>
+
+        <!-- Layer 5 -->
+        <rect x="1184" y="0" width="272" height="66" rx="8" fill="#202b3f" stroke="#06b6d4" stroke-width="1"/>
+        <text x="14" y="22" fill="#22d3ee" font-size="11" font-weight="700">CAPA 5: #202b3f</text>
+        <text x="14" y="40" fill="#e2e8f0" font-size="10">Bordes estructurales &amp; Divisores</text>
+        <text x="14" y="54" fill="#94a3b8" font-size="9" font-family="ui-monospace, monospace">Contrast ratio &gt; 7:1 WCAG AAA</text>
+      </g>
+    </g>
+  </g>
+</svg>

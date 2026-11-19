@@ -1,0 +1,266 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 640" width="100%" height="100%" style="background:#07090e; font-family: Inter, system-ui, -apple-system, sans-serif;">
+  <defs>
+    <!-- Background Radial Glow -->
+    <radialGradient id="bgGlow" cx="50%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#0c172a" stop-opacity="0.6" />
+      <stop offset="60%" stop-color="#090d16" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#07090e" stop-opacity="1" />
+    </radialGradient>
+
+    <!-- Tactical Grid Pattern -->
+    <pattern id="tacticalGrid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#162035" stroke-width="0.7" stroke-opacity="0.5"/>
+      <circle cx="0" cy="0" r="1.2" fill="#202b3f"/>
+    </pattern>
+
+    <!-- Glow Filters -->
+    <filter id="glowCyan" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <filter id="glowEmerald" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <filter id="glowPurple" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <!-- Gradients -->
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0c1322" />
+      <stop offset="100%" stop-color="#080c16" />
+    </linearGradient>
+
+    <linearGradient id="accentCyan" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#06b6d4" />
+      <stop offset="100%" stop-color="#6366f1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background Layer -->
+  <rect width="1000" height="640" fill="url(#bgGlow)" />
+  <rect width="1000" height="640" fill="url(#tacticalGrid)" />
+
+  <!-- Corner HUD Brackets -->
+  <path d="M 24 38 L 24 24 L 38 24" fill="none" stroke="#06b6d4" stroke-width="2" opacity="0.6"/>
+  <path d="M 976 38 L 976 24 L 962 24" fill="none" stroke="#06b6d4" stroke-width="2" opacity="0.6"/>
+  <path d="M 24 602 L 24 616 L 38 616" fill="none" stroke="#06b6d4" stroke-width="2" opacity="0.6"/>
+  <path d="M 976 602 L 976 616 L 962 616" fill="none" stroke="#06b6d4" stroke-width="2" opacity="0.6"/>
+
+  <!-- Header Section -->
+  <g transform="translate(40, 36)">
+    <rect x="0" y="0" width="12" height="12" fill="#06b6d4" rx="2" filter="url(#glowCyan)"/>
+    <text x="22" y="11" fill="#f8fafc" font-size="16" font-weight="700" letter-spacing="0.5">SQUAD COMMAND DECK &amp; AGENTS ORCHESTRATION ARCHITECTURE</text>
+    <text x="22" y="27" fill="#64748b" font-size="11" font-family="JetBrains Mono, monospace">CARD 30 // TACTICAL DARK HUD // PARALLEL DISPATCH &amp; TOPOLOGY MESH</text>
+    
+    <rect x="760" y="2" width="160" height="24" fill="#0c182b" stroke="#202b3f" rx="4"/>
+    <circle cx="774" cy="14" r="4" fill="#10b981" filter="url(#glowEmerald)"/>
+    <text x="786" y="18" fill="#38bdf8" font-size="10" font-weight="600" font-family="JetBrains Mono, monospace">AGENTS: COHESIVE</text>
+  </g>
+
+  <!-- COLUMN 1: Parallel Dispatcher & Formations -->
+  <g transform="translate(40, 90)">
+    <rect x="0" y="0" width="290" height="430" fill="url(#cardGrad)" stroke="#202b3f" stroke-width="1.2" rx="8" />
+    <rect x="0" y="0" width="290" height="3" fill="url(#accentCyan)" rx="1.5" />
+    
+    <text x="16" y="26" fill="#38bdf8" font-size="11" font-weight="700" font-family="JetBrains Mono, monospace">01 // PARALLEL DISPATCHER</text>
+    <text x="16" y="48" fill="#f8fafc" font-size="13" font-weight="600">Despachador de Escuadrón</text>
+
+    <!-- Preset Pills -->
+    <g transform="translate(16, 62)">
+      <text x="0" y="10" fill="#64748b" font-size="10" font-family="JetBrains Mono, monospace" font-weight="600">FORMACIONES RÁPIDAS</text>
+      
+      <g transform="translate(0, 18)">
+        <rect x="0" y="0" width="124" height="24" fill="#1e1808" stroke="#f59e0b" stroke-opacity="0.4" rx="4"/>
+        <circle cx="10" cy="12" r="3" fill="#f59e0b"/>
+        <text x="18" y="16" fill="#fef3c7" font-size="9.5" font-weight="600">Full Protocol (4)</text>
+
+        <rect x="132" y="0" width="124" height="24" fill="#140f2b" stroke="#6366f1" stroke-opacity="0.4" rx="4"/>
+        <circle cx="142" cy="12" r="3" fill="#6366f1"/>
+        <text x="150" y="16" fill="#e0e7ff" font-size="9.5" font-weight="600">Feature Duo (2)</text>
+      </g>
+      <g transform="translate(0, 48)">
+        <rect x="0" y="0" width="124" height="24" fill="#240c14" stroke="#f43f5e" stroke-opacity="0.4" rx="4"/>
+        <circle cx="10" cy="12" r="3" fill="#f43f5e"/>
+        <text x="18" y="16" fill="#ffe4e6" font-size="9.5" font-weight="600">Bugfix Squad (3)</text>
+
+        <rect x="132" y="0" width="124" height="24" fill="#082018" stroke="#10b981" stroke-opacity="0.4" rx="4"/>
+        <circle cx="142" cy="12" r="3" fill="#10b981"/>
+        <text x="150" y="16" fill="#d1fae5" font-size="9.5" font-weight="600">Audit &amp; Docs (2)</text>
+      </g>
+    </g>
+
+    <!-- Inputs Mock -->
+    <g transform="translate(16, 150)">
+      <text x="0" y="10" fill="#cbd5e1" font-size="10.5" font-weight="600" font-family="JetBrains Mono, monospace">DESTINO &amp; MISIÓN</text>
+      
+      <rect x="0" y="18" width="258" height="28" fill="#07090e" stroke="#202b3f" rx="5"/>
+      <text x="10" y="36" fill="#94a3b8" font-size="10">📁 Proyecto: /agent-hub</text>
+
+      <rect x="0" y="52" width="258" height="28" fill="#07090e" stroke="#202b3f" rx="5"/>
+      <text x="10" y="70" fill="#94a3b8" font-size="10">⚙ Misión: Refactor de Vistas a HUD</text>
+    </g>
+
+    <!-- Agent Roster Preview -->
+    <g transform="translate(16, 246)">
+      <text x="0" y="10" fill="#cbd5e1" font-size="10.5" font-weight="600" font-family="JetBrains Mono, monospace">ROSTER ASIGNADO</text>
+      
+      <rect x="0" y="18" width="258" height="24" fill="#07090e" stroke="#202b3f" rx="4"/>
+      <text x="8" y="34" fill="#38bdf8" font-size="9.5" font-family="JetBrains Mono, monospace">#1 Arquitecto</text>
+      <rect x="194" y="21" width="56" height="18" fill="#0284c7" fill-opacity="0.2" stroke="#0284c7" stroke-opacity="0.4" rx="3"/>
+      <text x="202" y="34" fill="#7dd3fc" font-size="8.5" font-weight="700">SPEC</text>
+
+      <rect x="0" y="46" width="258" height="24" fill="#07090e" stroke="#202b3f" rx="4"/>
+      <text x="8" y="62" fill="#a855f7" font-size="9.5" font-family="JetBrains Mono, monospace">#2 Desarrollador</text>
+      <rect x="194" y="49" width="56" height="18" fill="#7c3aed" fill-opacity="0.2" stroke="#7c3aed" stroke-opacity="0.4" rx="3"/>
+      <text x="202" y="62" fill="#d8b4fe" font-size="8.5" font-weight="700">CODE</text>
+
+      <rect x="0" y="74" width="258" height="24" fill="#07090e" stroke="#202b3f" rx="4"/>
+      <text x="8" y="90" fill="#10b981" font-size="9.5" font-family="JetBrains Mono, monospace">#3 Tester</text>
+      <rect x="194" y="77" width="56" height="18" fill="#059669" fill-opacity="0.2" stroke="#059669" stroke-opacity="0.4" rx="3"/>
+      <text x="206" y="90" fill="#a7f3d0" font-size="8.5" font-weight="700">TEST</text>
+    </g>
+
+    <!-- Launch CTA -->
+    <g transform="translate(16, 372)">
+      <rect x="0" y="0" width="258" height="38" fill="url(#accentCyan)" rx="6" filter="url(#glowCyan)"/>
+      <text x="64" y="24" fill="#ffffff" font-size="12" font-weight="700" letter-spacing="0.5">▶ LANZAR ESCUADRÓN</text>
+    </g>
+  </g>
+
+  <!-- COLUMN 2: Topology Mesh & Flow Coordination -->
+  <g transform="translate(355, 90)">
+    <rect x="0" y="0" width="350" height="430" fill="url(#cardGrad)" stroke="#202b3f" stroke-width="1.2" rx="8" />
+    <rect x="0" y="0" width="350" height="3" fill="#10b981" rx="1.5" />
+    
+    <text x="16" y="26" fill="#34d399" font-size="11" font-weight="700" font-family="JetBrains Mono, monospace">02 // TOPOLOGY &amp; MESH</text>
+    <text x="16" y="48" fill="#f8fafc" font-size="13" font-weight="600">Relevos y Topología de Misión</text>
+
+    <!-- Isolation Worktree Badge -->
+    <g transform="translate(16, 62)">
+      <rect x="0" y="0" width="318" height="34" fill="#0a1628" stroke="#38bdf8" stroke-opacity="0.4" rx="5"/>
+      <circle cx="16" cy="17" r="4" fill="#38bdf8" filter="url(#glowCyan)"/>
+      <text x="28" y="21" fill="#7dd3fc" font-size="10.5" font-family="JetBrains Mono, monospace">squad/isolated-1794801 · Git Worktree</text>
+    </g>
+
+    <!-- Node 1: Arquitecto -->
+    <g transform="translate(16, 110)">
+      <rect x="0" y="0" width="318" height="66" fill="#07090e" stroke="#0284c7" stroke-width="1.2" rx="6"/>
+      <circle cx="18" cy="18" r="4" fill="#38bdf8"/>
+      <text x="30" y="22" fill="#f8fafc" font-size="12" font-weight="700">Arquitecto-1</text>
+      <text x="210" y="21" fill="#38bdf8" font-size="10" font-family="JetBrains Mono, monospace">COMPLETADO</text>
+      
+      <text x="30" y="42" fill="#94a3b8" font-size="10">Diseño técnico en docs/specs/refactor.md</text>
+      <text x="30" y="56" fill="#64748b" font-size="9" font-family="JetBrains Mono, monospace">18.4s · $0,03 USD · Handoff emitido</text>
+    </g>
+
+    <!-- Connection Line 1 -> 2 -->
+    <path d="M 175 176 L 175 196" fill="none" stroke="#06b6d4" stroke-width="2" stroke-dasharray="3 3"/>
+    <text x="190" y="190" fill="#38bdf8" font-size="9" font-family="JetBrains Mono, monospace">↓ Handoff: Relevo autónomo</text>
+
+    <!-- Node 2: Desarrollador (Active) -->
+    <g transform="translate(16, 202)">
+      <rect x="0" y="0" width="318" height="74" fill="#091814" stroke="#10b981" stroke-width="1.5" rx="6" filter="url(#glowEmerald)"/>
+      <circle cx="18" cy="18" r="4" fill="#10b981"/>
+      <text x="30" y="22" fill="#f8fafc" font-size="12" font-weight="700">Desarrollador-1</text>
+      <text x="210" y="21" fill="#34d399" font-size="10" font-weight="700" font-family="JetBrains Mono, monospace">⚡ EN EJECUCIÓN</text>
+      
+      <text x="30" y="42" fill="#cbd5e1" font-size="10">Implementando componentes en src/webview/...</text>
+      <rect x="30" y="48" width="220" height="14" fill="#042016" stroke="#059669" rx="3"/>
+      <text x="36" y="59" fill="#6ee7b7" font-size="8.5" font-family="JetBrains Mono, monospace">$ npm run build:webview (Transform 1565 mod)</text>
+    </g>
+
+    <!-- Connection Line 2 -> 3 -->
+    <path d="M 175 276 L 175 296" fill="none" stroke="#475569" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <text x="190" y="290" fill="#64748b" font-size="9" font-family="JetBrains Mono, monospace">↓ Espera turno</text>
+
+    <!-- Node 3: Tester -->
+    <g transform="translate(16, 302)">
+      <rect x="0" y="0" width="318" height="58" fill="#07090e" stroke="#202b3f" rx="6"/>
+      <circle cx="18" cy="18" r="4" fill="#475569"/>
+      <text x="30" y="22" fill="#94a3b8" font-size="12" font-weight="600">Tester-1</text>
+      <text x="230" y="21" fill="#64748b" font-size="10" font-family="JetBrains Mono, monospace">EN ESPERA</text>
+      
+      <text x="30" y="42" fill="#64748b" font-size="10">Ejecución de suites de prueba automáticas</text>
+    </g>
+
+    <!-- Stage Progress Bar -->
+    <g transform="translate(16, 376)">
+      <text x="0" y="10" fill="#64748b" font-size="9.5" font-family="JetBrains Mono, monospace">PROGRESO DEL ESCUADRÓN (ETAPAS 2/3)</text>
+      <rect x="0" y="18" width="318" height="8" fill="#07090e" stroke="#202b3f" rx="4"/>
+      <rect x="0" y="18" width="210" height="8" fill="url(#accentCyan)" rx="4"/>
+    </g>
+  </g>
+
+  <!-- COLUMN 3: Intercom & Telemetry -->
+  <g transform="translate(730, 90)">
+    <rect x="0" y="0" width="230" height="430" fill="url(#cardGrad)" stroke="#202b3f" stroke-width="1.2" rx="8" />
+    <rect x="0" y="0" width="230" height="3" fill="#a855f7" rx="1.5" />
+    
+    <text x="16" y="26" fill="#c084fc" font-size="11" font-weight="700" font-family="JetBrains Mono, monospace">03 // INTERCOM &amp; COMMS</text>
+    <text x="16" y="48" fill="#f8fafc" font-size="13" font-weight="600">Transmisiones Vivas</text>
+
+    <!-- Comm 1 -->
+    <g transform="translate(14, 62)">
+      <rect x="0" y="0" width="202" height="74" fill="#07090e" stroke="#202b3f" rx="5"/>
+      <text x="8" y="16" fill="#38bdf8" font-size="9.5" font-family="JetBrains Mono, monospace" font-weight="700">ARQUITECTO</text>
+      <text x="76" y="16" fill="#64748b" font-size="9.5">→</text>
+      <text x="90" y="16" fill="#c084fc" font-size="9.5" font-family="JetBrains Mono, monospace" font-weight="700">DESARROLLADOR</text>
+      
+      <text x="8" y="34" fill="#cbd5e1" font-size="9.5" line-height="13">
+        <tspan x="8" dy="0">>> hecho: especificación</tspan>
+        <tspan x="8" dy="13">lista en docs/specs/refactor.md.</tspan>
+        <tspan x="8" dy="13">Comienza implementación.</tspan>
+      </text>
+    </g>
+
+    <!-- Comm 2 (Live incoming) -->
+    <g transform="translate(14, 148)">
+      <rect x="0" y="0" width="202" height="74" fill="#0d111d" stroke="#6366f1" stroke-width="1" rx="5"/>
+      <text x="8" y="16" fill="#c084fc" font-size="9.5" font-family="JetBrains Mono, monospace" font-weight="700">DESARROLLADOR</text>
+      <text x="96" y="16" fill="#64748b" font-size="9.5">→</text>
+      <text x="110" y="16" fill="#34d399" font-size="9.5" font-family="JetBrains Mono, monospace" font-weight="700">TESTER</text>
+      
+      <text x="8" y="34" fill="#e2e8f0" font-size="9.5" line-height="13">
+        <tspan x="8" dy="0">>> hecho: 103 clases zinc-</tspan>
+        <tspan x="8" dy="13">reemplazadas por tokens HUD.</tspan>
+        <tspan x="8" dy="13">Ejecutando build local.</tspan>
+      </text>
+    </g>
+
+    <!-- Telemetry Box -->
+    <g transform="translate(14, 238)">
+      <rect x="0" y="0" width="202" height="172" fill="#07090e" stroke="#202b3f" rx="5"/>
+      <text x="10" y="20" fill="#cbd5e1" font-size="10" font-weight="700" font-family="JetBrains Mono, monospace">MÉTRICAS DEL ESCUADRÓN</text>
+      
+      <g transform="translate(10, 36)">
+        <text x="0" y="0" fill="#64748b" font-size="9">AGENTES TOTALES</text>
+        <text x="0" y="16" fill="#f8fafc" font-size="14" font-weight="700">3 Asignados</text>
+      </g>
+      <g transform="translate(10, 76)">
+        <text x="0" y="0" fill="#64748b" font-size="9">COSTO ESTIMADO</text>
+        <text x="0" y="16" fill="#34d399" font-size="14" font-weight="700">$0,08 USD</text>
+      </g>
+      <g transform="translate(10, 116)">
+        <text x="0" y="0" fill="#64748b" font-size="9">TIEMPO TRANSCURRIDO</text>
+        <text x="0" y="16" fill="#38bdf8" font-size="14" font-weight="700">1m 14s</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Bottom Tactical Summary Strip -->
+  <g transform="translate(40, 540)">
+    <rect x="0" y="0" width="920" height="68" fill="#090e1a" stroke="#202b3f" rx="8"/>
+    <rect x="0" y="0" width="4" height="68" fill="#06b6d4" rx="2"/>
+    
+    <text x="24" y="24" fill="#f8fafc" font-size="11.5" font-weight="700">TACTICAL HUD PURITY &amp; SQUAD SYNCHRONIZATION</text>
+    <text x="24" y="42" fill="#94a3b8" font-size="10.5">
+      Modernización integral de AgentsView y SquadCanvas: 103 clases zinc eliminadas, selectores de alta precisión, topología de relevos y trazabilidad en vivo.
+    </text>
+    <text x="24" y="58" fill="#34d399" font-size="10" font-family="JetBrains Mono, monospace">
+      ✔ WCAG AAA Contrast Verified // 0 Build Warnings // Continuous Loop Iteration 1 Completed
+    </text>
+  </g>
+</svg>

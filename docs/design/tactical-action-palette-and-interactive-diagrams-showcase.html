@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentHub // Tactical Action Palette & Interactive Diagrams Showcase</title>
+  <style>
+    :root {
+      --bg-base: #07090e;
+      --bg-panel: #0c1220;
+      --bg-card: #0e131f;
+      --bg-surface: #101625;
+      --border-subtle: #162035;
+      --border-strong: #202b3f;
+      --cyan: #06b6d4;
+      --cyan-glow: rgba(6, 182, 212, 0.25);
+      --emerald: #10b981;
+      --emerald-glow: rgba(16, 185, 129, 0.25);
+      --amber: #f59e0b;
+      --rose: #f43f5e;
+      --violet: #8b5cf6;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.5;
+      padding: 24px;
+      min-height: 100vh;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(6, 182, 212, 0.04) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.04) 0%, transparent 40%),
+        linear-gradient(to right, rgba(22, 32, 53, 0.15) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(22, 32, 53, 0.15) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 28px 28px, 28px 28px;
+    }
+
+    .container {
+      max-width: 1240px;
+      margin: 0 auto;
+    }
+
+    /* Top Master Bar */
+    .header {
+      background: var(--bg-panel);
+      border: 1.5px solid var(--border-strong);
+      border-radius: 16px;
+      padding: 18px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(6, 182, 212, 0.15);
+      border: 1.5px solid var(--cyan);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--cyan);
+      box-shadow: 0 0 16px var(--cyan-glow);
+    }
+
+    .header-title h1 {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-title p {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: monospace;
+      margin-top: 2px;
+    }
+
+    .header-badges {
+      display: flex;
+      gap: 10px;
+    }
+
+    .hud-badge {
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      font-family: monospace;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge-cyan {
+      background: rgba(6, 182, 212, 0.12);
+      border: 1px solid rgba(6, 182, 212, 0.4);
+      color: var(--cyan);
+    }
+
+    .badge-emerald {
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: var(--emerald);
+    }
+
+    /* Main Grid */
+    .showcase-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: var(--bg-panel);
+      border: 1.5px solid var(--border-strong);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: var(--text-main);
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 10px;
+    }
+
+    .tag-spec {
+      font-size: 10px;
+      font-family: monospace;
+      color: var(--cyan);
+      background: rgba(6, 182, 212, 0.1);
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid rgba(6, 182, 212, 0.3);
+    }
+
+    /* Action Palette Simulator UI */
+    .palette-box {
+      background: #07090e;
+      border: 1px solid var(--border-strong);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .search-input-wrap {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border-strong);
+      background: #0a0e17;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .search-input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      font-size: 12px;
+      font-family: monospace;
+    }
+
+    .search-input:focus {
+      outline: none;
+    }
+
+    .filter-chips {
+      padding: 8px 14px;
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      border-bottom: 1px solid var(--border-subtle);
+      background: #07090e;
+    }
+
+    .chip-btn {
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 10.5px;
+      font-family: monospace;
+      cursor: pointer;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-strong);
+      color: var(--text-muted);
+      transition: all 0.15s;
+    }
+
+    .chip-btn.active {
+      background: rgba(6, 182, 212, 0.15);
+      border-color: var(--cyan);
+      color: var(--cyan);
+      font-weight: bold;
+    }
+
+    .action-list {
+      padding: 12px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      max-height: 250px;
+      overflow-y: auto;
+    }
+
+    .action-card {
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #0c1220;
+      border: 1px solid var(--border-strong);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: left;
+    }
+
+    .action-card:hover, .action-card:focus-visible {
+      background: #162035;
+      border-color: var(--cyan);
+      outline: none;
+      transform: translateY(-1px);
+    }
+
+    .action-icon-wrap {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: #07090e;
+      border: 1px solid var(--border-strong);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--cyan);
+      font-weight: bold;
+      shrink: 0;
+    }
+
+    .action-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .action-sub {
+      font-size: 10.5px;
+      color: var(--text-muted);
+      font-family: monospace;
+      margin-top: 2px;
+    }
+
+    /* Diagram Viewer Simulator UI */
+    .diagram-viewport {
+      height: 310px;
+      background: #07090e;
+      border: 1px solid var(--border-strong);
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+      cursor: grab;
+      user-select: none;
+      background-image: radial-gradient(circle, #162035 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+
+    .diagram-viewport.dragging {
+      cursor: grabbing;
+    }
+
+    .diagram-canvas {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform-origin: center center;
+      transition: transform 0.05s ease-out;
+    }
+
+    .diagram-controls-pill {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(10, 14, 23, 0.95);
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      padding: 4px 8px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+    }
+
+    .tool-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-family: monospace;
+      font-size: 13px;
+      transition: all 0.15s;
+    }
+
+    .tool-btn:hover {
+      background: #162035;
+      color: var(--text-main);
+    }
+
+    .zoom-text {
+      font-family: monospace;
+      font-size: 11px;
+      color: var(--text-main);
+      padding: 0 4px;
+      min-width: 44px;
+      text-align: center;
+    }
+
+    .btn-fullscreen {
+      background: rgba(6, 182, 212, 0.15);
+      border: 1px solid rgba(6, 182, 212, 0.4);
+      color: var(--cyan);
+      font-weight: 700;
+      font-size: 11px;
+      font-family: monospace;
+      padding: 3px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-fullscreen:hover {
+      background: var(--cyan);
+      color: #07090e;
+    }
+
+    .hint-bar {
+      position: absolute;
+      bottom: 8px;
+      left: 10px;
+      font-size: 10px;
+      font-family: monospace;
+      color: var(--text-muted);
+      background: rgba(10, 14, 23, 0.9);
+      padding: 2px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* Live Telemetry Panel */
+    .telemetry-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .telemetry-card {
+      background: var(--bg-panel);
+      border: 1.5px solid var(--border-strong);
+      border-radius: 14px;
+      padding: 16px;
+    }
+
+    .telemetry-card-title {
+      font-size: 10.5px;
+      font-family: monospace;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .telemetry-card-val {
+      font-size: 20px;
+      font-weight: 900;
+      font-family: monospace;
+      color: var(--cyan);
+      margin-bottom: 4px;
+    }
+
+    .telemetry-card-sub {
+      font-size: 10.5px;
+      font-family: monospace;
+      color: var(--emerald);
+    }
+
+    /* Fullscreen Modal View */
+    .fullscreen-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(7, 9, 14, 0.98);
+      backdrop-filter: blur(12px);
+      z-index: 2000;
+      display: none;
+      flex-direction: column;
+      animation: fadeIn 0.15s ease-out;
+    }
+
+    .fullscreen-modal.open {
+      display: flex;
+    }
+
+    .fullscreen-header {
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--border-strong);
+      background: rgba(10, 14, 23, 0.95);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .fullscreen-body {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      cursor: grab;
+      background-image: radial-gradient(circle, #162035 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <div class="logo-badge">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+          </svg>
+        </div>
+        <div class="header-title">
+          <h1>AGENTHUB // ACTION PALETTE & INTERACTIVE DIAGRAMS</h1>
+          <p>TACTICAL HUD SPEC CARD #50 • 100% TOKEN PURIFIED • PAN & ZOOM 60 FPS • ACCESSIBLE TRAP</p>
+        </div>
+      </div>
+      <div class="header-badges">
+        <div class="hud-badge badge-cyan">
+          <span>●</span>
+          <span>ACTION ENGINE V2</span>
+        </div>
+        <div class="hud-badge badge-emerald">
+          <span>✓</span>
+          <span>0 LEGACY TOKENS</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Grid -->
+    <div class="showcase-grid">
+      <!-- Action Palette Card -->
+      <section class="card">
+        <div class="card-title">
+          <span>PALETA DE ACCIONES RÁPIDAS (ActionPalette.tsx)</span>
+          <span class="tag-spec">SPEC CARD #50.A</span>
+        </div>
+        <div class="palette-box">
+          <div class="search-input-wrap">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input type="text" id="action-query" class="search-input" placeholder="Buscar acción (tests, git, secretos, arquitectura)..." />
+          </div>
+
+          <div class="filter-chips">
+            <button type="button" class="chip-btn active" data-filter="all">Todas 4</button>
+            <button type="button" class="chip-btn" data-filter="git">Git 1</button>
+            <button type="button" class="chip-btn" data-filter="tests">Tests 1</button>
+            <button type="button" class="chip-btn" data-filter="secretos">Secretos 1</button>
+            <button type="button" class="chip-btn" data-filter="arquitectura">Arquitectura 1</button>
+          </div>
+
+          <div class="action-list" id="action-list-dom">
+            <div class="action-card" tabindex="0" data-group="tests" data-label="Ejecutar Tests Rápidos">
+              <div class="action-icon-wrap" style="color: var(--emerald);">✓</div>
+              <div>
+                <div class="action-title">Ejecutar Tests Rápidos</div>
+                <div class="action-sub">npm run test:flows (14/14 superados)</div>
+              </div>
+            </div>
+
+            <div class="action-card" tabindex="0" data-group="git" data-label="Generar Commit Semántico">
+              <div class="action-icon-wrap" style="color: var(--cyan);">⎇</div>
+              <div>
+                <div class="action-title">Generar Commit Semántico</div>
+                <div class="action-sub">Inspeccionar diff staged vs HEAD</div>
+              </div>
+            </div>
+
+            <div class="action-card" tabindex="0" data-group="secretos" data-label="Auditar Secretos en Código">
+              <div class="action-icon-wrap" style="color: var(--amber);">!</div>
+              <div>
+                <div class="action-title">Auditar Secretos en Código</div>
+                <div class="action-sub">Detección de claves de API y tokens en archivos</div>
+              </div>
+            </div>
+
+            <div class="action-card" tabindex="0" data-group="arquitectura" data-label="Diagrama de Arquitectura">
+              <div class="action-icon-wrap" style="color: var(--violet);">❖</div>
+              <div>
+                <div class="action-title">Diagrama de Arquitectura</div>
+                <div class="action-sub">Generar topología Mermaid interactiva</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Interactive Diagram Viewer Card -->
+      <section class="card">
+        <div class="card-title">
+          <span>VISOR DE DIAGRAMAS INTERACTIVOS (Markdown.tsx)</span>
+          <span class="tag-spec">SPEC CARD #50.B</span>
+        </div>
+
+        <div class="diagram-viewport" id="diagram-viewport">
+          <div class="diagram-canvas" id="diagram-canvas">
+            <!-- Simulated Mermaid Node Graph -->
+            <svg width="420" height="180" viewBox="0 0 420 180" fill="none">
+              <rect x="10" y="65" width="100" height="40" rx="8" fill="#0e131f" stroke="#06b6d4" stroke-width="1.8" />
+              <text x="24" y="89" fill="#06b6d4" font-size="11" font-family="monospace" font-weight="bold">Composer</text>
+
+              <path d="M110 85 L160 85" stroke="#06b6d4" stroke-width="1.8" stroke-dasharray="3,3" />
+              <polygon points="160,82 166,85 160,88" fill="#06b6d4" />
+
+              <rect x="166" y="30" width="110" height="40" rx="8" fill="#0e131f" stroke="#8b5cf6" stroke-width="1.8" />
+              <text x="180" y="54" fill="#8b5cf6" font-size="11" font-family="monospace" font-weight="bold">Action Engine</text>
+
+              <rect x="166" y="100" width="110" height="40" rx="8" fill="#0e131f" stroke="#10b981" stroke-width="1.8" />
+              <text x="178" y="124" fill="#10b981" font-size="11" font-family="monospace" font-weight="bold">Isolated CWD</text>
+
+              <path d="M276 50 L320 85 M276 120 L320 85" stroke="#94a3b8" stroke-width="1.8" />
+              <polygon points="320,82 326,85 320,88" fill="#94a3b8" />
+
+              <rect x="326" y="65" width="85" height="40" rx="8" fill="#0e131f" stroke="#f59e0b" stroke-width="1.8" />
+              <text x="342" y="89" fill="#f59e0b" font-size="11" font-family="monospace" font-weight="bold">Build OK</text>
+            </svg>
+          </div>
+
+          <div class="diagram-controls-pill">
+            <button type="button" class="tool-btn" id="btn-zoom-out" title="Reducir zoom (−)">−</button>
+            <span class="zoom-text" id="zoom-label">100%</span>
+            <button type="button" class="tool-btn" id="btn-zoom-in" title="Aumentar zoom (+)">+</button>
+            <button type="button" class="tool-btn" id="btn-zoom-reset" title="Restablecer (100%)">↺</button>
+            <button type="button" class="btn-fullscreen" id="btn-open-fullscreen">Ampliar</button>
+          </div>
+
+          <div class="hint-bar">
+            Arrastra para mover · Rueda para zoom · Doble clic para centrar
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Telemetry Strip -->
+    <div class="telemetry-strip">
+      <div class="telemetry-card">
+        <div class="telemetry-card-title">ESCALA Y ZOOM ACTUAL</div>
+        <div class="telemetry-card-val" id="hud-scale-val">100%</div>
+        <div class="telemetry-card-sub">Rango: 20% a 500%</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-card-title">COORDENADAS DE PAN</div>
+        <div class="telemetry-card-val" id="hud-pan-val">X: 0 | Y: 0</div>
+        <div class="telemetry-card-sub">60 FPS Hardware Accel</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-card-title">ÚLTIMA ACCIÓN EJECUTADA</div>
+        <div class="telemetry-card-val" id="hud-action-val" style="font-size: 15px;">Ninguna</div>
+        <div class="telemetry-card-sub">Dispatched via Host IPC</div>
+      </div>
+      <div class="telemetry-card">
+        <div class="telemetry-card-title">PURIFICACIÓN DE TOKENS</div>
+        <div class="telemetry-card-val" style="color: var(--emerald);">0 RESIDUOS</div>
+        <div class="telemetry-card-sub">0 #202b3f · 0 #162035</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fullscreen Modal Dialog Simulator -->
+  <div class="fullscreen-modal" id="fullscreen-modal" role="dialog" aria-modal="true" aria-label="Vista ampliada de diagrama">
+    <div class="fullscreen-header">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="color: var(--cyan); font-weight: bold; font-family: monospace;">❖ Vista Ampliada de Arquitectura</span>
+        <span style="font-size: 10px; font-family: monospace; background: rgba(6,182,212,0.15); color: var(--cyan); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(6,182,212,0.3);">PANTALLA COMPLETA</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <button type="button" class="btn-fullscreen" id="fs-close-btn" style="background:#202b3f; color:var(--text-main); border-color:#334155;">
+          Cerrar (Esc)
+        </button>
+      </div>
+    </div>
+    <div class="fullscreen-body" id="fullscreen-body">
+      <div class="diagram-canvas" id="fullscreen-canvas">
+        <svg width="600" height="260" viewBox="0 0 420 180" fill="none">
+          <rect x="10" y="65" width="100" height="40" rx="8" fill="#0e131f" stroke="#06b6d4" stroke-width="1.8" />
+          <text x="24" y="89" fill="#06b6d4" font-size="11" font-family="monospace" font-weight="bold">Composer</text>
+
+          <path d="M110 85 L160 85" stroke="#06b6d4" stroke-width="1.8" stroke-dasharray="3,3" />
+          <polygon points="160,82 166,85 160,88" fill="#06b6d4" />
+
+          <rect x="166" y="30" width="110" height="40" rx="8" fill="#0e131f" stroke="#8b5cf6" stroke-width="1.8" />
+          <text x="180" y="54" fill="#8b5cf6" font-size="11" font-family="monospace" font-weight="bold">Action Engine</text>
+
+          <rect x="166" y="100" width="110" height="40" rx="8" fill="#0e131f" stroke="#10b981" stroke-width="1.8" />
+          <text x="178" y="124" fill="#10b981" font-size="11" font-family="monospace" font-weight="bold">Isolated CWD</text>
+
+          <path d="M276 50 L320 85 M276 120 L320 85" stroke="#94a3b8" stroke-width="1.8" />
+          <polygon points="320,82 326,85 320,88" fill="#94a3b8" />
+
+          <rect x="326" y="65" width="85" height="40" rx="8" fill="#0e131f" stroke="#f59e0b" stroke-width="1.8" />
+          <text x="342" y="89" fill="#f59e0b" font-size="11" font-family="monospace" font-weight="bold">Build OK</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // State
+    let scale = 1;
+    let pos = { x: 0, y: 0 };
+    let isDragging = false;
+    let dragStart = { x: 0, y: 0 };
+    let openerElement = null;
+
+    const viewport = document.getElementById('diagram-viewport');
+    const canvas = document.getElementById('diagram-canvas');
+    const zoomLabel = document.getElementById('zoom-label');
+    const hudScaleVal = document.getElementById('hud-scale-val');
+    const hudPanVal = document.getElementById('hud-pan-val');
+    const hudActionVal = document.getElementById('hud-action-val');
+    const fsModal = document.getElementById('fullscreen-modal');
+    const fsCloseBtn = document.getElementById('fs-close-btn');
+    const btnFullscreen = document.getElementById('btn-open-fullscreen');
+
+    function updateTransform() {
+      canvas.style.transform = `translate(${pos.x}px, ${pos.y}px) scale(${scale})`;
+      const pct = `${Math.round(scale * 100)}%`;
+      zoomLabel.textContent = pct;
+      hudScaleVal.textContent = pct;
+      hudPanVal.textContent = `X: ${Math.round(pos.x)} | Y: ${Math.round(pos.y)}`;
+    }
+
+    // Pan interactions
+    viewport.addEventListener('mousedown', (e) => {
+      if (e.target.closest('.diagram-controls-pill') || e.target.closest('.hint-bar')) return;
+      isDragging = true;
+      viewport.classList.add('dragging');
+      dragStart = { x: e.clientX - pos.x, y: e.clientY - pos.y };
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      pos = { x: e.clientX - dragStart.x, y: e.clientY - dragStart.y };
+      updateTransform();
+    });
+
+    window.addEventListener('mouseup', () => {
+      isDragging = false;
+      viewport.classList.remove('dragging');
+    });
+
+    // Zoom controls
+    document.getElementById('btn-zoom-in').addEventListener('click', () => {
+      scale = Math.min(5, Math.round((scale + 0.25) * 100) / 100);
+      updateTransform();
+    });
+
+    document.getElementById('btn-zoom-out').addEventListener('click', () => {
+      scale = Math.max(0.2, Math.round((scale - 0.25) * 100) / 100);
+      updateTransform();
+    });
+
+    document.getElementById('btn-zoom-reset').addEventListener('click', () => {
+      scale = 1;
+      pos = { x: 0, y: 0 };
+      updateTransform();
+    });
+
+    viewport.addEventListener('dblclick', () => {
+      scale = 1;
+      pos = { x: 0, y: 0 };
+      updateTransform();
+    });
+
+    // Wheel zoom
+    viewport.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const factor = e.deltaY < 0 ? 1.15 : 0.87;
+      scale = Math.min(5, Math.max(0.2, Math.round(scale * factor * 100) / 100));
+      updateTransform();
+    }, { passive: false });
+
+    // Fullscreen View
+    btnFullscreen.addEventListener('click', function() {
+      openerElement = this;
+      fsModal.classList.add('open');
+      fsCloseBtn.focus();
+    });
+
+    function closeFullscreen() {
+      fsModal.classList.remove('open');
+      if (openerElement) openerElement.focus();
+    }
+
+    fsCloseBtn.addEventListener('click', closeFullscreen);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && fsModal.classList.contains('open')) {
+        closeFullscreen();
+      }
+    });
+
+    // Action Palette filtering
+    const actionCards = Array.from(document.querySelectorAll('.action-card'));
+    const filterChips = Array.from(document.querySelectorAll('.chip-btn'));
+    const searchInput = document.getElementById('action-query');
+
+    function applyFilter() {
+      const q = searchInput.value.toLowerCase().trim();
+      const activeChip = document.querySelector('.chip-btn.active');
+      const cat = activeChip ? activeChip.getAttribute('data-filter') : 'all';
+
+      actionCards.forEach(card => {
+        const text = card.textContent.toLowerCase();
+        const group = card.getAttribute('data-group');
+        const matchesQuery = !q || text.includes(q);
+        const matchesCat = cat === 'all' || group === cat;
+
+        card.style.display = matchesQuery && matchesCat ? 'flex' : 'none';
+      });
+    }
+
+    searchInput.addEventListener('input', applyFilter);
+
+    filterChips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        filterChips.forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        applyFilter();
+      });
+    });
+
+    actionCards.forEach(card => {
+      card.addEventListener('click', () => {
+        const label = card.getAttribute('data-label');
+        hudActionVal.textContent = label;
+        card.style.borderColor = 'var(--emerald)';
+        setTimeout(() => card.style.borderColor = '', 600);
+      });
+
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          card.click();
+        }
+      });
+    });
+  </script>
+</body>
+</html>

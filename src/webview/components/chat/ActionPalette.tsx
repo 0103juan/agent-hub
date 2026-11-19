@@ -25,13 +25,13 @@ export const ActionPalette: React.FC<Props> = ({ onRun, onClose }) => {
   ];
 
   return (
-    <ModalShell title="Acciones" icon={<Wrench className="w-4 h-4 text-indigo-400" />} widthClass="max-w-2xl" onClose={onClose}>
-      <div className="p-2.5 border-b border-zinc-800/80 bg-zinc-900 space-y-2">
+    <ModalShell title="Acciones Rápidas" icon={<Wrench className="w-4 h-4 text-cyan-400" />} widthClass="max-w-2xl" onClose={onClose}>
+      <div className="p-3.5 border-b border-[#202b3f] bg-[#07090e] space-y-2.5">
         <div className="relative">
-          <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-3.5 h-3.5 text-cyan-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Buscar acción (tests, git, secretos, diagrama)..."
+            placeholder="Buscar acción (tests, git, secretos, arquitectura)..."
             aria-label="Buscar acción"
             value={query}
             autoFocus
@@ -43,29 +43,29 @@ export const ActionPalette: React.FC<Props> = ({ onRun, onClose }) => {
                 document.querySelector<HTMLButtonElement>('[data-action]')?.focus();
               }
             }}
-            className="w-full bg-zinc-950 border border-zinc-750 rounded-lg pl-8 pr-3 py-1.5 text-xs text-zinc-100 placeholder-zinc-400 focus:outline-none focus:border-indigo-500"
+            className="w-full bg-[#0a0e17] border border-[#202b3f] focus:border-cyan-500 rounded-xl pl-9 pr-3 py-1.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none font-sans"
           />
         </div>
-        <div className="flex flex-wrap items-center gap-1 text-[11px]">
+        <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-mono">
           {filters.map((filter) => (
             <button
               key={filter.id}
               type="button"
               onClick={() => setGroup(filter.id)}
-              className={`px-2 py-0.5 rounded-full border transition ${
+              className={`px-3 py-0.5 rounded-full border transition cursor-pointer text-[10.5px] ${
                 group === filter.id
-                  ? 'bg-indigo-600/30 text-indigo-300 border-indigo-500/50 font-medium'
-                  : 'bg-zinc-800/60 hover:bg-zinc-800 text-zinc-400 border-zinc-700/60'
+                  ? 'bg-cyan-950/70 text-cyan-300 border-cyan-500/60 font-semibold shadow-xs'
+                  : 'bg-[#0c1220] hover:bg-[#162035] text-slate-400 border-[#202b3f]'
               }`}
             >
-              {filter.label} <span className="font-mono opacity-70">{filter.count}</span>
+              {filter.label} <span className="font-mono opacity-70 ml-0.5">{filter.count}</span>
             </button>
           ))}
         </div>
       </div>
 
       <div
-        className="flex-1 overflow-y-auto p-2 space-y-2"
+        className="flex-1 overflow-y-auto p-3.5 space-y-3.5 bg-[#0a0e17] max-h-96"
         onKeyDown={(event) => {
           if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
           const buttons = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('[data-action]'));
@@ -77,30 +77,32 @@ export const ActionPalette: React.FC<Props> = ({ onRun, onClose }) => {
           }
         }}
       >
-        {matches.length === 0 && <div className="text-center py-8 text-zinc-400 text-xs">No hay acciones con ese filtro.</div>}
+        {matches.length === 0 && (
+          <div className="text-center py-8 text-slate-400 font-mono text-xs">No hay acciones con ese filtro.</div>
+        )}
         {ACTION_GROUPS.map((actionGroup) => {
           const actions = matches.filter((action) => action.group === actionGroup);
           if (actions.length === 0) return null;
           return (
-            <section key={actionGroup}>
-              <h4 className="text-[11px] font-semibold text-zinc-400 px-1 pb-1">{actionGroup}</h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+            <section key={actionGroup} className="space-y-2">
+              <h4 className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400 px-1">{actionGroup}</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {actions.map((action) => {
-                  const { icon: Icon, color } = ACTION_ICONS[action.id] ?? { icon: Wrench, color: 'text-zinc-400' };
+                  const { icon: Icon, color } = ACTION_ICONS[action.id] ?? { icon: Wrench, color: 'text-cyan-400' };
                   return (
                     <button
                       data-action
                       key={action.id}
                       type="button"
                       onClick={() => run(action.id)}
-                      className="flex items-start gap-2 px-2 py-1.5 rounded-lg border border-transparent hover:border-zinc-700 hover:bg-zinc-800 text-left transition group min-w-0"
+                      className="flex items-start gap-2.5 p-2.5 rounded-xl bg-[#0c1220] hover:bg-[#162035] border border-[#202b3f] hover:border-cyan-500/50 text-left transition group min-w-0 cursor-pointer shadow-xs hub-lift"
                     >
-                      <span className="p-1 rounded bg-zinc-800/80 group-hover:bg-zinc-700 border border-zinc-700/50 shrink-0">
+                      <span className="p-1.5 rounded-lg bg-[#07090e] group-hover:bg-[#0c1220] border border-[#202b3f] shrink-0 group-hover:scale-105 transition-transform">
                         <Icon className={`w-3.5 h-3.5 ${color}`} />
                       </span>
                       <span className="flex-1 min-w-0">
-                        <span className="block text-[11px] font-medium text-zinc-200 group-hover:text-white truncate">{action.label}</span>
-                        <span className="block text-[11px] text-zinc-400 group-hover:text-zinc-200 truncate">{action.description}</span>
+                        <span className="block text-xs font-bold text-slate-100 group-hover:text-cyan-200 truncate">{action.label}</span>
+                        <span className="block text-[11px] text-slate-400 group-hover:text-slate-300 truncate mt-0.5">{action.description}</span>
                       </span>
                     </button>
                   );
@@ -111,8 +113,12 @@ export const ActionPalette: React.FC<Props> = ({ onRun, onClose }) => {
         })}
       </div>
 
-      <div className="p-2 border-t border-zinc-800 bg-zinc-950/60 text-[11px] text-zinc-400 px-3">
-        <kbd className="font-mono text-zinc-400">Enter</kbd> ejecuta la primera · <kbd className="font-mono text-zinc-400">Esc</kbd> cierra
+      <div className="p-2.5 border-t border-[#202b3f] bg-[#07090e] text-[11px] text-slate-400 px-4 flex items-center justify-between font-mono">
+        <div className="flex items-center gap-2">
+          <kbd className="px-1.5 py-0.5 rounded bg-[#0c1220] border border-[#202b3f] text-slate-300">Enter</kbd>
+          <span>ejecuta la primera coincidencia</span>
+        </div>
+        <span className="text-slate-400">Esc cierra</span>
       </div>
     </ModalShell>
   );

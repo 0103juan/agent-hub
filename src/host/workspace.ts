@@ -4,13 +4,16 @@ import * as path from 'path';
 import { execSync } from 'child_process';
 import * as vscode from 'vscode';
 import { TerminalRequest } from '../agents/terminal-opener';
+import { isSystemOrAppDir } from './safe-path';
+
+export { isSystemOrAppDir };
 
 let customWorkspaceDir: string | undefined;
 
 const RECENT_FILE = path.join(os.homedir(), '.agent-hub', 'recent-workspaces.json');
 
 export function setCustomWorkspaceDir(dir: string): void {
-  if (dir && fs.existsSync(dir)) {
+  if (dir && !isSystemOrAppDir(dir) && fs.existsSync(dir)) {
     customWorkspaceDir = path.resolve(dir);
     addRecentWorkspace(customWorkspaceDir);
     if ((globalThis as any).vscode?.workspace) {
@@ -20,8 +23,23 @@ export function setCustomWorkspaceDir(dir: string): void {
 }
 
 export function workspaceDir(): string | undefined {
-  const dir = customWorkspaceDir ?? vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? process.cwd();
-  return dir && fs.existsSync(dir) ? dir : undefined;
+  if (customWorkspaceDir && !isSystemOrAppDir(customWorkspaceDir) && fs.existsSync(customWorkspaceDir)) {
+    return customWorkspaceDir;
+  }
+  const vscodeDir = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+  if (vscodeDir && !isSystemOrAppDir(vscodeDir) && fs.existsSync(vscodeDir)) {
+    return vscodeDir;
+  }
+  // Si no hay carpeta en VS Code ni custom, usar el proyecto reciente más usado
+  const recent = getRecentWorkspaces();
+  if (recent.length > 0 && fs.existsSync(recent[0])) {
+    return recent[0];
+  }
+  const cwd = process.cwd();
+  if (cwd && !isSystemOrAppDir(cwd) && fs.existsSync(cwd)) {
+    return cwd;
+  }
+  return undefined;
 }
 
 export function workspaceDirOrHome(): string {
@@ -33,15 +51,15 @@ export function getRecentWorkspaces(): string[] {
     if (fs.existsSync(RECENT_FILE)) {
       const data = JSON.parse(fs.readFileSync(RECENT_FILE, 'utf8'));
       if (Array.isArray(data)) {
-        return data.filter((p) => typeof p === 'string' && fs.existsSync(p));
+        return data.filter((p) => typeof p === 'string' && !isSystemOrAppDir(p) && fs.existsSync(p));
       }
     }
   } catch {}
-  const current = workspaceDir();
-  return current ? [current] : [];
+  return [];
 }
 
 export function addRecentWorkspace(dir: string): void {
+  if (!dir || isSystemOrAppDir(dir)) return;
   try {
     const list = getRecentWorkspaces().filter((item) => item.toLowerCase() !== dir.toLowerCase());
     list.unshift(dir);

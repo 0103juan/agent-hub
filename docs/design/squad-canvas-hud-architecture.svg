@@ -1,0 +1,215 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#07090e" />
+      <stop offset="50%" stop-color="#0a0d16" />
+      <stop offset="100%" stop-color="#07090e" />
+    </linearGradient>
+    <linearGradient id="primaryGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#6366f1" />
+      <stop offset="100%" stop-color="#06b6d4" />
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0e131f" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#0a0d16" stop-opacity="0.98" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <style>
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    .sans { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+  </style>
+
+  <!-- Background Canvas -->
+  <rect width="960" height="540" fill="url(#bgGrad)" />
+
+  <!-- Subtle Blueprint Grid -->
+  <g opacity="0.08" stroke="#38bdf8" stroke-width="1">
+    <path d="M 0 40 L 960 40 M 0 80 L 960 80 M 0 120 L 960 120 M 0 160 L 960 160 M 0 200 L 960 200 M 0 240 L 960 240 M 0 280 L 960 280 M 0 320 L 960 320 M 0 360 L 960 360 M 0 400 L 960 400 M 0 440 L 960 440 M 0 480 L 960 480 M 0 520 L 960 520" />
+    <path d="M 60 0 L 60 540 M 120 0 L 120 540 M 180 0 L 180 540 M 240 0 L 240 540 M 300 0 L 300 540 M 360 0 L 360 540 M 420 0 L 420 540 M 480 0 L 480 540 M 540 0 L 540 540 M 600 0 L 600 540 M 660 0 L 660 540 M 720 0 L 720 540 M 780 0 L 780 540 M 840 0 L 840 540 M 900 0 L 900 540" />
+  </g>
+
+  <!-- Header Banner -->
+  <g transform="translate(60, 26)">
+    <rect x="0" y="0" width="840" height="42" rx="8" fill="#0e131f" stroke="#202b3f" stroke-width="1.5" />
+    <circle cx="24" cy="21" r="5" fill="#6366f1" filter="url(#glow)" />
+    <text x="42" y="26" fill="#f8fafc" font-size="13" font-weight="700" class="sans" letter-spacing="0.5">AGENTHUB HUD :: MULTI-AGENT SQUAD TOPOLOGY &amp; CANVAS</text>
+    <rect x="670" y="9" width="150" height="24" rx="4" fill="#6366f1" fill-opacity="0.15" stroke="#6366f1" stroke-width="1" />
+    <text x="745" y="25" fill="#a5b4fc" font-size="11" font-weight="600" text-anchor="middle" class="mono">SWARM RUNTIME V2</text>
+  </g>
+
+  <!-- Squad Canvas Main Panel -->
+  <g transform="translate(60, 84)">
+    <rect x="0" y="0" width="840" height="426" rx="14" fill="url(#cardGrad)" stroke="#202b3f" stroke-width="1.5" />
+
+    <!-- Top Canvas Status Header -->
+    <rect x="0" y="0" width="840" height="46" rx="14" fill="#0a0d16" />
+    <rect x="0" y="45" width="840" height="1" fill="#202b3f" />
+
+    <g transform="translate(20, 13)">
+      <circle cx="8" cy="10" r="4" fill="#10b981" filter="url(#glow)" />
+      <text x="22" y="14" fill="#f8fafc" font-size="12" font-weight="700" class="sans">TOPOLOGÍA DEL SQUAD ACTIVO</text>
+      
+      <rect x="230" y="1" width="160" height="20" rx="4" fill="#131927" stroke="#202b3f" />
+      <text x="310" y="15" fill="#38bdf8" font-size="10" font-weight="600" text-anchor="middle" class="mono">4 AGENTES COORDINADOS</text>
+
+      <!-- Isolation worktree badge -->
+      <rect x="400" y="1" width="190" height="20" rx="4" fill="#6366f1" fill-opacity="0.15" stroke="#6366f1" stroke-width="1" />
+      <text x="495" y="15" fill="#a5b4fc" font-size="10" font-weight="600" text-anchor="middle" class="mono">squad/design-system-audit</text>
+
+      <rect x="680" y="0" width="120" height="22" rx="6" fill="#131927" stroke="#202b3f" />
+      <text x="740" y="15" fill="#cbd5e1" font-size="10" font-weight="600" text-anchor="middle" class="mono">Generar Informe</text>
+    </g>
+
+    <!-- Canvas Left Column: Timeline & Duration/Cost Gauges -->
+    <g transform="translate(20, 58)">
+      <rect x="0" y="0" width="260" height="348" rx="10" fill="#05070c" stroke="#202b3f" stroke-width="1" />
+      
+      <text x="14" y="24" fill="#94a3b8" font-size="10" font-weight="700" class="mono">LÍNEA DE TIEMPO DEL SQUAD</text>
+
+      <!-- Stage 1: Coordinador -->
+      <g transform="translate(14, 38)">
+        <circle cx="8" cy="8" r="4" fill="#38bdf8" />
+        <text x="20" y="12" fill="#f8fafc" font-size="11" font-weight="600" class="sans">Coordinador General</text>
+        <text x="20" y="26" fill="#64748b" font-size="9" class="mono">Con respuesta · 1m 20s</text>
+        <line x1="8" y1="16" x2="8" y2="44" stroke="#202b3f" stroke-width="2" />
+      </g>
+
+      <!-- Stage 2: Arquitecto -->
+      <g transform="translate(14, 88)">
+        <circle cx="8" cy="8" r="4" fill="#818cf8" />
+        <text x="20" y="12" fill="#f8fafc" font-size="11" font-weight="600" class="sans">Arquitecto de Solución</text>
+        <text x="20" y="26" fill="#64748b" font-size="9" class="mono">Con respuesta · $0,14 USD</text>
+        <line x1="8" y1="16" x2="8" y2="44" stroke="#202b3f" stroke-width="2" />
+      </g>
+
+      <!-- Stage 3: Desarrollador (Working) -->
+      <g transform="translate(14, 138)">
+        <circle cx="8" cy="8" r="4" fill="#10b981" filter="url(#glow)" />
+        <text x="20" y="12" fill="#34d399" font-size="11" font-weight="700" class="sans">Desarrollador Frontend</text>
+        <text x="20" y="26" fill="#34d399" font-size="9" class="mono">Trabajando ahora · 45s</text>
+        <line x1="8" y1="16" x2="8" y2="44" stroke="#202b3f" stroke-width="2" stroke-dasharray="3 3" />
+      </g>
+
+      <!-- Stage 4: Revisor (Queued) -->
+      <g transform="translate(14, 188)">
+        <circle cx="8" cy="8" r="4" fill="#fbbf24" />
+        <text x="20" y="12" fill="#cbd5e1" font-size="11" font-weight="500" class="sans">Revisor de Código</text>
+        <text x="20" y="26" fill="#64748b" font-size="9" class="mono">En espera #1</text>
+      </g>
+
+      <line x1="14" y1="230" x2="246" y2="230" stroke="#202b3f" stroke-width="1" />
+
+      <!-- Cost / Duration Bars -->
+      <g transform="translate(14, 246)">
+        <text x="0" y="12" fill="#94a3b8" font-size="10" font-weight="700" class="mono">CONSUMO POR AGENTE</text>
+        
+        <text x="0" y="32" fill="#cbd5e1" font-size="10" class="mono">Coordinador</text>
+        <text x="232" y="32" fill="#94a3b8" font-size="10" text-anchor="end" class="mono">$0,18</text>
+        <rect x="0" y="38" width="232" height="4" rx="2" fill="#131927" />
+        <rect x="0" y="38" width="190" height="4" rx="2" fill="#38bdf8" />
+
+        <text x="0" y="58" fill="#cbd5e1" font-size="10" class="mono">Desarrollador</text>
+        <text x="232" y="58" fill="#94a3b8" font-size="10" text-anchor="end" class="mono">$0,24</text>
+        <rect x="0" y="64" width="232" height="4" rx="2" fill="#131927" />
+        <rect x="0" y="64" width="232" height="4" rx="2" fill="#10b981" />
+
+        <text x="0" y="84" fill="#cbd5e1" font-size="10" class="mono">Arquitecto</text>
+        <text x="232" y="84" fill="#94a3b8" font-size="10" text-anchor="end" class="mono">$0,14</text>
+        <rect x="0" y="90" width="232" height="4" rx="2" fill="#131927" />
+        <rect x="0" y="90" width="140" height="4" rx="2" fill="#818cf8" />
+      </g>
+    </g>
+
+    <!-- Canvas Right Column: Visual Swarm Grid Nodes -->
+    <g transform="translate(300, 58)">
+      <!-- Zoom controls header -->
+      <g transform="translate(360, 4)">
+        <rect x="0" y="0" width="24" height="20" rx="4" fill="#131927" stroke="#202b3f" />
+        <text x="12" y="14" fill="#cbd5e1" font-size="11" text-anchor="middle" class="mono font-bold">−</text>
+        <text x="50" y="14" fill="#94a3b8" font-size="10" text-anchor="middle" class="mono font-bold">100%</text>
+        <rect x="74" y="0" width="24" height="20" rx="4" fill="#131927" stroke="#202b3f" />
+        <text x="86" y="14" fill="#cbd5e1" font-size="11" text-anchor="middle" class="mono font-bold">+</text>
+        <rect x="106" y="0" width="46" height="20" rx="4" fill="#131927" stroke="#202b3f" />
+        <text x="129" y="14" fill="#cbd5e1" font-size="9" text-anchor="middle" class="mono">Reset</text>
+      </g>
+
+      <!-- 2x2 Agent Grid -->
+      <g transform="translate(0, 32)">
+        <!-- Node 1: Coordinador -->
+        <g transform="translate(0, 0)">
+          <rect x="0" y="0" width="250" height="96" rx="10" fill="#0e131f" stroke="#0284c7" stroke-width="1.2" />
+          <circle cx="16" cy="18" r="4" fill="#38bdf8" />
+          <text x="26" y="22" fill="#f8fafc" font-size="12" font-weight="700" class="sans">Coordinador</text>
+          <rect x="170" y="8" width="70" height="18" rx="4" fill="#0284c7" fill-opacity="0.2" />
+          <text x="205" y="21" fill="#38bdf8" font-size="9" font-weight="700" text-anchor="middle" class="mono">COORDINADOR</text>
+          
+          <text x="14" y="44" fill="#94a3b8" font-size="10" class="mono">claude-3-7 · Con respuesta</text>
+          
+          <rect x="12" y="58" width="226" height="24" rx="4" fill="#07090e" stroke="#202b3f" />
+          <text x="22" y="74" fill="#64748b" font-size="9" class="mono">&gt; swarm assign: feature/hud</text>
+        </g>
+
+        <!-- Node 2: Arquitecto -->
+        <g transform="translate(266, 0)">
+          <rect x="0" y="0" width="250" height="96" rx="10" fill="#0e131f" stroke="#6366f1" stroke-width="1.2" />
+          <circle cx="16" cy="18" r="4" fill="#818cf8" />
+          <text x="26" y="22" fill="#f8fafc" font-size="12" font-weight="700" class="sans">Arquitecto</text>
+          <rect x="170" y="8" width="70" height="18" rx="4" fill="#6366f1" fill-opacity="0.2" />
+          <text x="205" y="21" fill="#a5b4fc" font-size="9" font-weight="700" text-anchor="middle" class="mono">ARQUITECTO</text>
+          
+          <text x="14" y="44" fill="#94a3b8" font-size="10" class="mono">claude-3-7 · Contratos listos</text>
+          
+          <rect x="12" y="58" width="226" height="24" rx="4" fill="#07090e" stroke="#202b3f" />
+          <text x="22" y="74" fill="#64748b" font-size="9" class="mono">&gt; handoff to: desarrollador</text>
+        </g>
+
+        <!-- Node 3: Desarrollador (Active working node with glow) -->
+        <g transform="translate(0, 110)">
+          <rect x="-2" y="-2" width="254" height="100" rx="12" fill="none" stroke="#10b981" stroke-width="2" filter="url(#glow)" stroke-opacity="0.5" />
+          <rect x="0" y="0" width="250" height="96" rx="10" fill="#0e131f" stroke="#10b981" stroke-width="1.5" />
+          <circle cx="16" cy="18" r="4" fill="#10b981" filter="url(#glow)" />
+          <text x="26" y="22" fill="#f8fafc" font-size="12" font-weight="700" class="sans">Desarrollador</text>
+          <rect x="170" y="8" width="70" height="18" rx="4" fill="#10b981" fill-opacity="0.2" />
+          <text x="205" y="21" fill="#34d399" font-size="9" font-weight="700" text-anchor="middle" class="mono">TRABAJANDO</text>
+          
+          <text x="14" y="44" fill="#34d399" font-size="10" font-weight="600" class="mono">gpt-4o · Ejecutando Vite build</text>
+          
+          <rect x="12" y="58" width="226" height="24" rx="4" fill="#07090e" stroke="#202b3f" />
+          <text x="22" y="74" fill="#38bdf8" font-size="9" class="mono">$ npm run build:webview</text>
+        </g>
+
+        <!-- Node 4: Revisor (Queued) -->
+        <g transform="translate(266, 110)">
+          <rect x="0" y="0" width="250" height="96" rx="10" fill="#0e131f" stroke="#d97706" stroke-width="1.2" />
+          <circle cx="16" cy="18" r="4" fill="#fbbf24" />
+          <text x="26" y="22" fill="#f8fafc" font-size="12" font-weight="700" class="sans">Revisor</text>
+          <rect x="170" y="8" width="70" height="18" rx="4" fill="#d97706" fill-opacity="0.2" />
+          <text x="205" y="21" fill="#fbbf24" font-size="9" font-weight="700" text-anchor="middle" class="mono">EN ESPERA #1</text>
+          
+          <text x="14" y="44" fill="#94a3b8" font-size="10" class="mono">claude-3-5 · Esperando build</text>
+          
+          <rect x="12" y="58" width="226" height="24" rx="4" fill="#07090e" stroke="#202b3f" />
+          <text x="22" y="74" fill="#64748b" font-size="9" class="mono">waiting for commit...</text>
+        </g>
+      </g>
+
+      <!-- Bottom Relevo Stream -->
+      <g transform="translate(0, 244)">
+        <rect x="0" y="0" width="516" height="70" rx="8" fill="#05070c" stroke="#202b3f" />
+        <text x="12" y="18" fill="#94a3b8" font-size="9" font-weight="700" class="mono">ÚLTIMO RELEVO DE COMUNICACIÓN EN TIEMPO REAL</text>
+        
+        <g transform="translate(12, 28)">
+          <text x="0" y="16" fill="#818cf8" font-size="10" font-weight="700" class="mono">Arquitecto</text>
+          <text x="70" y="16" fill="#64748b" font-size="10" class="mono">→</text>
+          <text x="86" y="16" fill="#34d399" font-size="10" font-weight="700" class="mono">Desarrollador</text>
+          <text x="176" y="16" fill="#94a3b8" font-size="10" class="mono truncate">"Contratos de interfaces validados, procede con Vite"</text>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

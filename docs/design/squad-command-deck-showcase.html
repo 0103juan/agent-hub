@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentHub // Squad Command Deck Showcase</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #07090e;
+      color: #f1f5f9;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .hud-grid {
+      background-image: radial-gradient(rgba(14, 165, 233, 0.08) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+    .hud-card {
+      background: linear-gradient(180deg, rgba(14, 22, 38, 0.95) 0%, rgba(10, 15, 27, 0.95) 100%);
+      border: 1px solid #202b3f;
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+    }
+    .hud-card:hover {
+      border-color: rgba(6, 182, 212, 0.4);
+    }
+    .hud-input {
+      background-color: #07090e;
+      border: 1px solid #202b3f;
+      color: #f8fafc;
+    }
+    .hud-input:focus {
+      outline: none;
+      border-color: #06b6d4;
+      box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.2);
+    }
+    /* Custom Tactical Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #07090e;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #202b3f;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+  </style>
+</head>
+<body class="hud-grid min-h-screen p-4 sm:p-6 lg:p-8">
+  <div class="max-w-6xl mx-auto space-y-4">
+
+    <!-- Top Banner / Navigation -->
+    <header class="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl hud-card border-cyan-500/30">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-cyan-500/20">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-sm font-bold text-white tracking-wide">Coordinación de Agentes</h1>
+            <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
+              3 agentes activos
+            </span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-[#162035] text-[#94a3b8] border border-[#202b3f]">
+              CARD 30 // HUD V2
+            </span>
+          </div>
+          <p class="text-[11px] text-[#94a3b8]">
+            Despacho en paralelo, topología de relevos y ejecución de escuadrones autónomos
+          </p>
+        </div>
+      </div>
+
+      <!-- Live Indicators & Segmented View Switcher -->
+      <div class="flex items-center gap-3 flex-wrap">
+        <div class="flex items-center gap-2 font-mono text-[11px]">
+          <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#07090e]/80 border border-[#202b3f]">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
+            <span class="text-[#cbd5e1]">2 en curso</span>
+          </div>
+          <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#07090e]/80 border border-amber-500/30 text-amber-300">
+            <span class="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]"></span>
+            <span>1 en cola</span>
+          </div>
+        </div>
+
+        <!-- View Mode Switcher -->
+        <div class="flex items-center gap-1 bg-[#07090e] border border-[#202b3f] p-1 rounded-lg text-xs" id="viewSwitcher">
+          <button type="button" onclick="switchView('cards')" id="btnCards" class="flex items-center gap-1.5 px-2.5 py-1 rounded-md transition font-semibold bg-gradient-to-r from-cyan-500 to-indigo-600 text-white shadow-sm shadow-cyan-500/30">
+            <span>Lista</span>
+          </button>
+          <button type="button" onclick="switchView('canvas')" id="btnCanvas" class="flex items-center gap-1.5 px-2.5 py-1 rounded-md transition font-medium text-[#94a3b8] hover:text-white">
+            <span>Topología</span>
+          </button>
+          <button type="button" onclick="switchView('board')" id="btnBoard" class="flex items-center gap-1.5 px-2.5 py-1 rounded-md transition font-medium text-[#94a3b8] hover:text-white">
+            <span>Tablero</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Dispatcher / Spawn Form -->
+    <section class="hud-card p-4 rounded-xl space-y-4">
+      <div class="flex items-center justify-between pb-2 border-b border-[#202b3f]">
+        <div class="flex items-center gap-2">
+          <div class="w-6 h-6 rounded bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+          </div>
+          <h2 class="text-xs font-bold text-[#f8fafc]">Despachador de Escuadrón</h2>
+          <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">Paralelo</span>
+        </div>
+        <span class="text-[10px] text-[#64748b] font-mono">WORKSPACE: C:/Users/juan0/Documents/GitHub/portafolio/agent-hub</span>
+      </div>
+
+      <!-- Presets -->
+      <div class="space-y-1.5">
+        <div class="text-[10px] uppercase font-semibold text-[#94a3b8] tracking-wider font-mono">Formaciones rápidas</div>
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+          <button class="px-2.5 py-1 rounded-lg border border-amber-500/40 bg-amber-500/10 text-amber-200 font-medium hover:border-amber-500 transition">
+            ✨ Full Protocol (4)
+          </button>
+          <button class="px-2.5 py-1 rounded-lg border border-indigo-500/40 bg-indigo-500/10 text-indigo-200 font-medium hover:border-indigo-500 transition">
+            ⚡ Feature Duo (2)
+          </button>
+          <button class="px-2.5 py-1 rounded-lg border border-rose-500/40 bg-rose-500/10 text-rose-200 font-medium hover:border-rose-500 transition">
+            🐞 Bugfix Squad (3)
+          </button>
+          <button class="px-2.5 py-1 rounded-lg border border-emerald-500/40 bg-emerald-500/10 text-emerald-200 font-medium hover:border-emerald-500 transition">
+            🛡 Auditoría &amp; Docs (2)
+          </button>
+        </div>
+      </div>
+
+      <!-- Project & Mission Inputs -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="space-y-1">
+          <label class="text-[10px] font-semibold text-[#cbd5e1] font-mono flex items-center gap-1">
+            📁 Proyecto de destino
+          </label>
+          <select class="w-full hud-input rounded-lg px-2.5 py-1.5 text-xs text-[#f1f5f9]">
+            <option>agent-hub (Carpeta actual)</option>
+            <option>metrovia-servicios-back</option>
+            <option>finesa-extraccion-back</option>
+          </select>
+        </div>
+        <div class="space-y-1">
+          <label class="text-[10px] font-semibold text-[#cbd5e1] font-mono flex items-center gap-1">
+            ⚙ Nombre del flujo / misión
+          </label>
+          <input type="text" value="Modernización Táctica de AgentsView y SquadCanvas" class="w-full hud-input rounded-lg px-2.5 py-1.5 text-xs text-[#f1f5f9]">
+        </div>
+      </div>
+
+      <!-- Objective Textarea -->
+      <div class="space-y-1">
+        <div class="flex items-center justify-between text-[10px] text-[#94a3b8] font-mono">
+          <span class="font-semibold text-[#cbd5e1]">Objetivo inicial para el equipo</span>
+          <span class="text-[#64748b]">«&gt;&gt; nombre: mensaje» para comunicarse</span>
+        </div>
+        <textarea rows="2" class="w-full hud-input rounded-lg p-2.5 text-xs text-[#f8fafc] resize-none" placeholder="Describe la tarea para que el equipo la resuelva coordinadamente..."></textarea>
+      </div>
+
+      <!-- Controls & Submit -->
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-[#202b3f]">
+        <label class="flex items-center gap-2 text-xs text-[#cbd5e1] cursor-pointer">
+          <input type="checkbox" checked class="w-4 h-4 rounded border-[#202b3f] bg-[#07090e] text-cyan-500">
+          <span class="flex items-center gap-1.5">
+            <span>Copia aparte aislada</span>
+            <span class="text-[10px] text-[#64748b] font-mono">(Git Worktree)</span>
+          </span>
+        </label>
+        <button class="px-4 py-2 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white rounded-lg font-bold text-xs shadow-md shadow-cyan-500/20 transition">
+          ▶ Lanzar 3 Agentes (Ctrl+Enter)
+        </button>
+      </div>
+    </section>
+
+    <!-- DYNAMIC VIEW CONTAINER -->
+    <div id="viewCards" class="space-y-3">
+      <!-- Active Squad Group -->
+      <div class="space-y-2">
+        <div class="flex flex-wrap items-center justify-between gap-2 px-3 py-1.5 bg-[#0a0e17]/90 rounded-lg border border-[#202b3f]">
+          <div class="flex items-center gap-2 text-xs font-bold text-[#f1f5f9]">
+            <span class="w-2.5 h-2.5 rounded-full bg-cyan-500 shadow-sm shadow-cyan-500/50"></span>
+            <span>Refactor de Vistas a HUD</span>
+            <span class="text-[#94a3b8] font-mono text-[11px] bg-[#0c1220] px-2 py-0.5 rounded border border-[#202b3f]">agent-hub</span>
+            <span class="text-[#64748b] text-[11px] font-mono">(3 agentes)</span>
+          </div>
+          <span class="text-[11px] text-emerald-400 font-mono font-medium flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            2 trabajando
+          </span>
+        </div>
+
+        <!-- Agent Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <!-- Card 1: Arquitecto -->
+          <div class="hud-card p-3.5 rounded-xl border-[#202b3f] space-y-2.5 text-xs">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-indigo-400"></span>
+                <span class="font-bold text-[#f8fafc]">Arquitecto-1</span>
+                <span class="text-[10px] font-mono px-1.5 py-0.5 rounded uppercase border border-blue-500/50 bg-blue-950/30 text-blue-300">ARQUITECTO</span>
+              </div>
+              <span class="text-[#94a3b8] font-mono text-[10px]">gemini-2.5</span>
+            </div>
+            <p class="text-[#cbd5e1] text-[11px] line-clamp-2">
+              Diseño de especificación completado. Handoff generado para Desarrollador-1.
+            </p>
+            <div class="text-[10px] font-mono text-[#64748b] flex justify-between pt-1 border-t border-[#202b3f]">
+              <span>ID: s1794801</span>
+              <span>18s · $0,03 USD</span>
+            </div>
+          </div>
+
+          <!-- Card 2: Desarrollador (Working) -->
+          <div class="hud-card p-3.5 rounded-xl border-emerald-500/60 bg-gradient-to-r from-emerald-950/20 via-[#0a0e17] to-[#0a0e17] space-y-2.5 text-xs shadow-lg shadow-emerald-950/20">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-sm shadow-emerald-400"></span>
+                <span class="font-bold text-[#f8fafc]">Desarrollador-1</span>
+                <span class="text-[10px] font-mono px-1.5 py-0.5 rounded uppercase border border-purple-500/50 bg-purple-950/30 text-purple-300">DESARROLLADOR</span>
+              </div>
+              <span class="text-[10px] font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-full font-mono">⚡ En curso</span>
+            </div>
+            <!-- Terminal Log Snippet -->
+            <div class="p-2 rounded bg-black/80 border border-[#202b3f] font-mono text-[10.5px] space-y-1 text-emerald-300">
+              <div class="text-[9.5px] text-[#64748b] border-b border-[#202b3f] pb-0.5">Terminal en vivo</div>
+              <div>$ vite build</div>
+              <div class="text-[#cbd5e1]">✓ 1565 modules transformed.</div>
+            </div>
+            <div class="text-[10px] font-mono text-[#64748b] flex justify-between pt-1 border-t border-[#202b3f]">
+              <span>ID: s1794802</span>
+              <span>42s · $0,05 USD</span>
+            </div>
+          </div>
+
+          <!-- Card 3: Tester (Waiting) -->
+          <div class="hud-card p-3.5 rounded-xl border-amber-500/40 space-y-2.5 text-xs">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                <span class="font-bold text-[#f8fafc]">Tester-1</span>
+                <span class="text-[10px] font-mono px-1.5 py-0.5 rounded uppercase border border-emerald-500/50 bg-emerald-950/30 text-emerald-300">TESTER</span>
+              </div>
+              <span class="text-[10px] font-mono text-amber-300 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">⏳ En espera</span>
+            </div>
+            <p class="text-[#94a3b8] text-[11px]">
+              Esperando relevo de Desarrollador-1 para ejecutar suites de prueba unitarias.
+            </p>
+            <div class="text-[10px] font-mono text-[#64748b] flex justify-between pt-1 border-t border-[#202b3f]">
+              <span>ID: s1794803</span>
+              <span>0s · $0,00 USD</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DYNAMIC VIEW: Canvas / Topology Mock -->
+    <div id="viewCanvas" class="hidden hud-card p-6 rounded-xl space-y-4">
+      <div class="flex items-center justify-between pb-2 border-b border-[#202b3f]">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="text-xs font-bold text-white font-mono uppercase tracking-wider">Topología del Squad</span>
+        </div>
+        <span class="text-xs font-mono text-cyan-400">3 agentes secuenciados · Worktree aislado</span>
+      </div>
+      <div class="p-4 rounded-lg bg-[#07090e] border border-[#202b3f] flex items-center justify-around">
+        <div class="p-3 rounded-lg border border-blue-500/50 bg-[#0a0e17] text-center w-40">
+          <div class="text-xs font-bold text-[#38bdf8]">Arquitecto-1</div>
+          <div class="text-[10px] text-[#94a3b8]">Docs &amp; Spec</div>
+          <span class="text-[9px] font-mono text-emerald-400">✔ Hecho</span>
+        </div>
+        <div class="text-cyan-400 font-mono text-lg font-bold">→</div>
+        <div class="p-3 rounded-lg border border-purple-500/50 bg-[#0a0e17] text-center w-40 ring-1 ring-emerald-500/50">
+          <div class="text-xs font-bold text-[#c084fc]">Desarrollador-1</div>
+          <div class="text-[10px] text-[#94a3b8]">Código Frontend</div>
+          <span class="text-[9px] font-mono text-emerald-400 animate-pulse">⚡ En curso</span>
+        </div>
+        <div class="text-slate-600 font-mono text-lg font-bold">→</div>
+        <div class="p-3 rounded-lg border border-[#202b3f] bg-[#07090e] text-center w-40 opacity-70">
+          <div class="text-xs font-bold text-[#94a3b8]">Tester-1</div>
+          <div class="text-[10px] text-[#64748b]">Verificación</div>
+          <span class="text-[9px] font-mono text-amber-400">⏳ En espera</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DYNAMIC VIEW: Kanban Board Mock -->
+    <div id="viewBoard" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div class="p-3 rounded-xl bg-[#0a0e17]/80 border border-[#202b3f] space-y-2">
+        <div class="text-xs font-bold font-mono text-sky-400 uppercase tracking-wider border-b border-[#202b3f] pb-1">En espera (1)</div>
+        <div class="p-2.5 rounded bg-[#0c1220] border border-[#202b3f] text-xs">
+          <div class="font-bold text-[#f8fafc]">Tester-1</div>
+          <div class="text-[10px] text-[#94a3b8] font-mono">Esperando relevo</div>
+        </div>
+      </div>
+      <div class="p-3 rounded-xl bg-[#0a0e17]/80 border border-[#202b3f] space-y-2">
+        <div class="text-xs font-bold font-mono text-emerald-400 uppercase tracking-wider border-b border-[#202b3f] pb-1">Trabajando (1)</div>
+        <div class="p-2.5 rounded bg-[#0c1220] border border-emerald-500/50 text-xs">
+          <div class="font-bold text-[#f8fafc]">Desarrollador-1</div>
+          <div class="text-[10px] text-emerald-300 font-mono">Compilando vite</div>
+        </div>
+      </div>
+      <div class="p-3 rounded-xl bg-[#0a0e17]/80 border border-[#202b3f] space-y-2">
+        <div class="text-xs font-bold font-mono text-rose-400 uppercase tracking-wider border-b border-[#202b3f] pb-1">Te espera (0)</div>
+        <div class="text-xs text-[#64748b] text-center p-4">Sin agentes bloqueados</div>
+      </div>
+      <div class="p-3 rounded-xl bg-[#0a0e17]/80 border border-[#202b3f] space-y-2">
+        <div class="text-xs font-bold font-mono text-[#94a3b8] uppercase tracking-wider border-b border-[#202b3f] pb-1">Completado (1)</div>
+        <div class="p-2.5 rounded bg-[#0c1220] border border-[#202b3f] text-xs">
+          <div class="font-bold text-[#f8fafc]">Arquitecto-1</div>
+          <div class="text-[10px] text-[#64748b] font-mono">Spec finalizada</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Intercom Feed -->
+    <section class="hud-card p-4 rounded-xl space-y-3">
+      <div class="flex items-center justify-between pb-2 border-b border-[#202b3f]">
+        <div class="flex items-center gap-2 text-xs font-bold text-[#f8fafc]">
+          <span class="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(6,182,212,0.8)]"></span>
+          <span>Intercomunicador de Escuadrón (Transmisiones en vivo)</span>
+        </div>
+        <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-[#07090e] text-[#94a3b8] border border-[#202b3f]">
+          2 relevos registrados
+        </span>
+      </div>
+
+      <div class="space-y-2 font-mono text-xs">
+        <div class="p-2.5 bg-[#07090e]/80 border border-[#202b3f] rounded-lg space-y-1">
+          <div class="flex items-center gap-2 text-[11px]">
+            <span class="text-cyan-300 font-bold bg-cyan-950/40 px-1.5 py-0.2 rounded border border-cyan-500/20">Arquitecto-1</span>
+            <span class="text-[#64748b]">→</span>
+            <span class="text-purple-300 font-bold bg-purple-950/40 px-1.5 py-0.2 rounded border border-purple-500/20">Desarrollador-1</span>
+            <span class="ml-auto text-[10px] text-[#64748b]">22:10:14</span>
+          </div>
+          <p class="text-[#cbd5e1] font-sans text-xs pl-1">
+            >> Desarrollador-1: Hecho: especificación lista en docs/specs/refactor.md. Pendiente: sustitución de clases zinc- en componentes de escuadrón.
+          </p>
+        </div>
+
+        <div class="p-2.5 bg-[#07090e]/80 border border-emerald-500/30 rounded-lg space-y-1">
+          <div class="flex items-center gap-2 text-[11px]">
+            <span class="text-purple-300 font-bold bg-purple-950/40 px-1.5 py-0.2 rounded border border-purple-500/20">Desarrollador-1</span>
+            <span class="text-[#64748b]">→</span>
+            <span class="text-emerald-300 font-bold bg-emerald-950/40 px-1.5 py-0.2 rounded border border-emerald-500/20">Tester-1</span>
+            <span class="ml-auto text-[10px] text-emerald-400 font-bold animate-pulse">EN VIVO</span>
+          </div>
+          <p class="text-[#f1f5f9] font-sans text-xs pl-1">
+            >> Tester-1: Hecho: 103 clases zinc- eliminadas en AgentsView y SquadCanvas. Verificación: npm run build:webview pasando en 2.13s.
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    function switchView(mode) {
+      document.getElementById('viewCards').classList.add('hidden');
+      document.getElementById('viewCanvas').classList.add('hidden');
+      document.getElementById('viewBoard').classList.add('hidden');
+
+      const btnCards = document.getElementById('btnCards');
+      const btnCanvas = document.getElementById('btnCanvas');
+      const btnBoard = document.getElementById('btnBoard');
+
+      [btnCards, btnCanvas, btnBoard].forEach(b => {
+        b.className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-md transition font-medium text-[#94a3b8] hover:text-white';
+      });
+
+      const activeClass = 'flex items-center gap-1.5 px-2.5 py-1 rounded-md transition font-semibold bg-gradient-to-r from-cyan-500 to-indigo-600 text-white shadow-sm shadow-cyan-500/30';
+
+      if (mode === 'cards') {
+        document.getElementById('viewCards').classList.remove('hidden');
+        btnCards.className = activeClass;
+      } else if (mode === 'canvas') {
+        document.getElementById('viewCanvas').classList.remove('hidden');
+        btnCanvas.className = activeClass;
+      } else if (mode === 'board') {
+        document.getElementById('viewBoard').classList.remove('hidden');
+        btnBoard.className = activeClass;
+      }
+    }
+  </script>
+</body>
+</html>

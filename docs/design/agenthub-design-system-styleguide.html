@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentHub // Master Living Styleguide & Design System Manual</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            hud: {
+              base: '#07090e',
+              surface: '#0a0e17',
+              panel: '#0c1220',
+              hover: '#162035',
+              border: '#202b3f',
+              activeBorder: '#202b3f',
+              cyan: '#06b6d4',
+              indigo: '#6366f1',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              purple: '#a855f7'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Precision 6px Tactical Scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #202b3f; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #06b6d4; }
+
+    /* Focus Visible */
+    :focus-visible {
+      outline: 2px solid #06b6d4;
+      outline-offset: 1.5px;
+      box-shadow: 0 0 10px rgba(6, 182, 212, 0.4);
+    }
+
+    /* Selection */
+    ::selection {
+      background: rgba(6, 182, 212, 0.35);
+      color: #f1f5f9;
+    }
+
+    /* Hub Lift */
+    .hub-lift {
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s ease, border-color 0.2s ease;
+    }
+    .hub-lift:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px -14px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(6, 182, 212, 0.3);
+      border-color: rgba(6, 182, 212, 0.5);
+    }
+
+    /* Sliding Tab Pill */
+    .hub-tab-pill {
+      transition: left 0.38s cubic-bezier(0.16, 1, 0.3, 1), width 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Aurora Wave */
+    @keyframes auroraWave {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .aurora-border {
+      background: linear-gradient(90deg, #06b6d4, #6366f1, #a855f7, #06b6d4);
+      background-size: 300% 300%;
+      animation: auroraWave 3s ease infinite;
+    }
+  </style>
+</head>
+<body class="bg-hud-base text-slate-100 font-sans antialiased min-h-screen p-6 sm:p-10 selection:bg-cyan-500/35 selection:text-cyan-100">
+
+  <div class="max-w-6xl mx-auto space-y-10">
+
+    <!-- MASTER HERO BANNER -->
+    <header class="p-6 sm:p-8 rounded-2xl bg-hud-surface/95 border border-hud-border shadow-2xl backdrop-blur-md relative overflow-hidden">
+      <!-- Glow effect -->
+      <div class="absolute -top-24 -right-24 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="flex flex-wrap items-center justify-between gap-6 relative z-10">
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 rounded-2xl bg-[#080f1d] border border-cyan-500/50 flex items-center justify-center text-cyan-400 shadow-[0_0_24px_rgba(6,182,212,0.3)] shrink-0">
+            <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          </div>
+          <div>
+            <div class="flex items-center gap-3">
+              <h1 class="text-xl sm:text-2xl font-bold font-mono tracking-wider text-slate-100">
+                AGENT<span class="text-cyan-400">HUB</span> // LIVING STYLEGUIDE
+              </h1>
+              <span class="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold">
+                TACTICAL HUD v2.5
+              </span>
+            </div>
+            <p class="text-xs sm:text-sm text-slate-400 font-mono mt-1">
+              Manual maestro de diseño visual, componentes reactivos, tokens cromáticos y matriz de accesibilidad.
+            </p>
+          </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="flex items-center gap-3 font-mono text-xs">
+          <div class="px-3 py-1.5 rounded-lg bg-[#060a12] border border-hud-border flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="text-slate-300">WCAG AA 4.8:1</span>
+          </div>
+          <div class="px-3 py-1.5 rounded-lg bg-[#060a12] border border-hud-border flex items-center gap-2">
+            <span class="text-cyan-400 font-bold">25</span>
+            <span class="text-slate-300">Módulos Unificados</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- SECTION 1: COLOR PALETTE TOKEN EXPLORER -->
+    <section class="space-y-4">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+        <h2 class="text-sm font-mono font-bold tracking-wide text-slate-200 uppercase">01 // MATRIZ DE TOKENS CROMÁTICOS</h2>
+      </div>
+
+      <!-- Surface Tokens -->
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        <div onclick="copyHex('#07090e')" class="hub-lift p-3.5 rounded-xl bg-[#07090e] border border-hud-border cursor-pointer">
+          <div class="text-[10px] font-mono text-slate-400">HUD Base</div>
+          <div class="text-sm font-mono font-bold text-slate-100 mt-1">#07090e</div>
+          <div class="text-[10px] font-mono text-slate-500 mt-0.5">Lienzo Principal</div>
+        </div>
+
+        <div onclick="copyHex('#0a0e17')" class="hub-lift p-3.5 rounded-xl bg-[#0a0e17] border border-hud-border cursor-pointer">
+          <div class="text-[10px] font-mono text-slate-400">HUD Surface</div>
+          <div class="text-sm font-mono font-bold text-slate-100 mt-1">#0a0e17</div>
+          <div class="text-[10px] font-mono text-slate-500 mt-0.5">Barras y Cabeceras</div>
+        </div>
+
+        <div onclick="copyHex('#0c1220')" class="hub-lift p-3.5 rounded-xl bg-[#0c1220] border border-hud-border cursor-pointer">
+          <div class="text-[10px] font-mono text-slate-400">HUD Panel</div>
+          <div class="text-sm font-mono font-bold text-slate-100 mt-1">#0c1220</div>
+          <div class="text-[10px] font-mono text-slate-500 mt-0.5">Tarjetas y Cajas</div>
+        </div>
+
+        <div onclick="copyHex('#202b3f')" class="hub-lift p-3.5 rounded-xl bg-[#202b3f] border border-hud-border cursor-pointer">
+          <div class="text-[10px] font-mono text-slate-400">HUD Border</div>
+          <div class="text-sm font-mono font-bold text-slate-100 mt-1">#202b3f</div>
+          <div class="text-[10px] font-mono text-slate-500 mt-0.5">Bordes Estándar</div>
+        </div>
+
+        <div onclick="copyHex('#202b3f')" class="hub-lift p-3.5 rounded-xl bg-[#202b3f] border border-hud-border cursor-pointer">
+          <div class="text-[10px] font-mono text-slate-400">HUD Active Border</div>
+          <div class="text-sm font-mono font-bold text-slate-100 mt-1">#202b3f</div>
+          <div class="text-[10px] font-mono text-slate-500 mt-0.5">Límites Activos</div>
+        </div>
+      </div>
+
+      <!-- Accent Tokens -->
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        <div onclick="copyHex('#06b6d4')" class="hub-lift p-3.5 rounded-xl bg-cyan-950/30 border border-cyan-500/40 cursor-pointer">
+          <div class="text-[10px] font-mono text-cyan-400">Cian Primario</div>
+          <div class="text-sm font-mono font-bold text-cyan-300 mt-1">#06b6d4</div>
+          <div class="text-[10px] font-mono text-cyan-500/80 mt-0.5">Acción y Foco</div>
+        </div>
+
+        <div onclick="copyHex('#10b981')" class="hub-lift p-3.5 rounded-xl bg-emerald-950/30 border border-emerald-500/40 cursor-pointer">
+          <div class="text-[10px] font-mono text-emerald-400">Esmeralda Éxito</div>
+          <div class="text-sm font-mono font-bold text-emerald-300 mt-1">#10b981</div>
+          <div class="text-[10px] font-mono text-emerald-500/80 mt-0.5">Conexión / Pass</div>
+        </div>
+
+        <div onclick="copyHex('#f59e0b')" class="hub-lift p-3.5 rounded-xl bg-amber-950/30 border border-amber-500/40 cursor-pointer">
+          <div class="text-[10px] font-mono text-amber-400">Ámbar Alerta</div>
+          <div class="text-sm font-mono font-bold text-amber-300 mt-1">#f59e0b</div>
+          <div class="text-[10px] font-mono text-amber-500/80 mt-0.5">Cuota / Espera</div>
+        </div>
+
+        <div onclick="copyHex('#6366f1')" class="hub-lift p-3.5 rounded-xl bg-indigo-950/30 border border-indigo-500/40 cursor-pointer">
+          <div class="text-[10px] font-mono text-indigo-400">Índigo Squad</div>
+          <div class="text-sm font-mono font-bold text-indigo-300 mt-1">#6366f1</div>
+          <div class="text-[10px] font-mono text-indigo-500/80 mt-0.5">Agentes / MCPs</div>
+        </div>
+
+        <div onclick="copyHex('#a855f7')" class="hub-lift p-3.5 rounded-xl bg-purple-950/30 border border-purple-500/40 cursor-pointer">
+          <div class="text-[10px] font-mono text-purple-400">Púrpura Lógica</div>
+          <div class="text-sm font-mono font-bold text-purple-300 mt-1">#a855f7</div>
+          <div class="text-[10px] font-mono text-purple-500/80 mt-0.5">Keywords / Roles</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: INTERACTIVE COMPONENT GALLERY -->
+    <section class="space-y-4">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
+        <h2 class="text-sm font-mono font-bold tracking-wide text-slate-200 uppercase">02 // GALERÍA DE COMPONENTES INTERACTIVOS</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        <!-- Buttons & Actions Panel -->
+        <div class="p-5 rounded-xl bg-hud-panel border border-hud-border space-y-4">
+          <div class="text-xs font-mono font-bold text-slate-300 border-b border-hud-border pb-2">
+            BOTONES &amp; DISPARADORES TÁCTICOS
+          </div>
+          <div class="flex flex-wrap gap-2.5">
+            <!-- Primary Gradient -->
+            <button class="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-mono font-bold text-xs shadow-md shadow-cyan-600/30 transition hover:brightness-110 cursor-pointer">
+              Botón Primario
+            </button>
+            <!-- Secondary HUD -->
+            <button class="px-3.5 py-1.5 rounded-lg bg-[#121929] hover:bg-[#18233a] text-slate-200 border border-[#1e2c47] font-mono text-xs transition cursor-pointer">
+              Botón Secundario
+            </button>
+            <!-- Active State -->
+            <button class="px-3.5 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-mono font-semibold text-xs shadow-[0_0_8px_rgba(6,182,212,0.2)] cursor-pointer">
+              Botón Activo
+            </button>
+            <!-- Danger -->
+            <button class="px-3 py-1.5 rounded-lg bg-rose-950/20 text-rose-300 border border-rose-500/30 hover:bg-rose-950/40 font-mono text-xs transition cursor-pointer">
+              Peligro / Revertir
+            </button>
+          </div>
+
+          <!-- Micro Badges -->
+          <div class="text-xs font-mono font-bold text-slate-300 border-b border-hud-border pt-2 pb-2">
+            MICRO-BADGES &amp; ESTADOS
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <span class="px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-[10px] font-mono font-bold">ACTIVO</span>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-[10px] font-mono font-bold">CONECTADO</span>
+            <span class="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 text-[10px] font-mono font-bold">ESPERA #1</span>
+            <span class="px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-300 border border-purple-500/30 text-[10px] font-mono font-bold">ARQUITECTO</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#060a12] border border-hud-border text-slate-400 text-[10px] font-mono">gemini-3.8-pro</span>
+          </div>
+        </div>
+
+        <!-- Form Elements & Inputs -->
+        <div class="p-5 rounded-xl bg-hud-panel border border-hud-border space-y-4">
+          <div class="text-xs font-mono font-bold text-slate-300 border-b border-hud-border pb-2">
+            INPUTS, SELECTORES &amp; FOCO TÁCTICO
+          </div>
+          <div class="space-y-3">
+            <div>
+              <label class="block text-[11px] font-mono text-slate-400 mb-1">Entrada de comando o archivo:</label>
+              <input type="text" value="docs/design/styleguide.html" class="w-full px-3 py-1.5 rounded-lg bg-[#060a12] border border-hud-border text-xs font-mono text-slate-200 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 transition outline-none" />
+            </div>
+
+            <div class="flex gap-2">
+              <select class="flex-1 px-3 py-1.5 rounded-lg bg-[#060a12] border border-hud-border text-xs font-mono text-slate-300 focus:border-cyan-400 outline-none">
+                <option>Modelo: gemini-3.8-pro-preview</option>
+                <option>Modelo: claude-3-7-sonnet</option>
+                <option>Modelo: gpt-4o-copilot</option>
+              </select>
+              <button class="px-3 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-xs font-mono font-medium">
+                Despachar
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECTION 3: COMPLETE ARCHITECTURE DIRECTORY -->
+    <section class="space-y-4">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+        <h2 class="text-sm font-mono font-bold tracking-wide text-slate-200 uppercase">03 // DIRECTORIO DE ENTREGABLES DE ARQUITECTURA (25 MÓDULOS)</h2>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <!-- Module Card 1 -->
+        <div class="p-3.5 rounded-xl bg-hud-panel border border-hud-border space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-cyan-400">01. SQUAD ORCHESTRATOR</span>
+            <span class="text-[9px] font-mono text-slate-500">Iteración 1</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-sans">Pipeline visual de roles TDD con traspasos automáticos.</p>
+          <div class="flex gap-2 pt-1">
+            <a href="squad-orchestrator.svg" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver SVG</a>
+            <span class="text-slate-600">·</span>
+            <a href="agents-interface-redesign.html" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver Prototipo</a>
+          </div>
+        </div>
+
+        <!-- Module Card 2 -->
+        <div class="p-3.5 rounded-xl bg-hud-panel border border-hud-border space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-cyan-400">02. MEMORY CONTEXT</span>
+            <span class="text-[9px] font-mono text-slate-500">Iteración 2</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-sans">Visualizador de base de conocimiento y experiencia acumulada.</p>
+          <div class="flex gap-2 pt-1">
+            <a href="memory-context-window.svg" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver SVG</a>
+            <span class="text-slate-600">·</span>
+            <a href="memory-view-redesign.html" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver Prototipo</a>
+          </div>
+        </div>
+
+        <!-- Module Card 3 -->
+        <div class="p-3.5 rounded-xl bg-hud-panel border border-hud-border space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-cyan-400">03. MCP MANAGER MESH</span>
+            <span class="text-[9px] font-mono text-slate-500">Iteración 3</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-sans">Malla de servidores Model Context Protocol y conmutación en vivo.</p>
+          <div class="flex gap-2 pt-1">
+            <a href="mcp-mesh-architecture.svg" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver SVG</a>
+            <span class="text-slate-600">·</span>
+            <a href="mcp-manager-redesign.html" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver Prototipo</a>
+          </div>
+        </div>
+
+        <!-- Module Card 4 -->
+        <div class="p-3.5 rounded-xl bg-hud-panel border border-hud-border space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-cyan-400">04. DOCUMENT PIPELINE</span>
+            <span class="text-[9px] font-mono text-slate-500">Iteración 4</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-sans">Visor seguro de documentación en sandbox con breakpoints responsive.</p>
+          <div class="flex gap-2 pt-1">
+            <a href="document-pipeline.svg" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver SVG</a>
+            <span class="text-slate-600">·</span>
+            <a href="documents-viewer-redesign.html" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver Prototipo</a>
+          </div>
+        </div>
+
+        <!-- Module Card 5 -->
+        <div class="p-3.5 rounded-xl bg-hud-panel border border-hud-border space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-cyan-400">05. SESSIONS &amp; DRAWER</span>
+            <span class="text-[9px] font-mono text-slate-500">Iteración 5</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-sans">Cajón de flujos agrupados, recencia y archivado ordenado.</p>
+          <div class="flex gap-2 pt-1">
+            <a href="sessions-and-flows-architecture.svg" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver SVG</a>
+            <span class="text-slate-600">·</span>
+            <a href="session-drawer-redesign.html" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver Prototipo</a>
+          </div>
+        </div>
+
+        <!-- Module Card 6 -->
+        <div class="p-3.5 rounded-xl bg-hud-panel border border-hud-border space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-cyan-400">06. COMPOSER &amp; CHAT</span>
+            <span class="text-[9px] font-mono text-slate-500">Iteración 6</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-sans">Barra multimodal con dictado por voz, cola y selector de modelos.</p>
+          <div class="flex gap-2 pt-1">
+            <a href="composer-hud-architecture.svg" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver SVG</a>
+            <span class="text-slate-600">·</span>
+            <a href="chat-view-redesign-v2.html" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver Prototipo</a>
+          </div>
+        </div>
+
+        <!-- Module Card 7 -->
+        <div class="p-3.5 rounded-xl bg-hud-panel border border-hud-border space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-cyan-400">07. TELEMETRY &amp; COSTS</span>
+            <span class="text-[9px] font-mono text-slate-500">Iteración 7</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-sans">Dashboard de consumo de tokens, latencias y costes acumulados.</p>
+          <div class="flex gap-2 pt-1">
+            <a href="telemetry-cost-architecture.svg" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver SVG</a>
+            <span class="text-slate-600">·</span>
+            <a href="telemetry-dashboard-redesign.html" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver Prototipo</a>
+          </div>
+        </div>
+
+        <!-- Module Card 8 -->
+        <div class="p-3.5 rounded-xl bg-hud-panel border border-hud-border space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-cyan-400">08. TACTICAL HUD CENTER</span>
+            <span class="text-[9px] font-mono text-slate-500">Iteración 8</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-sans">Command center con dial holográfico y matriz de estaciones.</p>
+          <div class="flex gap-2 pt-1">
+            <a href="command-center-hud-architecture.svg" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver SVG</a>
+            <span class="text-slate-600">·</span>
+            <a href="tactical-hud-command-center.html" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver Prototipo</a>
+          </div>
+        </div>
+
+        <!-- Module Card 9 -->
+        <div class="p-3.5 rounded-xl bg-hud-panel border border-hud-border space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-cyan-400">09. MESSAGE BUBBLES</span>
+            <span class="text-[9px] font-mono text-slate-500">Iteración 9</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-sans">Anatomía de burbujas, pensamiento, diffs y preguntas interactivas.</p>
+          <div class="flex gap-2 pt-1">
+            <a href="chat-message-anatomy.svg" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver SVG</a>
+            <span class="text-slate-600">·</span>
+            <a href="message-list-redesign.html" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver Prototipo</a>
+          </div>
+        </div>
+
+        <!-- Module Card 10 -->
+        <div class="p-3.5 rounded-xl bg-hud-panel border border-hud-border space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-cyan-400">10. FILES &amp; GIT SIDEBAR</span>
+            <span class="text-[9px] font-mono text-slate-500">Iteración 10</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-sans">Explorador de árbol de proyecto y contador de modificaciones Git.</p>
+          <div class="flex gap-2 pt-1">
+            <a href="project-workspace-files-architecture.svg" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver SVG</a>
+            <span class="text-slate-600">·</span>
+            <a href="project-files-sidebar-redesign.html" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver Prototipo</a>
+          </div>
+        </div>
+
+        <!-- Module Card 11 -->
+        <div class="p-3.5 rounded-xl bg-hud-panel border border-hud-border space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-cyan-400">11. TERMINAL SHELL</span>
+            <span class="text-[9px] font-mono text-slate-500">Iteración 11</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-sans">Consola multi-pestaña con snippets, dock inferior/lateral y Ask AI.</p>
+          <div class="flex gap-2 pt-1">
+            <a href="terminal-console-hud-architecture.svg" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver SVG</a>
+            <span class="text-slate-600">·</span>
+            <a href="terminal-drawer-redesign.html" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver Prototipo</a>
+          </div>
+        </div>
+
+        <!-- Module Card 12 -->
+        <div class="p-3.5 rounded-xl bg-hud-panel border border-hud-border space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-cyan-400">12. COMMAND PALETTE</span>
+            <span class="text-[9px] font-mono text-slate-500">Iteración 12</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-sans">Paleta rápida modal (Ctrl+K) con búsqueda difusa y atajos de teclado.</p>
+          <div class="flex gap-2 pt-1">
+            <a href="command-palette-hud-architecture.svg" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver SVG</a>
+            <span class="text-slate-600">·</span>
+            <a href="command-palette-redesign.html" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver Prototipo</a>
+          </div>
+        </div>
+
+        <!-- Module Card 13 -->
+        <div class="p-3.5 rounded-xl bg-hud-panel border border-hud-border space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-cyan-400">13. INTERACTIVE DIFF</span>
+            <span class="text-[9px] font-mono text-slate-500">Iteración 13</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-sans">Inspector de cambios con saltos entre diferencias y aplicación parcial.</p>
+          <div class="flex gap-2 pt-1">
+            <a href="diff-inspector-hud-architecture.svg" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver SVG</a>
+            <span class="text-slate-600">·</span>
+            <a href="interactive-diff-redesign.html" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver Prototipo</a>
+          </div>
+        </div>
+
+        <!-- Module Card 14 -->
+        <div class="p-3.5 rounded-xl bg-hud-panel border border-hud-border space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-cyan-400">14. SCRATCHPAD &amp; BRANCH</span>
+            <span class="text-[9px] font-mono text-slate-500">Iteración 14</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-sans">Borrador persistente de trabajo y gestor de ramas de squad.</p>
+          <div class="flex gap-2 pt-1">
+            <a href="scratchpad-and-branch-architecture.svg" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver SVG</a>
+            <span class="text-slate-600">·</span>
+            <a href="scratchpad-and-branch-redesign.html" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver Prototipo</a>
+          </div>
+        </div>
+
+        <!-- Module Card 15 -->
+        <div class="p-3.5 rounded-xl bg-hud-panel border border-hud-border space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-cyan-400">15. SECURITY AUDITOR</span>
+            <span class="text-[9px] font-mono text-slate-500">Iteración 15</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-sans">Escaneo de secretos, variables de entorno huérfanas y consultas SQL.</p>
+          <div class="flex gap-2 pt-1">
+            <a href="security-and-shortcuts-architecture.svg" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver SVG</a>
+            <span class="text-slate-600">·</span>
+            <a href="security-and-shortcuts-redesign.html" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver Prototipo</a>
+          </div>
+        </div>
+
+        <!-- Module Card 16 -->
+        <div class="p-3.5 rounded-xl bg-hud-panel border border-hud-border space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-cyan-400">16. SQUAD CANVAS</span>
+            <span class="text-[9px] font-mono text-slate-500">Iteración 16</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-sans">Topología visual de red interactiva para equipos de múltiples agentes.</p>
+          <div class="flex gap-2 pt-1">
+            <a href="squad-canvas-hud-architecture.svg" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver SVG</a>
+            <span class="text-slate-600">·</span>
+            <a href="squad-canvas-redesign.html" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver Prototipo</a>
+          </div>
+        </div>
+
+        <!-- Module Card 17 -->
+        <div class="p-3.5 rounded-xl bg-hud-panel border border-hud-border space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-cyan-400">17. SPLIT WORKSPACE</span>
+            <span class="text-[9px] font-mono text-slate-500">Iteración 17</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-sans">Cuadrículas multi-panel (1 a 4 columnas) con difusión y control CWD.</p>
+          <div class="flex gap-2 pt-1">
+            <a href="split-workspace-hud-architecture.svg" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver SVG</a>
+            <span class="text-slate-600">·</span>
+            <a href="split-workspace-redesign.html" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver Prototipo</a>
+          </div>
+        </div>
+
+        <!-- Module Card 18 -->
+        <div class="p-3.5 rounded-xl bg-hud-panel border border-hud-border space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-cyan-400">18. SPOTLIGHT &amp; NOTICES</span>
+            <span class="text-[9px] font-mono text-slate-500">Iteración 18</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-sans">Lanzador rápido Alt+Espacio y bandeja de notificaciones en tiempo real.</p>
+          <div class="flex gap-2 pt-1">
+            <a href="spotlight-and-notifications-architecture.svg" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver SVG</a>
+            <span class="text-slate-600">·</span>
+            <a href="spotlight-and-notifications-redesign.html" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver Prototipo</a>
+          </div>
+        </div>
+
+        <!-- Module Card 19 -->
+        <div class="p-3.5 rounded-xl bg-hud-panel border border-hud-border space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-cyan-400">19. MODEL CATALOG</span>
+            <span class="text-[9px] font-mono text-slate-500">Iteración 19</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-sans">Catálogo de modelos, monitor de cuota y selector de roles de protocolo.</p>
+          <div class="flex gap-2 pt-1">
+            <a href="model-catalog-and-quota-architecture.svg" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver SVG</a>
+            <span class="text-slate-600">·</span>
+            <a href="model-catalog-and-quota-redesign.html" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver Prototipo</a>
+          </div>
+        </div>
+
+        <!-- Module Card 20 -->
+        <div class="p-3.5 rounded-xl bg-hud-panel border border-hud-border space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-cyan-400">20. ATTACHMENTS &amp; ACTIONS</span>
+            <span class="text-[9px] font-mono text-slate-500">Iteración 20</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-sans">Fichas de contexto, paleta de acciones rápidas e insignias de proveedor.</p>
+          <div class="flex gap-2 pt-1">
+            <a href="attachments-and-actions-palette-architecture.svg" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver SVG</a>
+            <span class="text-slate-600">·</span>
+            <a href="attachments-and-actions-palette-redesign.html" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver Prototipo</a>
+          </div>
+        </div>
+
+        <!-- Module Card 21 -->
+        <div class="p-3.5 rounded-xl bg-hud-panel border border-hud-border space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-cyan-400">21. MARKDOWN &amp; CODE</span>
+            <span class="text-[9px] font-mono text-slate-500">Iteración 21</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-sans">Renderizado sintáctico con copy, run in terminal y branding oficial.</p>
+          <div class="flex gap-2 pt-1">
+            <a href="markdown-and-codeblock-hud-architecture.svg" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver SVG</a>
+            <span class="text-slate-600">·</span>
+            <a href="markdown-and-codeblock-redesign.html" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver Prototipo</a>
+          </div>
+        </div>
+
+        <!-- Module Card 22 -->
+        <div class="p-3.5 rounded-xl bg-hud-panel border border-hud-border space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-cyan-400">22. GLOBAL SHELL &amp; NAV</span>
+            <span class="text-[9px] font-mono text-slate-500">Iteración 22</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-sans">Encabezado global, píldora animada y cinta de agentes en vivo.</p>
+          <div class="flex gap-2 pt-1">
+            <a href="global-navigation-and-shell-architecture.svg" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver SVG</a>
+            <span class="text-slate-600">·</span>
+            <a href="global-navigation-and-shell-redesign.html" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver Prototipo</a>
+          </div>
+        </div>
+
+        <!-- Module Card 23 -->
+        <div class="p-3.5 rounded-xl bg-hud-panel border border-hud-border space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-cyan-400">23. CREDENTIAL PROFILES</span>
+            <span class="text-[9px] font-mono text-slate-500">Iteración 23</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-sans">Malla de credenciales y conmutación transparente ante límite de cuota.</p>
+          <div class="flex gap-2 pt-1">
+            <a href="account-profiles-and-credentials-architecture.svg" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver SVG</a>
+            <span class="text-slate-600">·</span>
+            <a href="account-profiles-and-credentials-redesign.html" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver Prototipo</a>
+          </div>
+        </div>
+
+        <!-- Module Card 24 -->
+        <div class="p-3.5 rounded-xl bg-hud-panel border border-hud-border space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-cyan-400">24. MICRO-INTERACTIONS</span>
+            <span class="text-[9px] font-mono text-slate-500">Iteración 24</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-sans">Física de elevación, Aurora thinking wave y anillos de foco accesibles.</p>
+          <div class="flex gap-2 pt-1">
+            <a href="global-hud-design-system-and-micro-interactions.svg" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver SVG</a>
+            <span class="text-slate-600">·</span>
+            <a href="global-hud-design-system-and-micro-interactions.html" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver Prototipo</a>
+          </div>
+        </div>
+
+        <!-- Module Card 25 -->
+        <div class="p-3.5 rounded-xl bg-hud-panel border border-hud-border space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-cyan-400">25. ZERO-FLASH ENTRY</span>
+            <span class="text-[9px] font-mono text-slate-500">Iteración 25</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-sans">Arranque visual homogéneo en Electron y web con fondo nativo #07090e.</p>
+          <div class="flex gap-2 pt-1">
+            <a href="entry-and-launch-architecture.svg" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver SVG</a>
+            <span class="text-slate-600">·</span>
+            <a href="entry-and-launch-redesign.html" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver Prototipo</a>
+          </div>
+        </div>
+
+        <!-- Module Card 26 -->
+        <div class="p-3.5 rounded-xl bg-hud-panel border border-hud-border space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-cyan-400">26. ECOSYSTEM ARCHITECTURE</span>
+            <span class="text-[9px] font-mono text-slate-500">Iteración 26</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-sans">Metodologías agénticas (ODD, RDD, EDD, TDD, SDD, CDD) mapeadas al código.</p>
+          <div class="flex gap-2 pt-1">
+            <a href="driven-developments-ecosystem-architecture.svg" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver SVG</a>
+            <span class="text-slate-600">·</span>
+            <a href="../driven-developments-guide.html" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver Guía Interactiva</a>
+          </div>
+        </div>
+
+        <!-- Module Card 27 -->
+        <div class="p-3.5 rounded-xl bg-hud-panel border border-hud-border space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-cyan-400">27. SYNTAX ENGINE</span>
+            <span class="text-[9px] font-mono text-slate-500">Iteración 27</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-sans">Tokenizador con lookahead contextual, operadores cian y constantes ámbar.</p>
+          <div class="flex gap-2 pt-1">
+            <a href="syntax-highlighter-engine-architecture.svg" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver SVG</a>
+            <span class="text-slate-600">·</span>
+            <a href="syntax-highlighter-engine-showcase.html" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver Showcase</a>
+          </div>
+        </div>
+
+        <!-- Module Card 28 -->
+        <div class="p-3.5 rounded-xl bg-hud-panel border border-hud-border space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-cyan-400">28. CHAT &amp; DECK HUD</span>
+            <span class="text-[9px] font-mono text-slate-500">Iteración 28</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-sans">Deck de sesión interactivo, recibos de rollback y onboarding táctico.</p>
+          <div class="flex gap-2 pt-1">
+            <a href="chat-and-session-hud-architecture.svg" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver SVG</a>
+            <span class="text-slate-600">·</span>
+            <a href="chat-and-session-hud-showcase.html" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver Showcase</a>
+          </div>
+        </div>
+
+        <!-- Module Card 29 -->
+        <div class="p-3.5 rounded-xl bg-hud-panel border border-hud-border space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-cyan-400">29. COMPOSER &amp; ACTION ENGINE</span>
+            <span class="text-[9px] font-mono text-slate-500">Iteración 29</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-sans">Dictado de voz WebAudio, cola con fotos/código y lanzador Squad.</p>
+          <div class="flex gap-2 pt-1">
+            <a href="composer-and-action-engine-architecture.svg" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver SVG</a>
+            <span class="text-slate-600">·</span>
+            <a href="composer-and-action-engine-showcase.html" class="text-[10px] font-mono text-cyan-300 hover:underline">Ver Showcase</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER CERTIFICATION -->
+    <footer class="p-6 rounded-2xl bg-hud-surface/90 border border-hud-border text-center space-y-2">
+      <div class="text-xs font-mono text-slate-400">
+        AGENT-HUB DESIGN SYSTEM // MASTER ARCHITECTURE SPECIFICATION CERTIFIED
+      </div>
+      <div class="text-[11px] font-mono text-cyan-400">
+        WCAG AA COMPLIANT · PALETTE: #07090e · #0a0e17 · #0c1220 · #202b3f · #06b6d4 · #10b981
+      </div>
+    </footer>
+
+  </div>
+
+  <div id="copyToast" class="fixed bottom-6 right-6 px-4 py-2 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-mono font-semibold shadow-xl transform translate-y-12 opacity-0 transition-all duration-200 pointer-events-none">
+    Copiado al portapapeles
+  </div>
+
+  <script>
+    function copyHex(hex) {
+      navigator.clipboard.writeText(hex);
+      const toast = document.getElementById('copyToast');
+      toast.textContent = 'Token ' + hex + ' copiado al portapapeles';
+      toast.classList.remove('translate-y-12', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-12', 'opacity-0');
+      }, 1500);
+    }
+  </script>
+</body>
+</html>

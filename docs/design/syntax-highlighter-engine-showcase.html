@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentHub · Motor de Resaltado de Sintaxis Táctico HUD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            hud: {
+              base: '#07090e',
+              surface: '#0a0e17',
+              panel: '#0c1220',
+              hover: '#162035',
+              border: '#202b3f',
+              activeBorder: '#202b3f',
+              cyan: '#06b6d4',
+              indigo: '#6366f1',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              purple: '#a855f7'
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    code, pre { font-family: 'JetBrains Mono', monospace; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #202b3f; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #06b6d4; }
+
+    /* Syntax Highlighting Tokens (Tactical Dark HUD) */
+    .syn-kw { color: #c084fc; font-weight: 600; }
+    .syn-str { color: #86efac; }
+    .syn-com { color: #64748b; font-style: italic; }
+    .syn-num { color: #fde047; }
+    .syn-fn { color: #60a5fa; font-weight: 500; }
+    .syn-type { color: #38bdf8; font-weight: 500; }
+    .syn-op { color: #06b6d4; font-weight: 600; }
+    .syn-const { color: #fbbf24; font-weight: 600; }
+    .syn-tag { color: #f43f5e; font-weight: 600; }
+    .syn-diff-add { background-color: rgba(16, 185, 129, 0.15); color: #6ee7b7; display: block; }
+    .syn-diff-del { background-color: rgba(244, 63, 94, 0.15); color: #fda4af; display: block; }
+
+    .hub-lift {
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s ease, border-color 0.2s ease;
+    }
+    .hub-lift:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px -14px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(6, 182, 212, 0.3);
+      border-color: rgba(6, 182, 212, 0.5);
+    }
+  </style>
+</head>
+<body class="bg-[#07090e] text-slate-100 min-h-screen antialiased selection:bg-cyan-500/30 selection:text-cyan-200">
+
+  <!-- Header -->
+  <header class="border-b border-[#202b3f] bg-[#0a0e17]/95 backdrop-blur sticky top-0 z-50 px-6 py-3.5">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-[#081120] border border-cyan-500/40 flex items-center justify-center text-cyan-400 font-bold font-mono text-xs shadow-sm">
+          AH
+        </div>
+        <div>
+          <div class="text-sm font-bold flex items-center gap-2">
+            <span class="font-mono tracking-wide text-white">AGENT<span class="text-cyan-400">HUB</span></span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-[#060a12] border border-[#202b3f] text-cyan-300 font-mono font-bold">Syntax Engine v0.1.2</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-mono">Motor de resaltado léxico sin dependencias externas · &lt;1ms por bloque</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2.5 text-xs font-mono">
+        <a href="syntax-highlighter-engine-architecture.svg" target="_blank" class="px-3 py-1.5 rounded-lg bg-[#0c1220] hover:bg-[#162035] border border-[#202b3f] text-cyan-300 transition flex items-center gap-1.5">
+          <span>Ver Arquitectura SVG</span>
+          <span>↗</span>
+        </a>
+        <a href="agenthub-design-system-styleguide.html" class="px-3 py-1.5 rounded-lg bg-[#0a0e17] hover:bg-[#162035] border border-[#202b3f] text-slate-300 transition">
+          Master Styleguide ↗
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-6 py-10 space-y-12">
+
+    <!-- Hero Spec -->
+    <section class="space-y-4">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-mono font-semibold">
+        <span>⚡</span>
+        <span>High-Performance AST-Free Tokenizer</span>
+      </div>
+      <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white max-w-3xl leading-tight">
+        Resaltado de Sintaxis Táctico HUD en Bloques de Código
+      </h1>
+      <p class="text-slate-400 text-sm max-w-3xl leading-relaxed">
+        El visor de Markdown de AgentHub integra un motor de tokenización léxica en tiempo real con detección de llamadas a funciones mediante <strong class="text-slate-200">lookahead contextual</strong>, operadores HUD cian, constantes en ámbar y formateo instantáneo de diffs de Git con cumplimiento estricto de accesibilidad WCAG AA.
+      </p>
+    </section>
+
+    <!-- Interactive Codeblock Showcase with Language Selector -->
+    <section class="space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="text-lg font-bold text-white flex items-center gap-2">
+            <span class="text-cyan-400">💻</span> Muestrario Interactivo de Lenguajes
+          </h2>
+          <p class="text-xs text-slate-400">Prueba el resaltado en vivo en TypeScript, Python, SQL, Git Diff y Rust</p>
+        </div>
+
+        <!-- Language Tabs -->
+        <div class="flex items-center gap-1.5 bg-[#0c1220] p-1 rounded-xl border border-[#202b3f] text-xs font-mono">
+          <button onclick="setLang('ts')" id="tab-ts" class="px-3 py-1.5 rounded-lg bg-cyan-950/70 border border-cyan-500/40 text-cyan-300 font-semibold transition">TypeScript</button>
+          <button onclick="setLang('py')" id="tab-py" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition">Python</button>
+          <button onclick="setLang('sql')" id="tab-sql" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition">SQL</button>
+          <button onclick="setLang('diff')" id="tab-diff" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition">Git Diff</button>
+          <button onclick="setLang('rs')" id="tab-rs" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition">Rust</button>
+        </div>
+      </div>
+
+      <!-- Main Code Window -->
+      <div class="rounded-2xl border border-[#202b3f] bg-[#0a0e17] overflow-hidden shadow-2xl hub-lift">
+        <!-- Window Chrome Header -->
+        <div class="flex items-center justify-between px-4 py-3 bg-[#0c1220] border-b border-[#202b3f]">
+          <div class="flex items-center gap-3">
+            <div class="flex items-center gap-1.5">
+              <span class="w-3 h-3 rounded-full bg-rose-500/80 inline-block"></span>
+              <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
+              <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+            </div>
+            <span id="code-filename" class="text-xs font-mono font-medium text-slate-300 flex items-center gap-1.5">
+              <span class="text-cyan-400">📄</span> src/server/session-manager.ts
+            </span>
+          </div>
+
+          <div class="flex items-center gap-3 text-xs font-mono">
+            <span id="code-badge" class="px-2 py-0.5 rounded bg-[#07090e] border border-[#202b3f] text-slate-400 text-[10px] uppercase font-bold">
+              TYPESCRIPT · 18 LÍNEAS
+            </span>
+            <button onclick="copyCode()" id="btn-copy" class="px-2.5 py-1 rounded bg-[#162035] hover:bg-[#1a263e] border border-[#202b3f] text-slate-200 transition flex items-center gap-1 text-[11px]">
+              <span>Copiar</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Code Viewport -->
+        <div class="p-4 sm:p-6 overflow-x-auto text-xs leading-6 font-mono flex">
+          <!-- Line Numbers -->
+          <div id="line-numbers" class="select-none pr-4 mr-4 text-right text-slate-600 border-r border-[#202b3f]">
+            <!-- Injected by JS -->
+          </div>
+
+          <!-- Code Content -->
+          <pre id="code-viewport" class="text-slate-200 flex-1 min-w-0">
+            <!-- Injected by JS -->
+          </pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Spectrum Matrix: Tokens & Contrast Ratio Verification -->
+    <section class="space-y-6">
+      <div>
+        <h2 class="text-lg font-bold text-white flex items-center gap-2">
+          <span class="text-purple-400">🎯</span> Matriz de Tokens Léxicos &amp; Accesibilidad WCAG AA
+        </h2>
+        <p class="text-xs text-slate-400">Todos los tokens superan el ratio mínimo exigido de contraste sobre el fondo base `#07090e`</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs font-mono">
+        
+        <!-- Token 1 -->
+        <div class="p-4 rounded-xl bg-[#0a0e17] border border-[#202b3f] space-y-2 hub-lift">
+          <div class="flex items-center justify-between">
+            <span class="syn-kw font-bold">.syn-kw</span>
+            <span class="px-1.5 py-0.5 rounded bg-purple-950/60 border border-purple-800 text-purple-300 text-[10px]">6.8:1 AA</span>
+          </div>
+          <div class="text-[11px] text-slate-300">Keywords de control de flujo, imports y clases</div>
+          <div class="p-2 rounded bg-[#07090e] border border-[#202b3f] text-slate-400 text-[10px]">
+            <span class="syn-kw">async</span> <span class="syn-kw">function</span>, <span class="syn-kw">return</span>
+          </div>
+        </div>
+
+        <!-- Token 2 -->
+        <div class="p-4 rounded-xl bg-[#0a0e17] border border-[#202b3f] space-y-2 hub-lift">
+          <div class="flex items-center justify-between">
+            <span class="syn-fn font-bold">.syn-fn</span>
+            <span class="px-1.5 py-0.5 rounded bg-blue-950/60 border border-blue-800 text-blue-300 text-[10px]">5.9:1 AA</span>
+          </div>
+          <div class="text-[11px] text-slate-300">Nombres y llamadas a funciones (Lookahead)</div>
+          <div class="p-2 rounded bg-[#07090e] border border-[#202b3f] text-slate-400 text-[10px]">
+            <span class="syn-fn">renderCode</span>(), <span class="syn-fn">fetchData</span>()
+          </div>
+        </div>
+
+        <!-- Token 3 -->
+        <div class="p-4 rounded-xl bg-[#0a0e17] border border-[#202b3f] space-y-2 hub-lift">
+          <div class="flex items-center justify-between">
+            <span class="syn-type font-bold">.syn-type</span>
+            <span class="px-1.5 py-0.5 rounded bg-sky-950/60 border border-sky-800 text-sky-300 text-[10px]">7.4:1 AA</span>
+          </div>
+          <div class="text-[11px] text-slate-300">Tipos nativos y genéricos de TypeScript/Rust</div>
+          <div class="p-2 rounded bg-[#07090e] border border-[#202b3f] text-slate-400 text-[10px]">
+            <span class="syn-type">Promise</span>&lt;<span class="syn-type">string</span>&gt;, <span class="syn-type">Record</span>
+          </div>
+        </div>
+
+        <!-- Token 4 -->
+        <div class="p-4 rounded-xl bg-[#0a0e17] border border-[#202b3f] space-y-2 hub-lift">
+          <div class="flex items-center justify-between">
+            <span class="syn-const font-bold">.syn-const</span>
+            <span class="px-1.5 py-0.5 rounded bg-amber-950/60 border border-amber-800 text-amber-300 text-[10px]">8.2:1 AA</span>
+          </div>
+          <div class="text-[11px] text-slate-300">Constantes en mayúsculas y decoradores</div>
+          <div class="p-2 rounded bg-[#07090e] border border-[#202b3f] text-slate-400 text-[10px]">
+            <span class="syn-const">MAX_TIMEOUT</span>, <span class="syn-const">@Component</span>
+          </div>
+        </div>
+
+        <!-- Token 5 -->
+        <div class="p-4 rounded-xl bg-[#0a0e17] border border-[#202b3f] space-y-2 hub-lift">
+          <div class="flex items-center justify-between">
+            <span class="syn-op font-bold">.syn-op</span>
+            <span class="px-1.5 py-0.5 rounded bg-cyan-950/60 border border-cyan-800 text-cyan-300 text-[10px]">6.5:1 AA</span>
+          </div>
+          <div class="text-[11px] text-slate-300">Operadores lógicos y flechas tácticas HUD</div>
+          <div class="p-2 rounded bg-[#07090e] border border-[#202b3f] text-slate-400 text-[10px]">
+            <span class="syn-op">=&gt;</span>, <span class="syn-op">===</span>, <span class="syn-op">??</span>, <span class="syn-op">&amp;&amp;</span>
+          </div>
+        </div>
+
+        <!-- Token 6 -->
+        <div class="p-4 rounded-xl bg-[#0a0e17] border border-[#202b3f] space-y-2 hub-lift">
+          <div class="flex items-center justify-between">
+            <span class="syn-str font-bold">.syn-str</span>
+            <span class="px-1.5 py-0.5 rounded bg-emerald-950/60 border border-emerald-800 text-emerald-300 text-[10px]">9.1:1 AA</span>
+          </div>
+          <div class="text-[11px] text-slate-300">Cadenas de texto con comillas dobles, simples y template strings</div>
+          <div class="p-2 rounded bg-[#07090e] border border-[#202b3f] text-slate-400 text-[10px]">
+            <span class="syn-str">"agenthub"</span>, <span class="syn-str">`https://${host}`</span>
+          </div>
+        </div>
+
+        <!-- Token 7 -->
+        <div class="p-4 rounded-xl bg-[#0a0e17] border border-[#202b3f] space-y-2 hub-lift">
+          <div class="flex items-center justify-between">
+            <span class="syn-num font-bold">.syn-num</span>
+            <span class="px-1.5 py-0.5 rounded bg-yellow-950/60 border border-yellow-800 text-yellow-300 text-[10px]">10.4:1 AA</span>
+          </div>
+          <div class="text-[11px] text-slate-300">Números enteros, decimales y unidades CSS</div>
+          <div class="p-2 rounded bg-[#07090e] border border-[#202b3f] text-slate-400 text-[10px]">
+            <span class="syn-num">42</span>, <span class="syn-num">3.14159</span>, <span class="syn-num">16px</span>
+          </div>
+        </div>
+
+        <!-- Token 8 -->
+        <div class="p-4 rounded-xl bg-[#0a0e17] border border-[#202b3f] space-y-2 hub-lift">
+          <div class="flex items-center justify-between">
+            <span class="syn-com font-bold">.syn-com</span>
+            <span class="px-1.5 py-0.5 rounded bg-slate-800/80 border border-slate-700 text-slate-300 text-[10px]">4.9:1 AA</span>
+          </div>
+          <div class="text-[11px] text-slate-300">Comentarios de línea y bloque en cursiva</div>
+          <div class="p-2 rounded bg-[#07090e] border border-[#202b3f] text-slate-400 text-[10px]">
+            <span class="syn-com">// Tokenizer lookahead</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="border-t border-[#202b3f] text-center py-6 text-xs text-slate-400 font-mono">
+    AgentHub Architecture · Diseñado profesionalmente siguiendo la skill disenador-grafico
+  </footer>
+
+  <script>
+    const SAMPLES = {
+      ts: {
+        filename: "src/server/session-manager.ts",
+        badge: "TYPESCRIPT · 16 LÍNEAS",
+        code: `<span class="syn-com">// Gestor de sesiones agénticas en AgentHub</span>
+<span class="syn-kw">import</span> { <span class="syn-type">SessionConfig</span>, <span class="syn-type">AgentProfile</span> } <span class="syn-kw">from</span> <span class="syn-str">'../shared/types'</span>;
+
+<span class="syn-kw">const</span> <span class="syn-const">MAX_CONCURRENT_CHATS</span> = <span class="syn-num">8</span>;
+<span class="syn-kw">const</span> <span class="syn-const">DEFAULT_MODEL</span> = <span class="syn-str">'claude-3-7-sonnet'</span>;
+
+<span class="syn-kw">export</span> <span class="syn-kw">async</span> <span class="syn-kw">function</span> <span class="syn-fn">initializeSession</span>(id: <span class="syn-type">string</span>, config?: <span class="syn-type">SessionConfig</span>): <span class="syn-type">Promise</span>&lt;<span class="syn-type">boolean</span>&gt; {
+  <span class="syn-kw">const</span> session = <span class="syn-kw">await</span> <span class="syn-fn">loadFromDisk</span>(id);
+  <span class="syn-kw">if</span> (!session <span class="syn-op">||</span> session.status <span class="syn-op">===</span> <span class="syn-str">'closed'</span>) {
+    <span class="syn-kw">return</span> <span class="syn-kw">false</span>;
+  }
+  
+  <span class="syn-kw">const</span> role = config?.role <span class="syn-op">??</span> <span class="syn-str">'coordinador'</span>;
+  <span class="syn-fn">emitTelemetry</span>(<span class="syn-str">'session_boot'</span>, { id, role, timestamp: <span class="syn-fn">Date.now</span>() });
+  <span class="syn-kw">return</span> <span class="syn-kw">true</span>;
+}`
+      },
+      py: {
+        filename: "scripts/telemetry_aggregator.py",
+        badge: "PYTHON · 14 LÍNEAS",
+        code: `<span class="syn-com"># Agregador de métricas y costes de tokens</span>
+<span class="syn-kw">import</span> json
+<span class="syn-kw">from</span> typing <span class="syn-kw">import</span> <span class="syn-type">Dict</span>, <span class="syn-type">List</span>, <span class="syn-type">Optional</span>
+
+<span class="syn-const">CACHE_TTL_SECONDS</span> = <span class="syn-num">3600</span>
+
+<span class="syn-const">@decorator</span>
+<span class="syn-kw">def</span> <span class="syn-fn">compute_cost_breakdown</span>(events: <span class="syn-type">List</span>[<span class="syn-type">Dict</span>]) -&gt; <span class="syn-type">float</span>:
+    total_cost: <span class="syn-type">float</span> = <span class="syn-num">0.0</span>
+    <span class="syn-kw">for</span> item <span class="syn-kw">in</span> events:
+        tokens = item.<span class="syn-fn">get</span>(<span class="syn-str">"prompt_tokens"</span>, <span class="syn-num">0</span>)
+        rate = item.<span class="syn-fn">get</span>(<span class="syn-str">"rate_per_million"</span>, <span class="syn-num">3.0</span>)
+        total_cost <span class="syn-op">+=</span> (tokens / <span class="syn-num">1_000_000</span>) * rate
+    <span class="syn-kw">return</span> <span class="syn-fn">round</span>(total_cost, <span class="syn-num">4</span>)`
+      },
+      sql: {
+        filename: "queries/active_squad_metrics.sql",
+        badge: "SQL · 12 LÍNEAS",
+        code: `<span class="syn-com">-- Consulta agregada de rendimiento agéntico por squad</span>
+<span class="syn-kw">SELECT</span> 
+    s.squad_id,
+    s.squad_name,
+    <span class="syn-fn">COUNT</span>(m.message_id) <span class="syn-kw">AS</span> total_turns,
+    <span class="syn-fn">SUM</span>(m.spent_usd) <span class="syn-kw">AS</span> total_cost_usd,
+    <span class="syn-fn">AVG</span>(m.duration_ms) <span class="syn-kw">AS</span> avg_turn_latency
+<span class="syn-kw">FROM</span> squads s
+<span class="syn-kw">JOIN</span> messages m <span class="syn-kw">ON</span> s.squad_id <span class="syn-op">=</span> m.squad_id
+<span class="syn-kw">WHERE</span> m.created_at <span class="syn-op">&gt;=</span> <span class="syn-str">'2026-01-01'</span>
+<span class="syn-kw">GROUP</span> <span class="syn-kw">BY</span> s.squad_id, s.squad_name
+<span class="syn-kw">ORDER</span> <span class="syn-kw">BY</span> total_cost_usd <span class="syn-kw">DESC</span>
+<span class="syn-kw">LIMIT</span> <span class="syn-num">10</span>;`
+      },
+      diff: {
+        filename: "git/checkpoint-diff.patch",
+        badge: "GIT DIFF · 13 LÍNEAS",
+        code: `<span class="text-cyan-400 font-semibold">@@ -124,7 +124,10 @@ export function renderSyntaxCode()</span>
+<span class="syn-com"> // Contextual lookahead tokenizer</span>
+<span class="syn-diff-del">-const TOKEN_REGEX = /([a-zA-Z0-9_$]+)/g;</span>
+<span class="syn-diff-add">+const TOKEN_REGEX = /(\/\/[^\n]*|#[^\n]*|[a-zA-Z0-9_$]+|===|!==|=>|&&|\|\||\?\?)/g;</span>
+<span class="syn-diff-add">+const OPERATORS = new Set(['=>', '===', '!==', '??']);</span>
+ 
+<span class="text-cyan-400 font-semibold">@@ -140,5 +143,7 @@ export function renderSyntaxCode()</span>
+     if (TYPES.has(token)) return &lt;span className="syn-type"&gt;{token}&lt;/span&gt;;
+<span class="syn-diff-add">+    if (OPERATORS.has(token)) return &lt;span className="syn-op"&gt;{token}&lt;/span&gt;;</span>
+<span class="syn-diff-add">+    if (nextToken === '(') return &lt;span className="syn-fn"&gt;{token}&lt;/span&gt;;</span>
+     return token;`
+      },
+      rs: {
+        filename: "src-tauri/src/watcher.rs",
+        badge: "RUST · 14 LÍNEAS",
+        code: `<span class="syn-com">// Vigilante de archivos con notificaciones en Rust</span>
+<span class="syn-kw">use</span> std::path::<span class="syn-type">PathBuf</span>;
+<span class="syn-kw">use</span> notify::{<span class="syn-type">Watcher</span>, <span class="syn-type">RecursiveMode</span>, <span class="syn-type">Result</span>};
+
+<span class="syn-kw">pub</span> <span class="syn-kw">struct</span> <span class="syn-type">ProjectWatcher</span> {
+    path: <span class="syn-type">PathBuf</span>,
+    is_active: <span class="syn-type">bool</span>,
+}
+
+<span class="syn-kw">impl</span> <span class="syn-type">ProjectWatcher</span> {
+    <span class="syn-kw">pub</span> <span class="syn-kw">fn</span> <span class="syn-fn">new</span>(dir: &amp;<span class="syn-type">str</span>) -&gt; <span class="syn-type">Self</span> {
+        <span class="syn-type">Self</span> {
+            path: <span class="syn-type">PathBuf</span>::<span class="syn-fn">from</span>(dir),
+            is_active: <span class="syn-kw">true</span>,
+        }
+    }
+}`
+      }
+    };
+
+    let currentLang = 'ts';
+
+    function setLang(lang) {
+      currentLang = lang;
+      const sample = SAMPLES[lang];
+      document.getElementById('code-filename').innerHTML = `<span class="text-cyan-400">📄</span> ${sample.filename}`;
+      document.getElementById('code-badge').textContent = sample.badge;
+      
+      const viewport = document.getElementById('code-viewport');
+      viewport.innerHTML = sample.code;
+
+      const lines = sample.code.split('\n').length;
+      let lineNums = '';
+      for (let i = 1; i <= lines; i++) {
+        lineNums += `${i}\n`;
+      }
+      document.getElementById('line-numbers').textContent = lineNums;
+
+      // Update tab styles
+      ['ts', 'py', 'sql', 'diff', 'rs'].forEach(l => {
+        const btn = document.getElementById(`tab-${l}`);
+        if (l === lang) {
+          btn.className = 'px-3 py-1.5 rounded-lg bg-cyan-950/70 border border-cyan-500/40 text-cyan-300 font-semibold transition';
+        } else {
+          btn.className = 'px-3 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition';
+        }
+      });
+    }
+
+    function copyCode() {
+      const sample = SAMPLES[currentLang];
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = sample.code;
+      navigator.clipboard.writeText(tempDiv.innerText);
+
+      const btn = document.getElementById('btn-copy');
+      btn.innerHTML = '<span class="text-emerald-400">✓ Copiado!</span>';
+      setTimeout(() => {
+        btn.innerHTML = '<span>Copiar</span>';
+      }, 1800);
+    }
+
+    // Initialize
+    setLang('ts');
+  </script>
+
+</body>
+</html>

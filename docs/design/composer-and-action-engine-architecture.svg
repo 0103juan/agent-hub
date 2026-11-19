@@ -1,0 +1,306 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720" fill="none">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bg" x1="0" y1="0" x2="1280" y2="720" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#07090e" />
+      <stop offset="50%" stop-color="#0a0e17" />
+      <stop offset="100%" stop-color="#0c1220" />
+    </linearGradient>
+
+    <!-- Radial Glows -->
+    <radialGradient id="cyan-glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(240, 200) rotate(45) scale(380)">
+      <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.14" />
+      <stop offset="100%" stop-color="#06b6d4" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="purple-glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1040, 500) rotate(45) scale(380)">
+      <stop offset="0%" stop-color="#a855f7" stop-opacity="0.12" />
+      <stop offset="100%" stop-color="#a855f7" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Drop Shadow Filter -->
+    <filter id="card-shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.75" />
+    </filter>
+    <filter id="neon" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <!-- Grid Pattern -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#202b3f" stroke-width="0.5" stroke-opacity="0.5" />
+      <circle cx="40" cy="40" r="1" fill="#06b6d4" fill-opacity="0.25" />
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1280" height="720" fill="url(#bg)" />
+  <rect width="1280" height="720" fill="url(#cyan-glow)" />
+  <rect width="1280" height="720" fill="url(#purple-glow)" />
+  <rect width="1280" height="720" fill="url(#grid)" />
+
+  <!-- Outer HUD Frame -->
+  <rect x="24" y="24" width="1232" height="672" rx="16" stroke="#202b3f" stroke-width="1.5" />
+  <path d="M 24 64 L 1256 64" stroke="#202b3f" stroke-width="1" />
+  <path d="M 24 656 L 1256 656" stroke="#202b3f" stroke-width="1" />
+
+  <!-- Corner Brackets -->
+  <path d="M 24 44 L 44 24" stroke="#06b6d4" stroke-width="2" />
+  <path d="M 1256 44 L 1236 24" stroke="#06b6d4" stroke-width="2" />
+  <path d="M 24 636 L 44 656" stroke="#06b6d4" stroke-width="2" />
+  <path d="M 1256 636 L 1236 656" stroke="#06b6d4" stroke-width="2" />
+
+  <!-- Header -->
+  <g transform="translate(48, 44)">
+    <circle cx="6" cy="0" r="4" fill="#06b6d4" filter="url(#neon)" />
+    <text x="20" y="4" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="700" fill="#06b6d4" letter-spacing="1.5">AGENTHUB HUD CORE // COMPOSER &amp; ACTION ENGINE ARCHITECTURE</text>
+    <text x="940" y="4" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="500" fill="#94a3b8">Voice Audio WebAPI · Multi-Attachment Queue · Flow Launcher</text>
+  </g>
+
+  <!-- 3-Column Layout -->
+
+  <!-- COLUMN 1: Voice Recording & Enriched Queue -->
+  <g transform="translate(56, 92)" filter="url(#card-shadow)">
+    <rect width="360" height="536" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.5" />
+    <rect width="360" height="42" rx="14" fill="#0c1220" />
+    <path d="M 0 42 L 360 42" stroke="#202b3f" stroke-width="1" />
+    
+    <circle cx="24" cy="21" r="5" fill="#f43f5e" />
+    <text x="40" y="25" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="#f1f5f9">1. Voz Nativa &amp; Cola con Adjuntos</text>
+
+    <!-- Card Body -->
+    <g transform="translate(20, 60)">
+      <text x="0" y="16" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600" fill="#94a3b8">Captura de audio y buffer de turnos:</text>
+
+      <!-- Voice Recording Banner Mockup -->
+      <g transform="translate(0, 28)">
+        <rect width="320" height="56" rx="10" fill="#07090e" stroke="#f43f5e" stroke-opacity="0.4" stroke-width="1" />
+        <circle cx="22" cy="28" r="6" fill="#f43f5e" />
+        <text x="36" y="24" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#f43f5e">Grabando voz (0:14)</text>
+        <text x="36" y="42" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" fill="#94a3b8">Habla con naturalidad · Web Audio API</text>
+        
+        <rect x="240" y="14" width="66" height="28" rx="6" fill="#10b981" />
+        <text x="273" y="32" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#ffffff">Listo ✓</text>
+      </g>
+
+      <!-- Enriched Queue Card -->
+      <g transform="translate(0, 98)">
+        <rect width="320" height="240" rx="10" fill="#07090e" stroke="#202b3f" stroke-width="1" />
+        
+        <!-- Queue Header -->
+        <g transform="translate(14, 18)">
+          <text x="0" y="12" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#fbbf24">Cola Activa (2 mensajes)</text>
+          <text x="290" y="12" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="10" fill="#64748b">Auto-drain</text>
+        </g>
+
+        <!-- Queue Item 1 with Attachments -->
+        <g transform="translate(14, 38)">
+          <rect width="292" height="82" rx="8" fill="#0a0e17" stroke="#202b3f" stroke-width="1" />
+          <text x="12" y="20" font-family="'JetBrains Mono', monospace" font-size="10" fill="#fbbf24">#1</text>
+          <text x="36" y="20" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="600" fill="#f1f5f9">Mejora el footer y los tests</text>
+          
+          <!-- Attachment Chips -->
+          <g transform="translate(12, 34)">
+            <rect width="120" height="22" rx="4" fill="#07090e" stroke="#202b3f" stroke-width="1" />
+            <text x="10" y="15" font-family="'JetBrains Mono', monospace" font-size="9.5" fill="#38bdf8">🖼️ captura.png</text>
+
+            <rect x="128" width="130" height="22" rx="4" fill="#07090e" stroke="#202b3f" stroke-width="1" />
+            <text x="138" y="15" font-family="'JetBrains Mono', monospace" font-size="9.5" fill="#38bdf8">📄 flows.test.ts</text>
+          </g>
+
+          <text x="12" y="72" font-family="'JetBrains Mono', monospace" font-size="9" fill="#10b981">✓ Listo para procesar al terminar</text>
+        </g>
+
+        <!-- Queue Item 2 -->
+        <g transform="translate(14, 130)">
+          <rect width="292" height="48" rx="8" fill="#0a0e17" stroke="#202b3f" stroke-width="1" />
+          <text x="12" y="20" font-family="'JetBrains Mono', monospace" font-size="10" fill="#fbbf24">#2</text>
+          <text x="36" y="20" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="600" fill="#f1f5f9">Genera reporte de tokens y coste</text>
+          <text x="12" y="38" font-family="'JetBrains Mono', monospace" font-size="9" fill="#64748b">En espera de turno previo...</text>
+        </g>
+
+        <!-- Resume Button -->
+        <g transform="translate(14, 190)">
+          <rect width="292" height="34" rx="8" fill="#0c1220" stroke="#06b6d4" stroke-opacity="0.4" stroke-width="1" />
+          <text x="146" y="22" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#06b6d4">Reanudar cola de ejecución ↵</text>
+        </g>
+      </g>
+
+      <!-- Key Engineering Notes -->
+      <g transform="translate(0, 350)">
+        <rect width="320" height="106" rx="10" fill="#08101a" stroke="#06b6d4" stroke-opacity="0.3" stroke-width="1" />
+        <text x="14" y="22" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#06b6d4">Resiliencia y Concurrencia</text>
+        <text x="14" y="44" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" fill="#cbd5e1">· Auto-drain en background sin bloquear UI.</text>
+        <text x="14" y="64" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" fill="#cbd5e1">· Miniaturas de imágenes cacheadas localmente.</text>
+        <text x="14" y="84" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" fill="#cbd5e1">· Cero pérdida de attachments en cola.</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- COLUMN 2: Slash Commands & Action Palette Engine -->
+  <g transform="translate(446, 92)" filter="url(#card-shadow)">
+    <rect width="388" height="536" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.5" />
+    <rect width="388" height="42" rx="14" fill="#0c1220" />
+    <path d="M 0 42 L 388 42" stroke="#202b3f" stroke-width="1" />
+    
+    <circle cx="24" cy="21" r="5" fill="#06b6d4" />
+    <text x="40" y="25" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="#f1f5f9">2. Slash Commands &amp; Paleta Rápida</text>
+
+    <!-- Card Body -->
+    <g transform="translate(20, 60)">
+      <text x="0" y="16" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600" fill="#94a3b8">Atajos conversacionales y comandos rápidos:</text>
+
+      <!-- Slash Dropdown Mockup -->
+      <g transform="translate(0, 28)">
+        <rect width="348" height="216" rx="10" fill="#07090e" stroke="#202b3f" stroke-width="1" />
+        
+        <!-- Command 1: /goal -->
+        <g transform="translate(10, 10)">
+          <rect width="328" height="38" rx="6" fill="#0a0e17" stroke="#06b6d4" stroke-opacity="0.4" stroke-width="1" />
+          <text x="12" y="24" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#06b6d4">/goal</text>
+          <text x="80" y="24" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" fill="#cbd5e1">Ejecutar tarea larga autónoma sin parar</text>
+        </g>
+
+        <!-- Command 2: /plan -->
+        <g transform="translate(10, 52)">
+          <rect width="328" height="38" rx="6" fill="#0c1220" stroke="#202b3f" stroke-width="1" />
+          <text x="12" y="24" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#c084fc">/plan</text>
+          <text x="80" y="24" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" fill="#cbd5e1">Plan paso a paso antes de tocar código</text>
+        </g>
+
+        <!-- Command 3: /audit -->
+        <g transform="translate(10, 94)">
+          <rect width="328" height="38" rx="6" fill="#0c1220" stroke="#202b3f" stroke-width="1" />
+          <text x="12" y="24" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#10b981">/audit</text>
+          <text x="80" y="24" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" fill="#cbd5e1">Auditar rama actual vs main</text>
+        </g>
+
+        <!-- Command 4: /compact -->
+        <g transform="translate(10, 136)">
+          <rect width="328" height="38" rx="6" fill="#0c1220" stroke="#202b3f" stroke-width="1" />
+          <text x="12" y="24" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#fbbf24">/compact</text>
+          <text x="80" y="24" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" fill="#cbd5e1">Resumir contexto para liberar tokens</text>
+        </g>
+
+        <!-- Footer -->
+        <g transform="translate(12, 196)">
+          <text x="0" y="10" font-family="'JetBrains Mono', monospace" font-size="10" fill="#64748b">Navega con flechas ↑↓ y pulsa Enter para aplicar</text>
+        </g>
+      </g>
+
+      <!-- Action Palette Trigger Card -->
+      <g transform="translate(0, 260)">
+        <rect width="348" height="196" rx="10" fill="#07090e" stroke="#202b3f" stroke-width="1" />
+        <text x="14" y="24" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#06b6d4">Paleta de Acciones Rápidas (Ctrl+K)</text>
+        
+        <g transform="translate(14, 38)">
+          <!-- Action Grid -->
+          <rect width="154" height="42" rx="6" fill="#0a0e17" stroke="#202b3f" stroke-width="1" />
+          <text x="10" y="20" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#10b981">🧪 Correr Tests</text>
+          <text x="10" y="34" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" fill="#94a3b8">npm run test:flows</text>
+
+          <rect x="162" width="154" height="42" rx="6" fill="#0a0e17" stroke="#202b3f" stroke-width="1" />
+          <text x="172" y="20" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#06b6d4">⚡ Compilar Webview</text>
+          <text x="172" y="34" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" fill="#94a3b8">npm run build:webview</text>
+
+          <rect y="48" width="154" height="42" rx="6" fill="#0a0e17" stroke="#202b3f" stroke-width="1" />
+          <text x="10" y="68" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#f59e0b">🛡️ Escanear Secretos</text>
+          <text x="10" y="82" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" fill="#94a3b8">Auditoría preventiva</text>
+
+          <rect x="162" y="48" width="154" height="42" rx="6" fill="#0a0e17" stroke="#202b3f" stroke-width="1" />
+          <text x="172" y="68" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#c084fc">📐 Diff Interactivo</text>
+          <text x="172" y="82" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" fill="#94a3b8">git diff inspección</text>
+        </g>
+
+        <!-- Kbd footer -->
+        <g transform="translate(14, 168)">
+          <text x="0" y="10" font-family="'JetBrains Mono', monospace" font-size="10" fill="#64748b">Filtros por categoría: git, tests, ai, docs</text>
+        </g>
+      </g>
+    </g>
+  </g>
+
+  <!-- COLUMN 3: Flow Template & Squad Launcher -->
+  <g transform="translate(864, 92)" filter="url(#card-shadow)">
+    <rect width="360" height="536" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.5" />
+    <rect width="360" height="42" rx="14" fill="#0c1220" />
+    <path d="M 0 42 L 360 42" stroke="#202b3f" stroke-width="1" />
+    
+    <circle cx="24" cy="21" r="5" fill="#a855f7" />
+    <text x="40" y="25" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="#f1f5f9">3. Lanzador de Metodologías Squad</text>
+
+    <!-- Card Body -->
+    <g transform="translate(20, 60)">
+      <text x="0" y="16" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600" fill="#94a3b8">Orquestación de pipelines agénticos:</text>
+
+      <!-- Flow Selector Card -->
+      <g transform="translate(0, 28)">
+        <rect width="320" height="236" rx="10" fill="#07090e" stroke="#202b3f" stroke-width="1" />
+        
+        <g transform="translate(14, 16)">
+          <text x="0" y="12" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#a855f7">Metodología ODD (Gentleman)</text>
+          
+          <!-- Stepper Diagram -->
+          <g transform="translate(0, 28)">
+            <rect width="64" height="26" rx="5" fill="#0c1220" stroke="#06b6d4" stroke-width="1" />
+            <text x="32" y="17" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" fill="#06b6d4">Explora</text>
+            
+            <text x="74" y="17" font-family="'JetBrains Mono', monospace" font-size="12" fill="#64748b">→</text>
+
+            <rect x="88" width="64" height="26" rx="5" fill="#0c1220" stroke="#c084fc" stroke-width="1" />
+            <text x="120" y="17" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" fill="#c084fc">Coordina</text>
+
+            <text x="162" y="17" font-family="'JetBrains Mono', monospace" font-size="12" fill="#64748b">→</text>
+
+            <rect x="176" width="60" height="26" rx="5" fill="#0c1220" stroke="#10b981" stroke-width="1" />
+            <text x="206" y="17" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" fill="#10b981">Desarrolla</text>
+
+            <text x="246" y="17" font-family="'JetBrains Mono', monospace" font-size="12" fill="#64748b">→</text>
+
+            <rect x="258" width="50" height="26" rx="5" fill="#0c1220" stroke="#38bdf8" stroke-width="1" />
+            <text x="283" y="17" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" fill="#38bdf8">Revisa</text>
+          </g>
+
+          <!-- Safety Toggles -->
+          <g transform="translate(0, 72)">
+            <rect width="292" height="42" rx="6" fill="#0a0e17" stroke="#202b3f" stroke-width="1" />
+            <text x="10" y="18" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#f1f5f9">☑ Copia aislada (Worktree Git)</text>
+            <text x="10" y="32" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" fill="#94a3b8">Rama y carpeta propias, fusión segura al final.</text>
+
+            <rect y="48" width="292" height="42" rx="6" fill="#0a0e17" stroke="#202b3f" stroke-width="1" />
+            <text x="10" y="66" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#f1f5f9">☑ Aprobar cada traspaso (HITL)</text>
+            <text x="10" y="80" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" fill="#94a3b8">El equipo se detiene entre agentes hasta tu OK.</text>
+          </g>
+
+          <!-- Launch Button -->
+          <g transform="translate(0, 172)">
+            <rect width="292" height="34" rx="8" fill="#a855f7" />
+            <text x="146" y="22" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#ffffff">Lanzar Equipo ODD →</text>
+          </g>
+        </g>
+      </g>
+
+      <!-- Architecture Summary -->
+      <g transform="translate(0, 280)">
+        <rect width="320" height="176" rx="10" fill="#08101a" stroke="#a855f7" stroke-opacity="0.3" stroke-width="1" />
+        <text x="14" y="24" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#c084fc">Pipeline Agéntico Escalable</text>
+        <text x="14" y="48" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" fill="#cbd5e1">· Inyección de contexto ODD por turnos.</text>
+        <text x="14" y="70" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" fill="#cbd5e1">· Protocolo de roles especializado.</text>
+        <text x="14" y="92" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" fill="#cbd5e1">· Auditoría cruzada RDD antes del commit.</text>
+        <text x="14" y="114" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" fill="#cbd5e1">· Recibos inmutables en memoria persistente.</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Footer Info Bar -->
+  <g transform="translate(48, 672)">
+    <circle cx="6" cy="0" r="3.5" fill="#10b981" />
+    <text x="18" y="3.5" font-family="'JetBrains Mono', monospace" font-size="11" fill="#94a3b8">Status: <tspan fill="#10b981" font-weight="600">Production Unified · 100% Tactical HUD Synchronized</tspan></text>
+    <text x="560" y="3.5" font-family="'JetBrains Mono', monospace" font-size="11" fill="#64748b">|</text>
+    <text x="580" y="3.5" font-family="'JetBrains Mono', monospace" font-size="11" fill="#94a3b8">Components: <tspan fill="#cbd5e1">Composer.tsx, ActionPalette.tsx &amp; ModelAccountBar.tsx</tspan></text>
+    <text x="960" y="3.5" font-family="'JetBrains Mono', monospace" font-size="11" fill="#64748b">Tactical Dark HUD v0.1.2</text>
+  </g>
+</svg>

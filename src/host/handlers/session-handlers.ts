@@ -10,15 +10,23 @@ import { recommendedFor, resolveSelection } from '../../shared/model-selection';
 import { searchSessions } from '../../shared/session-search';
 import { DEFAULT_LOOP_INSTRUCTION, LoopConfig, ProtocolRole } from '../../shared/types';
 import { PROTOCOL_ROLES } from '../../shared/protocol-roles';
+import { flowNameFrom, sessionTitle } from '../../shared/flows';
 import { templateById } from '../../shared/team-templates';
 import { HubContext } from '../hub-context';
-import { isInsideWorkspace } from '../safe-path';
-import { workspaceDir } from '../workspace';
+import { isInsideWorkspace, isSystemOrAppDir } from '../safe-path';
+import { getRecentWorkspaces, workspaceDir, workspaceDirOrHome } from '../workspace';
 import { HandlerMap } from './handler-types';
 
 /** Carpeta de un equipo: una copia aparte (git worktree) si se pide y se puede, si no la del proyecto. */
 function squadLocation(hub: HubContext, name: string | undefined, folder: string | undefined, squad: string, isolate: boolean | undefined) {
-  const base = (name && hub.sessions.projectPath(name)) || folder;
+  let base = (name && hub.sessions.projectPath(name)) || folder;
+  if (!base || isSystemOrAppDir(base) || !fs.existsSync(base)) {
+    const active = hub.sessions.getActive();
+    base = (active?.projectPath && !isSystemOrAppDir(active.projectPath) && fs.existsSync(active.projectPath) ? (active.isolatedBase ?? active.projectPath) : undefined)
+      ?? (active?.projectName && hub.sessions.projectPath(active.projectName))
+      ?? workspaceDir()
+      ?? os.homedir();
+  }
   const worktree = isolate && base ? createSquadWorktree(base, squad) : undefined;
   if (isolate && !worktree) {
     hub.chat.addNote(
@@ -63,13 +71,18 @@ export function sessionHandlers(hub: HubContext): HandlerMap<
 
     createSession: ({ projectName, taskSlug, protocolRole }) => {
       const current = hub.sessions.getActive();
-      const folder = workspaceDir();
+      const folder = (projectName && hub.sessions.projectPath(projectName))
+        ?? (current?.projectPath && !isSystemOrAppDir(current.projectPath) && fs.existsSync(current.projectPath) ? (current.isolatedBase ?? current.projectPath) : undefined)
+        ?? (current?.projectName && hub.sessions.projectPath(current.projectName))
+        ?? workspaceDir()
+        ?? os.homedir();
+      const name = projectName ?? current?.projectName ?? (folder && path.basename(folder));
       hub.sessions.create({
         profileId: current.profileId,
         modelId: current.modelId,
         effort: current.effort,
-        projectName: projectName ?? (folder && path.basename(folder)),
-        projectPath: (projectName && hub.sessions.projectPath(projectName)) || folder,
+        projectName: name,
+        projectPath: (name && hub.sessions.projectPath(name)) || folder,
         taskSlug,
         protocolRole
       });
@@ -107,12 +120,17 @@ export function sessionHandlers(hub: HubContext): HandlerMap<
       hub.chat.publishSessions();
     },
 
-    spawnAgents: async ({ projectName, roles, prompt, isolate }) => {
+    spawnAgents: async ({ projectName, roles, prompt, isolate, flowName }) => {
       const current = hub.sessions.getActive();
       const account = (await hub.providers.listAccounts()).find((candidate) => candidate.id === current.profileId);
-      const folder = workspaceDir();
-      const name = projectName ?? (folder && path.basename(folder));
+      const folder = (projectName && hub.sessions.projectPath(projectName))
+        ?? (current?.projectPath && !isSystemOrAppDir(current.projectPath) && fs.existsSync(current.projectPath) ? (current.isolatedBase ?? current.projectPath) : undefined)
+        ?? (current?.projectName && hub.sessions.projectPath(current.projectName))
+        ?? workspaceDir()
+        ?? os.homedir();
+      const name = projectName ?? current?.projectName ?? (folder && path.basename(folder));
       const squad = `squad-${Date.now()}`;
+      const squadName = flowName?.trim() || flowNameFrom(prompt, `Equipo de ${name ?? 'proyecto'}`);
       const seen: Record<string, number> = {};
       const location = squadLocation(hub, name, folder, squad, isolate);
       const created = roles.map((role) => {
@@ -126,8 +144,10 @@ export function sessionHandlers(hub: HubContext): HandlerMap<
           projectName: name,
           ...location,
           taskSlug: `${base}-${seen[base]}`,
+          title: sessionTitle(role, squadName),
           protocolRole: role,
-          squad
+          squad,
+          squadName
         });
       });
       hub.sessions.setActive(current.id);
@@ -229,18 +249,23 @@ export function sessionHandlers(hub: HubContext): HandlerMap<
       await hub.chat.failover(sessionId, targetProvider);
     },
 
-    startPipeline: async ({ projectName, prompt: rawPrompt, requireApproval, template, isolate }) => {
-      const current = hub.sessions.getActive();
-      const folder = workspaceDir();
+    startPipeline: async ({ sessionId, projectName, prompt: rawPrompt, requireApproval, template, isolate }: { sessionId?: string; projectName?: string; prompt: string; requireApproval?: boolean; template?: string; isolate?: boolean }) => {
+      const current = (sessionId && hub.sessions.get(sessionId)) ?? hub.sessions.getActive();
+      const folder = (projectName && hub.sessions.projectPath(projectName))
+        ?? (current?.projectPath && !isSystemOrAppDir(current.projectPath) && fs.existsSync(current.projectPath) ? (current.isolatedBase ?? current.projectPath) : undefined)
+        ?? (current?.projectName && hub.sessions.projectPath(current.projectName))
+        ?? workspaceDir()
+        ?? os.homedir();
       // `#123` trae la issue o el PR como requerimiento.
-      const prompt = await resolveRequirement(rawPrompt, folder ?? process.cwd());
-      const name = projectName ?? (folder && path.basename(folder));
+      const prompt = await resolveRequirement(rawPrompt, folder);
+      const name = projectName ?? current?.projectName ?? (folder && path.basename(folder));
       const squad = `pipeline-${Date.now()}`;
       const accounts = await hub.providers.listAccounts();
       const account = accounts.find((a) => a.id === current.profileId) ?? accounts.find((a) => a.status === 'connected');
 
       const chosenTemplate = templateById(template);
       const pipelineRoles = chosenTemplate.roles;
+      const squadName = flowNameFrom(prompt, chosenTemplate.label);
       const slug = prompt.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || `pipeline-${Date.now()}`;
       const specPath = `docs/specs/${slug}.md`;
       const location = squadLocation(hub, name, folder, squad, isolate);
@@ -253,10 +278,12 @@ export function sessionHandlers(hub: HubContext): HandlerMap<
           projectName: name,
           ...location,
           taskSlug: `${role}-1`,
+          title: sessionTitle(role, squadName),
           protocolRole: role,
           approveStages: requireApproval || undefined,
           handoffTo: chosenTemplate.handoffs?.[role],
-          squad
+          squad,
+          squadName
         });
       });
 
@@ -623,5 +650,21 @@ export function sessionHandlers(hub: HubContext): HandlerMap<
 }
 
 export function workspaceDirForSession(hub: HubContext, sessionId: string): string {
-  return hub.sessions.get(sessionId)?.projectPath ?? workspaceDir() ?? process.cwd();
+  const session = hub.sessions.get(sessionId);
+  if (session?.projectPath && !isSystemOrAppDir(session.projectPath) && fs.existsSync(session.projectPath)) {
+    return session.projectPath;
+  }
+  if (session?.projectName) {
+    const fromProject = hub.sessions.projectPath(session.projectName);
+    if (fromProject && !isSystemOrAppDir(fromProject) && fs.existsSync(fromProject)) {
+      return fromProject;
+    }
+  }
+  const ws = workspaceDir();
+  if (ws && !isSystemOrAppDir(ws) && fs.existsSync(ws)) {
+    return ws;
+  }
+  const recent = getRecentWorkspaces().find((d) => !isSystemOrAppDir(d) && fs.existsSync(d));
+  if (recent) return recent;
+  return os.homedir();
 }

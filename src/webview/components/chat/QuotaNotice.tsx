@@ -30,25 +30,53 @@ export const QuotaNotice: React.FC<Props> = ({ telemetry, accounts, activeAccoun
   );
 
   return (
-    <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-amber-950/50 border border-amber-600/60 text-amber-200 text-xs shadow-md shrink-0" role="alert">
-      <div className="flex items-center gap-2">
-        <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0" />
-        <span>
-          <strong>Alerta de cuota ({worst}%):</strong> {fiveHour >= weekly ? 'ventana de 5 h saturada.' : 'cuota semanal casi agotada.'}
-        </span>
+    <div
+      className="flex flex-wrap items-center justify-between px-3.5 py-2.5 rounded-xl bg-amber-950/30 border border-amber-600/50 text-amber-200 text-xs shadow-lg shadow-amber-950/20 gap-3 shrink-0"
+      role="alert"
+    >
+      <div className="flex items-center gap-2.5 min-w-0 flex-1">
+        <div className="w-7 h-7 rounded-lg bg-amber-900/60 border border-amber-500/50 flex items-center justify-center shrink-0">
+          <ShieldAlert className="w-4 h-4 text-amber-400" />
+        </div>
+        <div className="min-w-0">
+          <div className="font-semibold text-amber-100 flex items-center gap-1.5 flex-wrap">
+            <span>Alerta de cuota ({worst}%):</span>
+            <span className="text-amber-300 font-normal">
+              {fiveHour >= weekly ? 'ventana de 5 h saturada.' : 'cuota semanal casi agotada.'}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 text-[10.5px] text-amber-400/80 font-mono mt-0.5">
+            <span>5 h: {fiveHour}%</span>
+            <span>•</span>
+            <span>Semanal: {weekly}%</span>
+            {alternative && (
+              <>
+                <span>•</span>
+                <span className="text-emerald-400 font-semibold">{alternative.name} disponible para failover</span>
+              </>
+            )}
+          </div>
+        </div>
       </div>
-      <div className="flex items-center gap-1.5 shrink-0 ml-2">
+      <div className="flex items-center gap-2 shrink-0">
         {alternative && (
           <button
+            type="button"
             onClick={() => onFailover(alternative.provider)}
-            className="flex items-center gap-1 px-2.5 py-1 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-semibold rounded text-[11px] transition shadow"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg text-xs transition cursor-pointer shadow-md shadow-amber-500/20"
           >
-            <ArrowRightLeft className="w-3 h-3" />
+            <ArrowRightLeft className="w-3.5 h-3.5" />
             <span>Cambiar a {alternative.name}</span>
           </button>
         )}
-        <button type="button" aria-label="Descartar el aviso de cuota" title="Descartar (vuelve si la cuota sube)" onClick={() => setDismissedAt(worst)} className="p-1 rounded text-amber-300 hover:bg-amber-900/60">
-          <X className="w-3.5 h-3.5" />
+        <button
+          type="button"
+          aria-label="Descartar el aviso de cuota"
+          title="Descartar (vuelve si la cuota sube)"
+          onClick={() => setDismissedAt(worst)}
+          className="p-1 rounded-lg text-amber-400 hover:bg-amber-900/50 hover:text-white transition cursor-pointer"
+        >
+          <X className="w-4 h-4" />
         </button>
       </div>
     </div>

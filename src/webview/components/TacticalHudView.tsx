@@ -25,10 +25,10 @@ interface Props {
 
 type Status = 'running' | 'waiting' | 'attention' | 'done' | 'idle';
 const STATUS_LABEL: Record<Status, string> = { running: 'En curso', waiting: 'En espera', attention: 'Te espera', done: 'Respondió', idle: 'Sin turnos' };
-const STATUS_TEXT: Record<Status, string> = { running: 'text-amber-300', waiting: 'text-sky-300', attention: 'text-rose-300', done: 'text-emerald-300', idle: 'text-zinc-400' };
+const STATUS_TEXT: Record<Status, string> = { running: 'text-amber-300', waiting: 'text-sky-300', attention: 'text-rose-300', done: 'text-emerald-300', idle: 'text-slate-400' };
 
-const CARD = 'hud-spot hud-rise relative rounded-xl bg-[#0e131f]/90 border border-[#202b3f] p-3.5 flex flex-col gap-2.5 min-w-0';
-const CARD_HEAD = 'flex items-center justify-between gap-2 pb-2 border-b border-[#202b3f] text-[10px] font-bold uppercase tracking-[0.12em] text-zinc-300';
+const CARD = 'hud-spot hud-rise relative rounded-2xl bg-gradient-to-b from-[#0c1220]/95 to-[#0a0e17]/95 border border-[#202b3f] hover:border-cyan-500/40 p-4 flex flex-col gap-3 min-w-0 shadow-lg backdrop-blur-md transition-all duration-200';
+const CARD_HEAD = 'flex items-center justify-between gap-2 pb-2.5 border-b border-[#202b3f] text-[11px] font-bold uppercase tracking-[0.1em] text-slate-200';
 
 const Ring: React.FC<{ r: number; ratio: number; color: string; width: number }> = ({ r, ratio, color, width }) => {
   const length = 2 * Math.PI * r;
@@ -89,52 +89,58 @@ export const TacticalHudView: React.FC<Props> = ({
     'Conversación lista para recibir instrucciones.';
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col bg-[#07090e] text-zinc-100 overflow-y-auto p-3 sm:p-4 pb-0 gap-3 relative selection:bg-amber-500/30 selection:text-amber-200">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(245,158,11,0.07),transparent_50%),radial-gradient(ellipse_at_bottom_left,rgba(56,189,248,0.05),transparent_50%)] pointer-events-none" aria-hidden />
+    <div className="flex-1 min-h-0 flex flex-col bg-[#07090e] text-slate-100 overflow-y-auto p-3 sm:p-4 pb-0 gap-3 relative selection:bg-cyan-500/30 selection:text-cyan-200">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(6,182,212,0.07),transparent_50%),radial-gradient(ellipse_at_bottom_left,rgba(16,185,129,0.05),transparent_50%)] pointer-events-none" aria-hidden />
 
-      {/* CABECERA: dónde trabaja el chat activo */}
-      <div className="hud-spot hud-rise relative shrink-0 flex flex-wrap items-center justify-between gap-3 px-3.5 py-3 rounded-xl bg-[#0e131f]/90 border border-[#202b3f]">
+      {/* CABECERA TÁCTICA: COMMAND CENTER */}
+      <div className="hud-spot hud-rise relative shrink-0 flex flex-wrap items-center justify-between gap-3 px-4 py-3 rounded-2xl bg-[#0a0e17]/95 border border-[#202b3f] shadow-xl backdrop-blur-md">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 shrink-0 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-zinc-950 shadow-lg shadow-amber-500/20">
+          <div className="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-cyan-400 to-teal-500 flex items-center justify-center text-slate-950 shadow-lg shadow-cyan-500/20 font-black">
             <Sparkles className="w-5 h-5" aria-hidden />
           </div>
           <div className="min-w-0">
-            <h1 className="text-sm font-bold tracking-[0.08em] text-zinc-100">COMMAND CENTER</h1>
-            <p className="text-xs text-zinc-400 truncate">
-              <code className="text-amber-300 font-mono">📁 {workspaceDir || 'Sin carpeta'}</code>
+            <div className="flex items-center gap-2">
+              <h1 className="text-sm font-black tracking-[0.1em] text-slate-100 uppercase">COMMAND CENTER</h1>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span> LIVE HUD
+              </span>
+            </div>
+            <p className="text-xs text-slate-400 truncate flex items-center gap-2 mt-0.5">
+              <code className="text-cyan-300/90 font-mono">📁 {workspaceDir || 'Sin carpeta'}</code>
+              <span className="text-slate-600">•</span>
               {currentBranch
-                ? <span className="ml-2 font-mono text-emerald-300">⎇ {currentBranch}{gitFilesCount > 0 ? ` [+${gitFilesCount}]` : ''}</span>
-                : <span className="ml-2 font-mono text-zinc-400">⚪ Sin Git</span>}
+                ? <span className="font-mono text-emerald-400 font-semibold">⎇ {currentBranch}{gitFilesCount > 0 ? ` [+${gitFilesCount}]` : ''}</span>
+                : <span className="font-mono text-slate-500">⚪ Sin Git</span>}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <button type="button" onClick={onOpenTerminal}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition ${terminal?.running ? 'bg-amber-500/15 text-amber-300 border-amber-500/40' : 'bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border-[#202b3f]'}`}>
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition shadow-sm ${terminal?.running ? 'bg-amber-500/15 text-amber-300 border-amber-500/40' : 'bg-[#0c1220] hover:bg-slate-800 text-slate-300 border-[#202b3f]'}`}>
             <Terminal className="w-3.5 h-3.5 text-emerald-400" aria-hidden />
             Terminal
             {terminalBadge && <span className={`w-2 h-2 rounded-full ${terminalBadge === 'error' ? 'bg-rose-400' : 'bg-emerald-400'}`} aria-label={terminalBadge === 'error' ? 'El último comando falló' : 'El último comando terminó bien'} />}
           </button>
-          <button type="button" onClick={onNewTask} {...magnet} className="hud-magnet px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-[#202b3f] transition">
+          <button type="button" onClick={onNewTask} {...magnet} className="hud-magnet px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[#0c1220] hover:bg-slate-800 text-slate-200 border border-[#202b3f] transition shadow-sm">
             + Nueva tarea
           </button>
           <button type="button" onClick={() => onSwitchTab('chat')} {...magnet}
-            className="hud-magnet flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-amber-500 hover:bg-amber-400 text-zinc-950 shadow-md shadow-amber-500/20 transition">
+            className="hud-magnet flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-cyan-500 to-teal-400 hover:from-cyan-400 hover:to-teal-300 text-slate-950 shadow-md shadow-cyan-500/25 transition">
             Ir al chat <ArrowRight className="w-3.5 h-3.5" aria-hidden />
           </button>
         </div>
       </div>
 
       {notices.length > 0 && (
-        <div className="hud-ticker hud-rise relative shrink-0 overflow-hidden rounded-lg border border-[#202b3f] bg-[#0e131f]/60 py-1.5" style={rise(1)} aria-label="Actividad reciente">
+        <div className="hud-ticker hud-rise relative shrink-0 overflow-hidden rounded-xl border border-[#202b3f] bg-[#0a0e17]/75 py-1.5 shadow-inner" style={rise(1)} aria-label="Actividad reciente">
           <div className="hud-marquee">
             {[0, 1].map((copy) => (
               <ul key={copy} className="flex shrink-0 items-center" aria-hidden={copy === 1}>
                 {tickerItems.map((notice, index) => (
                   <li key={index} className="flex items-center">
                     <button type="button" tabIndex={copy === 1 || index >= notices.length ? -1 : undefined} disabled={!notice.sessionId} onClick={() => notice.sessionId && onOpenChat(notice.sessionId)}
-                      className="flex items-center gap-2 px-4 text-[11px] text-zinc-300 enabled:hover:text-amber-200 whitespace-nowrap">
-                      <span className="font-mono text-amber-300/90">{new Date(notice.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                      className="flex items-center gap-2 px-4 text-[11px] text-slate-300 enabled:hover:text-amber-300 whitespace-nowrap transition">
+                      <span className="font-mono text-amber-400 font-bold">{new Date(notice.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                       {notice.text.length > 90 ? `${notice.text.slice(0, 90)}…` : notice.text}
                     </button>
                     <span className="text-[#334155]" aria-hidden>◆</span>
@@ -146,32 +152,46 @@ export const TacticalHudView: React.FC<Props> = ({
         </div>
       )}
 
-      <div className="relative grid grid-cols-1 min-[900px]:grid-cols-[minmax(220px,1fr)_minmax(0,2fr)_minmax(220px,1fr)] gap-3 flex-1">
+      <div className="relative grid grid-cols-1 min-[900px]:grid-cols-[minmax(220px,1fr)_minmax(0,2fr)_minmax(220px,1fr)] gap-3.5 flex-1">
         {/* IZQUIERDA: agentes con rol y etapas del equipo */}
-        <aside className="flex flex-col gap-3 min-w-0">
+        <aside className="flex flex-col gap-3.5 min-w-0">
           <section className={CARD} style={rise(2)}>
             <div className={CARD_HEAD}>
-              <span className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5 text-purple-300" aria-hidden />Agentes con rol</span>
-              <span className="font-mono text-amber-300">{state.sessions.filter((s) => s.protocolRole).length}</span>
+              <span className="flex items-center gap-1.5 text-violet-300">
+                <Users className="w-3.5 h-3.5" aria-hidden />
+                <span>Agentes con rol</span>
+              </span>
+              <span className="font-mono text-amber-400 font-bold">{state.sessions.filter((s) => s.protocolRole).length}</span>
             </div>
-            {roleSessions.length === 0 && <p className="text-xs text-zinc-400">Ningún chat tiene rol. Asígnalo al crear una tarea o desde la cabecera del chat.</p>}
+            {roleSessions.length === 0 && <p className="text-xs text-slate-400 py-1">Ningún chat tiene rol. Asígnalo al crear una tarea o desde la cabecera del chat.</p>}
             {roleSessions.map((s) => {
               const status = statusOf(s);
               return (
                 <button key={s.id} type="button" onClick={() => onOpenChat(s.id)}
-                  className={`text-left p-2.5 rounded-lg border transition flex flex-col gap-1 ${status === 'running' ? 'border-amber-500/50 bg-amber-500/5' : 'border-[#202b3f] bg-[#07090e]/60 hover:border-zinc-600'}`}>
+                  className={`text-left p-3 rounded-xl border transition-all duration-200 flex flex-col gap-1.5 shadow-sm ${
+                    status === 'running'
+                      ? 'border-amber-500/60 bg-amber-500/10 hover:border-amber-400'
+                      : status === 'attention'
+                      ? 'border-rose-500/50 bg-rose-500/10 hover:border-rose-400'
+                      : 'border-[#202b3f] bg-[#07090e]/75 hover:border-slate-500'
+                  }`}>
                   <span className="flex items-center justify-between gap-2">
-                    <span className={`px-1.5 rounded border text-[10px] font-semibold uppercase ${ROLE_COLORS[s.protocolRole!] ?? 'border-zinc-700 text-zinc-300'}`}>{PROTOCOL_ROLES[s.protocolRole!]?.label ?? s.protocolRole}</span>
-                    <span className={`font-mono text-[10px] ${STATUS_TEXT[status]}`}>{STATUS_LABEL[status].toUpperCase()}</span>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${ROLE_COLORS[s.protocolRole!] ?? 'border-slate-700 text-slate-300'}`}>
+                      {PROTOCOL_ROLES[s.protocolRole!]?.label ?? s.protocolRole}
+                    </span>
+                    <span className={`font-mono text-[10px] font-bold ${STATUS_TEXT[status]}`}>
+                      {STATUS_LABEL[status].toUpperCase()}
+                    </span>
                   </span>
-                  <span className="text-xs font-semibold text-zinc-200 truncate">{s.title || agentName(s)}</span>
-                  <span className="font-mono text-[10px] text-zinc-400 truncate">📁 {s.projectName || 'Sin proyecto'}</span>
+                  <span className="text-xs font-bold text-slate-100 truncate">{s.title || agentName(s)}</span>
+                  <span className="font-mono text-[10px] text-slate-400 truncate">📁 {s.projectName || 'Sin proyecto'}</span>
                 </button>
               );
             })}
             {state.pendingHandoffs.length > 0 && (
-              <button type="button" onClick={() => onSwitchTab('agents')} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-amber-500/40 bg-amber-500/10 text-xs text-amber-200 hover:bg-amber-500/20 transition">
-                <PauseCircle className="w-3.5 h-3.5" aria-hidden />{state.pendingHandoffs.length} traspaso{state.pendingHandoffs.length === 1 ? '' : 's'} por aprobar
+              <button type="button" onClick={() => onSwitchTab('agents')} className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-amber-500/40 bg-amber-500/15 text-xs font-semibold text-amber-200 hover:bg-amber-500/25 transition shadow-sm">
+                <PauseCircle className="w-3.5 h-3.5 text-amber-400" aria-hidden />
+                <span>{state.pendingHandoffs.length} traspaso{state.pendingHandoffs.length === 1 ? '' : 's'} por aprobar</span>
               </button>
             )}
           </section>
@@ -179,21 +199,27 @@ export const TacticalHudView: React.FC<Props> = ({
           <section className={CARD} style={rise(5)}>
             <div className={CARD_HEAD}>
               <span>Etapas del equipo</span>
-              <span className="font-mono text-emerald-300 normal-case">{session?.squad ? `${squadStages.filter((s) => statusOf(s) === 'done').length}/${squadStages.length}` : '—'}</span>
+              <span className="font-mono text-emerald-400 font-bold normal-case">{session?.squad ? `${squadStages.filter((s) => statusOf(s) === 'done').length}/${squadStages.length}` : '—'}</span>
             </div>
             {squadStages.length === 0 ? (
-              <p className="text-xs text-zinc-400">El chat activo no pertenece a un equipo. Lanza el pipeline desde <b className="text-zinc-200">Flujos</b> en el compositor o crea un equipo en <button type="button" onClick={() => onSwitchTab('agents')} className="underline text-amber-300">Agentes</button>.</p>
+              <p className="text-xs text-slate-400 py-1">El chat activo no pertenece a un equipo. Lanza el pipeline desde <b className="text-slate-200">Flujos</b> en el compositor o crea un equipo en <button type="button" onClick={() => onSwitchTab('agents')} className="underline text-amber-400 font-medium">Agentes</button>.</p>
             ) : (
               <ol className="flex flex-col gap-1.5">
                 {squadStages.map((s, index) => {
                   const status = statusOf(s);
                   return (
                     <li key={s.id}>
-                      <button type="button" onClick={() => onOpenChat(s.id)} className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md border text-[11px] transition hover:brightness-125 ${status === 'running' ? 'border-amber-500/50 bg-amber-500/10 text-amber-200 font-semibold' : status === 'done' ? 'border-emerald-500/30 bg-emerald-500/5 text-emerald-200' : 'border-[#202b3f] text-zinc-300'}`}>
-                        {status === 'running' ? <Loader2 className="w-3 h-3 animate-spin" aria-hidden /> : status === 'done' ? <CheckCircle2 className="w-3 h-3" aria-hidden /> : <Clock className="w-3 h-3 text-zinc-400" aria-hidden />}
-                        <span className="font-mono text-zinc-400">{index + 1}.</span>
-                        <span className="truncate">{PROTOCOL_ROLES[s.protocolRole!]?.label ?? s.protocolRole}</span>
-                        <span className={`ml-auto font-mono text-[10px] ${STATUS_TEXT[status]}`}>{STATUS_LABEL[status]}</span>
+                      <button type="button" onClick={() => onOpenChat(s.id)} className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl border text-[11px] transition-all hover:brightness-110 shadow-sm ${
+                        status === 'running'
+                          ? 'border-amber-500/50 bg-amber-500/15 text-amber-200 font-bold'
+                          : status === 'done'
+                          ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300 font-medium'
+                          : 'border-[#202b3f] bg-[#07090e]/60 text-slate-300 hover:border-slate-600'
+                      }`}>
+                        {status === 'running' ? <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-400" aria-hidden /> : status === 'done' ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" aria-hidden /> : <Clock className="w-3.5 h-3.5 text-slate-500" aria-hidden />}
+                        <span className="font-mono text-slate-400 font-bold">{index + 1}.</span>
+                        <span className="truncate font-sans font-semibold">{PROTOCOL_ROLES[s.protocolRole!]?.label ?? s.protocolRole}</span>
+                        <span className={`ml-auto font-mono text-[10px] font-bold ${STATUS_TEXT[status]}`}>{STATUS_LABEL[status]}</span>
                       </button>
                     </li>
                   );
@@ -204,46 +230,48 @@ export const TacticalHudView: React.FC<Props> = ({
         </aside>
 
         {/* CENTRO: dial de estado y estaciones de trabajo */}
-        <section className="flex flex-col gap-3 min-w-0">
-          <div className={`${CARD} items-center py-5 overflow-hidden`} style={rise(3)}>
+        <section className="flex flex-col gap-3.5 min-w-0">
+          <div className={`${CARD} items-center py-6 overflow-hidden`} style={rise(3)}>
             <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 600 320" preserveAspectRatio="none" aria-hidden>
               <defs>
                 <linearGradient id="hudGlow" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.6" />
-                  <stop offset="100%" stopColor="#38bdf8" stopOpacity="0.15" />
+                  <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.45" />
+                  <stop offset="100%" stopColor="#10b981" stopOpacity="0.15" />
                 </linearGradient>
               </defs>
               <path d="M 30 170 Q 200 40 300 140 T 570 170" fill="none" stroke="url(#hudGlow)" strokeWidth="1.2" strokeDasharray="4 4" />
             </svg>
-            <div className="relative w-52 h-52">
+            <div className="relative w-56 h-56">
               <svg className="w-full h-full -rotate-90" viewBox="0 0 240 240" role="img"
                 aria-label={`${connectedAccounts} de ${state.accounts.length} cuentas conectadas; ${connectedMcps} de ${state.mcps.length} MCPs conectados`}>
-                <circle cx="120" cy="120" r="117" fill="none" stroke={state.runningSessionIds.length ? '#f59e0b' : '#334155'} strokeOpacity="0.6" strokeWidth="1.5" strokeDasharray="1 7"
+                <circle cx="120" cy="120" r="117" fill="none" stroke={state.runningSessionIds.length ? '#06b6d4' : '#334155'} strokeOpacity="0.6" strokeWidth="1.5" strokeDasharray="1 7"
                   className={state.runningSessionIds.length ? 'hud-orbit' : undefined} />
-                <circle cx="120" cy="120" r="109" fill="#0e131f" />
-                <Ring r={105} width={8} color="#f59e0b" ratio={state.accounts.length ? connectedAccounts / state.accounts.length : 0} />
-                <Ring r={85} width={4} color="#38bdf8" ratio={state.mcps.length ? connectedMcps / state.mcps.length : 0} />
+                <circle cx="120" cy="120" r="109" fill="#0a0e17" />
+                <Ring r={105} width={8} color="#06b6d4" ratio={state.accounts.length ? connectedAccounts / state.accounts.length : 0} />
+                <Ring r={85} width={5} color="#10b981" ratio={state.mcps.length ? connectedMcps / state.mcps.length : 0} />
               </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className="text-4xl font-black font-mono text-zinc-50"><CountUp value={state.runningSessionIds.length} format={(n) => String(Math.round(n))} /></span>
-                <span className="text-[10px] font-bold text-amber-300 uppercase tracking-[0.14em]">Agentes en curso</span>
-                <span className="text-[10px] font-mono text-zinc-400 mt-1">{state.waitingSessionIds.length} en espera · {state.attentionSessionIds.length} te esperan</span>
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
+                <span className="text-5xl font-black font-mono text-slate-50 tracking-tight leading-none">
+                  <CountUp value={state.runningSessionIds.length} format={(n) => String(Math.round(n))} />
+                </span>
+                <span className="text-[10px] font-bold text-cyan-300 uppercase tracking-widest mt-1.5">Agentes en curso</span>
+                <span className="text-[10px] font-mono text-slate-400 mt-1">{state.waitingSessionIds.length} en espera · {state.attentionSessionIds.length} te esperan</span>
               </div>
             </div>
-            <div className="relative flex flex-wrap justify-center gap-x-4 gap-y-1 text-[10px] text-zinc-400 font-mono">
-              <span><span className="inline-block w-2 h-2 rounded-full bg-amber-500 mr-1" />Cuentas {connectedAccounts}/{state.accounts.length}</span>
-              <span><span className="inline-block w-2 h-2 rounded-full bg-sky-400 mr-1" />MCPs {connectedMcps}/{state.mcps.length}</span>
+            <div className="relative flex flex-wrap justify-center gap-x-5 gap-y-1 text-[11px] text-slate-400 font-mono">
+              <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50" />Cuentas {connectedAccounts}/{state.accounts.length}</span>
+              <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50" />MCPs {connectedMcps}/{state.mcps.length}</span>
             </div>
-            <dl className="relative grid grid-cols-2 sm:grid-cols-4 w-full mt-1 text-center divide-x divide-[#202b3f]">
+            <dl className="relative grid grid-cols-2 sm:grid-cols-4 w-full mt-3 pt-3 border-t border-[#202b3f] text-center divide-x divide-[#202b3f]">
               {[
-                { label: 'Sesiones', value: state.sessions.length, format: (n: number) => String(Math.round(n)), tone: 'text-zinc-50' },
-                { label: 'Costo acumulado', value: totalCostUSD, format: (n: number) => `$${n.toFixed(3)}`, tone: 'text-amber-300' },
+                { label: 'Sesiones', value: state.sessions.length, format: (n: number) => String(Math.round(n)), tone: 'text-slate-100' },
+                { label: 'Costo acum.', value: totalCostUSD, format: (n: number) => `$${n.toFixed(3)}`, tone: 'text-emerald-400' },
                 { label: 'Cambios Git', value: gitFilesCount, format: (n: number) => (currentBranch ? String(Math.round(n)) : '—'), tone: 'text-emerald-300' },
-                { label: 'Tokens aprox.', value: approxTokens, format: (n: number) => `${(n / 1000).toFixed(1)}k`, tone: 'text-sky-300' }
+                { label: 'Tokens aprox.', value: approxTokens, format: (n: number) => `${(n / 1000).toFixed(1)}k`, tone: 'text-violet-300' }
               ].map((stat) => (
                 <div key={stat.label} className="px-2">
-                  <dt className="text-[10px] uppercase tracking-wider text-zinc-400">{stat.label}</dt>
-                  <dd className={`font-mono text-base font-bold ${stat.tone}`}><CountUp value={stat.value} format={stat.format} /></dd>
+                  <dt className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{stat.label}</dt>
+                  <dd className={`font-mono text-base font-black ${stat.tone}`}><CountUp value={stat.value} format={stat.format} /></dd>
                 </div>
               ))}
             </dl>
@@ -251,19 +279,24 @@ export const TacticalHudView: React.FC<Props> = ({
 
           <div className={`${CARD} flex-1`} style={rise(6)}>
             <div className={CARD_HEAD}>
-              <span className="flex items-center gap-1.5"><Layers className="w-3.5 h-3.5 text-amber-300" aria-hidden />Estaciones de trabajo</span>
-              <button type="button" onClick={() => onSwitchTab('chat')} className="flex items-center gap-1 normal-case tracking-normal text-[11px] font-medium text-zinc-300 hover:text-amber-300 transition">
+              <span className="flex items-center gap-2 text-cyan-300">
+                <Layers className="w-4 h-4" aria-hidden />
+                <span>Estaciones de trabajo</span>
+              </span>
+              <button type="button" onClick={() => onSwitchTab('chat')} className="flex items-center gap-1 normal-case tracking-normal text-[11px] font-semibold text-slate-300 hover:text-cyan-400 transition">
                 <Columns3 className="w-3.5 h-3.5" aria-hidden />Chats en columnas <ArrowRight className="w-3 h-3" aria-hidden />
               </button>
             </div>
-            {recentSessions.length === 0 && <p className="text-xs text-zinc-400">Aún no hay chats. Crea uno con <b className="text-zinc-200">+ Nueva tarea</b>.</p>}
-            <div className="grid grid-cols-1 min-[1200px]:grid-cols-2 gap-2.5">
+            {recentSessions.length === 0 && <p className="text-xs text-slate-400 py-2">Aún no hay chats. Crea uno con <b className="text-slate-200">+ Nueva tarea</b>.</p>}
+            <div className="grid grid-cols-1 min-[1200px]:grid-cols-2 gap-3">
               {recentSessions.map((s, index) => {
                 const accent = getAccent(s.projectName);
                 const status = statusOf(s);
                 return (
                   <button key={s.id} type="button" onClick={() => onOpenChat(s.id)} style={rise(7 + index)}
-                    className={`hud-spot hud-rise group text-left p-3 rounded-lg bg-[#07090e]/70 border transition-[border-color,transform] duration-300 hover:-translate-y-0.5 flex flex-col gap-2 relative overflow-hidden ${s.id === session?.id ? 'border-amber-500/60' : 'border-[#202b3f] hover:border-amber-500/40'}`}>
+                    className={`hud-spot hud-rise group text-left p-3.5 rounded-xl bg-[#07090e]/80 border transition-all duration-200 hover:-translate-y-0.5 flex flex-col gap-2 relative overflow-hidden shadow-sm ${
+                      s.id === session?.id ? 'border-cyan-500/70 shadow-cyan-500/10' : 'border-[#202b3f] hover:border-slate-500'
+                    }`}>
                     {status === 'running'
                       ? <span className="aurora-border absolute top-0 inset-x-0 h-0.5" aria-hidden />
                       : accent && <span className="absolute top-0 inset-x-0 h-0.5" style={{ backgroundColor: accent }} aria-hidden />}
@@ -271,19 +304,19 @@ export const TacticalHudView: React.FC<Props> = ({
                       <span className="min-w-0">
                         <span className="flex items-center gap-1.5">
                           <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: accent || '#a1a1aa' }} aria-hidden />
-                          <span className="text-xs font-bold text-zinc-100 truncate group-hover:text-amber-300 transition">{agentName(s)}</span>
+                          <span className="text-xs font-bold text-slate-100 truncate group-hover:text-cyan-300 transition">{agentName(s)}</span>
                         </span>
-                        <span className="block text-[10px] font-mono text-zinc-400 truncate mt-0.5">📁 {s.projectName || 'Sin proyecto'} · {s.modelId}</span>
+                        <span className="block text-[10px] font-mono text-slate-400 truncate mt-0.5">📁 {s.projectName || 'Sin proyecto'} · {s.modelId}</span>
                       </span>
-                      <span className="flex items-center gap-1 shrink-0">
-                        {s.protocolRole && <span className={`px-1.5 rounded text-[10px] font-medium border ${ROLE_COLORS[s.protocolRole] ?? 'border-zinc-700 text-zinc-300'}`}>{PROTOCOL_ROLES[s.protocolRole]?.label ?? s.protocolRole}</span>}
-                        <span className={`font-mono text-[10px] ${STATUS_TEXT[status]}`}>{status === 'running' ? <Loader2 className="w-3 h-3 animate-spin" aria-label="En curso" /> : STATUS_LABEL[status]}</span>
+                      <span className="flex items-center gap-1.5 shrink-0">
+                        {s.protocolRole && <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${ROLE_COLORS[s.protocolRole] ?? 'border-slate-700 text-slate-300'}`}>{PROTOCOL_ROLES[s.protocolRole]?.label ?? s.protocolRole}</span>}
+                        <span className={`font-mono text-[10px] font-bold ${STATUS_TEXT[status]}`}>{status === 'running' ? <Loader2 className="w-3.5 h-3.5 animate-spin" aria-label="En curso" /> : STATUS_LABEL[status]}</span>
                       </span>
                     </span>
-                    <span className="text-[11.5px] text-zinc-300 line-clamp-2 leading-relaxed">{lastAnswer(s)}</span>
-                    <span className="flex items-center justify-between text-[10px] text-zinc-400 pt-1.5 border-t border-[#202b3f] font-mono">
+                    <span className="text-xs text-slate-300 line-clamp-2 leading-relaxed">{lastAnswer(s)}</span>
+                    <span className="flex items-center justify-between text-[10px] text-slate-400 pt-2 border-t border-[#162035] font-mono">
                       <span>{s.messages.length} mensajes</span>
-                      <span className="text-amber-300/80 group-hover:translate-x-0.5 transition-transform">Abrir →</span>
+                      <span className="text-cyan-400 font-semibold group-hover:translate-x-1 transition-transform">Abrir Chat →</span>
                     </span>
                   </button>
                 );
@@ -293,62 +326,68 @@ export const TacticalHudView: React.FC<Props> = ({
         </section>
 
         {/* DERECHA: MCPs y salida de la terminal */}
-        <aside className="flex flex-col gap-3 min-w-0">
+        <aside className="flex flex-col gap-3.5 min-w-0">
           <section className={CARD} style={rise(4)}>
             <div className={CARD_HEAD}>
-              <span className="flex items-center gap-1.5"><Plug className="w-3.5 h-3.5 text-emerald-300" aria-hidden />Servidores MCP</span>
-              <button type="button" onClick={() => onSwitchTab('mcps')} className="font-mono text-emerald-300 normal-case whitespace-nowrap hover:underline">{connectedMcps} conectados</button>
+              <span className="flex items-center gap-1.5 text-emerald-400">
+                <Plug className="w-3.5 h-3.5" aria-hidden />
+                <span>Servidores MCP</span>
+              </span>
+              <button type="button" onClick={() => onSwitchTab('mcps')} className="font-mono text-emerald-400 font-bold normal-case whitespace-nowrap hover:underline">{connectedMcps} conectados</button>
             </div>
-            {state.mcps.length === 0 && <p className="text-xs text-zinc-400">Sin servidores MCP configurados.</p>}
+            {state.mcps.length === 0 && <p className="text-xs text-slate-400 py-1">Sin servidores MCP configurados.</p>}
             {state.mcps.slice(0, 6).map((mcp) => (
-              <div key={mcp.id} title={mcp.healthMessage || mcp.description} className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-md border border-[#202b3f] bg-[#07090e]/60 text-xs">
-                <span className="flex items-center gap-1.5 min-w-0">
-                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${mcp.status === 'connected' ? 'bg-emerald-400' : mcp.status === 'needs_auth' ? 'bg-amber-400' : 'bg-zinc-500'}`} aria-hidden />
-                  <span className="truncate text-zinc-200">{mcp.name}</span>
+              <div key={mcp.id} title={mcp.healthMessage || mcp.description} className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg border border-[#202b3f] bg-[#07090e]/75 text-xs shadow-sm">
+                <span className="flex items-center gap-2 min-w-0">
+                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${mcp.status === 'connected' ? 'bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.6)]' : mcp.status === 'needs_auth' ? 'bg-amber-400' : 'bg-slate-600'}`} aria-hidden />
+                  <span className="truncate font-medium text-slate-200">{mcp.name}</span>
                 </span>
-                <span className={`font-mono text-[10px] shrink-0 ${mcp.status === 'connected' ? 'text-emerald-300' : mcp.status === 'needs_auth' ? 'text-amber-300' : 'text-zinc-400'}`}>
+                <span className={`font-mono text-[10px] font-semibold shrink-0 ${mcp.status === 'connected' ? 'text-emerald-400' : mcp.status === 'needs_auth' ? 'text-amber-300' : 'text-slate-500'}`}>
                   {mcp.status === 'connected' ? (mcp.tools?.length ? `${mcp.tools.length} tools` : 'conectado') : mcp.status === 'needs_auth' ? 'requiere login' : 'desconectado'}
                 </span>
               </div>
             ))}
-            {state.mcps.length > 6 && <button type="button" onClick={() => onSwitchTab('mcps')} className="text-[11px] text-zinc-300 hover:text-amber-300 text-left">Ver los {state.mcps.length} →</button>}
+            {state.mcps.length > 6 && <button type="button" onClick={() => onSwitchTab('mcps')} className="text-[11px] font-medium text-slate-300 hover:text-amber-400 text-left transition">Ver los {state.mcps.length} →</button>}
           </section>
 
           <section className={`${CARD} flex-1`} style={rise(7)}>
             <div className={CARD_HEAD}>
-              <span className="flex items-center gap-1.5"><Terminal className="w-3.5 h-3.5 text-emerald-300" aria-hidden />Terminal</span>
-              <button type="button" onClick={onOpenTerminal} className="normal-case tracking-normal text-[11px] font-medium text-zinc-300 hover:text-amber-300 transition">Abrir shell →</button>
+              <span className="flex items-center gap-1.5 text-emerald-400">
+                <Terminal className="w-3.5 h-3.5" aria-hidden />
+                <span>Terminal</span>
+              </span>
+              <button type="button" onClick={onOpenTerminal} className="normal-case tracking-normal text-[11px] font-semibold text-slate-300 hover:text-amber-400 transition">Abrir shell →</button>
             </div>
             {terminal?.lastCommand && (
-              <div className="flex items-center justify-between gap-2 font-mono text-[10px]">
-                <span className="truncate text-zinc-300">$ {terminal.lastCommand}</span>
-                {terminal.running ? <span className="text-amber-300">en curso</span>
-                  : terminal.lastExitCode !== undefined && <span className={terminal.lastExitCode === 0 ? 'text-emerald-300' : 'text-rose-300'}>exit {terminal.lastExitCode}</span>}
+              <div className="flex items-center justify-between gap-2 font-mono text-[10px] px-1">
+                <span className="truncate text-slate-300">$ {terminal.lastCommand}</span>
+                {terminal.running ? <span className="text-amber-400 font-bold animate-pulse">en curso</span>
+                  : terminal.lastExitCode !== undefined && <span className={terminal.lastExitCode === 0 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}>exit {terminal.lastExitCode}</span>}
               </div>
             )}
-            <pre className="flex-1 min-h-[140px] max-h-72 overflow-auto rounded-lg bg-[#06080e] border border-[#202b3f] p-2.5 font-mono text-[11px] leading-relaxed text-emerald-200/90 whitespace-pre-wrap break-all">
+            <pre className="flex-1 min-h-[140px] max-h-72 overflow-auto rounded-xl bg-[#07090e] border border-[#202b3f] p-3 font-mono text-[11px] leading-relaxed text-emerald-300/90 whitespace-pre-wrap break-all shadow-inner">
               {terminalLines || 'Sin salida todavía. Abre la shell para ejecutar tests, builds o git.'}
             </pre>
           </section>
         </aside>
       </div>
 
-      {/* DOCK FLOTANTE CON LAS DEMÁS VISTAS (como la barra inferior de Awwwards) */}
+      {/* DOCK FLOTANTE CON LAS DEMÁS VISTAS */}
       <nav className="sticky bottom-0 z-20 flex justify-center pt-1 pb-3 pointer-events-none" aria-label="Otras vistas">
-        <div className="hud-dock hud-rise pointer-events-auto flex flex-wrap justify-center gap-1 p-1.5 rounded-2xl bg-[#0e131f]/85 backdrop-blur-md border border-[#202b3f] shadow-2xl shadow-black/60" style={rise(9)}>
+        <div className="hud-dock hud-rise pointer-events-auto flex flex-wrap justify-center gap-1 p-1.5 rounded-2xl bg-[#0a0e17]/90 backdrop-blur-xl border border-[#202b3f] shadow-2xl shadow-black/80" style={rise(9)}>
           {([
-            { id: 'chat', label: 'Chat', icon: <MessageSquare className="w-4 h-4 text-amber-300" />, badge: state.attentionSessionIds.length },
-            { id: 'agents', label: 'Agentes', icon: <Bot className="w-4 h-4 text-purple-300" />, badge: state.runningSessionIds.length },
-            { id: 'memory', label: 'Memoria', icon: <Brain className="w-4 h-4 text-amber-300" />, badge: 0 },
-            { id: 'documents', label: 'Documentos', icon: <FileText className="w-4 h-4 text-sky-300" />, badge: 0 },
+            { id: 'chat', label: 'Chat', icon: <MessageSquare className="w-4 h-4 text-cyan-300" />, badge: state.attentionSessionIds.length },
+            { id: 'agents', label: 'Agentes', icon: <Bot className="w-4 h-4 text-violet-300" />, badge: state.runningSessionIds.length },
+            { id: 'memory', label: 'Memoria', icon: <Brain className="w-4 h-4 text-violet-300" />, badge: 0 },
+            { id: 'documents', label: 'Documentos', icon: <FileText className="w-4 h-4 text-teal-300" />, badge: 0 },
             { id: 'mcps', label: 'MCPs', icon: <Wrench className="w-4 h-4 text-emerald-300" />, badge: 0 },
             { id: 'telemetry', label: 'Métricas', icon: <BarChart3 className="w-4 h-4 text-rose-300" />, badge: 0 },
-            { id: 'accounts', label: 'Cuentas', icon: <Users className="w-4 h-4 text-indigo-300" />, badge: 0 }
+            { id: 'accounts', label: 'Cuentas', icon: <Users className="w-4 h-4 text-amber-300" />, badge: 0 }
           ] as const).map((item) => (
             <button key={item.id} type="button" onClick={() => onSwitchTab(item.id)}
-              className="relative flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-zinc-300 hover:text-zinc-50 hover:bg-white/5">
+              className="relative flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-slate-50 hover:bg-white/5 transition">
               {item.icon}<span>{item.label}</span>
-              {item.badge > 0 && <span className="absolute -top-1 -right-1 min-w-4 px-1 rounded-full bg-amber-500 text-zinc-950 text-[9px] font-bold leading-4 text-center">{item.badge}</span>}
+              {item.badge > 0 && <span className="absolute -top-1 -right-1 min-w-4 px-1 rounded-full bg-amber-500 text-slate-950 text-[9px] font-bold leading-4 text-center shadow-sm">{item.badge}</span>}
             </button>
           ))}
         </div>

@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentHub - Command Center Tactical HUD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            hub: {
+              void: '#07090e',
+              surface: '#0e131f',
+              panel: '#131927',
+              border: '#202b3f',
+              'border-subtle': '#182030',
+              accent: '#f59e0b',
+              cyan: '#38bdf8',
+              emerald: '#10b981',
+              purple: '#c084fc',
+              rose: '#f43f5e'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #07090e;
+      color: #f1f5f9;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .hud-card {
+      background: linear-gradient(180deg, rgba(19, 25, 39, 0.9) 0%, rgba(14, 19, 31, 0.95) 100%);
+      border: 1px solid #202b3f;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .hud-card:hover {
+      border-color: #3b4e6e;
+    }
+    @keyframes orbitPulse {
+      0%, 100% { transform: rotate(0deg) scale(1); opacity: 0.8; }
+      50% { transform: rotate(180deg) scale(1.02); opacity: 1; }
+    }
+    .orbit-anim {
+      animation: orbitSpin 30s linear infinite;
+      transform-origin: 120px 120px;
+    }
+    @keyframes orbitSpin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .marquee-track {
+      display: flex;
+      width: max-content;
+      animation: marqueeScroll 25s linear infinite;
+    }
+    .marquee-track:hover {
+      animation-play-state: paused;
+    }
+    @keyframes marqueeScroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .pulse-dot {
+      animation: pulseGlow 1.8s infinite ease-in-out;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.5; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1.15); }
+    }
+  </style>
+</head>
+<body class="p-4 md:p-6 max-w-7xl mx-auto space-y-4">
+
+  <!-- TOP HEADER: Command Center -->
+  <header class="flex flex-wrap items-center justify-between gap-3 px-4 py-3 rounded-2xl bg-hub-surface/95 border border-hub-border shadow-xl backdrop-blur-md">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-slate-950 shadow-lg shadow-amber-500/20 font-bold">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-sm font-black tracking-widest text-slate-100 uppercase">COMMAND CENTER</h1>
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 pulse-dot"></span> LIVE HUD
+          </span>
+        </div>
+        <p class="text-xs text-slate-400 flex items-center gap-2 mt-0.5">
+          <span class="font-mono text-amber-300/90">📁 /agent-hub</span>
+          <span class="text-slate-600">•</span>
+          <span class="font-mono text-emerald-400 font-semibold">⎇ main [+3 cambios]</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex items-center gap-2">
+      <button class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-hub-panel hover:bg-slate-800 text-slate-300 border border-hub-border transition shadow-sm">
+        <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        Terminal
+        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+      </button>
+      <button class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-hub-panel hover:bg-slate-800 text-slate-200 border border-hub-border transition shadow-sm">
+        + Nueva Tarea
+      </button>
+      <button class="flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-md shadow-amber-500/25 transition">
+        Ir al Chat
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- LIVE TICKER MARQUEE -->
+  <div class="relative overflow-hidden rounded-xl border border-hub-border bg-hub-surface/70 py-1.5 shadow-inner">
+    <div class="marquee-track flex items-center text-xs font-mono">
+      <div class="flex items-center gap-6 px-4 shrink-0 text-slate-300">
+        <span><strong class="text-amber-400">23:42</strong> [Orquestador] Sincronización de agentes de enjambre completada</span>
+        <span class="text-slate-600">◆</span>
+        <span><strong class="text-cyan-400">23:44</strong> [Diseñador] Entregables de telemetría y métricas verificados (11 tests pass)</span>
+        <span class="text-slate-600">◆</span>
+        <span><strong class="text-emerald-400">23:45</strong> [Terminal] build:webview compiló en 2.08s</span>
+        <span class="text-slate-600">◆</span>
+        <span><strong class="text-purple-400">23:46</strong> [Protocolo] Traspaso aprobado: Arquitecto → Diseñador</span>
+        <span class="text-slate-600">◆</span>
+      </div>
+      <div class="flex items-center gap-6 px-4 shrink-0 text-slate-300">
+        <span><strong class="text-amber-400">23:42</strong> [Orquestador] Sincronización de agentes de enjambre completada</span>
+        <span class="text-slate-600">◆</span>
+        <span><strong class="text-cyan-400">23:44</strong> [Diseñador] Entregables de telemetría y métricas verificados (11 tests pass)</span>
+        <span class="text-slate-600">◆</span>
+        <span><strong class="text-emerald-400">23:45</strong> [Terminal] build:webview compiló en 2.08s</span>
+        <span class="text-slate-600">◆</span>
+        <span><strong class="text-purple-400">23:46</strong> [Protocolo] Traspaso aprobado: Arquitecto → Diseñador</span>
+        <span class="text-slate-600">◆</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3-COLUMN TACTICAL GRID -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+
+    <!-- LEFT COLUMN: Roles & Squad Stages (3 cols) -->
+    <aside class="lg:col-span-3 space-y-4">
+      <!-- Roles Section -->
+      <section class="hud-card p-4 rounded-2xl space-y-3">
+        <div class="flex items-center justify-between pb-2 border-b border-hub-border text-xs font-bold uppercase tracking-wider text-slate-300">
+          <span class="flex items-center gap-2 text-purple-300">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            Agentes con Rol
+          </span>
+          <span class="font-mono text-amber-400 font-bold">4</span>
+        </div>
+
+        <!-- Role 1 -->
+        <div class="p-3 rounded-xl border border-amber-500/40 bg-amber-500/10 space-y-1.5 transition hover:border-amber-400 cursor-pointer">
+          <div class="flex items-center justify-between text-[10px] font-mono">
+            <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">DISEÑADOR</span>
+            <span class="text-amber-400 font-bold uppercase animate-pulse">EN CURSO</span>
+          </div>
+          <div class="text-xs font-bold text-slate-100">Rediseño Tactical HUD</div>
+          <div class="text-[10px] font-mono text-slate-400">📁 agent-hub · gemini-2.5-pro</div>
+        </div>
+
+        <!-- Role 2 -->
+        <div class="p-3 rounded-xl border border-hub-border bg-hub-surface/80 space-y-1.5 transition hover:border-slate-500 cursor-pointer">
+          <div class="flex items-center justify-between text-[10px] font-mono">
+            <span class="px-2 py-0.5 rounded bg-blue-500/15 text-blue-300 font-bold border border-blue-500/30">COORDINADOR</span>
+            <span class="text-sky-300 font-medium uppercase">EN ESPERA</span>
+          </div>
+          <div class="text-xs font-bold text-slate-100">Orquestación de Sprints</div>
+          <div class="text-[10px] font-mono text-slate-400">📁 agent-hub · claude-3-5-sonnet</div>
+        </div>
+
+        <!-- Role 3 -->
+        <div class="p-3 rounded-xl border border-hub-border bg-hub-surface/80 space-y-1.5 transition hover:border-slate-500 cursor-pointer">
+          <div class="flex items-center justify-between text-[10px] font-mono">
+            <span class="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 font-bold border border-emerald-500/30">REVISOR</span>
+            <span class="text-emerald-400 font-medium uppercase">RESPONDIÓ</span>
+          </div>
+          <div class="text-xs font-bold text-slate-100">Auditoría de Protocolo</div>
+          <div class="text-[10px] font-mono text-slate-400">📁 portafolio · 11 tests ok</div>
+        </div>
+      </section>
+
+      <!-- Squad Stages -->
+      <section class="hud-card p-4 rounded-2xl space-y-3">
+        <div class="flex items-center justify-between pb-2 border-b border-hub-border text-xs font-bold uppercase tracking-wider text-slate-300">
+          <span>Etapas del Equipo</span>
+          <span class="font-mono text-emerald-400 font-bold">3/4</span>
+        </div>
+
+        <ol class="space-y-2 text-xs font-mono">
+          <li class="flex items-center gap-2 p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-200">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span class="text-slate-400">1.</span>
+            <span class="truncate">Arquitecto Software</span>
+            <span class="ml-auto text-[10px] text-emerald-400">LISTO</span>
+          </li>
+          <li class="flex items-center gap-2 p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-200">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span class="text-slate-400">2.</span>
+            <span class="truncate">Programador Principal</span>
+            <span class="ml-auto text-[10px] text-emerald-400">LISTO</span>
+          </li>
+          <li class="flex items-center gap-2 p-2 rounded-lg bg-amber-500/15 border border-amber-500/40 text-amber-200 font-bold">
+            <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+            <span class="text-amber-400">3.</span>
+            <span class="truncate">Diseñador Gráfico</span>
+            <span class="ml-auto text-[10px] text-amber-400">EN CURSO</span>
+          </li>
+          <li class="flex items-center gap-2 p-2 rounded-lg bg-hub-surface border border-hub-border text-slate-400">
+            <span class="w-2 h-2 rounded-full bg-slate-600"></span>
+            <span class="text-slate-500">4.</span>
+            <span class="truncate">Auditor Seguridad</span>
+            <span class="ml-auto text-[10px] text-slate-500">PENDIENTE</span>
+          </li>
+        </ol>
+      </section>
+    </aside>
+
+    <!-- CENTER COLUMN: Orbital Dial & Workstations (6 cols) -->
+    <main class="lg:col-span-6 space-y-4">
+      <!-- Orbital Reactor Card -->
+      <section class="hud-card p-6 rounded-2xl flex flex-col items-center justify-center relative overflow-hidden text-center">
+        <!-- SVG Radial Mesh -->
+        <div class="relative w-56 h-56 flex items-center justify-center my-2">
+          <svg class="w-full h-full -rotate-90" viewBox="0 0 240 240">
+            <!-- Outer dashed orbit -->
+            <circle cx="120" cy="120" r="115" fill="none" stroke="#202b3f" stroke-width="1.5" stroke-dasharray="2 6" />
+            <!-- Inner background -->
+            <circle cx="120" cy="120" r="108" fill="#0b0f19" />
+            
+            <!-- Accounts Ring (Amber) -->
+            <circle cx="120" cy="120" r="102" fill="none" stroke="#162035" stroke-width="8" />
+            <circle cx="120" cy="120" r="102" fill="none" stroke="#f59e0b" stroke-width="8" stroke-linecap="round" stroke-dasharray="640" stroke-dashoffset="160" class="transition-all duration-700" />
+
+            <!-- MCPs Ring (Cyan) -->
+            <circle cx="120" cy="120" r="86" fill="none" stroke="#162035" stroke-width="5" />
+            <circle cx="120" cy="120" r="86" fill="none" stroke="#38bdf8" stroke-width="5" stroke-linecap="round" stroke-dasharray="540" stroke-dashoffset="90" class="transition-all duration-700" />
+          </svg>
+
+          <!-- Core Counter Center -->
+          <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+            <span class="text-5xl font-black font-mono text-slate-50 tracking-tight">2</span>
+            <span class="text-[10px] font-bold text-amber-300 uppercase tracking-widest mt-1">AGENTES EN CURSO</span>
+            <span class="text-[10px] font-mono text-slate-400 mt-1">1 en espera · 0 te esperan</span>
+          </div>
+        </div>
+
+        <!-- Ring Legend -->
+        <div class="flex items-center gap-5 text-xs font-mono text-slate-400 mt-1">
+          <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-400"></span> Cuentas 3/4</span>
+          <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-sky-400"></span> MCPs 8/8</span>
+        </div>
+
+        <!-- 4 Global KPIs Bar -->
+        <dl class="grid grid-cols-2 sm:grid-cols-4 w-full mt-5 pt-4 border-t border-hub-border divide-x divide-hub-border text-center">
+          <div class="px-2">
+            <dt class="text-[10px] font-bold uppercase tracking-wider text-slate-400">SESIONES</dt>
+            <dd class="font-mono text-lg font-bold text-slate-100">18</dd>
+          </div>
+          <div class="px-2">
+            <dt class="text-[10px] font-bold uppercase tracking-wider text-slate-400">COSTO ACUM.</dt>
+            <dd class="font-mono text-lg font-bold text-emerald-400">$1.842</dd>
+          </div>
+          <div class="px-2">
+            <dt class="text-[10px] font-bold uppercase tracking-wider text-slate-400">CAMBIOS GIT</dt>
+            <dd class="font-mono text-lg font-bold text-emerald-300">+3</dd>
+          </div>
+          <div class="px-2">
+            <dt class="text-[10px] font-bold uppercase tracking-wider text-slate-400">TOKENS APROX.</dt>
+            <dd class="font-mono text-lg font-bold text-purple-300">1,482k</dd>
+          </div>
+        </dl>
+      </section>
+
+      <!-- Workstations Cards -->
+      <section class="hud-card p-5 rounded-2xl space-y-3">
+        <div class="flex items-center justify-between pb-2 border-b border-hub-border text-xs font-bold uppercase tracking-wider text-slate-300">
+          <span class="flex items-center gap-2 text-amber-300">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+            Estaciones de Trabajo en Paralelo
+          </span>
+          <button class="font-mono text-amber-400 hover:text-amber-300 text-[11px] normal-case flex items-center gap-1">
+            Split Workspace →
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- Station 1 -->
+          <div class="p-3.5 rounded-xl bg-hub-surface border border-amber-500/50 hover:border-amber-400 space-y-2 cursor-pointer shadow-md transition">
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <span class="text-xs font-bold text-slate-100 block">Diseñador Gráfico HUD</span>
+                <span class="text-[10px] font-mono text-slate-400">📁 agent-hub · gemini-2.5-pro</span>
+              </div>
+              <span class="text-[10px] font-mono text-amber-400 font-bold">EN CURSO</span>
+            </div>
+            <p class="text-xs text-slate-300 line-clamp-2 leading-relaxed">
+              Completando iteración 4 de la interfaz con diseño táctico militar, SVG arquitectónico y maquetas interactivas...
+            </p>
+            <div class="flex items-center justify-between text-[10px] font-mono text-slate-400 pt-2 border-t border-hub-border-subtle">
+              <span>32 mensajes</span>
+              <span class="text-amber-400 font-semibold">Abrir Chat →</span>
+            </div>
+          </div>
+
+          <!-- Station 2 -->
+          <div class="p-3.5 rounded-xl bg-hub-surface border border-hub-border hover:border-slate-500 space-y-2 cursor-pointer shadow-sm transition">
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <span class="text-xs font-bold text-slate-100 block">Arquitecto de Solución</span>
+                <span class="text-[10px] font-mono text-slate-400">📁 agent-hub · claude-3-5-sonnet</span>
+              </div>
+              <span class="text-[10px] font-mono text-sky-300 font-medium">EN ESPERA</span>
+            </div>
+            <p class="text-xs text-slate-300 line-clamp-2 leading-relaxed">
+              Estructura de memoria y orquestación multi-agente preparada para despliegue de squads continuos.
+            </p>
+            <div class="flex items-center justify-between text-[10px] font-mono text-slate-400 pt-2 border-t border-hub-border-subtle">
+              <span>18 mensajes</span>
+              <span class="text-amber-400 font-semibold">Abrir Chat →</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- RIGHT COLUMN: MCP Mesh & Live Terminal (3 cols) -->
+    <aside class="lg:col-span-3 space-y-4">
+      <!-- MCP Servers Section -->
+      <section class="hud-card p-4 rounded-2xl space-y-3">
+        <div class="flex items-center justify-between pb-2 border-b border-hub-border text-xs font-bold uppercase tracking-wider text-slate-300">
+          <span class="flex items-center gap-2 text-emerald-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"/></svg>
+            Servidores MCP
+          </span>
+          <span class="font-mono text-emerald-400 font-bold">8/8 OK</span>
+        </div>
+
+        <div class="space-y-1.5 text-xs font-mono">
+          <div class="flex items-center justify-between p-2 rounded-lg bg-hub-surface border border-hub-border">
+            <span class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              <span class="text-slate-200">github</span>
+            </span>
+            <span class="text-[10px] text-emerald-400 font-semibold">24 tools</span>
+          </div>
+          <div class="flex items-center justify-between p-2 rounded-lg bg-hub-surface border border-hub-border">
+            <span class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              <span class="text-slate-200">filesystem</span>
+            </span>
+            <span class="text-[10px] text-emerald-400 font-semibold">14 tools</span>
+          </div>
+          <div class="flex items-center justify-between p-2 rounded-lg bg-hub-surface border border-hub-border">
+            <span class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              <span class="text-slate-200">jira</span>
+            </span>
+            <span class="text-[10px] text-emerald-400 font-semibold">32 tools</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Live Terminal Console -->
+      <section class="hud-card p-4 rounded-2xl space-y-3">
+        <div class="flex items-center justify-between pb-2 border-b border-hub-border text-xs font-bold uppercase tracking-wider text-slate-300">
+          <span class="flex items-center gap-2 text-emerald-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            Terminal Output
+          </span>
+          <span class="font-mono text-amber-400 text-[10px]">LIVE CRT</span>
+        </div>
+
+        <pre class="w-full h-48 overflow-y-auto rounded-xl bg-[#06080e] border border-hub-border p-3 font-mono text-[11px] leading-relaxed text-emerald-300/90 whitespace-pre-wrap break-all shadow-inner">
+$ npm run build:webview
+✓ 1565 modules transformed.
+✓ built in 2.08s
+
+$ npm run test:flows
+ℹ pass 11 · fail 0
+ℹ duration_ms 58.48ms
+
+$ git status --short
+M src/webview/components/TacticalHudView.tsx
+M src/webview/components/TelemetryDashboard.tsx
+
+Ready for tactical deployment.
+        </pre>
+      </section>
+    </aside>
+
+  </div>
+
+  <!-- FLOATING HUD NAVIGATION DOCK -->
+  <nav class="sticky bottom-2 z-30 flex justify-center pt-2">
+    <div class="flex items-center gap-1.5 p-1.5 rounded-2xl bg-hub-surface/90 border border-hub-border shadow-2xl backdrop-blur-xl">
+      <button class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30 shadow-inner">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        HUD
+      </button>
+      <button class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-800/50 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+        Chat
+      </button>
+      <button class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-800/50 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        Agentes
+      </button>
+      <button class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-800/50 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+        Memoria
+      </button>
+      <button class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-800/50 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        Docs
+      </button>
+      <button class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-800/50 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"/></svg>
+        MCPs
+      </button>
+      <button class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-800/50 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        Métricas
+      </button>
+    </div>
+  </nav>
+
+</body>
+</html>

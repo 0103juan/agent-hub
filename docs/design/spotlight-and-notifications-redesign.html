@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentHub // Spotlight HUD & Notifications Prototype</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #07090e;
+      color: #e2e8f0;
+    }
+    code, kbd, pre, .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .hud-border {
+      border: 1px solid #202b3f;
+    }
+    .hud-card {
+      background: linear-gradient(180deg, #101625 0%, #0c101a 100%);
+      border: 1px solid #202b3f;
+    }
+    .glow-indigo {
+      box-shadow: 0 0 25px -5px rgba(99, 102, 241, 0.25);
+    }
+    .glow-amber {
+      box-shadow: 0 0 25px -5px rgba(245, 158, 11, 0.25);
+    }
+    .glow-cyan {
+      box-shadow: 0 0 25px -5px rgba(6, 182, 212, 0.25);
+    }
+    .glow-emerald {
+      box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.25);
+    }
+  </style>
+</head>
+<body class="p-6 max-w-7xl mx-auto space-y-8">
+
+  <!-- Header -->
+  <header class="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-[#202b3f]">
+    <div>
+      <div class="flex items-center gap-2 mb-1">
+        <span class="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-pulse"></span>
+        <span class="text-xs font-mono font-semibold tracking-wider text-indigo-400 uppercase">Design System // Iteration 14</span>
+      </div>
+      <h1 class="text-2xl font-bold text-white tracking-tight">Tactical HUD // Spotlight &amp; Quick Alerts</h1>
+      <p class="text-xs text-slate-400 mt-0.5">High-Fidelity Specification for Quick Launcher, Signal Bell, Auth Modal &amp; Header Badges</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="px-2.5 py-1 rounded bg-[#0e131f] border border-[#202b3f] text-xs font-mono text-cyan-400">WCAG AA 4.5:1+</span>
+      <span class="px-2.5 py-1 rounded bg-indigo-950/40 border border-indigo-500/30 text-xs font-mono text-indigo-300">Alt + Space</span>
+    </div>
+  </header>
+
+  <!-- Showcase 1: Interactive Spotlight Modal Preview -->
+  <section class="space-y-4">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="text-sm font-bold text-slate-200">01. Spotlight Bar HUD</span>
+        <span class="text-xs text-slate-500 font-mono">Alt + Espacio quick overlay</span>
+      </div>
+      <span class="text-[11px] text-slate-400">Interactive Preview below</span>
+    </div>
+
+    <!-- Spotlight Mockup -->
+    <div class="p-8 rounded-2xl bg-black/80 backdrop-blur-md border border-[#202b3f] flex items-center justify-center">
+      <div class="w-full max-w-2xl bg-[#0e131f] border border-[#202b3f] rounded-2xl shadow-2xl overflow-hidden glow-indigo">
+        <!-- Input Row -->
+        <div class="flex items-center px-4 py-3.5 gap-3 border-b border-[#202b3f] bg-[#07090e]">
+          <div class="w-8 h-8 rounded-lg bg-indigo-950/60 border border-indigo-500/40 flex items-center justify-center text-indigo-400 shrink-0">
+            ⚡
+          </div>
+          <input
+            type="text"
+            id="spotlight-input"
+            value=""
+            placeholder="Escribe una instrucción rápida, /goal [objetivo], o presiona Enter..."
+            class="flex-1 bg-transparent border-none text-sm text-slate-100 placeholder-slate-500 focus:outline-none font-sans"
+          />
+          <div class="flex items-center gap-1.5 text-[11px] text-slate-400 font-mono">
+            <kbd class="px-2 py-0.5 rounded bg-[#161f31] border border-[#202b3f] text-slate-300">ESC</kbd>
+            <span class="text-slate-500">para salir</span>
+          </div>
+        </div>
+
+        <!-- Body / Chips -->
+        <div class="p-4 bg-[#0e131f] space-y-3">
+          <!-- Recent History -->
+          <div class="space-y-1">
+            <div class="flex items-center justify-between text-[11px] font-medium text-slate-400 px-1">
+              <span>Recientes (↑ ↓ para navegar)</span>
+              <span class="font-mono text-[10px] text-slate-500">5 últimas consultas</span>
+            </div>
+            <div class="space-y-1">
+              <button class="w-full text-left px-2.5 py-1.5 rounded-lg text-xs text-slate-300 hover:bg-[#151c2c] hover:text-white transition flex items-center justify-between group">
+                <span class="truncate">/goal Refactorizar el motor de memoria con pruebas unitarias</span>
+                <span class="text-[10px] font-mono text-slate-500 group-hover:text-indigo-400">hace 12m</span>
+              </button>
+              <button class="w-full text-left px-2.5 py-1.5 rounded-lg text-xs text-slate-300 hover:bg-[#151c2c] hover:text-white transition flex items-center justify-between group">
+                <span class="truncate">/loop Mejora la interfaz de usuario con diseño táctico</span>
+                <span class="text-[10px] font-mono text-slate-500 group-hover:text-indigo-400">hace 45m</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Suggested Quick Actions -->
+          <div class="pt-2 border-t border-[#1c2638] space-y-2">
+            <div class="text-[11px] font-mono font-semibold uppercase tracking-wider text-slate-400 px-1">Acciones Rápidas Sugeridas</div>
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+              <!-- /loop -->
+              <button onclick="document.getElementById('spotlight-input').value = '/loop '" class="flex items-center gap-2 p-2 rounded-xl bg-[#131a29] hover:bg-[#1a2336] border border-[#243147] hover:border-purple-500/50 text-left transition group cursor-pointer">
+                <div class="w-7 h-7 rounded-lg bg-purple-950/60 border border-purple-500/40 flex items-center justify-center text-purple-300 group-hover:scale-105 transition-transform">
+                  🔁
+                </div>
+                <div class="min-w-0">
+                  <div class="text-xs font-semibold text-slate-200">Modo Loop</div>
+                  <div class="text-[10px] text-slate-400 truncate">Bucle continuo</div>
+                </div>
+              </button>
+
+              <!-- /goal -->
+              <button onclick="document.getElementById('spotlight-input').value = '/goal '" class="flex items-center gap-2 p-2 rounded-xl bg-[#131a29] hover:bg-[#1a2336] border border-[#243147] hover:border-amber-500/50 text-left transition group cursor-pointer">
+                <div class="w-7 h-7 rounded-lg bg-amber-950/60 border border-amber-500/40 flex items-center justify-center text-amber-300 group-hover:scale-105 transition-transform">
+                  🎯
+                </div>
+                <div class="min-w-0">
+                  <div class="text-xs font-semibold text-slate-200">Modo Meta</div>
+                  <div class="text-[10px] text-slate-400 truncate">Meta con tests</div>
+                </div>
+              </button>
+
+              <!-- Commit -->
+              <button class="flex items-center gap-2 p-2 rounded-xl bg-[#131a29] hover:bg-[#1a2336] border border-[#243147] hover:border-emerald-500/50 text-left transition group cursor-pointer">
+                <div class="w-7 h-7 rounded-lg bg-emerald-950/60 border border-emerald-500/40 flex items-center justify-center text-emerald-300 group-hover:scale-105 transition-transform">
+                  ⚡
+                </div>
+                <div class="min-w-0">
+                  <div class="text-xs font-semibold text-slate-200">Auto Commit</div>
+                  <div class="text-[10px] text-slate-400 truncate">Git semántico</div>
+                </div>
+              </button>
+
+              <!-- Tests -->
+              <button class="flex items-center gap-2 p-2 rounded-xl bg-[#131a29] hover:bg-[#1a2336] border border-[#243147] hover:border-cyan-500/50 text-left transition group cursor-pointer">
+                <div class="w-7 h-7 rounded-lg bg-cyan-950/60 border border-cyan-500/40 flex items-center justify-center text-cyan-300 group-hover:scale-105 transition-transform">
+                  🧪
+                </div>
+                <div class="min-w-0">
+                  <div class="text-xs font-semibold text-slate-200">Correr Tests</div>
+                  <div class="text-[10px] text-slate-400 truncate">npm test suite</div>
+                </div>
+              </button>
+
+              <!-- Audit -->
+              <button class="flex items-center gap-2 p-2 rounded-xl bg-[#131a29] hover:bg-[#1a2336] border border-[#243147] hover:border-indigo-500/50 text-left transition group cursor-pointer">
+                <div class="w-7 h-7 rounded-lg bg-indigo-950/60 border border-indigo-500/40 flex items-center justify-center text-indigo-300 group-hover:scale-105 transition-transform">
+                  🛡️
+                </div>
+                <div class="min-w-0">
+                  <div class="text-xs font-semibold text-slate-200">Auditar Rama</div>
+                  <div class="text-[10px] text-slate-400 truncate">Seguridad diffs</div>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer info -->
+        <div class="px-4 py-2.5 bg-[#07090e] border-t border-[#202b3f] flex items-center justify-between text-[11px] text-slate-400 font-mono">
+          <div class="flex items-center gap-2">
+            <span>Atajo global:</span>
+            <kbd class="px-1.5 py-0.5 rounded bg-[#131a29] border border-[#202b3f] text-slate-300">Alt + Espacio</kbd>
+          </div>
+          <span class="text-slate-500">AgentHub Desktop v0.1.0 • Tactical HUD</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Showcase 2: Notifications Popover & Add Account Modal Preview -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Notifications Popover -->
+    <div class="hud-card p-5 rounded-xl space-y-4">
+      <div class="flex items-center justify-between border-b border-[#202b3f] pb-3">
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-bold text-slate-200">02. Signal Bell Popover</span>
+          <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+        </div>
+        <span class="px-2 py-0.5 rounded bg-red-950/50 border border-red-500/40 text-[10px] font-mono text-red-400">3 SIN LEER</span>
+      </div>
+
+      <!-- Popover Body Mockup -->
+      <div class="rounded-xl bg-[#07090e] border border-[#202b3f] p-2 space-y-2 shadow-xl">
+        <div class="flex items-center justify-between px-2 py-1 text-[10px] font-mono text-slate-400 uppercase tracking-wider border-b border-[#161f31]">
+          <span>3 avisos activos</span>
+          <button class="text-slate-400 hover:text-slate-200 transition text-[11px] normal-case">Limpiar todo</button>
+        </div>
+
+        <!-- Item 1: Error -->
+        <button class="w-full text-left p-2 rounded-lg bg-red-950/20 border border-red-900/40 hover:bg-red-950/30 transition flex items-start gap-2.5">
+          <span class="text-xs mt-0.5 text-red-400">⚠️</span>
+          <div class="min-w-0 flex-1">
+            <div class="text-xs font-semibold text-red-300">Fallo en test: `runner.spec.ts`</div>
+            <div class="text-[10px] text-slate-400 mt-0.5">El proceso falló con exit code 1 al evaluar el parser.</div>
+            <div class="flex items-center gap-2 mt-1 text-[10px] font-mono text-slate-500">
+              <span>hace 3m</span>
+              <span>•</span>
+              <span class="text-indigo-400">Ir a sesión #14</span>
+            </div>
+          </div>
+        </button>
+
+        <!-- Item 2: Success -->
+        <button class="w-full text-left p-2 rounded-lg bg-emerald-950/20 border border-emerald-900/40 hover:bg-emerald-950/30 transition flex items-start gap-2.5">
+          <span class="text-xs mt-0.5 text-emerald-400">✓</span>
+          <div class="min-w-0 flex-1">
+            <div class="text-xs font-semibold text-emerald-300">Commit semántico generado</div>
+            <div class="text-[10px] text-slate-400 mt-0.5">feat(webview): redesign Tactical HUD components</div>
+            <div class="flex items-center gap-2 mt-1 text-[10px] font-mono text-slate-500">
+              <span>hace 14m</span>
+              <span>•</span>
+              <span class="text-indigo-400">Ir a sesión #13</span>
+            </div>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Add Account Modal Preview -->
+    <div class="hud-card p-5 rounded-xl space-y-4">
+      <div class="flex items-center justify-between border-b border-[#202b3f] pb-3">
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-bold text-slate-200">03. Add Account Provider Modal</span>
+        </div>
+        <span class="px-2 py-0.5 rounded bg-indigo-950/50 border border-indigo-500/40 text-[10px] font-mono text-indigo-300">MODAL SHELL</span>
+      </div>
+
+      <div class="rounded-xl bg-[#07090e] border border-[#202b3f] p-4 space-y-4 shadow-xl">
+        <!-- Provider Buttons -->
+        <div class="grid grid-cols-3 gap-2">
+          <button class="p-2.5 rounded-lg border bg-orange-600/20 text-orange-300 border-orange-500/50 text-xs font-semibold text-center transition">
+            Claude Code
+          </button>
+          <button class="p-2.5 rounded-lg border bg-[#162035] hover:bg-[#1a263d] text-slate-400 border-[#202b3f] text-xs font-semibold text-center transition">
+            Antigravity
+          </button>
+          <button class="p-2.5 rounded-lg border bg-[#162035] hover:bg-[#1a263d] text-slate-400 border-[#202b3f] text-xs font-semibold text-center transition">
+            Ollama Local
+          </button>
+        </div>
+
+        <p class="text-[11px] text-slate-400 bg-[#0e131f] p-2 rounded border border-[#202b3f]">
+          Se abre el inicio de sesión de Claude Code en el navegador para autorizar la CLI de Anthropic.
+        </p>
+
+        <div>
+          <label class="block text-[11px] text-slate-400 font-medium mb-1">
+            Etiqueta identificadora (ej: Trabajo, Personal 2, Cliente):
+          </label>
+          <input
+            type="text"
+            value="Trabajo - Proyectos Core"
+            class="w-full bg-[#0e131f] border border-[#243147] rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-sans"
+          />
+        </div>
+
+        <div class="flex items-center justify-between pt-2 border-t border-[#1c2638]">
+          <span class="font-mono text-[10px] text-slate-500">24/40 caracteres</span>
+          <div class="flex items-center gap-2">
+            <button class="px-3 py-1.5 text-xs rounded-lg text-slate-400 hover:bg-[#131a29] transition">Cancelar</button>
+            <button class="px-3 py-1.5 text-xs rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium transition shadow-lg shadow-indigo-600/30">
+              Iniciar sesión
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Showcase 3: Header Badges & Workspace Selectors -->
+  <section class="hud-card p-5 rounded-xl space-y-4">
+    <div class="flex items-center justify-between border-b border-[#202b3f] pb-3">
+      <div class="flex items-center gap-2">
+        <span class="text-sm font-bold text-slate-200">04. Header Controls // Workspace &amp; Git Branch Badges</span>
+      </div>
+      <span class="px-2 py-0.5 rounded bg-cyan-950/50 border border-cyan-500/40 text-[10px] font-mono text-cyan-300">CONTEXTUAL HEADERS</span>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <!-- Workspace Picker Preview -->
+      <div class="p-3.5 rounded-xl bg-[#07090e] border border-[#202b3f] space-y-3">
+        <div class="text-xs font-semibold text-slate-300 flex items-center gap-2">
+          <span>📂 Workspace Picker Trigger &amp; Card</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#0e131f] border border-[#202b3f] hover:border-indigo-500/50 cursor-pointer">
+            <span class="text-indigo-400 text-xs">📂</span>
+            <span class="font-mono text-xs font-semibold text-slate-200">agent-hub</span>
+            <span class="text-slate-500 text-[10px]">▼</span>
+          </div>
+          <span class="text-xs text-slate-400">Trigger compacto en la barra superior</span>
+        </div>
+
+        <!-- Dropdown mockup -->
+        <div class="p-2.5 rounded-xl bg-[#0e131f] border border-[#202b3f] space-y-2 text-xs">
+          <div class="text-[10px] font-mono uppercase text-slate-400 tracking-wider">Espacio de Trabajo Activo</div>
+          <div class="p-2 rounded bg-[#07090e] border border-[#202b3f] font-mono text-[11px] text-cyan-300 truncate">
+            C:/Users/juan0/Documents/GitHub/portafolio/agent-hub
+          </div>
+          <div class="grid grid-cols-3 gap-1 pt-1">
+            <button class="p-1 rounded bg-[#162035] hover:bg-[#1c2940] text-slate-300 text-[11px] text-center">Explorador</button>
+            <button class="p-1 rounded bg-[#162035] hover:bg-[#1c2940] text-emerald-300 text-[11px] text-center">VS Code</button>
+            <button class="p-1 rounded bg-[#162035] hover:bg-[#1c2940] text-slate-300 text-[11px] text-center">Copiar ruta</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Git Branch Badge Preview -->
+      <div class="p-3.5 rounded-xl bg-[#07090e] border border-[#202b3f] space-y-3">
+        <div class="text-xs font-semibold text-slate-300 flex items-center gap-2">
+          <span>🌿 Git Branch Badge &amp; Switcher</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#0e131f] border border-emerald-500/40 cursor-pointer">
+            <span class="text-emerald-400 text-xs">🌿</span>
+            <span class="font-mono text-xs font-semibold text-slate-200">main</span>
+            <span class="px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-300 font-mono text-[10px]">clean</span>
+            <span class="text-slate-500 text-[10px]">▼</span>
+          </div>
+          <span class="text-xs text-slate-400">Badge con detector de cambios</span>
+        </div>
+
+        <!-- Branch actions mockup -->
+        <div class="p-2.5 rounded-xl bg-[#0e131f] border border-[#202b3f] space-y-2 text-xs">
+          <div class="flex items-center justify-between text-[10px] font-mono uppercase text-slate-400">
+            <span>Ramas Locales</span>
+            <span class="text-indigo-400 cursor-pointer">+ Nueva rama</span>
+          </div>
+          <div class="space-y-1">
+            <div class="flex items-center justify-between p-1.5 rounded bg-emerald-950/20 border border-emerald-800/40 text-emerald-300">
+              <span class="font-mono">✓ main (activa)</span>
+              <span class="text-[10px] text-emerald-400 font-mono">HEAD</span>
+            </div>
+            <div class="flex items-center justify-between p-1.5 rounded bg-[#111726] border border-[#202b3f] text-slate-300">
+              <span class="font-mono">feat/tactical-hud-v2</span>
+              <span class="text-[10px] text-slate-500 font-mono">hace 1h</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Color & Contrast Verification Token Board -->
+  <section class="hud-card p-5 rounded-xl space-y-4">
+    <div class="flex items-center justify-between border-b border-[#202b3f] pb-3">
+      <h2 class="text-sm font-bold text-slate-200 uppercase tracking-wider font-mono">05. Design Token Matrix &amp; Contrast Validation</h2>
+      <span class="text-xs font-mono text-emerald-400">ALL PASS WCAG AA / AAA</span>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
+      <div class="p-3 rounded-lg bg-[#07090e] border border-[#202b3f]">
+        <div class="text-[10px] font-mono text-slate-500">Surface Root</div>
+        <div class="text-xs font-bold text-slate-200 mt-1">#07090e</div>
+        <div class="text-[10px] text-emerald-400 mt-2 font-mono">15.8:1 vs text</div>
+      </div>
+      <div class="p-3 rounded-lg bg-[#0e131f] border border-[#202b3f]">
+        <div class="text-[10px] font-mono text-slate-500">Surface Panel</div>
+        <div class="text-xs font-bold text-slate-200 mt-1">#0e131f</div>
+        <div class="text-[10px] text-emerald-400 mt-2 font-mono">14.1:1 vs text</div>
+      </div>
+      <div class="p-3 rounded-lg bg-[#141c2e] border border-[#202b3f]">
+        <div class="text-[10px] font-mono text-slate-500">Surface Elevated</div>
+        <div class="text-xs font-bold text-slate-200 mt-1">#141c2e</div>
+        <div class="text-[10px] text-emerald-400 mt-2 font-mono">11.6:1 vs text</div>
+      </div>
+      <div class="p-3 rounded-lg bg-[#6366f1]/20 border border-[#6366f1]/40">
+        <div class="text-[10px] font-mono text-indigo-300">Accent Indigo</div>
+        <div class="text-xs font-bold text-indigo-400 mt-1">#6366f1</div>
+        <div class="text-[10px] text-emerald-400 mt-2 font-mono">Focus / Primary</div>
+      </div>
+      <div class="p-3 rounded-lg bg-[#06b6d4]/20 border border-[#06b6d4]/40">
+        <div class="text-[10px] font-mono text-cyan-300">Accent Cyan</div>
+        <div class="text-xs font-bold text-cyan-400 mt-1">#06b6d4</div>
+        <div class="text-[10px] text-emerald-400 mt-2 font-mono">Tests &amp; Files</div>
+      </div>
+      <div class="p-3 rounded-lg bg-[#10b981]/20 border border-[#10b981]/40">
+        <div class="text-[10px] font-mono text-emerald-300">Accent Emerald</div>
+        <div class="text-xs font-bold text-emerald-400 mt-1">#10b981</div>
+        <div class="text-[10px] text-emerald-400 mt-2 font-mono">Git &amp; Success</div>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>

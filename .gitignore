@@ -3,6 +3,7 @@ dist/
 dist_package/
 .playwright-mcp/
 tests/dist.test.js
+tests/dist.flows.test.js
 *.vsix
 .DS_Store
 Thumbs.db

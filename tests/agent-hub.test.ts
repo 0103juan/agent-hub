@@ -34,6 +34,7 @@ import { HubServer } from '../src/server/hub-server';
 import { isFromHost, isElectron } from '../src/webview/vscode-api';
 import { editorHandlers, resolveShellOption } from '../src/host/handlers/editor-handlers';
 import { sessionHandlers } from '../src/host/handlers/session-handlers';
+import { agentName } from '../src/shared/agent-name';
 import { pruneExperience, selectExperience } from '../src/shared/experience';
 import { buildTeamReport } from '../src/shared/team-report';
 import { nextRoles } from '../src/shared/protocol-roles';
@@ -2500,6 +2501,15 @@ describe('Utilidades de la interfaz y acciones', () => {
     assert.strictEqual(extensionFor('desconocido'), 'txt');
   });
 
+  it('timeUntil acepta resetsAt en segundos o milisegundos', async () => {
+    const { timeUntil } = await import('../src/webview/utils/format');
+    const now = 1_800_000_000_000;
+    assert.strictEqual(timeUntil(now / 1000 + 25 * 60, now), '25 min');
+    assert.strictEqual(timeUntil(now + (2 * 60 + 13) * 60_000, now), '2 h 13 min');
+    assert.strictEqual(timeUntil(now / 1000 + (3 * 24 + 4) * 3600, now), '3 d 4 h');
+    assert.strictEqual(timeUntil(now / 1000 - 5, now), 'ya se reinició');
+  });
+
   it('cada acción tiene grupo válido y las del agente traen un prompt con contenido', async () => {
     const { ACTION_GROUPS } = await import('../src/shared/workspace-actions');
     for (const action of WORKSPACE_ACTIONS) {
@@ -2688,5 +2698,157 @@ describe('Historial de la terminal por proyecto', () => {
     assert.equal(terminalHistoryKey('C:/Users/X/App/'), key);
     assert.notEqual(terminalHistoryKey('C:/Users/X/Otro'), key);
     assert.equal(terminalHistoryKey(), 'agent-hub.terminalHistory');
+  });
+});
+
+describe('Chats y agentes por flujo', () => {
+  const HANDOFF = (to: string) => `>> ${to}: Hecho: spec\nArchivos: a.md\nPendiente: tests\nVerificación: criterios\n\n`;
+  const REQ = 'Quiero mejorar la creación de chats y de agentes, que se organicen mejor por flujo';
+
+  class Recorder implements AgentProvider {
+    public readonly type = 'claude' as const;
+    public requests: AgentTurnRequest[] = [];
+    constructor(private readonly script: (request: AgentTurnRequest, emit: (event: AgentEvent) => void) => TurnOutcome = () => ({ status: 'completed' })) {}
+    public async discoverAccounts() { return [CLAUDE_ACCOUNT]; }
+    public startTurn(request: AgentTurnRequest, onEvent: (event: AgentEvent) => void): AgentRun {
+      this.requests.push(request);
+      return { outcome: Promise.resolve(this.script(request, onEvent)), cancel: () => undefined };
+    }
+    public openLogin() {}
+    public describeLogout() { return undefined; }
+    public async logout() {}
+    public addAccount() {}
+    public prewarm() {}
+  }
+
+  /** `list()` ordena por updatedAt y empata en el mismo milisegundo: el Map conserva el orden de creación. */
+  const inCreationOrder = (sessions: SessionStore): ConversationSession[] =>
+    [...(sessions as any).sessions.values()].filter((s: ConversationSession) => s.squad);
+
+  /** Hub mínimo con un SessionStore real; el chat sólo anota lo que se le manda. */
+  function flowHub() {
+    const dir = tempDir();
+    const sessions = new SessionStore(dir);
+    const sent: Array<{ sessionId: string; prompt: string }> = [];
+    const hub: any = {
+      sessions,
+      providers: { listAccounts: async () => [CLAUDE_ACCOUNT] },
+      chat: { send: async (request: any) => { sent.push(request); }, publishSessions() {}, addNote() {} },
+      post() {}
+    };
+    return { hub, sessions, sent, handlers: sessionHandlers(hub) as any };
+  }
+
+  it('CA10: el almacén guarda squadName y el primer mensaje no pisa el título del equipo', () => {
+    const sessions = new SessionStore(tempDir());
+    const s = (sessions as any).create({ squad: 'S', squadName: 'Mi flujo', taskSlug: 'tester-1', protocolRole: 'tester', title: 'Tester · Mi flujo' });
+    assert.strictEqual(s.squadName, 'Mi flujo');
+    assert.strictEqual(s.title, 'Tester · Mi flujo');
+    sessions.appendMessage(s.id, { id: 'm1', role: 'user', content: 'Hola, empecemos', timestamp: Date.now() } as any);
+    assert.strictEqual(sessions.get(s.id)?.title, 'Tester · Mi flujo');
+  });
+
+  it('CA8: una sesión guardada sin squadName sigue igual (título, dirección y sin migración)', () => {
+    const old = migrateSession({ id: 'v', title: 'tester-1', taskSlug: 'tester-1', squad: 'pipeline-1', profileId: 'p', modelId: 'm', effort: 'low', messages: [], createdAt: 1, updatedAt: 1 } as any);
+    assert.strictEqual(old.squadName, undefined);
+    assert.strictEqual(old.title, 'tester-1');
+    assert.strictEqual(agentName(old), 'tester-1');
+  });
+
+  it('CA2: startPipeline crea cinco sesiones con el mismo squad/squadName y títulos legibles', async () => {
+    const { handlers, sessions } = flowHub();
+    await handlers.startPipeline({ projectName: 'P', prompt: REQ, template: 'feature' });
+    const team = inCreationOrder(sessions);
+    assert.strictEqual(team.length, 5);
+    assert.strictEqual(new Set(team.map((s) => s.squad)).size, 1);
+    const flow = team[0].squadName;
+    assert.ok(flow && flow.length <= 40 && !/^quiero/i.test(flow), String(flow));
+    assert.ok(team.every((s) => s.squadName === flow));
+    const labels = ['Arquitecto', 'Tester', 'Desarrollador', 'Revisor', 'Documentador'];
+    assert.deepStrictEqual(team.map((s) => s.title), labels.map((l) => `${l} · ${flow}`));
+    assert.ok(team.every((s) => !/-\d+$/.test(s.title)));
+    // la dirección no cambia
+    assert.deepStrictEqual(team.map((s) => s.taskSlug), ['arquitecto-1', 'tester-1', 'desarrollador-1', 'revisor-1', 'documentador-1']);
+    assert.deepStrictEqual(team.map((s) => agentName(s)), team.map((s) => s.taskSlug));
+  });
+
+  it('CA9: spawnAgents con nombre de flujo lo pone en squadName y en los títulos', async () => {
+    const { handlers, sessions } = flowHub();
+    await handlers.spawnAgents({ projectName: 'P', roles: ['desarrollador', 'tester'], prompt: '', flowName: 'Migración de login' });
+    const team = inCreationOrder(sessions);
+    assert.deepStrictEqual(team.map((s) => s.squadName), ['Migración de login', 'Migración de login']);
+    assert.deepStrictEqual(team.map((s) => s.title), ['Desarrollador · Migración de login', 'Tester · Migración de login']);
+    assert.deepStrictEqual(team.map((s) => s.taskSlug), ['desarrollador-1', 'tester-1']);
+  });
+
+  it('CA9: sin nombre sale del mensaje inicial; sin ambos, "Equipo de <proyecto>"', async () => {
+    const withPrompt = flowHub();
+    await withPrompt.handlers.spawnAgents({ projectName: 'P', roles: ['desarrollador'], prompt: 'Necesito agregar el login' });
+    assert.strictEqual(withPrompt.sessions.list().find((s) => s.squad)?.squadName, 'Agregar el login');
+
+    const bare = flowHub();
+    await bare.handlers.spawnAgents({ projectName: 'Proyecto X', roles: ['desarrollador'], prompt: '  ' });
+    assert.strictEqual(bare.sessions.list().find((s) => s.squad)?.squadName, 'Equipo de Proyecto X');
+  });
+
+  it('CA5: spawnAgents con dos desarrolladores conserva desarrollador-1/-2 como dirección', async () => {
+    const { handlers, sessions } = flowHub();
+    await handlers.spawnAgents({ projectName: 'P', roles: ['desarrollador', 'desarrollador'], prompt: '', flowName: 'F' });
+    const team = inCreationOrder(sessions);
+    assert.deepStrictEqual(team.map((s) => s.taskSlug), ['desarrollador-1', 'desarrollador-2']);
+  });
+
+  it('CA3: `>> tester-1` sigue llegando al tester de un equipo con nombre de flujo', async () => {
+    const dir = tempDir();
+    const sessions = new SessionStore(dir);
+    const arq = (sessions as any).create({ taskSlug: 'arquitecto-1', protocolRole: 'arquitecto', squad: 'S', squadName: 'Mi flujo', title: 'Arquitecto · Mi flujo' });
+    const tester = (sessions as any).create({ taskSlug: 'tester-1', protocolRole: 'tester', squad: 'S', squadName: 'Mi flujo', title: 'Tester · Mi flujo' });
+    const provider = new Recorder((request, emit) => {
+      if (request.sessionId === arq.id || provider.requests.length === 1) emit({ kind: 'text', text: HANDOFF('tester-1') });
+      return { status: 'completed' };
+    });
+    const chat = new ChatService(sessions, new TelemetryStore(dir), new ProviderRegistry([provider]), () => undefined);
+    await chat.send({ sessionId: arq.id, prompt: 'inicia', workspaceDir: dir });
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    assert.ok(tester.messages.some((m) => m.role === 'user' && m.content.includes('Hecho: spec')));
+    assert.strictEqual(agentName(tester), 'tester-1');
+  });
+
+  it('CA4: el mismo `tester-1` en dos flujos recibe sólo del arquitecto de su propio squad', async () => {
+    const dir = tempDir();
+    const sessions = new SessionStore(dir);
+    const make = (squad: string, flow: string) => ({
+      arq: (sessions as any).create({ taskSlug: 'arquitecto-1', protocolRole: 'arquitecto', squad, squadName: flow, projectName: 'P' }),
+      tester: (sessions as any).create({ taskSlug: 'tester-1', protocolRole: 'tester', squad, squadName: flow, projectName: 'P' })
+    });
+    const a = make('A', 'Flujo A');
+    const b = make('B', 'Flujo B');
+    let first = true;
+    const provider = new Recorder((_request, emit) => {
+      if (first) { first = false; emit({ kind: 'text', text: HANDOFF('tester-1') }); }
+      return { status: 'completed' };
+    });
+    const chat = new ChatService(sessions, new TelemetryStore(dir), new ProviderRegistry([provider]), () => undefined);
+    await chat.send({ sessionId: a.arq.id, prompt: 'inicia', workspaceDir: dir });
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    assert.strictEqual(a.tester.messages.filter((m) => m.role === 'user').length, 1);
+    assert.strictEqual(b.tester.messages.filter((m) => m.role === 'user').length, 0);
+  });
+
+  it('CA11: los avisos de fin de turno usan el nombre legible del flujo', async () => {
+    const dir = tempDir();
+    const sessions = new SessionStore(dir);
+    const active = (sessions as any).create({ taskSlug: 'arquitecto-1', protocolRole: 'arquitecto', squad: 'S', squadName: 'Mi flujo', title: 'Arquitecto · Mi flujo' });
+    const tester = (sessions as any).create({ taskSlug: 'tester-1', protocolRole: 'tester', squad: 'S', squadName: 'Mi flujo', title: 'Tester · Mi flujo' });
+    sessions.setActive(active.id);
+    const notices: string[] = [];
+    const provider = new Recorder((_request, emit) => {
+      emit({ kind: 'text', text: 'terminado' });
+      return { status: 'completed' };
+    });
+    const chat = new ChatService(sessions, new TelemetryStore(dir), new ProviderRegistry([provider]), () => undefined, (text) => notices.push(text));
+    await chat.send({ sessionId: tester.id, prompt: 'inicia', workspaceDir: dir });
+    assert.strictEqual(notices.length, 1);
+    assert.strictEqual(notices[0], 'Tester · Mi flujo terminó');
   });
 });

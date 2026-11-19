@@ -36,7 +36,7 @@ const AttachmentPreview: React.FC<{ attachment: FileContextAttachment }> = ({ at
     <div className={`text-[11px] font-mono flex items-center gap-1 ${colorClass}`}>
       {icon}
       <span className="truncate max-w-[200px]">{file}</span>
-      {sizeFormatted && <span className="text-zinc-400 text-[11px]">({sizeFormatted})</span>}
+      {sizeFormatted && <span className="text-slate-400 text-[11px]">({sizeFormatted})</span>}
     </div>
   );
 
@@ -51,7 +51,7 @@ const AttachmentPreview: React.FC<{ attachment: FileContextAttachment }> = ({ at
             onClick={() => fsPath && postToHost({ command: 'openAttachment', fsPath })}
             className="block"
           >
-            <img src={imageUri} alt={file} className="max-h-40 max-w-[240px] rounded-lg border border-zinc-750 object-contain bg-black/40" />
+            <img src={imageUri} alt={file} className="max-h-40 max-w-[240px] rounded-lg border border-[#202b3f] object-contain bg-black/40" />
           </button>
         )}
         {caption(<ImageIcon className="w-3 h-3 text-pink-400" />, 'text-pink-300')}
@@ -60,7 +60,7 @@ const AttachmentPreview: React.FC<{ attachment: FileContextAttachment }> = ({ at
   }
   if (mediaType === 'audio') {
     return (
-      <div className="w-full max-w-md space-y-1 p-2 rounded-lg bg-zinc-950/60 border border-zinc-800">
+      <div className="w-full max-w-md space-y-1 p-2 rounded-lg bg-[#07090e] border border-[#202b3f]">
         {caption(<Music className="w-3.5 h-3.5 text-amber-400" />, 'text-amber-300')}
         {mediaUri && <audio controls src={mediaUri} className="w-full h-8" />}
       </div>
@@ -69,12 +69,12 @@ const AttachmentPreview: React.FC<{ attachment: FileContextAttachment }> = ({ at
   if (mediaType === 'video') {
     return (
       <div className="space-y-1 w-full max-w-lg">
-        {mediaUri && <video controls src={mediaUri} className="max-h-64 w-full rounded-lg border border-zinc-750 bg-black/60" />}
-        {caption(<Film className="w-3.5 h-3.5 text-purple-400" />, 'text-purple-300')}
+        {mediaUri && <video controls src={mediaUri} className="max-h-64 w-full rounded-lg border border-[#202b3f] bg-black/60" />}
+        {caption(<Film className="w-3.5 h-3.5 text-violet-400" />, 'text-violet-300')}
       </div>
     );
   }
-  return <span className="text-[11px] font-mono text-indigo-300">{file}{attachment.lines ? `#${attachment.lines}` : ''}</span>;
+  return <span className="text-[11px] font-mono text-cyan-300">{file}{attachment.lines ? `#${attachment.lines}` : ''}</span>;
 };
 
 type TurnItem = { kind: 'note'; text: string } | { kind: 'step'; label: string };
@@ -106,7 +106,7 @@ function stepIcon(label: string): React.ReactNode {
   if (l.includes('file') || l.includes('read') || l.includes('edit') || l.includes('write') || l.includes('archivo') || l.includes('patch')) {
     return <FileCode className="h-3 w-3 text-emerald-400 shrink-0" />;
   }
-  return <Terminal className="h-3 w-3 text-indigo-400 shrink-0" />;
+  return <Terminal className="h-3 w-3 text-cyan-400 shrink-0" />;
 }
 
 const TurnProcess: React.FC<{ message: ChatMessage; process: TurnItem[]; hasAnswer: boolean }> = ({ message, process, hasAnswer }) => {
@@ -119,35 +119,35 @@ const TurnProcess: React.FC<{ message: ChatMessage; process: TurnItem[]; hasAnsw
 
   return (
     // Abierto solo mientras trabaja y aún no hay respuesta; después queda plegado.
-    <details open={message.isStreaming && !hasAnswer} className="group mb-2.5 rounded-lg border border-zinc-800 bg-zinc-950/60 text-[12px] overflow-hidden shadow-xs">
+    <details open={message.isStreaming && !hasAnswer} className="group mb-3 rounded-xl border border-[#202b3f] bg-[#07090e] text-[12px] overflow-hidden shadow-sm">
       {message.isStreaming && <div className="aurora-border h-0.5 w-full" />}
-      <summary className="flex cursor-pointer select-none items-center gap-1.5 px-2.5 py-1.5 text-[11px] text-zinc-400 hover:text-zinc-200 transition">
-        {message.isStreaming ? <Loader2 className="h-3.5 w-3.5 shrink-0 text-indigo-400 animate-spin" /> : <ChevronRight className="h-3.5 w-3.5 shrink-0 transition-transform group-open:rotate-90 text-zinc-500" />}
-        <span className="font-semibold text-zinc-200">Proceso de ejecución</span>
-        <span className="truncate text-zinc-400">· {summary}</span>
+      <summary className="flex cursor-pointer select-none items-center gap-2 px-3 py-2 text-[11px] text-slate-400 hover:text-slate-200 transition">
+        {message.isStreaming ? <Loader2 className="h-3.5 w-3.5 shrink-0 text-cyan-400 animate-spin" /> : <ChevronRight className="h-3.5 w-3.5 shrink-0 transition-transform group-open:rotate-90 text-slate-500" />}
+        <span className="font-bold text-slate-200">Proceso de ejecución</span>
+        <span className="truncate text-slate-400 font-mono">· {summary}</span>
       </summary>
-      <div className="space-y-2 border-t border-zinc-800/80 px-2.5 py-2">
+      <div className="space-y-2.5 border-t border-[#162035] px-3 py-2.5">
         {message.thinking && (
-          <details open={message.thinking.length <= LONG_BLOCK_CHARS} className="group/think text-zinc-400 border-l-2 border-purple-500/50 pl-2">
-            <summary className="flex cursor-pointer select-none items-center gap-1.5 hover:text-zinc-200 text-purple-300 font-medium">
-              <Brain className="h-3 w-3 shrink-0" />
+          <details open={message.thinking.length <= LONG_BLOCK_CHARS} className="group/think text-slate-400 border-l-2 border-violet-500/60 pl-2.5">
+            <summary className="flex cursor-pointer select-none items-center gap-1.5 hover:text-slate-200 text-violet-300 font-semibold">
+              <Brain className="h-3.5 w-3.5 shrink-0" />
               <span>Razonamiento interno</span>
-              <ChevronRight className="h-3 w-3 shrink-0 transition-transform group-open/think:rotate-90 text-zinc-500" />
+              <ChevronRight className="h-3 w-3 shrink-0 transition-transform group-open/think:rotate-90 text-slate-500" />
             </summary>
-            <p className="mt-1 max-h-48 overflow-y-auto whitespace-pre-wrap break-words italic text-zinc-400 font-mono text-[11px] leading-relaxed bg-zinc-900/60 p-2 rounded border border-zinc-800">
+            <p className="mt-1.5 max-h-48 overflow-y-auto whitespace-pre-wrap break-words italic text-slate-400 font-mono text-[11px] leading-relaxed bg-[#0a0e17] p-2.5 rounded-lg border border-[#202b3f]">
               {message.thinking}
             </p>
           </details>
         )}
-        <ol className="space-y-1.5 border-l border-zinc-800 pl-3">
+        <ol className="space-y-1.5 border-l border-[#202b3f] pl-3">
           {process.map((item, index) =>
             item.kind === 'step' ? (
-              <li key={index} className="flex items-center gap-1.5 font-mono text-[11px] text-zinc-400">
+              <li key={index} className="flex items-center gap-1.5 font-mono text-[11px] text-slate-400">
                 {stepIcon(item.label)}
-                <span className="truncate" title={item.label}>{item.label}</span>
+                <span className="truncate text-slate-300" title={item.label}>{item.label}</span>
               </li>
             ) : (
-              <li key={index} className="text-zinc-300 text-xs">
+              <li key={index} className="text-slate-300 text-xs">
                 <Markdown text={item.text} />
               </li>
             )
@@ -225,23 +225,23 @@ const QuestionOptionsCard: React.FC<{
   }, [disabled, selected, questionOptions.options]);
 
   return (
-    <div className="mt-3 p-3 rounded-xl border border-indigo-500/30 bg-zinc-950/80 shadow-md space-y-2.5">
-      <div className="flex items-center justify-between gap-2 text-xs font-semibold text-zinc-200">
-        <div className="flex items-center gap-2 min-w-0">
-          <Sparkles className="w-4 h-4 text-indigo-400 shrink-0" />
+    <div className="mt-3 p-3.5 rounded-xl border border-cyan-500/40 bg-[#07090e] shadow-md space-y-3">
+      <div className="flex items-center justify-between gap-2 text-xs font-bold text-slate-100">
+        <div className="flex items-center gap-2 min-w-0 text-cyan-300">
+          <Sparkles className="w-4 h-4 text-cyan-400 shrink-0" />
           <span className="truncate" title={questionOptions.question}>{questionOptions.question}</span>
         </div>
         <button
           type="button"
           onClick={() => setDismissed(true)}
           title="Descartar opciones"
-          className="p-1 rounded text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition cursor-pointer"
+          className="p-1 rounded-lg text-slate-500 hover:text-slate-300 hover:bg-[#0c1220] transition cursor-pointer"
         >
           <X className="w-3.5 h-3.5" />
         </button>
       </div>
 
-      <div className="space-y-1.5">
+      <div className="space-y-2">
         {questionOptions.options.slice(0, 5).map((opt, idx) => {
           const isRecommended = opt.toLowerCase().includes('(recommended)') || opt.toLowerCase().includes('(recomendado)');
           const cleanText = opt.replace(/\s*\((?:recommended|recomendado)\)\s*/gi, '').trim();
@@ -258,20 +258,20 @@ const QuestionOptionsCard: React.FC<{
               type="button"
               disabled={disabled || Boolean(selected)}
               onClick={() => handleSelect(cleanText)}
-              className={`w-full text-left p-2.5 rounded-lg text-xs flex items-start justify-between gap-2.5 border transition ${
+              className={`w-full text-left p-3 rounded-xl text-xs flex items-start justify-between gap-3 border transition-all duration-200 ${
                 isSelected
-                  ? 'bg-indigo-600/30 border-indigo-500 text-indigo-200 font-medium'
-                  : 'bg-zinc-900/90 hover:bg-zinc-800/90 border-zinc-800 hover:border-indigo-500/50 text-zinc-300 cursor-pointer'
+                  ? 'bg-cyan-500/20 border-cyan-400 text-cyan-200 font-semibold shadow-sm'
+                  : 'bg-[#0a0e17] hover:bg-[#0c1220] border-[#202b3f] hover:border-cyan-500/60 text-slate-300 cursor-pointer shadow-xs'
               } disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               <div className="flex items-start gap-2.5 min-w-0 flex-1">
-                <span className="w-5 h-5 rounded-full bg-zinc-800 text-zinc-300 font-mono text-[11px] flex items-center justify-center shrink-0 border border-zinc-700/60 mt-0.5">
+                <span className="w-5 h-5 rounded-md bg-[#0c1220] text-slate-200 font-mono text-[11px] font-bold flex items-center justify-center shrink-0 border border-[#202b3f] mt-0.5">
                   {idx + 1}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <div className="font-medium text-zinc-200 leading-tight">{title}</div>
+                  <div className="font-bold text-slate-100 leading-snug">{title}</div>
                   {description && (
-                    <div className="text-[11px] text-zinc-400 mt-1 leading-relaxed break-words font-normal">
+                    <div className="text-[11px] text-slate-400 mt-1 leading-relaxed break-words font-normal">
                       {description}
                     </div>
                   )}
@@ -279,11 +279,11 @@ const QuestionOptionsCard: React.FC<{
               </div>
               <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
                 {isRecommended && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-medium">
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-bold uppercase">
                     Recomendado
                   </span>
                 )}
-                {isSelected && <Check className="w-3.5 h-3.5 text-indigo-400 shrink-0" />}
+                {isSelected && <Check className="w-3.5 h-3.5 text-cyan-400 shrink-0" />}
               </div>
             </button>
           );
@@ -295,35 +295,35 @@ const QuestionOptionsCard: React.FC<{
               <button
                 type="button"
                 onClick={() => setShowOtherInput(true)}
-                className="w-full text-left p-2 rounded-lg text-xs flex items-center gap-2 border border-dashed border-zinc-700 hover:border-zinc-500 bg-zinc-900/40 hover:bg-zinc-800/60 text-zinc-400 hover:text-zinc-200 transition"
+                className="w-full text-left p-2.5 rounded-xl text-xs flex items-center gap-2 border border-dashed border-[#202b3f] hover:border-cyan-500/50 bg-[#0a0e17]/50 hover:bg-[#0c1220]/60 text-slate-400 hover:text-slate-200 transition cursor-pointer"
               >
-                <span className="w-5 h-5 rounded-full bg-zinc-800 text-zinc-400 font-mono text-[11px] flex items-center justify-center shrink-0 border border-zinc-700/60">
+                <span className="w-5 h-5 rounded-md bg-[#0c1220] text-slate-400 font-mono text-[11px] flex items-center justify-center shrink-0 border border-[#202b3f]">
                   {questionOptions.options.length < 5 ? questionOptions.options.length + 1 : '6'}
                 </span>
                 <span className="italic">Otra opción (Escribir respuesta personalizada)...</span>
               </button>
             ) : (
-              <form onSubmit={handleCustomSubmit} className="p-2 rounded-lg bg-zinc-900 border border-zinc-700 space-y-2">
+              <form onSubmit={handleCustomSubmit} className="p-3 rounded-xl bg-[#0a0e17] border border-[#202b3f] space-y-2.5">
                 <input
                   type="text"
                   autoFocus
                   placeholder="Escribe tu indicación o respuesta personalizada..."
                   value={otherText}
                   onChange={(e) => setOtherText(e.target.value)}
-                  className="w-full bg-zinc-950 border border-zinc-700 rounded p-1.5 text-xs text-zinc-200 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#07090e] border border-[#202b3f] focus:border-cyan-500 rounded-lg p-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none"
                 />
-                <div className="flex items-center justify-end gap-1.5">
+                <div className="flex items-center justify-end gap-2">
                   <button
                     type="button"
                     onClick={() => setShowOtherInput(false)}
-                    className="px-2 py-0.5 rounded text-[11px] text-zinc-400 hover:text-zinc-200"
+                    className="px-2.5 py-1 rounded-lg text-[11px] text-slate-400 hover:text-slate-200 transition"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
                     disabled={!otherText.trim()}
-                    className="px-2.5 py-1 rounded bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white text-[11px] font-medium transition"
+                    className="px-3 py-1 rounded-lg bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 disabled:opacity-40 text-slate-950 text-[11px] font-bold transition shadow-sm cursor-pointer"
                   >
                     Aprobar y enviar
                   </button>
@@ -335,7 +335,7 @@ const QuestionOptionsCard: React.FC<{
       </div>
 
       {selected && (
-        <div className="flex items-center gap-1.5 text-[11px] text-emerald-400 font-medium pt-0.5">
+        <div className="flex items-center gap-2 text-[11px] text-emerald-400 font-bold pt-1 border-t border-[#162035]">
           <Check className="w-3.5 h-3.5" />
           <span>Opción aprobada: "{selected}"</span>
         </div>
@@ -353,7 +353,7 @@ const TurnStatus: React.FC<{ message: ChatMessage; hasAnswer: boolean; live?: Li
   const phase = hasAnswer ? 'Escribiendo' : live?.commands.length || message.activity?.length ? 'Usando herramienta' : 'Pensando';
   const seconds = Math.max(0, Math.floor((now - message.timestamp) / 1000));
   return (
-    <span className="font-sans text-indigo-300">
+    <span className="font-sans text-cyan-300">
       {phase} · {Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, '0')}
     </span>
   );
@@ -376,7 +376,7 @@ const RestoreStage: React.FC<{ sessionId: string; messageId: string }> = ({ sess
       >
         Sí, volver
       </button>
-      <button type="button" aria-label="Cancelar" onClick={() => setConfirming(false)} className="text-zinc-400 hover:text-zinc-200">
+      <button type="button" aria-label="Cancelar" onClick={() => setConfirming(false)} className="text-slate-400 hover:text-slate-200">
         <X className="w-3 h-3" />
       </button>
     </span>
@@ -384,7 +384,7 @@ const RestoreStage: React.FC<{ sessionId: string; messageId: string }> = ({ sess
     <button
       type="button"
       onClick={() => setConfirming(true)}
-      className="flex items-center gap-1 text-indigo-300 hover:text-indigo-200 hover:underline px-1 py-0.5 rounded transition"
+      className="flex items-center gap-1 text-cyan-300 hover:text-cyan-200 hover:underline px-1 py-0.5 rounded transition"
       title="Devolver la copia aparte del equipo al estado en que terminó esta etapa"
     >
       <RotateCcw className="w-3 h-3" />
@@ -414,15 +414,15 @@ function groupSystemNotes(messages: ChatMessage[]): Array<ChatMessage | ChatMess
 
 /** Notas de sistema seguidas, en una sola tarjeta plegable. */
 const SystemGroup: React.FC<{ messages: ChatMessage[]; defaultOpen: boolean }> = ({ messages, defaultOpen }) => (
-  <details open={defaultOpen} className="group rounded-md border border-zinc-800 bg-zinc-950/40 text-[12px] overflow-hidden">
-    <summary className="flex cursor-pointer select-none items-center gap-1.5 px-2 py-1 text-[11px] text-zinc-400 hover:text-zinc-200">
-      <ChevronRight className="h-3 w-3 shrink-0 transition-transform group-open:rotate-90" />
-      <span className="font-medium text-zinc-300">{messages.length} eventos</span>
-      {messages.some((m) => m.isError) && <AlertCircle className="w-3 h-3 text-red-400" aria-label="Con error" />}
+  <details open={defaultOpen} className="group rounded-xl border border-[#202b3f] bg-[#0a0e17] text-[12px] overflow-hidden shadow-xs">
+    <summary className="flex cursor-pointer select-none items-center gap-1.5 px-2.5 py-1.5 text-[11px] text-slate-400 hover:text-slate-200 font-mono">
+      <ChevronRight className="h-3 w-3 shrink-0 transition-transform group-open:rotate-90 text-cyan-400" />
+      <span className="font-medium text-slate-300">{messages.length} eventos de sistema</span>
+      {messages.some((m) => m.isError) && <AlertCircle className="w-3.5 h-3.5 text-rose-400" aria-label="Con error" />}
     </summary>
-    <ul className="space-y-1 border-t border-zinc-800 px-2 py-2">
+    <ul className="space-y-1.5 border-t border-[#202b3f] px-3 py-2 bg-[#07090e]/60">
       {messages.map((m) => (
-        <li key={m.id} id={`msg-${m.id}`} className={m.isError ? 'text-red-300' : 'text-zinc-400'}>
+        <li key={m.id} id={`msg-${m.id}`} className={m.isError ? 'text-rose-300' : 'text-slate-300'}>
           <Markdown text={m.content} withCodeActions={false} />
         </li>
       ))}
@@ -471,81 +471,81 @@ const MessageBubble = memo<BubbleProps>(({ message, sessionId, onSendSuggestion,
     <div
       id={`msg-${message.id}`}
       style={message.isStreaming ? undefined : OFFSCREEN_SKIP_STYLE}
-      className={`msg-bubble p-3 rounded-xl text-[13px] leading-relaxed border transition-all ${
+      className={`msg-bubble p-3.5 rounded-2xl text-[13px] leading-relaxed border transition-all ${
         isUser
-          ? 'bg-gradient-to-br from-indigo-950/35 via-zinc-900/95 to-zinc-900 text-zinc-100 ml-4 border-indigo-500/30 shadow-xs animate-message-fade'
-          : 'bg-zinc-900/90 hover:bg-zinc-900 text-zinc-200 mr-2 border-zinc-800/80 shadow-xs animate-message-fade'
+          ? 'bg-gradient-to-br from-cyan-950/30 via-[#0a0e17]/95 to-[#07090e] text-slate-100 ml-4 border-cyan-500/35 shadow-sm animate-message-fade'
+          : 'bg-gradient-to-b from-[#0c1220]/90 to-[#0a0e17]/95 hover:border-cyan-500/30 text-slate-200 mr-2 border-[#202b3f] shadow-sm animate-message-fade'
       } ${message.isError ? '!border-red-500/50' : ''}`}
     >
-      <div className="flex flex-wrap items-center justify-between gap-y-1 text-[11px] text-zinc-400 mb-1.5 font-mono">
+      <div className="flex flex-wrap items-center justify-between gap-y-1 text-[11px] text-slate-400 mb-2 font-mono">
         <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 min-w-0">
           {message.isError && <AlertCircle className="w-3.5 h-3.5 text-red-400" />}
           {isUser ? (
-            <div className="flex items-center gap-1 text-indigo-300 font-semibold">
+            <div className="flex items-center gap-1.5 text-cyan-300 font-bold">
               <UserRound className="w-3.5 h-3.5" />
               <span>Tú</span>
             </div>
           ) : (
             <>
               {provider && <ProviderBadge provider={provider} />}
-              <span className="font-medium text-zinc-200">{message.modelName}</span>
+              <span className="font-bold text-slate-200">{message.modelName}</span>
             </>
           )}
           {!isUser && role && (
-            <span className={`px-1.5 py-0.2 rounded border uppercase text-[10px] font-semibold ${ROLE_COLORS[role] ?? 'border-zinc-700 text-zinc-300'}`}>
+            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${ROLE_COLORS[role] ?? 'border-[#202b3f] text-slate-300'}`}>
               {PROTOCOL_ROLES[role]?.label ?? role}
             </span>
           )}
-          {message.isPlan && <span className="px-1.5 py-0.2 rounded border border-indigo-500/50 bg-indigo-950/50 text-indigo-300 uppercase text-[10px] font-semibold">Plan</span>}
+          {message.isPlan && <span className="px-2 py-0.5 rounded border border-cyan-500/50 bg-cyan-950/50 text-cyan-300 uppercase text-[10px] font-bold">Plan</span>}
           {message.isStreaming && !isUser && <TurnStatus message={message} hasAnswer={Boolean(turn.answer)} live={live} />}
-          {message.pinned && <Pin className="w-3 h-3 text-amber-400 fill-amber-400" aria-label="Fijado" />}
+          {message.pinned && <Pin className="w-3.5 h-3.5 text-amber-400 fill-amber-400" aria-label="Fijado" />}
           {!isUser && !message.isStreaming && wordCount >= LONG_ANSWER_WORDS && (
-            <span className="text-zinc-500 text-[10px]" title={`~${Math.round(message.content.length / 4).toLocaleString()} tokens`}>
+            <span className="text-slate-500 text-[10px]" title={`~${Math.round(message.content.length / 4).toLocaleString()} tokens`}>
               {wordCount.toLocaleString()} palabras · {Math.max(1, Math.round(wordCount / 220))} min
             </span>
           )}
-          <time dateTime={new Date(message.timestamp).toISOString()} title={formatFull(message.timestamp)} className="text-zinc-500 text-[10px]">
+          <time dateTime={new Date(message.timestamp).toISOString()} title={formatFull(message.timestamp)} className="text-slate-500 text-[10px]">
             {formatTime(message.timestamp)}
           </time>
           {!isUser && !message.isStreaming && message.durationMs !== undefined && (
-            <span className="flex items-center gap-0.5 text-zinc-500 text-[10px]" title="Duración del turno">
-              <Clock className="w-2.5 h-2.5" />{formatDuration(message.durationMs)}
+            <span className="flex items-center gap-1 text-slate-500 text-[10px]" title="Duración del turno">
+              <Clock className="w-3 h-3 text-slate-500" />{formatDuration(message.durationMs)}
             </span>
           )}
           {!isUser && !message.isStreaming && message.costUSD !== undefined && message.costUSD > 0 && (
-            <span className="text-zinc-500 text-[10px]" title={`Costo del turno: $${message.costUSD.toFixed(4)}`}>{formatCost(message.costUSD)}</span>
+            <span className="text-emerald-400 font-bold text-[10px]" title={`Costo del turno: $${message.costUSD.toFixed(4)}`}>{formatCost(message.costUSD)}</span>
           )}
         </div>
         {!message.isStreaming && (
-          <div className="flex items-center gap-1 ml-auto shrink-0 opacity-70 hover:opacity-100 transition">
+          <div className="flex items-center gap-1.5 ml-auto shrink-0 opacity-80 hover:opacity-100 transition">
             <button
               type="button"
               onClick={copyMessageText}
-              className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 hover:bg-zinc-750 text-zinc-300 border border-zinc-700/60 transition cursor-pointer"
+              className="flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-lg bg-[#0c1220] hover:bg-[#162035] text-slate-300 border border-[#202b3f] hover:border-cyan-500/40 transition cursor-pointer shadow-xs"
               title="Copiar el texto (Mayús+clic: con autor y hora)"
               aria-label="Copiar texto del mensaje"
             >
-              {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-zinc-400" />}
-              <span className={copied ? 'text-emerald-400' : undefined}>{copied ? 'Copiado' : 'Copiar'}</span>
+              {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-slate-400" />}
+              <span className={copied ? 'text-emerald-400 font-bold' : undefined}>{copied ? 'Copiado' : 'Copiar'}</span>
             </button>
             <button
               type="button"
               onClick={() => postToHost({ command: 'pinMessage', sessionId, messageId: message.id })}
               aria-pressed={Boolean(message.pinned)}
-              className="flex items-center text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 hover:bg-zinc-750 text-zinc-300 border border-zinc-700/60 transition cursor-pointer"
+              className="flex items-center text-[10px] px-1.5 py-1 rounded-lg bg-[#0c1220] hover:bg-[#162035] text-slate-300 border border-[#202b3f] hover:border-cyan-500/40 transition cursor-pointer shadow-xs"
               title={message.pinned ? 'Desfijar mensaje' : 'Fijar mensaje'}
               aria-label={message.pinned ? 'Desfijar mensaje' : 'Fijar mensaje'}
             >
-              <Pin className={`w-3 h-3 ${message.pinned ? 'text-amber-400 fill-amber-400' : 'text-zinc-400'}`} />
+              <Pin className={`w-3 h-3 ${message.pinned ? 'text-amber-400 fill-amber-400' : 'text-slate-400'}`} />
             </button>
             {!isUser && turn.answer && (
               <button
                 type="button"
                 onClick={() => postToHost({ command: 'crossReview', sessionId, messageId: message.id })}
-                className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 hover:bg-zinc-750 text-indigo-300 border border-zinc-700/60 transition cursor-pointer"
+                className="flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-lg bg-[#0c1220] hover:bg-[#162035] text-cyan-300 border border-[#202b3f] hover:border-cyan-500/50 transition cursor-pointer shadow-xs"
                 title="Auditoría Imparcial: pedir una segunda opinión técnica a otro modelo conectado"
               >
-                <ShieldCheck className="w-3 h-3 text-indigo-400" />
+                <ShieldCheck className="w-3 h-3 text-cyan-400" />
                 <span className="hidden min-[400px]:inline">Segunda opinión</span>
               </button>
             )}
@@ -553,7 +553,7 @@ const MessageBubble = memo<BubbleProps>(({ message, sessionId, onSendSuggestion,
               <button
                 type="button"
                 onClick={() => setComposerText(message.content)}
-                className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 hover:bg-zinc-750 text-zinc-300 border border-zinc-700/60 transition cursor-pointer"
+                className="flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-lg bg-[#0c1220] hover:bg-[#162035] text-slate-300 border border-[#202b3f] hover:border-cyan-500/40 transition cursor-pointer shadow-xs"
                 title="Cargar este mensaje en el cuadro de texto para editarlo y reenviarlo"
               >
                 <Pencil className="w-3 h-3 text-cyan-400" />
@@ -564,7 +564,7 @@ const MessageBubble = memo<BubbleProps>(({ message, sessionId, onSendSuggestion,
               <button
                 type="button"
                 onClick={() => onSendSuggestion(regenerateFrom)}
-                className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 hover:bg-zinc-750 text-zinc-300 border border-zinc-700/60 transition cursor-pointer"
+                className="flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-lg bg-[#0c1220] hover:bg-[#162035] text-slate-300 border border-[#202b3f] hover:border-emerald-500/40 transition cursor-pointer shadow-xs"
                 title={message.isError ? 'Volver a enviar el último mensaje: el turno falló' : 'Volver a enviar el último mensaje para obtener otra respuesta'}
               >
                 <RefreshCw className="w-3 h-3 text-emerald-400" />
@@ -574,7 +574,7 @@ const MessageBubble = memo<BubbleProps>(({ message, sessionId, onSendSuggestion,
             <button
               type="button"
               onClick={() => postToHost({ command: 'forkSession', sessionId, messageId: message.id })}
-              className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 hover:bg-zinc-750 text-zinc-300 border border-zinc-700/60 transition cursor-pointer"
+              className="flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-lg bg-[#0c1220] hover:bg-[#162035] text-amber-300 border border-[#202b3f] hover:border-amber-500/50 transition cursor-pointer shadow-xs"
               title="Bifurcar conversación desde este punto (Time-Travel branching)"
             >
               <GitFork className="w-3 h-3 text-amber-400" />
@@ -595,7 +595,7 @@ const MessageBubble = memo<BubbleProps>(({ message, sessionId, onSendSuggestion,
             <button
               type="button"
               onClick={() => setExpanded((on) => !on)}
-              className="mt-1 flex items-center gap-1 text-[11px] text-indigo-300 hover:text-indigo-200 cursor-pointer"
+              className="mt-1 flex items-center gap-1 text-[11px] text-cyan-300 hover:text-cyan-200 cursor-pointer"
             >
               {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
               {expanded ? 'Ver menos' : 'Ver todo el mensaje'}
@@ -615,8 +615,8 @@ const MessageBubble = memo<BubbleProps>(({ message, sessionId, onSendSuggestion,
         </div>
       ) : (
         message.isStreaming && turn.process.length === 0 && (
-          <div className="flex items-center gap-1.5 text-zinc-400">
-            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          <div className="flex items-center gap-1.5 text-slate-400 font-mono text-xs">
+            <Loader2 className="w-3.5 h-3.5 animate-spin text-cyan-400" />
             <span>Trabajando…</span>
           </div>
         )
@@ -626,21 +626,21 @@ const MessageBubble = memo<BubbleProps>(({ message, sessionId, onSendSuggestion,
         <button
           type="button"
           onClick={() => onSendSuggestion('Plan aprobado: ejecútalo ahora.')}
-          className="mt-2 px-2.5 py-1 rounded bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-medium transition"
+          className="mt-2 px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-[11px] font-mono font-medium transition shadow-sm cursor-pointer"
         >
           Ejecutar plan
         </button>
       )}
 
       {!isUser && !message.isStreaming && message.checkpointHash && (
-        <div className="mt-2 pt-1.5 border-t border-zinc-800/80 flex items-center justify-between text-[11px] text-zinc-400">
+        <div className="mt-2.5 pt-2 border-t border-[#202b3f] flex items-center justify-between text-[11px] text-slate-400 font-mono">
           <span className="truncate max-w-[200px]" title={message.checkpointDiff || 'Punto de restauración disponible'}>
             {message.checkpointDiff ? message.checkpointDiff.split('\r\n')[0] : 'Punto de restauración guardado'}
           </span>
           <button
             type="button"
             onClick={() => postToHost({ command: 'rollbackTurn', sessionId, checkpointHash: message.checkpointHash! })}
-            className="flex items-center gap-1 text-amber-400 hover:text-amber-300 hover:underline px-1 py-0.5 rounded transition cursor-pointer"
+            className="flex items-center gap-1 text-amber-400 hover:text-amber-300 hover:underline px-1.5 py-0.5 rounded transition cursor-pointer"
             title="Revertir los archivos modificados durante este turno al estado previo"
           >
             <RotateCcw className="w-3 h-3" />
@@ -650,16 +650,16 @@ const MessageBubble = memo<BubbleProps>(({ message, sessionId, onSendSuggestion,
       )}
 
       {!isUser && !message.isStreaming && message.stageCommit && (
-        <div className="mt-2 pt-1.5 border-t border-zinc-800/80 flex items-center justify-end text-[11px] text-zinc-400">
+        <div className="mt-2.5 pt-2 border-t border-[#202b3f] flex items-center justify-end text-[11px] text-slate-400 font-mono">
           <RestoreStage sessionId={sessionId} messageId={message.id} />
         </div>
       )}
 
       {!isUser && !message.isStreaming && message.checkpointHash && message.checkpointFiles && message.checkpointFiles.length > 0 && (
-        <div className="mt-2 pt-1.5 border-t border-zinc-800/80 space-y-1">
-          <div className="text-[10px] text-zinc-400 font-mono font-medium flex items-center justify-between">
+        <div className="mt-2.5 pt-2 border-t border-[#202b3f] space-y-1.5">
+          <div className="text-[10px] text-slate-400 font-mono font-medium flex items-center justify-between">
             <span>Archivos modificados ({message.checkpointFiles.length}):</span>
-            <span className="text-zinc-500 text-[9px]">desplazamiento horizontal ➔</span>
+            <span className="text-slate-400 text-[9px]">desplazamiento horizontal ➔</span>
           </div>
           <div className="flex items-center gap-1.5 overflow-x-auto py-1 px-0.5 scrollbar-thin">
             {message.checkpointFiles.map((file) => {
@@ -667,10 +667,10 @@ const MessageBubble = memo<BubbleProps>(({ message, sessionId, onSendSuggestion,
               return (
                 <div
                   key={file}
-                  className={`shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-md border text-[11px] font-mono transition ${
+                  className={`shrink-0 flex items-center gap-1 px-2.5 py-1 rounded-md border text-[11px] font-mono transition ${
                     isSelected
-                      ? 'bg-indigo-950/60 border-indigo-500/60 text-indigo-200'
-                      : 'bg-zinc-850 hover:bg-zinc-800 border-zinc-750 text-zinc-300'
+                      ? 'bg-cyan-950/70 border-cyan-500/60 text-cyan-200'
+                      : 'bg-[#0c1220] hover:bg-[#162035] border-[#202b3f] hover:border-[#202b3f] text-slate-300'
                   }`}
                 >
                   <button
@@ -684,13 +684,13 @@ const MessageBubble = memo<BubbleProps>(({ message, sessionId, onSendSuggestion,
                     className="flex items-center gap-1 hover:text-white"
                     title={`Ver diff de ${file}`}
                   >
-                    <FileCode className="w-3 h-3 text-emerald-400 shrink-0" />
+                    <FileCode className="w-3 h-3 text-cyan-400 shrink-0" />
                     <span className="truncate max-w-[200px]">{file}</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => postToHost({ command: 'revertFile', sessionId, checkpointHash: message.checkpointHash!, file })}
-                    className="text-amber-400 hover:text-amber-300 hover:underline shrink-0 text-[10px] ml-1 pl-1 border-l border-zinc-750"
+                    className="text-amber-400 hover:text-amber-300 hover:underline shrink-0 text-[10px] ml-1 pl-1 border-l border-[#202b3f]"
                     title={`Revertir solo ${file} al estado previo al turno`}
                   >
                     <RotateCcw className="w-2.5 h-2.5" />
@@ -700,19 +700,19 @@ const MessageBubble = memo<BubbleProps>(({ message, sessionId, onSendSuggestion,
             })}
           </div>
           {activeDiffFile && (
-            <div className="mt-1 p-2 rounded-lg bg-zinc-950 border border-zinc-800">
-              <div className="text-[10px] font-mono text-zinc-400 mb-1 flex items-center justify-between">
-                <span>Diff de <strong className="text-zinc-200">{activeDiffFile}</strong>:</span>
+            <div className="mt-1.5 p-2.5 rounded-xl bg-[#07090e] border border-[#202b3f]">
+              <div className="text-[10px] font-mono text-slate-400 mb-1.5 flex items-center justify-between">
+                <span>Diff de <strong className="text-slate-200 font-semibold">{activeDiffFile}</strong>:</span>
                 <button
                   type="button"
                   onClick={() => setActiveDiffFile(null)}
-                  className="text-zinc-400 hover:text-zinc-200 text-[10px] hover:underline"
+                  className="text-slate-400 hover:text-cyan-300 text-[10px] hover:underline"
                 >
                   Cerrar diff
                 </button>
               </div>
               {fileDiffs[`${message.checkpointHash}:${activeDiffFile}`] === undefined ? (
-                <div className="text-zinc-400 pl-2 text-xs">Cargando diff…</div>
+                <div className="text-slate-400 pl-2 text-xs font-mono">Cargando diff…</div>
               ) : (
                 <DiffLines diff={fileDiffs[`${message.checkpointHash}:${activeDiffFile}`]} />
               )}
@@ -722,7 +722,7 @@ const MessageBubble = memo<BubbleProps>(({ message, sessionId, onSendSuggestion,
       )}
 
       {attachments.length > 0 && (
-        <div className="flex flex-wrap gap-2 mt-2 pt-2 border-t border-zinc-700/60">
+        <div className="flex flex-wrap gap-2 mt-2.5 pt-2 border-t border-[#202b3f]">
           {attachments.map((attachment, index) => (
             <AttachmentPreview key={index} attachment={attachment} />
           ))}
@@ -854,51 +854,51 @@ export const MessageList: React.FC<Props> = ({ sessionId, messages, accountName,
         }}
         role="log"
         aria-label="Conversación"
-        className="msg-list select-text flex-1 overflow-y-auto space-y-3 p-1 min-h-0 relative"
+        className={`msg-list select-text flex-1 overflow-y-auto space-y-3 p-1 min-h-0 relative ${showScrollTop || showScrollBottom ? 'pb-12' : ''}`}
       >
       {isSearchOpen && (
-        <div className="flex items-center gap-2 p-1.5 rounded-lg bg-zinc-900/95 border border-zinc-700 shadow-lg text-xs sticky top-0 z-20 glass-panel">
-          <Search className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+        <div className="flex items-center gap-2 p-2 rounded-xl bg-[#0a0e17]/95 border border-[#202b3f] shadow-xl text-xs sticky top-0 z-20 backdrop-blur-md">
+          <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
           <input
             type="text"
             placeholder="Buscar en la conversación (Ctrl+F)..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="flex-1 bg-transparent border-none text-zinc-200 focus:outline-none text-xs"
+            className="flex-1 bg-transparent border-none text-slate-100 placeholder-slate-500 focus:outline-none text-xs font-sans"
             autoFocus
             onKeyDown={(e) => {
               if (e.key === 'Escape') { setIsSearchOpen(false); setSearchQuery(''); setFilterMode('all'); }
             }}
           />
           {(searchQuery.trim() || filterMode !== 'all') && (
-            <span className="text-[10px] font-mono text-zinc-400 shrink-0">{filteredMessages.length} de {messages.length}</span>
+            <span className="text-[10px] font-mono text-slate-400 shrink-0 bg-[#0c1220] px-2 py-0.5 rounded border border-[#202b3f]">{filteredMessages.length} de {messages.length}</span>
           )}
           <div className="flex items-center gap-1">
             <button
               type="button"
               onClick={() => setFilterMode('all')}
-              className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${filterMode === 'all' ? 'bg-indigo-600 text-white' : 'text-zinc-400 hover:text-zinc-200'}`}
+              className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition ${filterMode === 'all' ? 'bg-gradient-to-r from-cyan-600 to-cyan-500 text-slate-950 shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
             >
               Todos
             </button>
             <button
               type="button"
               onClick={() => setFilterMode('modified')}
-              className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${filterMode === 'modified' ? 'bg-amber-600 text-white' : 'text-zinc-400 hover:text-zinc-200'}`}
+              className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition ${filterMode === 'modified' ? 'bg-amber-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
             >
               Modificados
             </button>
             <button
               type="button"
               onClick={() => setFilterMode('pinned')}
-              className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${filterMode === 'pinned' ? 'bg-amber-500 text-zinc-950' : 'text-zinc-400 hover:text-zinc-200'}`}
+              className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition ${filterMode === 'pinned' ? 'bg-amber-500 text-slate-950 shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
             >
               Fijados
             </button>
             <button
               type="button"
               onClick={() => setFilterMode('errors')}
-              className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${filterMode === 'errors' ? 'bg-red-600 text-white' : 'text-zinc-400 hover:text-zinc-200'}`}
+              className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition ${filterMode === 'errors' ? 'bg-red-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
             >
               Errores
             </button>
@@ -906,7 +906,7 @@ export const MessageList: React.FC<Props> = ({ sessionId, messages, accountName,
           <button
             type="button"
             onClick={() => { setIsSearchOpen(false); setSearchQuery(''); setFilterMode('all'); }}
-            className="text-zinc-400 hover:text-zinc-200 p-0.5"
+            className="text-slate-400 hover:text-slate-200 p-0.5"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -914,27 +914,27 @@ export const MessageList: React.FC<Props> = ({ sessionId, messages, accountName,
       )}
 
       {messages.length === 0 ? (
-        <div className="h-full flex flex-col items-center justify-center text-center p-6 text-zinc-400 space-y-3.5">
+        <div className="h-full flex flex-col items-center justify-center text-center p-6 text-slate-400 space-y-4">
           <div className="relative group">
-            <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-indigo-500/30 to-cyan-500/30 blur-md group-hover:blur-lg transition" />
-            <div className="relative p-2.5 rounded-2xl bg-zinc-900 border border-zinc-750 shadow-xl flex items-center justify-center">
-              <AgentHubIcon size={38} />
+            <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-cyan-500/30 to-blue-500/30 blur-md group-hover:blur-lg transition" />
+            <div className="relative p-3.5 rounded-2xl bg-[#0a0e17] border border-[#202b3f] shadow-2xl flex items-center justify-center">
+              <AgentHubIcon size={44} />
             </div>
           </div>
-          <div className="max-w-md space-y-1">
-            <h3 className="text-sm font-semibold text-zinc-100 flex items-center justify-center gap-1.5">
-              <span>Agent<span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-cyan-400 bg-clip-text text-transparent">Hub</span></span>
-              <span className="text-zinc-600">·</span>
-              <span className="text-indigo-300 font-medium">{accountName ?? 'Modo Autónomo'}</span>
+          <div className="max-w-md space-y-1.5">
+            <h3 className="text-sm font-bold text-slate-100 flex items-center justify-center gap-2 font-mono">
+              <span>AGENT<span className="text-cyan-400">HUB</span></span>
+              <span className="text-slate-600">·</span>
+              <span className="text-cyan-300 font-semibold">{accountName ?? 'Modo Autónomo'}</span>
             </h3>
-            <p className="text-xs text-zinc-400 leading-relaxed">
-              Suscripción directa conectada. Haz una pregunta, adjunta archivos con @ o ejecuta una acción rápida:
+            <p className="text-xs text-slate-400 leading-relaxed font-sans">
+              Suscripción multimodelo activa. Haz una pregunta, adjunta archivos con @ o dispara una acción rápida del enjambre:
             </p>
           </div>
           <div className="flex flex-wrap gap-2 justify-center max-w-lg pt-1">
             {QUICK_PROMPTS.map((prompt, idx) => {
               const icon = idx === 0
-                ? <Layers className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                ? <Layers className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
                 : idx === 1
                   ? <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                   : <CheckCircle2 className="w-3.5 h-3.5 text-amber-400 shrink-0" />;
@@ -942,7 +942,7 @@ export const MessageList: React.FC<Props> = ({ sessionId, messages, accountName,
                 <button
                   key={prompt}
                   onClick={() => onSendSuggestion(prompt)}
-                  className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-zinc-900/90 hover:bg-zinc-800 text-zinc-200 border border-zinc-800 hover:border-indigo-500/50 shadow-sm transition-all hover:scale-[1.02] cursor-pointer"
+                  className="flex items-center gap-1.5 text-xs font-mono font-medium px-3.5 py-1.5 rounded-xl bg-[#0a0e17] hover:bg-[#162035] text-slate-200 border border-[#202b3f] hover:border-cyan-500/50 shadow-sm transition-all hover:scale-[1.02] cursor-pointer hub-lift"
                 >
                   {icon}
                   <span>{prompt}</span>
@@ -960,7 +960,7 @@ export const MessageList: React.FC<Props> = ({ sessionId, messages, accountName,
                 isFollowing.current = false;
                 setVisibleCount((count) => count + PAGE_SIZE);
               }}
-              className="w-full text-[11px] py-1 rounded bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 transition"
+              className="w-full text-[11px] py-1.5 rounded-lg bg-[#0c1220] hover:bg-[#162035] text-slate-300 border border-[#202b3f] hover:border-cyan-500/40 font-mono transition"
             >
               Mostrar {Math.min(hiddenCount, PAGE_SIZE)} anteriores ({hiddenCount} ocultos)
             </button>
@@ -972,7 +972,7 @@ export const MessageList: React.FC<Props> = ({ sessionId, messages, accountName,
                 isFollowing.current = false;
                 setVisibleCount(filteredMessages.length);
               }}
-              className="w-full text-[11px] py-1 rounded text-zinc-400 hover:text-zinc-200 transition"
+              className="w-full text-[11px] py-1 rounded text-slate-400 hover:text-cyan-300 font-mono transition"
             >
               Mostrar todos los {filteredMessages.length} mensajes
             </button>
@@ -982,10 +982,10 @@ export const MessageList: React.FC<Props> = ({ sessionId, messages, accountName,
             const previous = items[index - 1];
             const previousMessage = previous && (Array.isArray(previous) ? previous[previous.length - 1] : previous);
             const day = (!previousMessage || !sameDay(previousMessage.timestamp, first.timestamp)) && (
-              <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-zinc-500 select-none">
-                <span className="flex-1 h-px bg-zinc-800" />
+              <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-slate-500 font-mono select-none">
+                <span className="flex-1 h-px bg-[#202b3f]" />
                 <span>{dayLabel(first.timestamp)}</span>
-                <span className="flex-1 h-px bg-zinc-800" />
+                <span className="flex-1 h-px bg-[#202b3f]" />
               </div>
             );
             return Array.isArray(item) ? (
@@ -1027,9 +1027,9 @@ export const MessageList: React.FC<Props> = ({ sessionId, messages, accountName,
           }}
           aria-label="Ir al inicio de la conversación"
           title="Ir al inicio de la conversación"
-          className={`absolute right-3 ${showScrollBottom ? 'bottom-12' : 'bottom-3'} z-20 flex w-fit items-center gap-1 px-2 py-1 rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] border border-zinc-600 shadow-lg transition cursor-pointer`}
+          className={`absolute right-3 ${showScrollBottom ? 'bottom-12' : 'bottom-3'} z-20 flex w-fit items-center gap-1 px-2.5 py-1 rounded-full bg-[#0c1220] hover:bg-[#162035] text-slate-200 text-[11px] border border-[#202b3f] hover:border-cyan-500/50 shadow-xl transition cursor-pointer font-mono`}
         >
-          <ChevronUp className="w-3.5 h-3.5" />
+          <ChevronUp className="w-3.5 h-3.5 text-cyan-400" />
           <span>Inicio</span>
         </button>
       )}
@@ -1038,7 +1038,7 @@ export const MessageList: React.FC<Props> = ({ sessionId, messages, accountName,
         <button
           type="button"
           onClick={scrollToBottom}
-          className="absolute left-1/2 -translate-x-1/2 bottom-3 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-medium shadow-xl border border-indigo-400/30 transition-all hover:scale-105 cursor-pointer animate-float-bounce"
+          className="absolute left-1/2 -translate-x-1/2 bottom-3 z-20 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-cyan-600 hover:bg-cyan-500 text-white text-[11px] font-mono font-medium shadow-xl border border-cyan-400/30 transition-all hover:scale-105 cursor-pointer animate-float-bounce"
         >
           <ChevronDown className="w-3.5 h-3.5" />
           <span>Ir al último mensaje</span>

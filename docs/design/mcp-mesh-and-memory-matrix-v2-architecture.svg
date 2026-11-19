@@ -1,0 +1,466 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1050" width="1600" height="1050">
+  <defs>
+    <!-- Background Gradients -->
+    <radialGradient id="bgGlow" cx="50%" cy="15%" r="75%">
+      <stop offset="0%" stop-color="#0e172a" stop-opacity="0.8"/>
+      <stop offset="50%" stop-color="#07090e" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#05070a" stop-opacity="1"/>
+    </radialGradient>
+    <radialGradient id="cyanGlow" cx="20%" cy="20%" r="40%">
+      <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#06b6d4" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="purpleGlow" cx="80%" cy="25%" r="45%">
+      <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Card Backgrounds & Borders -->
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0d1424"/>
+      <stop offset="100%" stop-color="#090d16"/>
+    </linearGradient>
+    <linearGradient id="borderGradCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.8"/>
+      <stop offset="50%" stop-color="#202b3f" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#0891b2" stop-opacity="0.3"/>
+    </linearGradient>
+    <linearGradient id="borderGradPurple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.8"/>
+      <stop offset="50%" stop-color="#202b3f" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#6d28d9" stop-opacity="0.3"/>
+    </linearGradient>
+    <linearGradient id="badgeEmerald" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#065f46"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+
+    <!-- Grid Pattern -->
+    <pattern id="tacticalGrid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#162035" stroke-width="0.75" stroke-opacity="0.4"/>
+      <circle cx="0" cy="0" r="1" fill="#06b6d4" fill-opacity="0.25"/>
+    </pattern>
+
+    <!-- Filters -->
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <style>
+    .title-font { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 800; }
+    .mono-font { font-family: 'JetBrains Mono', 'Fira Code', Menlo, Monaco, Consolas, monospace; }
+    .body-font { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+  </style>
+
+  <!-- Deep Background -->
+  <rect width="1600" height="1050" fill="#07090e"/>
+  <rect width="1600" height="1050" fill="url(#bgGlow)"/>
+  <rect width="1600" height="1050" fill="url(#tacticalGrid)"/>
+
+  <!-- Atmospheric Glows -->
+  <rect width="700" height="600" fill="url(#cyanGlow)" x="50" y="50" pointer-events="none"/>
+  <rect width="700" height="600" fill="url(#purpleGlow)" x="850" y="50" pointer-events="none"/>
+
+  <!-- Top Header / Tactical HUD Master Bar -->
+  <g transform="translate(60, 45)">
+    <!-- Brand / Status -->
+    <rect x="0" y="0" width="1480" height="74" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.2"/>
+    
+    <rect x="18" y="16" width="42" height="42" rx="10" fill="#0c1220" stroke="#06b6d4" stroke-width="1.5"/>
+    <path d="M 39 26 L 47 37 L 31 37 Z" fill="none" stroke="#06b6d4" stroke-width="2"/>
+    <circle cx="39" cy="42" r="2.5" fill="#14b8a6"/>
+
+    <text x="74" y="36" fill="#f8fafc" class="title-font" font-size="19" letter-spacing="-0.02em">AGENTHUB TACTICAL HUD <tspan fill="#06b6d4">::</tspan> SPEC CARD #52</text>
+    <text x="74" y="52" fill="#94a3b8" class="mono-font" font-size="11" letter-spacing="0.05em">MCP PROTOCOL MESH &amp; PERSISTENT EXPERIENCE MEMORY MATRIX (v2)</text>
+
+    <!-- Version & State Badges -->
+    <g transform="translate(1080, 20)">
+      <rect x="0" y="0" width="110" height="34" rx="8" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+      <text x="14" y="22" fill="#38bdf8" class="mono-font" font-size="11" font-weight="600">MCP MESH v2</text>
+
+      <rect x="120" y="0" width="135" height="34" rx="8" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+      <circle cx="134" cy="17" r="4" fill="#10b981"/>
+      <text x="146" y="22" fill="#10b981" class="mono-font" font-size="11" font-weight="600">SYNC: 100% OK</text>
+
+      <rect x="265" y="0" width="120" height="34" rx="8" fill="#162035" stroke="#8b5cf6" stroke-width="1.2"/>
+      <circle cx="279" cy="17" r="4" fill="#a855f7"/>
+      <text x="291" y="22" fill="#c084fc" class="mono-font" font-size="11" font-weight="600">MEM MATRIX</text>
+    </g>
+  </g>
+
+  <!-- ==================== LEFT COLUMN: MCP SERVER MESH ARCHITECTURE ==================== -->
+  <g transform="translate(60, 145)">
+    <!-- Container Card -->
+    <rect x="0" y="0" width="725" height="530" rx="16" fill="url(#cardGrad)" stroke="url(#borderGradCyan)" stroke-width="1.5"/>
+
+    <!-- Section Header -->
+    <g transform="translate(24, 24)">
+      <rect x="0" y="0" width="34" height="34" rx="8" fill="#06b6d4" fill-opacity="0.12" stroke="#06b6d4" stroke-width="1.2"/>
+      <path d="M 17 8 L 25 15 L 25 24 L 9 24 L 9 15 Z" fill="none" stroke="#06b6d4" stroke-width="1.6"/>
+      <circle cx="17" cy="17" r="2.5" fill="#38bdf8"/>
+
+      <text x="46" y="20" fill="#f8fafc" class="title-font" font-size="16">Model Context Protocol (MCP) Service Mesh</text>
+      <text x="46" y="34" fill="#64748b" class="mono-font" font-size="11">JSON-RPC stdio &amp; SSE Transports · Dynamic Discovery · Tool Inspector</text>
+      
+      <!-- Metrics Pills -->
+      <g transform="translate(480, 2)">
+        <rect x="0" y="0" width="95" height="26" rx="6" fill="#07090e" stroke="#202b3f"/>
+        <text x="10" y="17" fill="#06b6d4" class="mono-font" font-size="10">8 SERVERS</text>
+        <rect x="102" y="0" width="90" height="26" rx="6" fill="#07090e" stroke="#202b3f"/>
+        <text x="112" y="17" fill="#10b981" class="mono-font" font-size="10">42 TOOLS</text>
+      </g>
+    </g>
+
+    <!-- MCP Server Lifecycle Diagram -->
+    <g transform="translate(24, 75)">
+      <rect x="0" y="0" width="677" height="110" rx="12" fill="#0a0e17" stroke="#202b3f" stroke-width="1"/>
+      <text x="16" y="24" fill="#94a3b8" class="mono-font" font-size="10" font-weight="600" letter-spacing="0.05em">MCP LIFECYCLE &amp; HEALTH CHECK ENGINE</text>
+
+      <!-- Step 1: Config Discovery -->
+      <g transform="translate(18, 38)">
+        <rect x="0" y="0" width="115" height="56" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="12" y="24" fill="#cbd5e1" class="body-font" font-size="11" font-weight="600">1. Discovery</text>
+        <text x="12" y="42" fill="#64748b" class="mono-font" font-size="9">mcp.json / env</text>
+      </g>
+
+      <path d="M 137 66 L 151 66" stroke="#06b6d4" stroke-width="1.8" stroke-dasharray="3,2"/>
+      <polygon points="151,63 157,66 151,69" fill="#06b6d4"/>
+
+      <!-- Step 2: Spawn Process -->
+      <g transform="translate(161, 38)">
+        <rect x="0" y="0" width="115" height="56" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="12" y="24" fill="#cbd5e1" class="body-font" font-size="11" font-weight="600">2. Spawn</text>
+        <text x="12" y="42" fill="#64748b" class="mono-font" font-size="9">child_process / stdio</text>
+      </g>
+
+      <path d="M 280 66 L 294 66" stroke="#06b6d4" stroke-width="1.8" stroke-dasharray="3,2"/>
+      <polygon points="294,63 300,66 294,69" fill="#06b6d4"/>
+
+      <!-- Step 3: Handshake & Ping -->
+      <g transform="translate(304, 38)">
+        <rect x="0" y="0" width="115" height="56" rx="8" fill="#0c1220" stroke="#06b6d4" stroke-width="1.2"/>
+        <text x="12" y="24" fill="#38bdf8" class="body-font" font-size="11" font-weight="600">3. Handshake</text>
+        <text x="12" y="42" fill="#64748b" class="mono-font" font-size="9">initialize / ping</text>
+      </g>
+
+      <path d="M 423 66 L 437 66" stroke="#10b981" stroke-width="1.8" stroke-dasharray="3,2"/>
+      <polygon points="437,63 443,66 437,69" fill="#10b981"/>
+
+      <!-- Step 4: Tool Schema Sync -->
+      <g transform="translate(447, 38)">
+        <rect x="0" y="0" width="105" height="56" rx="8" fill="#0c1220" stroke="#10b981" stroke-width="1"/>
+        <text x="10" y="24" fill="#10b981" class="body-font" font-size="11" font-weight="600">4. Tool Mesh</text>
+        <text x="10" y="42" fill="#64748b" class="mono-font" font-size="9">tools/list sync</text>
+      </g>
+
+      <path d="M 556 66 L 570 66" stroke="#10b981" stroke-width="1.8" stroke-dasharray="3,2"/>
+      <polygon points="570,63 576,66 570,69" fill="#10b981"/>
+
+      <!-- Step 5: Active Dispatch -->
+      <g transform="translate(580, 38)">
+        <rect x="0" y="0" width="85" height="56" rx="8" fill="#065f46" fill-opacity="0.25" stroke="#10b981" stroke-width="1.2"/>
+        <circle cx="16" cy="22" r="3.5" fill="#10b981"/>
+        <text x="26" y="25" fill="#34d399" class="mono-font" font-size="10" font-weight="700">READY</text>
+        <text x="12" y="44" fill="#6ee7b7" class="mono-font" font-size="9">Lat &lt; 4ms</text>
+      </g>
+    </g>
+
+    <!-- MCP Server Grid Representation -->
+    <g transform="translate(24, 200)">
+      <text x="0" y="0" fill="#94a3b8" class="mono-font" font-size="11" font-weight="600" letter-spacing="0.05em">CONFIGURED MCP SERVERS &amp; TRANSPORT MESH</text>
+
+      <!-- Server Card 1: filesystem -->
+      <g transform="translate(0, 15)">
+        <rect x="0" y="0" width="328" height="85" rx="10" fill="#0a0e17" stroke="#202b3f" stroke-width="1"/>
+        <circle cx="20" cy="24" r="5" fill="#10b981"/>
+        <text x="34" y="27" fill="#f8fafc" class="body-font" font-size="12" font-weight="700">filesystem</text>
+        <rect x="110" y="16" width="46" height="18" rx="4" fill="#162035"/>
+        <text x="116" y="29" fill="#94a3b8" class="mono-font" font-size="9">stdio</text>
+        <rect x="162" y="16" width="60" height="18" rx="4" fill="#065f46" fill-opacity="0.3"/>
+        <text x="168" y="29" fill="#34d399" class="mono-font" font-size="9">14 tools</text>
+        
+        <text x="20" y="52" fill="#64748b" class="mono-font" font-size="10">npx -y @modelcontextprotocol/server-filesystem</text>
+        <text x="20" y="68" fill="#38bdf8" class="mono-font" font-size="9">Args: ["C:\Users\juan0\Documents\GitHub\portafolio"]</text>
+      </g>
+
+      <!-- Server Card 2: github -->
+      <g transform="translate(348, 15)">
+        <rect x="0" y="0" width="328" height="85" rx="10" fill="#0a0e17" stroke="#202b3f" stroke-width="1"/>
+        <circle cx="20" cy="24" r="5" fill="#10b981"/>
+        <text x="34" y="27" fill="#f8fafc" class="body-font" font-size="12" font-weight="700">github</text>
+        <rect x="85" y="16" width="46" height="18" rx="4" fill="#162035"/>
+        <text x="91" y="29" fill="#94a3b8" class="mono-font" font-size="9">stdio</text>
+        <rect x="137" y="16" width="60" height="18" rx="4" fill="#065f46" fill-opacity="0.3"/>
+        <text x="143" y="29" fill="#34d399" class="mono-font" font-size="9">26 tools</text>
+
+        <text x="20" y="52" fill="#64748b" class="mono-font" font-size="10">docker run -i --rm -e GITHUB_PERSONAL_ACCESS_TOKEN</text>
+        <text x="20" y="68" fill="#10b981" class="mono-font" font-size="9">PRs, Issues, Repos, Workflows · Latency: 28ms</text>
+      </g>
+
+      <!-- Server Card 3: playwright -->
+      <g transform="translate(0, 115)">
+        <rect x="0" y="0" width="328" height="85" rx="10" fill="#0a0e17" stroke="#202b3f" stroke-width="1"/>
+        <circle cx="20" cy="24" r="5" fill="#10b981"/>
+        <text x="34" y="27" fill="#f8fafc" class="body-font" font-size="12" font-weight="700">playwright</text>
+        <rect x="110" y="16" width="46" height="18" rx="4" fill="#162035"/>
+        <text x="116" y="29" fill="#94a3b8" class="mono-font" font-size="9">stdio</text>
+        <rect x="162" y="16" width="60" height="18" rx="4" fill="#065f46" fill-opacity="0.3"/>
+        <text x="168" y="29" fill="#34d399" class="mono-font" font-size="9">18 tools</text>
+
+        <text x="20" y="52" fill="#64748b" class="mono-font" font-size="10">npx @modelcontextprotocol/server-puppeteer</text>
+        <text x="20" y="68" fill="#f59e0b" class="mono-font" font-size="9">Headless Chrome · DOM Snapshot, Click, Type</text>
+      </g>
+
+      <!-- Server Card 4: postgres -->
+      <g transform="translate(348, 115)">
+        <rect x="0" y="0" width="328" height="85" rx="10" fill="#0a0e17" stroke="#202b3f" stroke-width="1"/>
+        <circle cx="20" cy="24" r="5" fill="#06b6d4"/>
+        <text x="34" y="27" fill="#f8fafc" class="body-font" font-size="12" font-weight="700">postgres</text>
+        <rect x="95" y="16" width="46" height="18" rx="4" fill="#162035"/>
+        <text x="101" y="29" fill="#94a3b8" class="mono-font" font-size="9">stdio</text>
+        <rect x="147" y="16" width="54" height="18" rx="4" fill="#0c1220" stroke="#06b6d4" stroke-width="0.8"/>
+        <text x="153" y="29" fill="#38bdf8" class="mono-font" font-size="9">1 tool</text>
+
+        <text x="20" y="52" fill="#64748b" class="mono-font" font-size="10">postgresql://user:***@localhost:5432/main_db</text>
+        <text x="20" y="68" fill="#a78bfa" class="mono-font" font-size="9">Safe read-only execution &amp; schema introspection</text>
+      </g>
+
+      <!-- Server Card 5: memory -->
+      <g transform="translate(0, 215)">
+        <rect x="0" y="0" width="328" height="85" rx="10" fill="#0a0e17" stroke="#8b5cf6" stroke-width="1"/>
+        <circle cx="20" cy="24" r="5" fill="#8b5cf6"/>
+        <text x="34" y="27" fill="#f8fafc" class="body-font" font-size="12" font-weight="700">memory-mcp</text>
+        <rect x="120" y="16" width="46" height="18" rx="4" fill="#162035"/>
+        <text x="126" y="29" fill="#94a3b8" class="mono-font" font-size="9">stdio</text>
+        <rect x="172" y="16" width="60" height="18" rx="4" fill="#4c1d95" fill-opacity="0.4"/>
+        <text x="178" y="29" fill="#c084fc" class="mono-font" font-size="9">9 tools</text>
+
+        <text x="20" y="52" fill="#64748b" class="mono-font" font-size="10">Knowledge Graph &amp; Entity Relationships</text>
+        <text x="20" y="68" fill="#c084fc" class="mono-font" font-size="9">Nodes, Relations, Observations · Memory V2 Sync</text>
+      </g>
+
+      <!-- Server Card 6: context7 -->
+      <g transform="translate(348, 215)">
+        <rect x="0" y="0" width="328" height="85" rx="10" fill="#0a0e17" stroke="#202b3f" stroke-width="1"/>
+        <circle cx="20" cy="24" r="5" fill="#10b981"/>
+        <text x="34" y="27" fill="#f8fafc" class="body-font" font-size="12" font-weight="700">context7</text>
+        <rect x="95" y="16" width="46" height="18" rx="4" fill="#162035"/>
+        <text x="101" y="29" fill="#94a3b8" class="mono-font" font-size="9">stdio</text>
+        <rect x="147" y="16" width="54" height="18" rx="4" fill="#065f46" fill-opacity="0.3"/>
+        <text x="153" y="29" fill="#34d399" class="mono-font" font-size="9">2 tools</text>
+
+        <text x="20" y="52" fill="#64748b" class="mono-font" font-size="10">resolve-library-id &amp; query-docs</text>
+        <text x="20" y="68" fill="#38bdf8" class="mono-font" font-size="9">Official doc extraction for React, Vite, Tailwind</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ==================== RIGHT COLUMN: PERSISTENT MEMORY MATRIX V2 ==================== -->
+  <g transform="translate(815, 145)">
+    <!-- Container Card -->
+    <rect x="0" y="0" width="725" height="530" rx="16" fill="url(#cardGrad)" stroke="url(#borderGradPurple)" stroke-width="1.5"/>
+
+    <!-- Section Header -->
+    <g transform="translate(24, 24)">
+      <rect x="0" y="0" width="34" height="34" rx="8" fill="#8b5cf6" fill-opacity="0.14" stroke="#8b5cf6" stroke-width="1.2"/>
+      <circle cx="17" cy="17" r="7" fill="none" stroke="#a855f7" stroke-width="1.6"/>
+      <circle cx="17" cy="17" r="3" fill="#c084fc"/>
+
+      <text x="46" y="20" fill="#f8fafc" class="title-font" font-size="16">Persistent Experience Memory Matrix (v2)</text>
+      <text x="46" y="34" fill="#64748b" class="mono-font" font-size="11">Self-Evolution Engine · Semantic Fact Ingestion · Context Budgeting</text>
+
+      <!-- Metrics Pills -->
+      <g transform="translate(480, 2)">
+        <rect x="0" y="0" width="95" height="26" rx="6" fill="#07090e" stroke="#202b3f"/>
+        <text x="10" y="17" fill="#a855f7" class="mono-font" font-size="10">24 LESSONS</text>
+        <rect x="102" y="0" width="90" height="26" rx="6" fill="#07090e" stroke="#202b3f"/>
+        <text x="112" y="17" fill="#38bdf8" class="mono-font" font-size="10">920 TOKENS</text>
+      </g>
+    </g>
+
+    <!-- Memory Pipeline Anatomy -->
+    <g transform="translate(24, 75)">
+      <rect x="0" y="0" width="677" height="110" rx="12" fill="#0a0e17" stroke="#202b3f" stroke-width="1"/>
+      <text x="16" y="24" fill="#94a3b8" class="mono-font" font-size="10" font-weight="600" letter-spacing="0.05em">EXPERIENCE ACQUISITION &amp; CONTEXT INJECTION FLOW</text>
+
+      <!-- Step 1: Session Experience -->
+      <g transform="translate(18, 38)">
+        <rect x="0" y="0" width="115" height="56" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="10" y="24" fill="#cbd5e1" class="body-font" font-size="11" font-weight="600">1. Observation</text>
+        <text x="10" y="42" fill="#64748b" class="mono-font" font-size="9">Chat &amp; Execution</text>
+      </g>
+
+      <path d="M 137 66 L 151 66" stroke="#8b5cf6" stroke-width="1.8" stroke-dasharray="3,2"/>
+      <polygon points="151,63 157,66 151,69" fill="#8b5cf6"/>
+
+      <!-- Step 2: Extraction -->
+      <g transform="translate(161, 38)">
+        <rect x="0" y="0" width="115" height="56" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="10" y="24" fill="#cbd5e1" class="body-font" font-size="11" font-weight="600">2. Distillation</text>
+        <text x="10" y="42" fill="#64748b" class="mono-font" font-size="9">Key-Value &amp; Weight</text>
+      </g>
+
+      <path d="M 280 66 L 294 66" stroke="#8b5cf6" stroke-width="1.8" stroke-dasharray="3,2"/>
+      <polygon points="294,63 300,66 294,69" fill="#8b5cf6"/>
+
+      <!-- Step 3: Dual Storage -->
+      <g transform="translate(304, 38)">
+        <rect x="0" y="0" width="115" height="56" rx="8" fill="#0c1220" stroke="#8b5cf6" stroke-width="1.2"/>
+        <text x="10" y="24" fill="#c084fc" class="body-font" font-size="11" font-weight="600">3. Persistence</text>
+        <text x="10" y="42" fill="#64748b" class="mono-font" font-size="9">.agent-hub/memory</text>
+      </g>
+
+      <path d="M 423 66 L 437 66" stroke="#06b6d4" stroke-width="1.8" stroke-dasharray="3,2"/>
+      <polygon points="437,63 443,66 437,69" fill="#06b6d4"/>
+
+      <!-- Step 4: Semantic Query -->
+      <g transform="translate(447, 38)">
+        <rect x="0" y="0" width="105" height="56" rx="8" fill="#0c1220" stroke="#06b6d4" stroke-width="1"/>
+        <text x="10" y="24" fill="#38bdf8" class="body-font" font-size="11" font-weight="600">4. Retrieval</text>
+        <text x="10" y="42" fill="#64748b" class="mono-font" font-size="9">Prompt Relevance</text>
+      </g>
+
+      <path d="M 556 66 L 570 66" stroke="#10b981" stroke-width="1.8" stroke-dasharray="3,2"/>
+      <polygon points="570,63 576,66 570,69" fill="#10b981"/>
+
+      <!-- Step 5: System Injection -->
+      <g transform="translate(580, 38)">
+        <rect x="0" y="0" width="85" height="56" rx="8" fill="#065f46" fill-opacity="0.25" stroke="#10b981" stroke-width="1.2"/>
+        <circle cx="16" cy="22" r="3.5" fill="#10b981"/>
+        <text x="26" y="25" fill="#34d399" class="mono-font" font-size="10" font-weight="700">INJECT</text>
+        <text x="12" y="44" fill="#6ee7b7" class="mono-font" font-size="9">Auto Prompt</text>
+      </g>
+    </g>
+
+    <!-- Live Experience Lessons Preview -->
+    <g transform="translate(24, 200)">
+      <text x="0" y="0" fill="#94a3b8" class="mono-font" font-size="11" font-weight="600" letter-spacing="0.05em">STRUCTURED EXPERIENCE ENTRIES &amp; TAG TAXONOMY</text>
+
+      <!-- Entry 1: Architecture -->
+      <g transform="translate(0, 15)">
+        <rect x="0" y="0" width="677" height="66" rx="10" fill="#0a0e17" stroke="#202b3f" stroke-width="1"/>
+        <rect x="14" y="14" width="85" height="20" rx="4" fill="#162035" stroke="#06b6d4" stroke-width="0.8"/>
+        <text x="20" y="28" fill="#38bdf8" class="mono-font" font-size="9">ARCHITECTURE</text>
+        <text x="110" y="28" fill="#f8fafc" class="body-font" font-size="12" font-weight="600">Tactical Dark HUD 5-Layer Color Token Hierarchy</text>
+        
+        <rect x="585" y="14" width="78" height="20" rx="4" fill="#065f46" fill-opacity="0.3"/>
+        <text x="595" y="28" fill="#34d399" class="mono-font" font-size="9">WEIGHT ★5</text>
+
+        <text x="14" y="49" fill="#94a3b8" class="mono-font" font-size="10">Void: #07090e · Base: #0a0e17 · Card: #0c1220 · Hover: #162035 · Border: #202b3f</text>
+      </g>
+
+      <!-- Entry 2: Security -->
+      <g transform="translate(0, 90)">
+        <rect x="0" y="0" width="677" height="66" rx="10" fill="#0a0e17" stroke="#202b3f" stroke-width="1"/>
+        <rect x="14" y="14" width="70" height="20" rx="4" fill="#162035" stroke="#f59e0b" stroke-width="0.8"/>
+        <text x="20" y="28" fill="#fbbf24" class="mono-font" font-size="9">SECURITY</text>
+        <text x="96" y="28" fill="#f8fafc" class="body-font" font-size="12" font-weight="600">Workspace CWD Anti-System32 Isolation Barrier</text>
+        
+        <rect x="585" y="14" width="78" height="20" rx="4" fill="#065f46" fill-opacity="0.3"/>
+        <text x="595" y="28" fill="#34d399" class="mono-font" font-size="9">WEIGHT ★5</text>
+
+        <text x="14" y="49" fill="#94a3b8" class="mono-font" font-size="10">isSystemOrAppDir() prevents electron execution in Windows/System32 &amp; AppData</text>
+      </g>
+
+      <!-- Entry 3: Accessibility -->
+      <g transform="translate(0, 165)">
+        <rect x="0" y="0" width="677" height="66" rx="10" fill="#0a0e17" stroke="#202b3f" stroke-width="1"/>
+        <rect x="14" y="14" width="85" height="20" rx="4" fill="#162035" stroke="#8b5cf6" stroke-width="0.8"/>
+        <text x="20" y="28" fill="#c084fc" class="mono-font" font-size="9">ACCESSIBILITY</text>
+        <text x="110" y="28" fill="#f8fafc" class="body-font" font-size="12" font-weight="600">Cyclic Focus Trap &amp; Opener Restoration (WCAG AAA)</text>
+        
+        <rect x="585" y="14" width="78" height="20" rx="4" fill="#065f46" fill-opacity="0.3"/>
+        <text x="595" y="28" fill="#34d399" class="mono-font" font-size="9">WEIGHT ★4</text>
+
+        <text x="14" y="49" fill="#94a3b8" class="mono-font" font-size="10">ModalShell, DiffModal &amp; SpotlightBar maintain strict keyboard focus containment</text>
+      </g>
+
+      <!-- Entry 4: Testing & Automation -->
+      <g transform="translate(0, 240)">
+        <rect x="0" y="0" width="677" height="66" rx="10" fill="#0a0e17" stroke="#202b3f" stroke-width="1"/>
+        <rect x="14" y="14" width="60" height="20" rx="4" fill="#162035" stroke="#10b981" stroke-width="0.8"/>
+        <text x="20" y="28" fill="#34d399" class="mono-font" font-size="9">TESTING</text>
+        <text x="86" y="28" fill="#f8fafc" class="body-font" font-size="12" font-weight="600">Fast Flow Test Verification &amp; Mocked Shims</text>
+        
+        <rect x="585" y="14" width="78" height="20" rx="4" fill="#065f46" fill-opacity="0.3"/>
+        <text x="595" y="28" fill="#34d399" class="mono-font" font-size="9">WEIGHT ★4</text>
+
+        <text x="14" y="49" fill="#94a3b8" class="mono-font" font-size="10">npm run test:flows completes in &lt; 60ms with zero flaky dependencies</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ==================== BOTTOM ROW: DUAL-ENGINE SYNCHRONIZATION SPEC ==================== -->
+  <g transform="translate(60, 695)">
+    <!-- Container Card -->
+    <rect x="0" y="0" width="1480" height="295" rx="16" fill="url(#cardGrad)" stroke="#202b3f" stroke-width="1.2"/>
+
+    <g transform="translate(24, 24)">
+      <!-- Title -->
+      <text x="0" y="0" fill="#f8fafc" class="title-font" font-size="16">Tactical HUD Dual-Engine Integration Matrix</text>
+      <text x="0" y="18" fill="#64748b" class="mono-font" font-size="11">How MCP Tools &amp; Persistent Memory form an autonomous feedback loop inside AgentHub</text>
+
+      <!-- Sub-panel 1: MCP Tool Calling with Injected Context -->
+      <g transform="translate(0, 36)">
+        <rect x="0" y="0" width="455" height="200" rx="12" fill="#0a0e17" stroke="#202b3f" stroke-width="1"/>
+        <rect x="14" y="14" width="28" height="28" rx="6" fill="#06b6d4" fill-opacity="0.15"/>
+        <text x="21" y="32" fill="#06b6d4" class="mono-font" font-size="13" font-weight="700">01</text>
+
+        <text x="52" y="26" fill="#f8fafc" class="body-font" font-size="13" font-weight="700">Agent Prompts + Memory Preload</text>
+        <text x="52" y="40" fill="#64748b" class="mono-font" font-size="10">Semantic Memory Prioritization</text>
+
+        <rect x="14" y="56" width="427" height="128" rx="8" fill="#07090e" stroke="#202b3f"/>
+        <text x="24" y="78" fill="#38bdf8" class="mono-font" font-size="10">// Context Injected Automatically:</text>
+        <text x="24" y="96" fill="#94a3b8" class="mono-font" font-size="10">&lt;memory_context&gt;</text>
+        <text x="36" y="114" fill="#cbd5e1" class="mono-font" font-size="10">- Colors: Use strict #202b3f border token</text>
+        <text x="36" y="132" fill="#cbd5e1" class="mono-font" font-size="10">- Safety: Never modify outside active workspace</text>
+        <text x="36" y="150" fill="#cbd5e1" class="mono-font" font-size="10">- Tests: Always verify with npm run test:flows</text>
+        <text x="24" y="168" fill="#94a3b8" class="mono-font" font-size="10">&lt;/memory_context&gt;</text>
+      </g>
+
+      <!-- Sub-panel 2: Tool Execution & Auto-Verification -->
+      <g transform="translate(488, 36)">
+        <rect x="0" y="0" width="455" height="200" rx="12" fill="#0a0e17" stroke="#202b3f" stroke-width="1"/>
+        <rect x="14" y="14" width="28" height="28" rx="6" fill="#10b981" fill-opacity="0.15"/>
+        <text x="21" y="32" fill="#10b981" class="mono-font" font-size="13" font-weight="700">02</text>
+
+        <text x="52" y="26" fill="#f8fafc" class="body-font" font-size="13" font-weight="700">MCP Tool Execution &amp; Feedback</text>
+        <text x="52" y="40" fill="#64748b" class="mono-font" font-size="10">Structured JSON-RPC Dispatch</text>
+
+        <rect x="14" y="56" width="427" height="128" rx="8" fill="#07090e" stroke="#202b3f"/>
+        <text x="24" y="78" fill="#34d399" class="mono-font" font-size="10">// MCP Call Response Stream:</text>
+        <text x="24" y="96" fill="#cbd5e1" class="mono-font" font-size="10">{ "server": "filesystem", "tool": "read_file" }</text>
+        <text x="24" y="114" fill="#cbd5e1" class="mono-font" font-size="10">Status: 200 OK · Payload: 1.4 KB · Latency: 3.2ms</text>
+        <text x="24" y="136" fill="#38bdf8" class="mono-font" font-size="10">// Execution Output Safety Filter:</text>
+        <text x="24" y="154" fill="#a78bfa" class="mono-font" font-size="10">Target path validated against workspace root.</text>
+        <text x="24" y="170" fill="#10b981" class="mono-font" font-size="10">No unauthorized directory traversal detected.</text>
+      </g>
+
+      <!-- Sub-panel 3: Auto Experience Consolidation -->
+      <g transform="translate(976, 36)">
+        <rect x="0" y="0" width="455" height="200" rx="12" fill="#0a0e17" stroke="#202b3f" stroke-width="1"/>
+        <rect x="14" y="14" width="28" height="28" rx="6" fill="#8b5cf6" fill-opacity="0.15"/>
+        <text x="21" y="32" fill="#8b5cf6" class="mono-font" font-size="13" font-weight="700">03</text>
+
+        <text x="52" y="26" fill="#f8fafc" class="body-font" font-size="13" font-weight="700">Experience Memory Consolidation</text>
+        <text x="52" y="40" fill="#64748b" class="mono-font" font-size="10">Self-Evolution &amp; Weight Decay</text>
+
+        <rect x="14" y="56" width="427" height="128" rx="8" fill="#07090e" stroke="#202b3f"/>
+        <text x="24" y="78" fill="#c084fc" class="mono-font" font-size="10">// Experience Learned from Execution:</text>
+        <text x="24" y="96" fill="#cbd5e1" class="mono-font" font-size="10">+ Lesson: "Always bundle flows test with esbuild"</text>
+        <text x="24" y="114" fill="#cbd5e1" class="mono-font" font-size="10">+ Category: "Build &amp; Packaging" · Score: 98%</text>
+        <text x="24" y="136" fill="#34d399" class="mono-font" font-size="10">+ Saved to: .agent-hub/memory.json</text>
+        <text x="24" y="154" fill="#38bdf8" class="mono-font" font-size="10">+ Appended to: .agent-hub/experience.md</text>
+        <text x="24" y="170" fill="#10b981" class="mono-font" font-size="10">Future squad iterations inherit this knowledge.</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Footer Information -->
+  <g transform="translate(60, 1015)">
+    <text x="0" y="0" fill="#64748b" class="mono-font" font-size="10">AGENTHUB TACTICAL HUD ARCHITECTURE · SPEC CARD #52 · PROTOCOL EVOLUTION 2026</text>
+    <text x="1480" y="0" text-anchor="end" fill="#64748b" class="mono-font" font-size="10">STANDARDS: MCP 2024-11-05 · JSON-RPC 2.0 · WCAG 2.2 AAA · ZERO REGRESSIONS</text>
+  </g>
+</svg>

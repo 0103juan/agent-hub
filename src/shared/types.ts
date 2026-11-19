@@ -237,6 +237,8 @@ export interface ConversationSession {
   taskSlug?: string;    // Ej: 'feat-auth', 'secop-query-fix'
   /** Agentes creados juntos comparten equipo y pueden escribirse entre sí. */
   squad?: string;
+  /** Nombre legible del flujo; lo comparten los agentes de un mismo `squad`. */
+  squadName?: string;
   protocolRole?: ProtocolRole;
   profileId: string;
   modelId: string;

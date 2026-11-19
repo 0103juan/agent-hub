@@ -20,6 +20,33 @@ export interface ContentSearchResult {
   text: string;
 }
 
+const getFileColor = (name: string) => {
+  const ext = name.slice(name.lastIndexOf('.')).toLowerCase();
+  switch (ext) {
+    case '.ts':
+    case '.tsx':
+      return 'text-cyan-400';
+    case '.js':
+    case '.jsx':
+      return 'text-amber-400';
+    case '.json':
+    case '.yaml':
+    case '.yml':
+      return 'text-amber-300';
+    case '.css':
+    case '.scss':
+      return 'text-rose-400';
+    case '.md':
+      return 'text-emerald-400';
+    case '.svg':
+    case '.png':
+    case '.ico':
+      return 'text-violet-400';
+    default:
+      return 'text-slate-400';
+  }
+};
+
 interface Props {
   workspaceDir?: string;
   gitFiles: GitFileItem[];
@@ -95,7 +122,7 @@ export const ProjectFilesSidebar: React.FC<Props> = ({
       case '?':
         return 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20';
       default:
-        return 'text-zinc-400 bg-zinc-800 border-zinc-700';
+        return 'text-slate-400 bg-[#162035] border-[#202b3f]';
     }
   };
 
@@ -115,17 +142,17 @@ export const ProjectFilesSidebar: React.FC<Props> = ({
   };
 
   return (
-    <aside className="w-72 shrink-0 max-[560px]:absolute max-[560px]:inset-y-0 max-[560px]:left-0 max-[560px]:z-30 max-[560px]:w-[85%] max-[560px]:shadow-2xl border-r border-zinc-800 bg-zinc-950 flex flex-col h-full text-xs">
+    <aside className="w-80 shrink-0 max-[560px]:absolute max-[560px]:inset-y-0 max-[560px]:left-0 max-[560px]:z-30 max-[560px]:w-[85%] max-[560px]:shadow-2xl border-r border-[#202b3f] bg-[#07090e] flex flex-col h-full text-xs">
       {/* Header */}
-      <div className="p-2 border-b border-zinc-800 flex items-center justify-between gap-1.5 shrink-0 bg-zinc-900/50">
-        <div className="flex items-center gap-1">
+      <div className="p-2.5 border-b border-[#202b3f] flex items-center justify-between gap-1.5 shrink-0 bg-[#0a0e17]/95 backdrop-blur-md">
+        <div className="flex items-center gap-1 bg-[#0c1220] p-0.5 rounded-lg border border-[#202b3f]">
           <button
             type="button"
             onClick={() => setActiveTab('git')}
-            className={`flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium transition cursor-pointer ${
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-bold transition cursor-pointer ${
               activeTab === 'git'
-                ? 'bg-indigo-600 text-white shadow-xs'
-                : 'text-zinc-400 hover:text-zinc-200'
+                ? 'bg-cyan-600 text-slate-950 font-bold shadow-md shadow-cyan-600/30'
+                : 'text-slate-400 hover:text-slate-200'
             }`}
           >
             <GitCompare className="w-3 h-3" />
@@ -134,10 +161,10 @@ export const ProjectFilesSidebar: React.FC<Props> = ({
           <button
             type="button"
             onClick={() => setActiveTab('tree')}
-            className={`flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium transition cursor-pointer ${
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold transition cursor-pointer ${
               activeTab === 'tree'
-                ? 'bg-indigo-600 text-white shadow-xs'
-                : 'text-zinc-400 hover:text-zinc-200'
+                ? 'bg-cyan-600 text-slate-950 font-bold shadow-md shadow-cyan-600/30'
+                : 'text-slate-400 hover:text-slate-200'
             }`}
           >
             <Folder className="w-3 h-3" />
@@ -149,15 +176,15 @@ export const ProjectFilesSidebar: React.FC<Props> = ({
           <button
             type="button"
             onClick={() => postToHost({ command: 'getWorkspaceOverview' })}
-            className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition"
+            className="p-1.5 rounded-lg hover:bg-[#162035] text-slate-400 hover:text-slate-200 transition"
             title="Refrescar archivos del proyecto"
           >
-            <RefreshCw className="w-3 h-3" />
+            <RefreshCw className="w-3.5 h-3.5" />
           </button>
           <button
             type="button"
             onClick={onToggle}
-            className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition"
+            className="p-1.5 rounded-lg hover:bg-[#162035] text-slate-400 hover:text-slate-200 transition"
             title="Ocultar panel lateral"
           >
             <X className="w-3.5 h-3.5" />
@@ -166,9 +193,9 @@ export const ProjectFilesSidebar: React.FC<Props> = ({
       </div>
 
       {/* Buscador de archivos y contenido */}
-      <div className="p-2 border-b border-zinc-850 shrink-0 space-y-1.5">
-        <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-zinc-900 border border-zinc-800 text-zinc-300">
-          <Search className="w-3 h-3 text-zinc-500 shrink-0" />
+      <div className="p-2.5 border-b border-[#162035] shrink-0 space-y-2 bg-[#0a0e17]/50">
+        <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-[#0c1220] border border-[#202b3f] text-slate-300 focus-within:border-cyan-500/70 shadow-inner">
+          <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
           <input
             type="text"
             placeholder={
@@ -181,23 +208,23 @@ export const ProjectFilesSidebar: React.FC<Props> = ({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => e.key === 'Escape' && setSearch('')}
-            className="w-full bg-transparent border-none text-[11px] text-zinc-200 focus:outline-none placeholder-zinc-500"
+            className="w-full bg-transparent border-none text-[11px] text-slate-100 focus:outline-none placeholder-slate-500 font-sans"
           />
           {search && (
-            <button type="button" onClick={() => setSearch('')} className="text-zinc-500 hover:text-zinc-300">
-              <X className="w-2.5 h-2.5" />
+            <button type="button" onClick={() => setSearch('')} className="text-slate-400 hover:text-slate-200">
+              <X className="w-3 h-3" />
             </button>
           )}
         </div>
 
         {activeTab === 'tree' && (
           <div className="flex items-center gap-1 text-[10px]">
-            <span className="text-zinc-500 text-[10px]">Modo:</span>
+            <span className="text-slate-500 text-[10px]">Modo:</span>
             <button
               type="button"
               onClick={() => setSearchMode('name')}
-              className={`px-1.5 py-0.5 rounded transition cursor-pointer ${
-                searchMode === 'name' ? 'bg-indigo-600/30 text-indigo-300 font-medium border border-indigo-500/40' : 'text-zinc-400 hover:text-zinc-200'
+              className={`px-2 py-0.5 rounded-md transition cursor-pointer ${
+                searchMode === 'name' ? 'bg-cyan-950/40 text-cyan-300 font-bold border border-cyan-500/40' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               Nombre
@@ -208,8 +235,8 @@ export const ProjectFilesSidebar: React.FC<Props> = ({
                 setSearchMode('content');
                 if (search.trim().length >= 2) onSearchContent?.(search.trim());
               }}
-              className={`px-1.5 py-0.5 rounded transition cursor-pointer ${
-                searchMode === 'content' ? 'bg-indigo-600/30 text-indigo-300 font-medium border border-indigo-500/40' : 'text-zinc-400 hover:text-zinc-200'
+              className={`px-2 py-0.5 rounded-md transition cursor-pointer ${
+                searchMode === 'content' ? 'bg-cyan-950/40 text-cyan-300 font-bold border border-cyan-500/40' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               En Contenido (Grep)
@@ -219,17 +246,20 @@ export const ProjectFilesSidebar: React.FC<Props> = ({
       </div>
 
       {/* Lista de contenidos */}
-      <div className="flex-1 overflow-y-auto p-1.5 space-y-0.5 no-scrollbar">
+      <div className="flex-1 overflow-y-auto p-2 space-y-1 no-scrollbar">
         {activeTab === 'git' ? (
           <>
             {/* Smart Triggers Git */}
             {gitFiles.length > 0 && (
-              <div className="p-1.5 mb-1.5 bg-zinc-900/80 rounded-lg border border-zinc-800 space-y-1">
-                <div className="text-[10px] font-semibold text-zinc-400 px-1 flex items-center gap-1">
-                  <Sparkles className="w-3 h-3 text-amber-400" />
-                  <span>Disparadores Inteligentes</span>
+              <div className="p-2.5 mb-2 bg-[#0c1220] rounded-xl border border-[#202b3f] space-y-2 shadow-sm">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5 text-amber-300">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Disparadores Inteligentes</span>
+                  </span>
+                  <span className="font-mono text-slate-400 text-[10px]">{gitFiles.length} cambios</span>
                 </div>
-                <div className="flex flex-wrap items-center gap-1 px-1 pb-0.5 font-mono text-[10px]">
+                <div className="flex flex-wrap items-center gap-1 font-mono text-[10px]">
                   {(['M', 'A', 'D', '?'] as const).map((status) => {
                     const count = gitFiles.filter((item) => item.status === status).length;
                     return count > 0 && (
@@ -238,7 +268,7 @@ export const ProjectFilesSidebar: React.FC<Props> = ({
                         type="button"
                         aria-pressed={statusFilter === status}
                         onClick={() => setStatusFilter(statusFilter === status ? null : status)}
-                        className={`px-1 rounded border cursor-pointer ${statusColor(status)} ${statusFilter === status ? 'ring-1 ring-white/50' : 'opacity-80 hover:opacity-100'}`}
+                        className={`px-2 py-0.5 rounded-md border font-bold cursor-pointer transition ${statusColor(status)} ${statusFilter === status ? 'ring-1 ring-white/60 shadow-sm' : 'opacity-85 hover:opacity-100'}`}
                         title={`${statusLabel(status)}: ${statusFilter === status ? 'mostrar todos' : 'filtrar solo estos'}`}
                       >
                         {status} {count}
@@ -248,7 +278,7 @@ export const ProjectFilesSidebar: React.FC<Props> = ({
                   <button
                     type="button"
                     onClick={() => gitFiles.filter((item) => item.status !== 'D').forEach((item) => postToHost({ command: 'attachFile', file: item.path }))}
-                    className="ml-auto px-1.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 cursor-pointer"
+                    className="ml-auto px-2 py-0.5 rounded-md bg-[#0a0e17] hover:bg-[#162035] text-slate-300 border border-[#202b3f] cursor-pointer font-sans text-[10px]"
                     title="Adjuntar al chat todos los archivos cambiados"
                   >
                     Adjuntar todos
@@ -262,7 +292,7 @@ export const ProjectFilesSidebar: React.FC<Props> = ({
                         setTimeout(() => setCopiedList(false), 1500);
                       } catch {}
                     }}
-                    className="px-1.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 cursor-pointer"
+                    className="px-2 py-0.5 rounded-md bg-[#0a0e17] hover:bg-[#162035] text-slate-300 border border-[#202b3f] cursor-pointer font-sans text-[10px]"
                     title="Copiar la lista de archivos cambiados"
                   >
                     {copiedList ? 'Copiada' : 'Copiar lista'}
@@ -270,30 +300,30 @@ export const ProjectFilesSidebar: React.FC<Props> = ({
                   <button
                     type="button"
                     onClick={() => setGitSort(gitSort === 'status' ? 'name' : 'status')}
-                    className="flex items-center gap-0.5 px-1.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 cursor-pointer"
+                    className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#0a0e17] hover:bg-[#162035] text-slate-300 border border-[#202b3f] cursor-pointer font-sans text-[10px]"
                     title={`Ordenado por ${gitSort === 'status' ? 'estado' : 'nombre'}; clic para cambiar`}
                   >
                     <ListOrdered className="w-3 h-3" />
-                    {gitSort === 'status' ? 'estado' : 'nombre'}
+                    <span>{gitSort === 'status' ? 'estado' : 'nombre'}</span>
                   </button>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="grid grid-cols-2 gap-1.5 pt-1 border-t border-[#162035]">
                   <button
                     type="button"
                     onClick={onGenerateCommit}
-                    className="flex-1 flex items-center justify-center gap-1 px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-750 text-emerald-300 border border-emerald-500/30 text-[10px] font-medium transition cursor-pointer"
+                    className="flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold transition cursor-pointer shadow-xs"
                     title="Generar mensaje de commit convencional según los cambios actuales"
                   >
-                    <GitCommit className="w-3 h-3" />
+                    <GitCommit className="w-3.5 h-3.5" />
                     <span>Auto Commit</span>
                   </button>
                   <button
                     type="button"
                     onClick={onAuditBranch}
-                    className="flex-1 flex items-center justify-center gap-1 px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-750 text-purple-300 border border-purple-500/30 text-[10px] font-medium transition cursor-pointer"
+                    className="flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-violet-500/10 hover:bg-violet-500/20 text-violet-300 border border-violet-500/30 text-[10px] font-bold transition cursor-pointer shadow-xs"
                     title="Auditar diferencias y posibles riesgos de la rama con el agente"
                   >
-                    <ShieldCheck className="w-3 h-3" />
+                    <ShieldCheck className="w-3.5 h-3.5" />
                     <span>Auditar Cambios</span>
                   </button>
                 </div>
@@ -301,18 +331,18 @@ export const ProjectFilesSidebar: React.FC<Props> = ({
             )}
 
             {filteredGit.length === 0 ? (
-              <div className="text-center py-8 text-zinc-500 text-[11px] space-y-1">
-                <FileCheck2 className="w-6 h-6 mx-auto text-zinc-600" />
+              <div className="text-center py-8 text-slate-500 text-[11px] space-y-1">
+                <FileCheck2 className="w-6 h-6 mx-auto text-slate-600" />
                 <p>No hay cambios pendientes en Git</p>
               </div>
             ) : (
               filteredGit.map((item) => (
                 <div
                   key={item.path}
-                  className="group relative flex items-center justify-between gap-1.5 px-2 py-1.5 rounded hover:bg-zinc-900 transition"
+                  className="group relative flex items-center justify-between gap-1.5 p-2 rounded-xl bg-[#0a0e17]/70 hover:bg-[#0c1220] border border-transparent hover:border-[#202b3f] transition-all duration-150 shadow-xs"
                 >
                   <div
-                    className="flex items-center gap-1.5 min-w-0 flex-1 cursor-pointer"
+                    className="flex items-center gap-2 min-w-0 flex-1 cursor-pointer"
                     onClick={() => (onOpenDiff ? onOpenDiff(item.path) : onPreviewFile(item.path))}
                     title={`${item.path} (${statusLabel(item.status)})\nClic para ver Diff interactivo`}
                   >
@@ -323,17 +353,17 @@ export const ProjectFilesSidebar: React.FC<Props> = ({
                     >
                       {item.status}
                     </span>
-                    <span className="flex min-w-0 font-mono text-[11px] text-zinc-300 group-hover:text-zinc-100">
-                      {item.path.includes('/') && <span className="truncate text-zinc-500">{item.path.slice(0, item.path.lastIndexOf('/') + 1)}</span>}
-                      <span className="shrink-0">{item.path.slice(item.path.lastIndexOf('/') + 1)}</span>
+                    <span className="flex min-w-0 font-mono text-[11px] text-slate-300 group-hover:text-slate-100">
+                      {item.path.includes('/') && <span className="truncate text-slate-500">{item.path.slice(0, item.path.lastIndexOf('/') + 1)}</span>}
+                      <span className="shrink-0 font-semibold">{item.path.slice(item.path.lastIndexOf('/') + 1)}</span>
                     </span>
                   </div>
 
-                  <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-1 rounded bg-zinc-900 pl-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition">
+                  <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-0.5 rounded-lg bg-[#0c1220] border border-[#202b3f] p-0.5 shadow-md opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition">
                     <button
                       type="button"
                       onClick={() => (onOpenDiff ? onOpenDiff(item.path) : onPreviewFile(item.path))}
-                      className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-indigo-300 transition"
+                      className="p-1 rounded-md hover:bg-[#162035] text-slate-400 hover:text-cyan-400 transition"
                       title="Comparar Diff interactivo"
                     >
                       <FileDiff className="w-3 h-3" />
@@ -341,7 +371,7 @@ export const ProjectFilesSidebar: React.FC<Props> = ({
                     <button
                       type="button"
                       onClick={() => onPreviewFile(item.path)}
-                      className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-cyan-300 transition"
+                      className="p-1 rounded-md hover:bg-[#162035] text-slate-400 hover:text-cyan-400 transition"
                       title="Previsualizar archivo completo"
                     >
                       <Eye className="w-3 h-3" />
@@ -349,7 +379,7 @@ export const ProjectFilesSidebar: React.FC<Props> = ({
                     <button
                       type="button"
                       onClick={() => openInVsCode(workspaceDir ? `${workspaceDir.replace(/[\\/]$/, '')}/${item.path}` : item.path)}
-                      className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-blue-300 transition"
+                      className="p-1 rounded-md hover:bg-[#162035] text-slate-400 hover:text-blue-400 transition"
                       title="Abrir en VS Code"
                     >
                       <Code2 className="w-3 h-3" />
@@ -357,7 +387,7 @@ export const ProjectFilesSidebar: React.FC<Props> = ({
                     <button
                       type="button"
                       onClick={() => copyPath(item.path)}
-                      className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition"
+                      className="p-1 rounded-md hover:bg-[#162035] text-slate-400 hover:text-slate-200 transition"
                       title="Copiar la ruta"
                     >
                       {copiedPath === item.path ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
@@ -365,7 +395,7 @@ export const ProjectFilesSidebar: React.FC<Props> = ({
                     <button
                       type="button"
                       onClick={() => postToHost({ command: 'attachFile', file: item.path })}
-                      className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-emerald-300 transition"
+                      className="p-1 rounded-md hover:bg-[#162035] text-slate-400 hover:text-emerald-400 transition"
                       title="Adjuntar al chat (@)"
                     >
                       <Plus className="w-3 h-3" />
@@ -377,38 +407,38 @@ export const ProjectFilesSidebar: React.FC<Props> = ({
           </>
         ) : searchMode === 'content' && search.trim().length >= 2 ? (
           contentResults.length === 0 ? (
-            <div className="text-center py-8 text-zinc-500 text-[11px] space-y-1">
-              <Search className="w-6 h-6 mx-auto text-zinc-600" />
+            <div className="text-center py-8 text-slate-500 text-[11px] space-y-1">
+              <Search className="w-6 h-6 mx-auto text-slate-600" />
               <p>Sin coincidencias en el contenido</p>
             </div>
           ) : (
             contentResults.map((item, idx) => (
               <div
                 key={`${item.file}-${item.line}-${idx}`}
-                className="group p-1.5 rounded hover:bg-zinc-900 transition text-[11px] cursor-pointer border border-transparent hover:border-zinc-800"
+                className="group p-1.5 rounded hover:bg-[#162035] transition text-[11px] cursor-pointer border border-transparent hover:border-[#202b3f]"
                 onClick={() => onPreviewFile(item.file, item.line)}
                 title={`${item.file}:${item.line}\nClic para abrir previsualización`}
               >
-                <div className="flex items-center justify-between text-zinc-400 font-mono text-[10px] mb-0.5">
-                  <span className="truncate text-indigo-300 font-medium">{item.file}</span>
-                  <span className="shrink-0 text-zinc-500 font-bold">L{item.line}</span>
+                <div className="flex items-center justify-between text-slate-400 font-mono text-[10px] mb-0.5">
+                  <span className="truncate text-cyan-300 font-medium">{item.file}</span>
+                  <span className="shrink-0 text-slate-500 font-bold">L{item.line}</span>
                 </div>
-                <div className="font-mono text-[10.5px] text-zinc-300 truncate bg-zinc-950/70 px-1.5 py-0.5 rounded border border-zinc-850">
+                <div className="font-mono text-[10.5px] text-slate-300 truncate bg-[#07090e] px-1.5 py-0.5 rounded border border-[#202b3f]">
                   {item.text}
                 </div>
               </div>
             ))
           )
         ) : filteredTree.length === 0 ? (
-          <div className="text-center py-8 text-zinc-500 text-[11px] space-y-1">
-            <FolderOpen className="w-6 h-6 mx-auto text-zinc-600" />
+          <div className="text-center py-8 text-slate-500 text-[11px] space-y-1">
+            <FolderOpen className="w-6 h-6 mx-auto text-slate-600" />
             <p>No se encontraron archivos</p>
           </div>
         ) : (
           filteredTree.map((item) => (
             <div
               key={item.path}
-              className="group flex items-center justify-between gap-1.5 px-2 py-1 rounded hover:bg-zinc-900 transition text-[11px]"
+              className="group flex items-center justify-between gap-1.5 px-2 py-1.5 rounded-lg hover:bg-[#0c1220] border border-transparent hover:border-[#202b3f] transition text-[11px]"
             >
               <div
                 className="flex items-center gap-1.5 min-w-0 flex-1 cursor-pointer"
@@ -416,13 +446,13 @@ export const ProjectFilesSidebar: React.FC<Props> = ({
                 title={item.path}
               >
                 {item.isDir ? (
-                  <Folder className="w-3 h-3 text-indigo-400 shrink-0" />
+                  <Folder className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
                 ) : (
-                  <FileCode className="w-3 h-3 text-zinc-400 shrink-0" />
+                  <FileCode className={`w-3.5 h-3.5 shrink-0 ${getFileColor(item.name)}`} />
                 )}
                 <span
                   className={`truncate font-mono ${
-                    item.isDir ? 'text-zinc-300 font-semibold' : 'text-zinc-400 group-hover:text-zinc-100'
+                    item.isDir ? 'text-slate-200 font-semibold' : 'text-slate-300 group-hover:text-slate-100'
                   }`}
                 >
                   {item.name}
@@ -430,11 +460,11 @@ export const ProjectFilesSidebar: React.FC<Props> = ({
               </div>
 
               {!item.isDir && (
-                <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition shrink-0">
+                <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition shrink-0 bg-[#0a0e17] border border-[#202b3f] p-0.5 rounded-md shadow-xs">
                   <button
                     type="button"
                     onClick={() => onPreviewFile(item.path)}
-                    className="p-0.5 rounded hover:bg-zinc-800 text-zinc-400 hover:text-indigo-300"
+                    className="p-1 rounded hover:bg-[#162035] text-slate-400 hover:text-cyan-400"
                     title="Previsualizar"
                   >
                     <Eye className="w-3 h-3" />
@@ -442,7 +472,7 @@ export const ProjectFilesSidebar: React.FC<Props> = ({
                   <button
                     type="button"
                     onClick={() => copyPath(item.path)}
-                    className="p-0.5 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200"
+                    className="p-1 rounded hover:bg-[#162035] text-slate-400 hover:text-slate-200"
                     title="Copiar la ruta"
                   >
                     {copiedPath === item.path ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
@@ -450,7 +480,7 @@ export const ProjectFilesSidebar: React.FC<Props> = ({
                   <button
                     type="button"
                     onClick={() => postToHost({ command: 'attachFile', file: item.path })}
-                    className="p-0.5 rounded hover:bg-zinc-800 text-zinc-400 hover:text-emerald-300"
+                    className="p-1 rounded hover:bg-[#162035] text-slate-400 hover:text-emerald-400"
                     title="Adjuntar al chat"
                   >
                     <Plus className="w-3 h-3" />

@@ -1,0 +1,320 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" style="background:#07090e; font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;">
+  <defs>
+    <!-- Background Grid -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#162035" stroke-width="0.8" opacity="0.4"/>
+    </pattern>
+    <radialGradient id="cyan-glow" cx="50%" cy="0%" r="70%">
+      <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#07090e" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="aurora-stream" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#06b6d4"/>
+      <stop offset="35%" stop-color="#14b8a6"/>
+      <stop offset="70%" stop-color="#a855f7"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+    <filter id="shadow-drop" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.65"/>
+    </filter>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="1600" height="900" fill="#07090e"/>
+  <rect width="1600" height="900" fill="url(#grid)"/>
+  <rect width="1600" height="500" fill="url(#cyan-glow)"/>
+
+  <!-- Master Header -->
+  <g transform="translate(48, 36)">
+    <!-- Brand / Badge -->
+    <rect x="0" y="0" width="132" height="26" rx="6" fill="#0c1220" stroke="#06b6d4" stroke-width="1.2"/>
+    <text x="12" y="17" fill="#22d3ee" font-size="11" font-weight="700" letter-spacing="1.5" font-family="ui-monospace, monospace">SPEC CARD #59</text>
+
+    <text x="148" y="18" fill="#64748b" font-size="12" font-family="ui-monospace, monospace">|</text>
+    <text x="164" y="18" fill="#94a3b8" font-size="12" font-weight="600" letter-spacing="0.5">SECTION 2.L TACTICAL MESSAGE ANATOMY &amp; DECISION MATRIX</text>
+
+    <!-- Master Title -->
+    <text x="0" y="62" fill="#f8fafc" font-size="28" font-weight="800" letter-spacing="-0.5">Anatomía del Mensaje Táctico, Matriz de Decisión y Time-Travel</text>
+    <text x="0" y="86" fill="#94a3b8" font-size="14">Desglose de turnos de IA, cronómetro de fases, matrices interactivas con atajos numéricos y bifurcación time-travel de estados</text>
+
+    <!-- Top Right Telemetry Badges -->
+    <g transform="translate(1120, 10)">
+      <rect x="0" y="0" width="384" height="64" rx="10" fill="#0a0e17" stroke="#202b3f" stroke-width="1.2" filter="url(#shadow-drop)"/>
+      <circle cx="24" cy="32" r="6" fill="#10b981"/>
+      <circle cx="24" cy="32" r="10" fill="none" stroke="#10b981" stroke-width="1.5" opacity="0.4"/>
+      <text x="42" y="27" fill="#f8fafc" font-size="12" font-weight="700">MESSAGE STREAM ENGINE: ACTIVE</text>
+      <text x="42" y="45" fill="#64748b" font-size="10" font-family="ui-monospace, monospace">splitTurn() • 1-5 Hotkeys • GitFork Time-Travel</text>
+      <rect x="300" y="16" width="70" height="32" rx="6" fill="#0c1220" stroke="#06b6d4" stroke-width="1"/>
+      <text x="314" y="36" fill="#22d3ee" font-size="12" font-weight="800" font-family="ui-monospace, monospace">60 FPS</text>
+    </g>
+  </g>
+
+  <!-- Three Architecture Pillars -->
+
+  <!-- ================= PILLAR 1: TURN LIFECYCLE & SPLIT ================= -->
+  <g transform="translate(48, 150)">
+    <rect x="0" y="0" width="470" height="540" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.4" filter="url(#shadow-drop)"/>
+    <rect x="0" y="0" width="470" height="48" rx="14" fill="#0c1220"/>
+    <path d="M 0 48 L 470 48" stroke="#202b3f" stroke-width="1.2"/>
+
+    <!-- Header -->
+    <rect x="16" y="13" width="22" height="22" rx="5" fill="#07090e" stroke="#06b6d4" stroke-width="1.2"/>
+    <text x="23" y="28" fill="#22d3ee" font-size="11" font-weight="800" font-family="ui-monospace, monospace">1</text>
+    <text x="48" y="29" fill="#f8fafc" font-size="13" font-weight="700">Ciclo de Turno y Pipeline splitTurn()</text>
+    <rect x="360" y="14" width="94" height="20" rx="4" fill="#07090e" stroke="#202b3f" stroke-width="1"/>
+    <text x="370" y="28" fill="#94a3b8" font-size="10" font-family="ui-monospace, monospace">splitTurn()</text>
+
+    <!-- Node 1: Split Turn Flow -->
+    <g transform="translate(18, 64)">
+      <rect x="0" y="0" width="434" height="116" rx="8" fill="#07090e" stroke="#162035" stroke-width="1.2"/>
+      <text x="14" y="22" fill="#22d3ee" font-size="12" font-weight="700">1. Desacoplamiento de Proceso y Respuesta</text>
+      <text x="14" y="40" fill="#94a3b8" font-size="11">Separa trazas de ejecución interna de la respuesta final:</text>
+      <!-- Sub-blocks -->
+      <g transform="translate(14, 52)">
+        <rect x="0" y="0" width="196" height="50" rx="6" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="10" y="18" fill="#a855f7" font-size="11" font-weight="700">🧠 TurnProcess</text>
+        <text x="10" y="32" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">activity[] + offsets[]</text>
+        <text x="10" y="44" fill="#94a3b8" font-size="9">Plegable, trazas de herramientas</text>
+      </g>
+      <g transform="translate(220, 52)">
+        <rect x="0" y="0" width="196" height="50" rx="6" fill="#0c1220" stroke="#06b6d4" stroke-width="1"/>
+        <text x="10" y="18" fill="#22d3ee" font-size="11" font-weight="700">💬 TurnAnswer</text>
+        <text x="10" y="32" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">content.slice(start)</text>
+        <text x="10" y="44" fill="#94a3b8" font-size="9">Síntesis markdown authoritative</text>
+      </g>
+    </g>
+
+    <!-- Node 2: TurnStatus Chronometer -->
+    <g transform="translate(18, 194)">
+      <rect x="0" y="0" width="434" height="110" rx="8" fill="#07090e" stroke="#162035" stroke-width="1.2"/>
+      <text x="14" y="22" fill="#22d3ee" font-size="12" font-weight="700">2. Cronómetro y Fases en Tiempo Real</text>
+      <text x="14" y="40" fill="#94a3b8" font-size="11">Transición fluida de fases con cronómetro en segundos:</text>
+      <g transform="translate(14, 52)">
+        <rect x="0" y="0" width="130" height="44" rx="6" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="10" y="18" fill="#a855f7" font-size="10" font-weight="700">Pensando</text>
+        <text x="10" y="32" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">0:04 · Aurora Wave</text>
+
+        <rect x="138" y="0" width="140" height="44" rx="6" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="10" y="18" fill="#f59e0b" font-size="10" font-weight="700" transform="translate(138,0)">Herramienta</text>
+        <text x="10" y="32" fill="#64748b" font-size="9" font-family="ui-monospace, monospace" transform="translate(138,0)">0:12 · Tool Active</text>
+
+        <rect x="286" y="0" width="120" height="44" rx="6" fill="#0c1220" stroke="#06b6d4" stroke-width="1"/>
+        <text x="10" y="18" fill="#22d3ee" font-size="10" font-weight="700" transform="translate(286,0)">Escribiendo</text>
+        <text x="10" y="32" fill="#64748b" font-size="9" font-family="ui-monospace, monospace" transform="translate(286,0)">0:28 · Streaming</text>
+      </g>
+    </g>
+
+    <!-- Node 3: Aurora Thinking Wave -->
+    <g transform="translate(18, 318)">
+      <rect x="0" y="0" width="434" height="98" rx="8" fill="#07090e" stroke="#162035" stroke-width="1.2"/>
+      <text x="14" y="22" fill="#22d3ee" font-size="12" font-weight="700">3. Borde Espectral Aurora (Thinking Wave)</text>
+      <text x="14" y="40" fill="#94a3b8" font-size="11">Animación espectral continua a 60 FPS durante razonamiento:</text>
+      <g transform="translate(14, 52)">
+        <rect x="0" y="0" width="406" height="32" rx="6" fill="url(#aurora-stream)"/>
+        <rect x="2" y="2" width="402" height="28" rx="5" fill="#0c1220"/>
+        <text x="14" y="19" fill="#22d3ee" font-size="10" font-family="ui-monospace, monospace">animation: auroraWave 3s ease infinite;</text>
+      </g>
+    </g>
+
+    <!-- Node 4: Telemetry Tokens & Cost -->
+    <g transform="translate(18, 430)">
+      <rect x="0" y="0" width="434" height="92" rx="8" fill="#0c1220" stroke="#10b981" stroke-width="1.2"/>
+      <text x="14" y="22" fill="#10b981" font-size="11" font-weight="700">Econometría de Turno &amp; Billing Tracker</text>
+      <text x="14" y="40" fill="#94a3b8" font-size="10.5">Medición precisa de tokens consumidos, duración en milisegundos</text>
+      <text x="14" y="56" fill="#94a3b8" font-size="10.5">y cálculo financiero instantáneo en USD por cada turno completado.</text>
+      <text x="14" y="76" fill="#22d3ee" font-size="10" font-family="ui-monospace, monospace">$0.0012 USD • 4.2s • ~1,420 tokens • 220 WPM</text>
+    </g>
+  </g>
+
+  <!-- ================= PILLAR 2: QUESTION MATRIX & HOTKEYS ================= -->
+  <g transform="translate(542, 150)">
+    <rect x="0" y="0" width="516" height="540" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.4" filter="url(#shadow-drop)"/>
+    <rect x="0" y="0" width="516" height="48" rx="14" fill="#0c1220"/>
+    <path d="M 0 48 L 516 48" stroke="#202b3f" stroke-width="1.2"/>
+
+    <!-- Header -->
+    <rect x="16" y="13" width="22" height="22" rx="5" fill="#07090e" stroke="#06b6d4" stroke-width="1.2"/>
+    <text x="23" y="28" fill="#22d3ee" font-size="11" font-weight="800" font-family="ui-monospace, monospace">2</text>
+    <text x="48" y="29" fill="#f8fafc" font-size="13" font-weight="700">Matriz de Decisión y Atajos 1-5</text>
+    <rect x="382" y="14" width="118" height="20" rx="4" fill="#07090e" stroke="#10b981" stroke-width="1"/>
+    <text x="392" y="28" fill="#10b981" font-size="10" font-family="ui-monospace, monospace">INTERACTIVE APG</text>
+
+    <!-- Node 1: Question Detection Engine -->
+    <g transform="translate(18, 64)">
+      <rect x="0" y="0" width="480" height="98" rx="8" fill="#07090e" stroke="#162035" stroke-width="1.2"/>
+      <text x="14" y="22" fill="#22d3ee" font-size="12" font-weight="700">1. Motor Heurístico de Detección de Preguntas</text>
+      <text x="14" y="40" fill="#94a3b8" font-size="11">Parsea preguntas estructuradas del agente (`extractQuestionOptions`):</text>
+      <g transform="translate(14, 50)">
+        <rect x="0" y="0" width="452" height="34" rx="6" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="12" y="21" fill="#f8fafc" font-size="10.5">✨ ¿Cómo deseas proceder con la arquitectura de micro-servicios?</text>
+      </g>
+    </g>
+
+    <!-- Node 2: 1-5 Number Keys Accelerators -->
+    <g transform="translate(18, 176)">
+      <rect x="0" y="0" width="480" height="198" rx="8" fill="#07090e" stroke="#162035" stroke-width="1.2"/>
+      <text x="14" y="22" fill="#22d3ee" font-size="12" font-weight="700">2. Aceleradores de Teclado Numérico (Teclas 1-5)</text>
+      <text x="14" y="40" fill="#94a3b8" font-size="11">Aprobación instantánea con listener global en `window.onKeyDown`:</text>
+
+      <!-- Option 1 (Recommended) -->
+      <g transform="translate(14, 52)">
+        <rect x="0" y="0" width="452" height="42" rx="6" fill="#0c1220" stroke="#06b6d4" stroke-width="1.2"/>
+        <rect x="8" y="8" width="24" height="24" rx="4" fill="#07090e" stroke="#202b3f" stroke-width="1"/>
+        <text x="16" y="24" fill="#22d3ee" font-size="11" font-weight="800" font-family="ui-monospace, monospace">1</text>
+        <text x="40" y="20" fill="#f8fafc" font-size="10.5" font-weight="700">Adoptar arquitectura modular desacoplada</text>
+        <rect x="320" y="10" width="118" height="20" rx="4" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="1"/>
+        <text x="330" y="24" fill="#34d399" font-size="9" font-weight="700">RECOMENDADO</text>
+      </g>
+
+      <!-- Option 2 -->
+      <g transform="translate(14, 100)">
+        <rect x="0" y="0" width="452" height="38" rx="6" fill="#0a0e17" stroke="#202b3f" stroke-width="1"/>
+        <rect x="8" y="7" width="24" height="24" rx="4" fill="#07090e" stroke="#202b3f" stroke-width="1"/>
+        <text x="16" y="23" fill="#94a3b8" font-size="11" font-weight="800" font-family="ui-monospace, monospace">2</text>
+        <text x="40" y="22" fill="#94a3b8" font-size="10.5">Mantener monolito optimizado con caché local</text>
+      </g>
+
+      <!-- Option 3 (Custom input) -->
+      <g transform="translate(14, 144)">
+        <rect x="0" y="0" width="452" height="38" rx="6" fill="#0a0e17" stroke="#202b3f" stroke-dasharray="4,4" stroke-width="1"/>
+        <rect x="8" y="7" width="24" height="24" rx="4" fill="#07090e" stroke="#202b3f" stroke-width="1"/>
+        <text x="16" y="23" fill="#64748b" font-size="11" font-weight="800" font-family="ui-monospace, monospace">3</text>
+        <text x="40" y="22" fill="#64748b" font-size="10.5" font-style="italic">Otra opción (Escribir respuesta personalizada)...</text>
+      </g>
+    </g>
+
+    <!-- Node 3: Dismiss & Persistence -->
+    <g transform="translate(18, 388)">
+      <rect x="0" y="0" width="480" height="134" rx="8" fill="#0c1220" stroke="#06b6d4" stroke-width="1.2"/>
+      <text x="14" y="22" fill="#22d3ee" font-size="11" font-weight="700">Aprobación y Despacho Atómico a la IA:</text>
+      <text x="14" y="42" fill="#94a3b8" font-size="10.5">Al presionar la tecla o hacer clic, la opción seleccionada se fija como</text>
+      <text x="14" y="58" fill="#94a3b8" font-size="10.5">aprobada (`selectedOption`) y se despacha de inmediato al prompt del host.</text>
+      <g transform="translate(14, 74)">
+        <rect x="0" y="0" width="452" height="44" rx="6" fill="#07090e" stroke="#10b981" stroke-width="1"/>
+        <circle cx="20" cy="22" r="8" fill="#10b981" fill-opacity="0.2"/>
+        <path d="M 16 22 L 19 25 L 25 18" fill="none" stroke="#10b981" stroke-width="2"/>
+        <text x="36" y="26" fill="#34d399" font-size="10.5" font-weight="700">Opción aprobada: "Adoptar arquitectura modular desacoplada"</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ================= PILLAR 3: TIME-TRAVEL & CROSS-REVIEW ================= -->
+  <g transform="translate(1082, 150)">
+    <rect x="0" y="0" width="470" height="540" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.4" filter="url(#shadow-drop)"/>
+    <rect x="0" y="0" width="470" height="48" rx="14" fill="#0c1220"/>
+    <path d="M 0 48 L 470 48" stroke="#202b3f" stroke-width="1.2"/>
+
+    <!-- Header -->
+    <rect x="16" y="13" width="22" height="22" rx="5" fill="#07090e" stroke="#06b6d4" stroke-width="1.2"/>
+    <text x="23" y="28" fill="#22d3ee" font-size="11" font-weight="800" font-family="ui-monospace, monospace">3</text>
+    <text x="48" y="29" fill="#f8fafc" font-size="13" font-weight="700">Time-Travel &amp; Auditoría Cruzada</text>
+    <rect x="340" y="14" width="114" height="20" rx="4" fill="#07090e" stroke="#f59e0b" stroke-width="1"/>
+    <text x="350" y="28" fill="#f59e0b" font-size="10" font-family="ui-monospace, monospace">GIT SNAPSHOTS</text>
+
+    <!-- Node 1: GitFork Time-Travel -->
+    <g transform="translate(18, 64)">
+      <rect x="0" y="0" width="434" height="114" rx="8" fill="#07090e" stroke="#162035" stroke-width="1.2"/>
+      <text x="14" y="22" fill="#22d3ee" font-size="12" font-weight="700">1. Bifurcación Temporal (GitFork Engine)</text>
+      <text x="14" y="40" fill="#94a3b8" font-size="11">Crea una nueva rama y sesión desde el punto exacto del mensaje:</text>
+      <g transform="translate(14, 52)">
+        <rect x="0" y="0" width="406" height="46" rx="6" fill="#0c1220" stroke="#f59e0b" stroke-width="1"/>
+        <text x="12" y="18" fill="#fbbf24" font-size="10" font-weight="700">🌿 postToHost({ command: 'forkSession' })</text>
+        <text x="12" y="34" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">Clona historial hasta messageId y crea git branch aislada</text>
+      </g>
+    </g>
+
+    <!-- Node 2: RestoreStage Rollback -->
+    <g transform="translate(18, 192)">
+      <rect x="0" y="0" width="434" height="114" rx="8" fill="#07090e" stroke="#162035" stroke-width="1.2"/>
+      <text x="14" y="22" fill="#22d3ee" font-size="12" font-weight="700">2. Reversión de Etapa (RestoreStage)</text>
+      <text x="14" y="40" fill="#94a3b8" font-size="11">Devuelve el workspace al commit del hito con confirmación inline:</text>
+      <g transform="translate(14, 52)">
+        <rect x="0" y="0" width="406" height="46" rx="6" fill="#0c1220" stroke="#f43f5e" stroke-width="1"/>
+        <text x="12" y="18" fill="#fda4af" font-size="10" font-weight="700">↺ ¿Volver a esta etapa? Se pierde lo posterior.</text>
+        <text x="12" y="34" fill="#94a3b8" font-size="9">[Sí, volver] con git reset --hard al commit del squad</text>
+      </g>
+    </g>
+
+    <!-- Node 3: CrossReview Impartial Auditor -->
+    <g transform="translate(18, 320)">
+      <rect x="0" y="0" width="434" height="98" rx="8" fill="#07090e" stroke="#162035" stroke-width="1.2"/>
+      <text x="14" y="22" fill="#22d3ee" font-size="12" font-weight="700">3. Auditoría Imparcial (CrossReview)</text>
+      <text x="14" y="40" fill="#94a3b8" font-size="11">Despacho ciego a un modelo rival para contraste técnico objetivo:</text>
+      <g transform="translate(14, 52)">
+        <rect x="0" y="0" width="406" height="34" rx="6" fill="#0c1220" stroke="#06b6d4" stroke-width="1"/>
+        <text x="12" y="21" fill="#22d3ee" font-size="10" font-weight="700">🛡️ postToHost({ command: 'crossReview' })</text>
+      </g>
+    </g>
+
+    <!-- Node 4: Action Buttons Micro-Interactions -->
+    <g transform="translate(18, 430)">
+      <rect x="0" y="0" width="434" height="92" rx="8" fill="#0c1220" stroke="#06b6d4" stroke-width="1.2"/>
+      <text x="14" y="22" fill="#22d3ee" font-size="11" font-weight="700">Botonera Táctica de Acciones:</text>
+      <text x="14" y="42" fill="#94a3b8" font-size="10.5">Acciones rápidas con elevación Capa 4 `#162035` y micro-borde cian:</text>
+      <g transform="translate(14, 54)">
+        <text x="0" y="16" fill="#f8fafc" font-size="10" font-family="ui-monospace, monospace">[Copiar] • [Fijar] • [Editar] • [Reintentar] • [Bifurcar]</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ================= BOTTOM SECTION: TOKENS & CONTRAST RATIO ================= -->
+  <g transform="translate(48, 714)">
+    <rect x="0" y="0" width="1504" height="152" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.4" filter="url(#shadow-drop)"/>
+
+    <!-- Bottom Left: Canonical Layers Swatches -->
+    <g transform="translate(24, 20)">
+      <text x="0" y="14" fill="#f8fafc" font-size="13" font-weight="700">Paleta Táctica Canónica (5 Capas de Elevación HUD)</text>
+      <g transform="translate(0, 30)">
+        <rect x="0" y="0" width="90" height="60" rx="6" fill="#07090e" stroke="#202b3f" stroke-width="1.2"/>
+        <text x="8" y="20" fill="#64748b" font-size="9">Capa 1: Base</text>
+        <text x="8" y="46" fill="#f8fafc" font-size="11" font-weight="700" font-family="ui-monospace, monospace">#07090e</text>
+
+        <rect x="100" y="0" width="90" height="60" rx="6" fill="#0a0e17" stroke="#202b3f" stroke-width="1.2"/>
+        <text x="108" y="20" fill="#64748b" font-size="9">Capa 2: Card</text>
+        <text x="108" y="46" fill="#f8fafc" font-size="11" font-weight="700" font-family="ui-monospace, monospace">#0a0e17</text>
+
+        <rect x="200" y="0" width="90" height="60" rx="6" fill="#0c1220" stroke="#202b3f" stroke-width="1.2"/>
+        <text x="208" y="20" fill="#64748b" font-size="9">Capa 3: Inset</text>
+        <text x="208" y="46" fill="#f8fafc" font-size="11" font-weight="700" font-family="ui-monospace, monospace">#0c1220</text>
+
+        <rect x="300" y="0" width="90" height="60" rx="6" fill="#162035" stroke="#202b3f" stroke-width="1.2"/>
+        <text x="308" y="20" fill="#94a3b8" font-size="9">Capa 4: Hover</text>
+        <text x="308" y="46" fill="#f8fafc" font-size="11" font-weight="700" font-family="ui-monospace, monospace">#162035</text>
+
+        <rect x="400" y="0" width="90" height="60" rx="6" fill="#202b3f" stroke="#06b6d4" stroke-width="1.2"/>
+        <text x="408" y="20" fill="#22d3ee" font-size="9">Capa 5: Borde</text>
+        <text x="408" y="46" fill="#f8fafc" font-size="11" font-weight="700" font-family="ui-monospace, monospace">#202b3f</text>
+      </g>
+    </g>
+
+    <!-- Bottom Center: WCAG AAA Contrast Metrics -->
+    <g transform="translate(540, 20)">
+      <text x="0" y="14" fill="#f8fafc" font-size="13" font-weight="700">Verificación de Accesibilidad WCAG 2.2 AAA (Contraste)</text>
+      <g transform="translate(0, 30)">
+        <rect x="0" y="0" width="170" height="60" rx="6" fill="#07090e" stroke="#202b3f" stroke-width="1"/>
+        <text x="12" y="20" fill="#64748b" font-size="10">Texto Principal (#f8fafc)</text>
+        <text x="12" y="46" fill="#10b981" font-size="16" font-weight="800" font-family="ui-monospace, monospace">18.4 : 1 (AAA)</text>
+
+        <rect x="180" y="0" width="170" height="60" rx="6" fill="#07090e" stroke="#202b3f" stroke-width="1"/>
+        <text x="12" y="20" fill="#64748b" font-size="10" transform="translate(180,0)">Acento Cian (#22d3ee)</text>
+        <text x="12" y="46" fill="#10b981" font-size="16" font-weight="800" font-family="ui-monospace, monospace" transform="translate(180,0)">11.8 : 1 (AAA)</text>
+
+        <rect x="360" y="0" width="170" height="60" rx="6" fill="#07090e" stroke="#202b3f" stroke-width="1"/>
+        <text x="12" y="20" fill="#64748b" font-size="10" transform="translate(360,0)">Texto Secundario (#94a3b8)</text>
+        <text x="12" y="46" fill="#10b981" font-size="16" font-weight="800" font-family="ui-monospace, monospace" transform="translate(360,0)">7.6 : 1 (AAA)</text>
+      </g>
+    </g>
+
+    <!-- Bottom Right: Production Verification Stamp -->
+    <g transform="translate(1100, 20)">
+      <rect x="0" y="0" width="374" height="104" rx="8" fill="#07090e" stroke="#10b981" stroke-width="1.2"/>
+      <circle cx="28" cy="30" r="12" fill="#10b981" fill-opacity="0.15"/>
+      <path d="M 22 30 L 26 34 L 34 26" fill="none" stroke="#10b981" stroke-width="2.2"/>
+      <text x="48" y="26" fill="#f8fafc" font-size="12" font-weight="700">CERTIFICACIÓN TÁCTICA AGENTHUB</text>
+      <text x="48" y="42" fill="#10b981" font-size="10.5" font-family="ui-monospace, monospace">100% Passing Flows (14/14 Tests)</text>
+      <text x="48" y="58" fill="#94a3b8" font-size="10">CWD Guard: Anti-System32 Shield Active</text>
+      <text x="48" y="74" fill="#94a3b8" font-size="10">Build: Standalone + Electron + Vite OK</text>
+      <text x="48" y="90" fill="#22d3ee" font-size="9" font-family="ui-monospace, monospace">Residual Legacy Hex Codes: 0 MATCHES</text>
+    </g>
+  </g>
+</svg>

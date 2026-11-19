@@ -1,6 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Bell, Clock, Columns3, ExternalLink, Layers, LayoutGrid, Loader2, Maximize2, Minimize2, Plus, Rows3, Send } from 'lucide-react';
+import { Bell, ChevronDown, ChevronRight, Clock, Columns3, ExternalLink, FolderGit2, Layers, LayoutGrid, Loader2, Maximize2, MessageSquare, Minimize2, Plus, Rows3, Search, Send, Terminal, Users } from 'lucide-react';
+import { normalizeText } from '../../shared/workspace-actions';
+import { relativeTime } from '../utils/format';
 import { agentName } from '../../shared/agent-name';
+import { agentLabel, groupByFlow } from '../../shared/flows';
 import { ConversationSession } from '../../shared/types';
 import { HubAction, HubState } from '../state/hub-state';
 import { isElectron, postToHost } from '../vscode-api';
@@ -90,7 +93,7 @@ const sameChat = (a: ChatProps, b: ChatProps) => {
     x.sessions.length === y.sessions.length &&
     x.sessions.every((p, i) => {
       const n = y.sessions[i];
-      return p === n || (p.id === n.id && p.title === n.title && p.squad === n.squad && p.messageCount === n.messageCount && p.projectName === n.projectName);
+      return p === n || (p.id === n.id && p.title === n.title && p.squad === n.squad && p.squadName === n.squadName && p.messageCount === n.messageCount && p.projectName === n.projectName);
     })
   );
 };
@@ -140,7 +143,25 @@ export const SplitBar: React.FC<BarProps> = ({ state, session, sp, switchSession
   }, [menu]);
   const running = (id: string) => state.runningSessionIds.includes(id);
   const pending = state.attentionSessionIds.flatMap((id) => state.sessions.filter((s) => s.id === id));
-  const ordered = [...state.sessions].sort((a, b) => Number(running(b.id)) - Number(running(a.id)));
+  const { flows, loose } = groupByFlow(state.sessions, state.runningSessionIds);
+  const [query, setQuery] = useState('');
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const q = normalizeText(query.trim());
+  const matches = (...texts: Array<string | undefined>) => !q || texts.some((text) => text && normalizeText(text).includes(q));
+  const shownFlows = flows.filter((f) => matches(f.name, f.project, ...f.members.map((m) => `${agentLabel(m, f.members)} ${m.title}`)));
+  const shownLoose = loose.filter((s) => matches(s.title, s.projectName));
+  const full = sp.ids.length >= MAX_COLUMNS;
+
+  const toggleFlow = (members: ConversationSession[]) => {
+    const allSelected = members.length > 0 && members.every((m) => sp.ids.includes(m.id));
+    if (allSelected) {
+      apply(sp.ids.filter((id) => !members.some((m) => m.id === id)));
+    } else {
+      const remainingSlots = Math.max(0, MAX_COLUMNS - sp.ids.length);
+      const toAdd = members.filter((m) => !sp.ids.includes(m.id)).slice(0, remainingSlots).map((m) => m.id);
+      apply([...sp.ids, ...toAdd]);
+    }
+  };
 
   // Las columnas solo se pintan si el chat activo es una de ellas: si la selección no lo incluye, se pasa al primero.
   const apply = (next: string[]) => {
@@ -148,6 +169,7 @@ export const SplitBar: React.FC<BarProps> = ({ state, session, sp, switchSession
     sp.setIds(clean);
     if (clean.length > 1 && !clean.includes(session.id)) switchSession(clean[0]);
   };
+  const pick = (id: string) => apply(sp.ids.length === 0 && id !== session.id ? [session.id, id] : sp.ids.includes(id) ? sp.ids.filter((x) => x !== id) : [...sp.ids, id]);
   const reveal = (id: string) => {
     // ponytail: si ya hay columnas, el chat se suma; si no, solo se abre.
     if (sp.list.length > 0 && !sp.ids.includes(id)) sp.setIds([...sp.ids, id]);
@@ -168,33 +190,33 @@ export const SplitBar: React.FC<BarProps> = ({ state, session, sp, switchSession
       title={label}
       aria-pressed={sp.layout === value}
       onClick={() => sp.setLayout(value)}
-      className={`p-1 rounded transition ${sp.layout === value ? 'bg-zinc-700 text-indigo-300' : 'hover:text-indigo-300'}`}
+      className={`p-1.5 rounded-md transition cursor-pointer ${sp.layout === value ? 'bg-[#0c1220] text-cyan-300 border border-cyan-800/40 shadow-xs' : 'text-slate-400 hover:text-slate-200 border border-transparent'}`}
     >
       {icon}
     </button>
   );
 
   return (
-    <div ref={barRef} className="relative flex items-center gap-2 px-3 py-1 border-b border-zinc-800 shrink-0 text-[11px] text-zinc-400 flex-wrap">
+    <div ref={barRef} className="relative z-40 flex items-center gap-2.5 px-3 py-1.5 border-b border-[#202b3f] bg-[#0a0e17]/95 backdrop-blur-md shrink-0 text-xs text-slate-300 flex-wrap">
       <button
         type="button"
         onClick={() => setMenu(menu === 'chats' ? 'none' : 'chats')}
         aria-expanded={menu === 'chats'}
-        className={`flex items-center gap-1 px-2 py-0.5 rounded border transition hover:text-indigo-300 ${sp.ids.length ? 'border-indigo-500/60 text-indigo-300' : 'border-zinc-700'}`}
+        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-mono text-xs font-semibold transition cursor-pointer ${sp.ids.length ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40 shadow-xs' : 'bg-[#0c1220] border-[#202b3f] text-slate-300 hover:text-white'}`}
       >
-        <Columns3 className="w-3 h-3" aria-hidden />
+        <Columns3 className="w-3.5 h-3.5" aria-hidden />
         Columnas{sp.ids.length ? ` (${sp.list.length})` : ''}
       </button>
 
       {sp.list.length > 1 && (
         <>
-          <div className="flex items-center gap-0.5 border border-zinc-800 rounded p-0.5">
-            {layoutBtn('cols', <Columns3 className="w-3 h-3" />, 'Columnas')}
-            {layoutBtn('rows', <Rows3 className="w-3 h-3" />, 'Filas')}
-            {layoutBtn('grid', <LayoutGrid className="w-3 h-3" />, 'Cuadrícula 2×2')}
+          <div className="flex items-center bg-[#07090e] rounded-lg border border-[#202b3f] p-0.5">
+            {layoutBtn('cols', <Columns3 className="w-3.5 h-3.5" />, 'Columnas')}
+            {layoutBtn('rows', <Rows3 className="w-3.5 h-3.5" />, 'Filas')}
+            {layoutBtn('grid', <LayoutGrid className="w-3.5 h-3.5" />, 'Cuadrícula 2×2')}
           </div>
           <form
-            className="flex items-center gap-1 flex-1 min-w-[180px] max-w-md"
+            className="flex items-center gap-1.5 flex-1 min-w-[200px] max-w-md"
             onSubmit={(event) => {
               event.preventDefault();
               send();
@@ -205,10 +227,10 @@ export const SplitBar: React.FC<BarProps> = ({ state, session, sp, switchSession
               onChange={(event) => setBroadcast(event.target.value)}
               placeholder={`Enviar a las ${sp.list.length} columnas…`}
               aria-label="Enviar el mismo mensaje a todas las columnas"
-              className="flex-1 min-w-0 px-2 py-0.5 rounded bg-zinc-900 border border-zinc-700 text-zinc-200 placeholder:text-zinc-600"
+              className="flex-1 min-w-0 px-3 py-1 rounded-xl bg-[#07090e] border border-[#202b3f] text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30 font-mono shadow-inner text-xs"
             />
-            <button type="submit" aria-label="Enviar a todas" disabled={!broadcast.trim()} className="p-1 rounded hover:text-indigo-300 disabled:opacity-40">
-              <Send className="w-3 h-3" />
+            <button type="submit" aria-label="Enviar a todas" disabled={!broadcast.trim()} className="p-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold transition disabled:opacity-30 cursor-pointer shadow-xs">
+              <Send className="w-3.5 h-3.5" />
             </button>
           </form>
         </>
@@ -218,74 +240,172 @@ export const SplitBar: React.FC<BarProps> = ({ state, session, sp, switchSession
         type="button"
         onClick={() => setMenu(menu === 'pending' ? 'none' : 'pending')}
         aria-expanded={menu === 'pending'}
-        className={`ml-auto flex items-center gap-1 px-2 py-0.5 rounded border transition ${pending.length ? 'border-amber-500/60 text-amber-300' : 'border-zinc-700 hover:text-zinc-200'}`}
+        className={`ml-auto flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-mono text-xs font-semibold transition cursor-pointer ${pending.length ? 'bg-amber-500/15 border-amber-500/40 text-amber-300 shadow-xs' : 'bg-[#0c1220] border-[#202b3f] text-slate-400 hover:text-slate-200'}`}
       >
-        <Bell className="w-3 h-3" aria-hidden />
+        <Bell className="w-3.5 h-3.5" aria-hidden />
         Pendientes{pending.length ? ` (${pending.length})` : ''}
       </button>
-      <button type="button" aria-label="Abrir este chat en otra ventana" title="Abrir este chat en otra ventana" onClick={() => openSolo(session.id)} className="p-1 rounded hover:text-indigo-300">
-        <ExternalLink className="w-3 h-3" />
-      </button>
+      {sp.list.length < 2 && <button type="button" aria-label="Abrir este chat en otra ventana" title="Abrir este chat en otra ventana" onClick={() => openSolo(session.id)} className="p-1.5 rounded-lg hover:bg-[#0c1220] text-slate-400 hover:text-cyan-300 border border-transparent hover:border-[#202b3f] transition-colors cursor-pointer">
+        <ExternalLink className="w-3.5 h-3.5" />
+      </button>}
       {sp.list.length > 1 && (
         <>
-          <button type="button" onClick={onOpenHistory} aria-label={`Historial, ${state.sessions.length} conversaciones`} title="Abrir el historial de conversaciones" className="flex items-center gap-1 px-2 py-0.5 rounded border border-zinc-700 hover:text-zinc-200 transition">
-            <Layers className="w-3 h-3" aria-hidden />
+          <button type="button" onClick={onOpenHistory} aria-label={`Historial, ${state.sessions.length} conversaciones`} title="Abrir el historial de conversaciones" className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#0c1220] hover:bg-slate-700 text-slate-300 hover:text-white border border-[#202b3f] transition font-mono text-xs cursor-pointer">
+            <Layers className="w-3.5 h-3.5" aria-hidden />
             Historial {state.sessions.length}
           </button>
-          <button type="button" onClick={onNewTask} aria-label="Nueva tarea" title="Crear nueva tarea en un proyecto" className="flex items-center gap-1 px-2 py-0.5 rounded bg-indigo-600 hover:bg-indigo-500 text-white font-medium transition">
-            <Plus className="w-3 h-3" aria-hidden />
+          <button type="button" onClick={onNewTask} aria-label="Nueva tarea" title="Crear nueva tarea en un proyecto" className="flex items-center gap-1 px-3 py-1 rounded-lg bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-slate-950 font-bold transition cursor-pointer shadow-md shadow-cyan-500/20 text-xs">
+            <Plus className="w-3.5 h-3.5" aria-hidden />
             Nueva tarea
           </button>
         </>
       )}
 
       {menu === 'chats' && (
-        <ul className="absolute left-3 top-full mt-1 z-30 w-80 max-h-80 overflow-y-auto rounded-lg border border-zinc-700 bg-zinc-900 p-1 shadow-xl">
-          <li className="flex items-center justify-between px-1.5 py-1 text-[10px] uppercase tracking-wider text-zinc-500">
-            <span>{sp.ids.length >= MAX_COLUMNS ? `Máximo ${MAX_COLUMNS} columnas` : 'Marca los chats que quieres ver juntos'}</span>
+        <div className="absolute left-3 top-full mt-1 z-30 w-[min(60rem,calc(100vw-1.5rem))] max-h-[min(36rem,75vh)] flex flex-col rounded-xl border border-[#202b3f] bg-[#0a0e17] shadow-2xl shadow-black/80 animate-modal-pop">
+          <div className="flex items-center gap-2 px-3 py-2 border-b border-[#202b3f]">
+            <div className="relative flex-1 min-w-0">
+              <Search className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden />
+              <input
+                autoFocus
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Buscar por flujo, proyecto, rol o chat…"
+                aria-label="Buscar chats"
+                className="w-full pl-8 pr-2 py-1 rounded-lg bg-[#07090e] border border-[#202b3f] text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500 text-xs"
+              />
+            </div>
+            <span className={`shrink-0 font-mono text-[11px] ${full ? 'text-amber-300' : 'text-slate-400'}`} title={full ? `Máximo ${MAX_COLUMNS} columnas: quita una para agregar otra` : 'Columnas elegidas'}>
+              {sp.ids.length}/{MAX_COLUMNS} columnas
+            </span>
             {sp.ids.length > 0 && (
-              <button type="button" onClick={() => sp.setIds([])} className="normal-case tracking-normal text-zinc-400 hover:text-zinc-200">
+              <button type="button" onClick={() => sp.setIds([])} className="shrink-0 text-slate-400 hover:text-slate-200 cursor-pointer">
                 Limpiar
               </button>
             )}
-          </li>
-          {ordered.map((s) => (
-            <li key={s.id}>
-              <label className="flex items-center gap-2 px-1.5 py-1 rounded hover:bg-zinc-800 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={sp.ids.includes(s.id)}
-                  disabled={!sp.ids.includes(s.id) && sp.ids.length >= MAX_COLUMNS}
-                  onChange={() => apply(sp.ids.length === 0 && s.id !== session.id ? [session.id, s.id] : sp.ids.includes(s.id) ? sp.ids.filter((x) => x !== s.id) : [...sp.ids, s.id])}
-                />
-                {running(s.id) && <Loader2 className="w-3 h-3 animate-spin text-indigo-300 shrink-0" aria-hidden />}
-                <span className="truncate text-zinc-200">{s.title}</span>
-                {s.projectName && <span className="ml-auto shrink-0 text-zinc-500">{s.projectName}</span>}
-              </label>
-            </li>
-          ))}
-          <li className="mt-1 pt-1 border-t border-zinc-800 px-1.5 text-[10px] uppercase tracking-wider text-zinc-500">Conjuntos guardados</li>
-          {sp.sets.map((set) => (
-            <li key={set.name} className="flex items-center gap-1 px-1.5 py-0.5">
-              <button
-                type="button"
-                onClick={() => {
-                  apply(set.ids.filter((id) => state.sessions.some((s) => s.id === id)));
-                  setMenu('none');
-                }}
-                className="flex-1 truncate text-left text-zinc-200 hover:text-indigo-300"
-              >
-                {set.name} <span className="text-zinc-500">· {set.ids.length}</span>
-              </button>
-              <button type="button" aria-label={`Borrar ${set.name}`} onClick={() => sp.setSets(sp.sets.filter((x) => x.name !== set.name))} className="text-zinc-500 hover:text-red-300">
-                ×
-              </button>
-            </li>
-          ))}
-          {sp.ids.length > 0 && (
-            <li>
+          </div>
+
+          <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-[3fr_2fr] md:divide-x divide-[#202b3f] overflow-y-auto md:overflow-hidden">
+            <section className="min-h-0 md:overflow-y-auto p-2 space-y-1.5" aria-label="Equipos de agentes por flujo">
+              <h3 className="flex items-center gap-1.5 px-1 text-[10px] uppercase tracking-wider text-slate-500 font-semibold">
+                <Users className="w-3 h-3" aria-hidden /> Equipos por flujo · {shownFlows.length}
+              </h3>
+              {shownFlows.length === 0 && <p className="px-1 py-3 text-slate-500">{q ? 'Ningún equipo coincide.' : 'Aún no hay equipos.'}</p>}
+              {shownFlows.map((flow) => {
+                const picked = flow.members.filter((m) => sp.ids.includes(m.id)).length;
+                const busy = flow.members.filter((m) => running(m.id)).length;
+                const open = expanded[flow.squad] ?? (Boolean(q) || picked > 0 || busy > 0);
+                return (
+                  <div key={flow.squad} className={`rounded-lg border ${picked ? 'border-cyan-700/50 bg-cyan-950/10' : 'border-[#202b3f] bg-[#07090e]/60'}`}>
+                    <div className="flex items-start gap-2 px-2 py-1.5">
+                      <input
+                        type="checkbox"
+                        className="mt-0.5"
+                        aria-label={`Ver todo el equipo ${flow.name}`}
+                        checked={picked === flow.members.length}
+                        ref={(el) => {
+                          if (el) el.indeterminate = picked > 0 && picked < flow.members.length;
+                        }}
+                        disabled={picked < flow.members.length && full}
+                        onChange={() => toggleFlow(flow.members)}
+                      />
+                      <button
+                        type="button"
+                        aria-expanded={open}
+                        onClick={() => setExpanded({ ...expanded, [flow.squad]: !open })}
+                        className="flex-1 min-w-0 text-left cursor-pointer group"
+                        title={flow.name}
+                      >
+                        <span className="flex items-center gap-1.5">
+                          {open ? <ChevronDown className="w-3 h-3 text-slate-500 shrink-0" aria-hidden /> : <ChevronRight className="w-3 h-3 text-slate-500 shrink-0" aria-hidden />}
+                          <span className={`w-2 h-2 rounded-full shrink-0 ${busy ? 'bg-emerald-400 animate-pulse' : 'bg-slate-600'}`} aria-hidden />
+                          <span className="truncate text-slate-100 font-medium group-hover:text-cyan-200">{flow.name}</span>
+                        </span>
+                        <span className="mt-0.5 pl-[1.375rem] flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10.5px] text-slate-400">
+                          <span className={`inline-flex items-center gap-1 px-1.5 rounded font-mono ${flow.project ? 'bg-[#162035] text-cyan-300' : 'bg-[#0c1220] text-slate-500'}`}>
+                            <FolderGit2 className="w-2.5 h-2.5" aria-hidden />
+                            {flow.project ?? 'Sin proyecto'}
+                          </span>
+                          <span title={new Date(flow.createdAt).toLocaleString('es')}>Inició {relativeTime(flow.createdAt)}</span>
+                          <span>{flow.members.length} agentes</span>
+                          {busy > 0 && <span className="text-emerald-300">{busy} trabajando</span>}
+                          {picked > 0 && <span className="text-cyan-300">{picked} en columnas</span>}
+                        </span>
+                        {!open && (
+                          <span className="mt-0.5 pl-[1.375rem] block truncate text-[10.5px] text-slate-500">
+                            {flow.members.map((m) => agentLabel(m, flow.members)).join(' → ')}
+                          </span>
+                        )}
+                      </button>
+                    </div>
+                    {open && (
+                      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-0.5 px-2 pb-1.5 pl-7">
+                        {flow.members.map((s) => (
+                          <li key={s.id}>
+                            <label className="flex items-center gap-2 px-1.5 py-0.5 rounded hover:bg-[#162035] cursor-pointer" title={s.title}>
+                              <input type="checkbox" checked={sp.ids.includes(s.id)} disabled={!sp.ids.includes(s.id) && full} onChange={() => pick(s.id)} />
+                              <span className="truncate text-slate-200">{agentLabel(s, flow.members)}</span>
+                              {running(s.id) ? (
+                                <Loader2 className="ml-auto w-3 h-3 animate-spin text-cyan-300 shrink-0" aria-label="Trabajando" />
+                              ) : (
+                                <span className="ml-auto shrink-0 text-[10px] text-slate-500">{relativeTime(s.updatedAt)}</span>
+                              )}
+                            </label>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                );
+              })}
+            </section>
+
+            <section className="min-h-0 md:overflow-y-auto p-2 space-y-0.5" aria-label="Chats sueltos">
+              <h3 className="flex items-center gap-1.5 px-1 pb-1 text-[10px] uppercase tracking-wider text-slate-500 font-semibold">
+                <MessageSquare className="w-3 h-3" aria-hidden /> Chats sueltos · {shownLoose.length}
+              </h3>
+              {shownLoose.length === 0 && <p className="px-1 py-3 text-slate-500">{q ? 'Ningún chat coincide.' : 'No hay chats sueltos.'}</p>}
+              {shownLoose.map((s) => (
+                <label key={s.id} className={`flex items-start gap-2 px-1.5 py-1 rounded cursor-pointer hover:bg-[#162035] ${sp.ids.includes(s.id) ? 'bg-cyan-950/20' : ''}`} title={s.title}>
+                  <input type="checkbox" className="mt-0.5" checked={sp.ids.includes(s.id)} disabled={!sp.ids.includes(s.id) && full} onChange={() => pick(s.id)} />
+                  <span className="min-w-0 flex-1">
+                    <span className="flex items-center gap-1.5">
+                      {running(s.id) && <Loader2 className="w-3 h-3 animate-spin text-cyan-300 shrink-0" aria-label="Trabajando" />}
+                      <span className="truncate text-slate-200">{s.title}</span>
+                    </span>
+                    <span className="flex gap-2 text-[10.5px] text-slate-500">
+                      <span className="truncate font-mono text-slate-400">{s.projectName ?? 'Sin proyecto'}</span>
+                      <span className="shrink-0">{relativeTime(s.updatedAt)}</span>
+                    </span>
+                  </span>
+                </label>
+              ))}
+            </section>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-1.5 px-3 py-2 border-t border-[#202b3f]">
+            <span className="text-[10px] uppercase tracking-wider text-slate-500 mr-1">Conjuntos</span>
+            {sp.sets.length === 0 && <span className="text-slate-600">Ninguno guardado.</span>}
+            {sp.sets.map((set) => (
+              <span key={set.name} className="inline-flex items-center rounded-full border border-[#202b3f] bg-[#0c1220]">
+                <button
+                  type="button"
+                  onClick={() => {
+                    apply(set.ids.filter((id) => state.sessions.some((s) => s.id === id)));
+                    setMenu('none');
+                  }}
+                  className="pl-2.5 pr-1 py-0.5 text-slate-200 hover:text-cyan-300 cursor-pointer"
+                >
+                  {set.name} <span className="text-slate-500">· {set.ids.length}</span>
+                </button>
+                <button type="button" aria-label={`Borrar ${set.name}`} onClick={() => sp.setSets(sp.sets.filter((x) => x.name !== set.name))} className="pr-2 text-slate-500 hover:text-red-300 cursor-pointer">
+                  ×
+                </button>
+              </span>
+            ))}
+            {sp.ids.length > 0 && (
               <form
-                className="flex items-center gap-1 p-1.5"
+                className="ml-auto flex items-center gap-1"
                 onSubmit={(event) => {
                   event.preventDefault();
                   const name = setName.trim();
@@ -294,27 +414,27 @@ export const SplitBar: React.FC<BarProps> = ({ state, session, sp, switchSession
                   setSetName('');
                 }}
               >
-                <input value={setName} onChange={(event) => setSetName(event.target.value)} placeholder="Nombre del conjunto" aria-label="Nombre del conjunto" className="flex-1 min-w-0 px-2 py-0.5 rounded bg-zinc-950 border border-zinc-700 text-zinc-200" />
-                <button type="submit" disabled={!setName.trim()} className="px-2 py-0.5 rounded border border-zinc-700 hover:text-indigo-300 disabled:opacity-40">
+                <input value={setName} onChange={(event) => setSetName(event.target.value)} placeholder="Guardar selección como…" aria-label="Nombre del conjunto" className="w-44 px-2 py-0.5 rounded bg-[#07090e] border border-[#202b3f] text-slate-200 focus:outline-none focus:border-cyan-500 text-xs" />
+                <button type="submit" disabled={!setName.trim()} className="px-2 py-0.5 rounded border border-[#202b3f] bg-[#0c1220] hover:text-cyan-300 disabled:opacity-40 text-xs cursor-pointer">
                   Guardar
                 </button>
               </form>
-            </li>
-          )}
-        </ul>
+            )}
+          </div>
+        </div>
       )}
 
       {menu === 'pending' && (
-        <ul className="absolute right-3 top-full mt-1 z-30 w-96 max-h-80 overflow-y-auto rounded-lg border border-zinc-700 bg-zinc-900 p-1 shadow-xl">
-          {pending.length === 0 && <li className="px-2 py-3 text-center text-zinc-500">Nada te espera.</li>}
+        <ul className="absolute right-3 top-full mt-1 z-30 w-96 max-h-80 overflow-y-auto rounded-xl border border-[#202b3f] bg-[#0a0e17] p-1.5 shadow-2xl">
+          {pending.length === 0 && <li className="px-2 py-3 text-center text-slate-500">Nada te espera.</li>}
           {pending.map((s) => (
             <li key={s.id}>
-              <button type="button" onClick={() => reveal(s.id)} className="w-full text-left px-2 py-1.5 rounded hover:bg-zinc-800">
+              <button type="button" onClick={() => reveal(s.id)} className="w-full text-left px-2 py-1.5 rounded hover:bg-[#162035]">
                 <div className="flex items-center gap-2">
-                  <span className="truncate text-zinc-200 font-medium">{agentName(s)}</span>
-                  {s.projectName && <span className="ml-auto shrink-0 text-zinc-500">{s.projectName}</span>}
+                  <span className="truncate text-slate-200 font-medium">{agentName(s)}</span>
+                  {s.projectName && <span className="ml-auto shrink-0 text-slate-500">{s.projectName}</span>}
                 </div>
-                <div className="mt-0.5 line-clamp-3 text-zinc-400">{lastAnswer(s) || 'Sin respuesta todavía.'}</div>
+                <div className="mt-0.5 line-clamp-3 text-slate-400">{lastAnswer(s) || 'Sin respuesta todavía.'}</div>
               </button>
             </li>
           ))}
@@ -332,15 +452,38 @@ interface ColumnsProps {
   dispatch: React.Dispatch<HubAction>;
   switchSession: (id: string) => void;
   recentDirs: string[];
-  currentBranch?: string;
-  branches?: string[];
-  squadBranches?: string[];
-  gitFilesCount?: number;
-  onCheckoutBranch?: (branch: string) => void;
-  onCreateBranch?: (branch: string) => void;
-  onOpenBranchManager?: () => void;
+  onCheckoutBranch?: (branch: string, dir?: string) => void;
+  onCreateBranch?: (branch: string, dir?: string) => void;
+  onOpenBranchManager?: (dir?: string) => void;
+  /** Abre (o reutiliza) una pestaña de terminal en esa carpeta. */
+  onOpenTerminal?: (dir: string) => void;
   onOpenHistory: () => void;
   onNewTask: () => void;
+}
+
+interface DirGit { branch?: string; branches?: string[]; squadBranches?: string[]; uncommitted?: number }
+
+/** Rama y cambios de cada carpeta en columnas; el estado git de App es solo el del chat activo. */
+function useDirGit(dirs: string[]): Record<string, DirGit> {
+  const [byDir, setByDir] = useState<Record<string, DirGit>>({});
+  useEffect(() => {
+    const onMessage = (event: MessageEvent) => {
+      const msg = event.data;
+      if (!msg?.dir) return;
+      if (msg.type === 'gitBranches') {
+        setByDir((prev) => ({ ...prev, [msg.dir]: { ...prev[msg.dir], branch: msg.currentBranch, branches: msg.branches, squadBranches: msg.squadBranches } }));
+      } else if (msg.type === 'dirGitStatus') {
+        setByDir((prev) => ({ ...prev, [msg.dir]: { ...prev[msg.dir], branch: msg.branch, uncommitted: msg.uncommittedCount } }));
+      }
+    };
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+  }, []);
+  const key = dirs.join('|');
+  useEffect(() => {
+    dirs.forEach((dir) => postToHost({ command: 'getDirGitStatus', dir }));
+  }, [key]); // eslint-disable-line react-hooks/exhaustive-deps
+  return byDir;
 }
 
 export const SplitColumns: React.FC<ColumnsProps> = ({
@@ -351,13 +494,10 @@ export const SplitColumns: React.FC<ColumnsProps> = ({
   dispatch,
   switchSession,
   recentDirs,
-  currentBranch = 'main',
-  branches = [],
-  squadBranches = [],
-  gitFilesCount = 0,
   onCheckoutBranch,
   onCreateBranch,
   onOpenBranchManager,
+  onOpenTerminal,
   onOpenHistory,
   onNewTask
 }) => {
@@ -366,6 +506,7 @@ export const SplitColumns: React.FC<ColumnsProps> = ({
   const active = isSplitActive(sp, session.id);
   const shown = active ? (sp.maximized && sp.ids.includes(sp.maximized) ? sp.list.filter((s) => s.id === sp.maximized) : sp.list) : [session];
   const split = active && shown.length > 1;
+  const git = useDirGit(active ? [...new Set(shown.flatMap((s) => (s.projectPath ? [s.projectPath] : [])))] : []);
   const rootRef = useRef<HTMLDivElement>(null);
 
   const focusColumn = useCallback(
@@ -396,9 +537,9 @@ export const SplitColumns: React.FC<ColumnsProps> = ({
 
   const status = (s: ConversationSession) =>
     state.waitingSessionIds.includes(s.id) ? (
-      <Clock className="w-3 h-3 text-zinc-400 shrink-0" aria-label="En espera" />
+      <Clock className="w-3 h-3 text-slate-400 shrink-0" aria-label="En espera" />
     ) : state.runningSessionIds.includes(s.id) ? (
-      <Loader2 className="w-3 h-3 animate-spin text-indigo-300 shrink-0" aria-label="Trabajando" />
+      <Loader2 className="w-3 h-3 animate-spin text-cyan-300 shrink-0" aria-label="Trabajando" />
     ) : state.attentionSessionIds.includes(s.id) ? (
       <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" role="img" aria-label="Te espera" />
     ) : (
@@ -453,7 +594,7 @@ export const SplitColumns: React.FC<ColumnsProps> = ({
         event.preventDefault();
         sp.setIds([...(sp.ids.length ? sp.ids : [session.id]), id]);
       }}
-      className={`flex-1 min-w-0 h-full min-h-0 ${scrollX} ${container} ${over ? 'ring-2 ring-indigo-500/60 rounded-lg' : ''}`}
+      className={`flex-1 min-w-0 h-full min-h-0 ${scrollX} ${container} ${over ? 'ring-2 ring-cyan-500/60 rounded-lg' : ''}`}
     >
       {shown.map((column, index) => (
         <React.Fragment key={column.id}>
@@ -462,14 +603,14 @@ export const SplitColumns: React.FC<ColumnsProps> = ({
               role="separator"
               aria-label="Ajustar tamaño"
               onPointerDown={(event) => startResize(event, shown[index - 1].id, column.id)}
-              className={`shrink-0 rounded bg-zinc-800 hover:bg-indigo-500/60 transition ${sp.layout === 'cols' ? 'w-1.5 mx-0.5 cursor-col-resize' : 'h-1.5 my-0.5 cursor-row-resize'}`}
+              className={`shrink-0 rounded bg-[#202b3f] hover:bg-cyan-500 transition-colors ${sp.layout === 'cols' ? 'w-1.5 mx-0.5 cursor-col-resize' : 'h-1.5 my-0.5 cursor-row-resize'}`}
             />
           )}
           <div
             data-col={column.id}
             onFocusCapture={() => column.id !== session.id && switchSession(column.id)}
             style={split && sp.layout !== 'grid' ? { flex: `${sp.weights[column.id] ?? 1} 1 0%` } : undefined}
-            className={`${split && sp.layout === 'cols' ? 'min-w-[340px]' : 'min-w-0'} min-h-0 flex flex-col overflow-hidden ${split ? '' : 'flex-1 h-full'} ${active ? `rounded-lg border ${column.id === session.id ? 'border-indigo-500/60' : 'border-zinc-800'}` : ''}`}
+            className={`${split && sp.layout === 'cols' ? 'min-w-[340px]' : 'min-w-0'} min-h-0 flex flex-col overflow-hidden ${split ? '' : 'flex-1 h-full'} ${active ? `rounded-xl border ${column.id === session.id ? 'border-cyan-500/70 shadow-lg shadow-cyan-950/40' : 'border-[#202b3f]'}` : ''}`}
           >
             {active && ( // maximizada también: el título trae el botón para restaurar
               <div
@@ -487,31 +628,21 @@ export const SplitColumns: React.FC<ColumnsProps> = ({
                 }}
                 onDoubleClick={() => sp.setMaximized(sp.maximized === column.id ? null : column.id)}
                 title={column.title}
-                className="relative shrink-0 flex items-center gap-1.5 px-2 py-0.5 text-[11px] bg-zinc-900/70 border-b border-zinc-800 cursor-grab"
+                className="relative shrink-0 px-3 py-1.5 space-y-1 text-xs bg-[#07090e]/95 border-b border-[#202b3f] backdrop-blur-md cursor-grab select-none"
               >
+                <div className="flex items-center gap-2 min-w-0">
                 {status(column)}
-                <span className="truncate text-zinc-300">
-                  <span className="text-zinc-500 font-mono mr-1">{index + 1}</span>
+                <span className="min-w-0 flex-1 truncate text-slate-300">
+                  <span className="text-slate-500 font-mono mr-1">{index + 1}</span>
                   {column.title}
                 </span>
-                <div className="min-w-0" onMouseDown={(event) => event.stopPropagation()} draggable={false}>
-                  <WorkspacePicker sessionId={column.id} currentDir={column.projectPath} recentDirs={recentDirs} />
-                </div>
-                <div onMouseDown={(event) => event.stopPropagation()} draggable={false}>
-                  <GitBranchBadge
-                    compact
-                    branch={column.isolatedBranch || currentBranch}
-                    branches={branches}
-                    squadBranches={squadBranches}
-                    uncommittedCount={gitFilesCount}
-                    onCheckout={onCheckoutBranch}
-                    onCreate={onCreateBranch}
-                    onOpenManager={onOpenBranchManager}
-                    currentDir={column.projectPath}
-                  />
-                </div>
-                <span className="ml-auto flex items-center gap-1 text-zinc-500 shrink-0">
-                  <button type="button" aria-label="Abrir en otra ventana" title="Abrir en otra ventana" onClick={() => openSolo(column.id)} className="hover:text-zinc-200">
+                <span className="flex items-center gap-1.5 text-slate-500 shrink-0">
+                  {column.projectPath && onOpenTerminal && (
+                    <button type="button" aria-label="Terminal en la carpeta de este chat" title={`Terminal en ${column.projectPath}`} onClick={() => onOpenTerminal(column.projectPath!)} className="hover:text-emerald-300">
+                      <Terminal className="w-3 h-3" />
+                    </button>
+                  )}
+                  <button type="button" aria-label="Abrir en otra ventana" title="Abrir en otra ventana" onClick={() => openSolo(column.id)} className="hover:text-slate-200">
                     <ExternalLink className="w-3 h-3" />
                   </button>
                   <button
@@ -519,7 +650,7 @@ export const SplitColumns: React.FC<ColumnsProps> = ({
                     aria-label={sp.maximized === column.id ? 'Restaurar columnas' : 'Maximizar columna'}
                     title={sp.maximized === column.id ? 'Restaurar columnas (doble clic en el título)' : 'Maximizar (doble clic en el título)'}
                     onClick={() => sp.setMaximized(sp.maximized === column.id ? null : column.id)}
-                    className="hover:text-zinc-200"
+                    className="hover:text-slate-200"
                   >
                     {sp.maximized === column.id ? <Minimize2 className="w-3 h-3" /> : <Maximize2 className="w-3 h-3" />}
                   </button>
@@ -531,11 +662,34 @@ export const SplitColumns: React.FC<ColumnsProps> = ({
                       if (sp.maximized === column.id) sp.setMaximized(null);
                       sp.toggle(column.id);
                     }}
-                    className="hover:text-zinc-200"
+                    className="hover:text-slate-200"
                   >
                     ×
                   </button>
                 </span>
+                </div>
+                {/* Carpeta y rama de esta columna, no las del chat activo; en otra fila para que no se monten sobre el título. */}
+                <div className="flex flex-wrap items-center gap-1.5 min-w-0" onMouseDown={(event) => event.stopPropagation()} draggable={false}>
+                  <WorkspacePicker sessionId={column.id} currentDir={column.projectPath} recentDirs={recentDirs} />
+                  {column.projectPath && (
+                    <GitBranchBadge
+                      compact
+                      branch={column.isolatedBranch || git[column.projectPath]?.branch}
+                      branches={git[column.projectPath]?.branches}
+                      squadBranches={git[column.projectPath]?.squadBranches}
+                      uncommittedCount={git[column.projectPath]?.uncommitted}
+                      onCheckout={onCheckoutBranch}
+                      onCreate={onCreateBranch}
+                      onOpenManager={onOpenBranchManager}
+                      currentDir={column.projectPath}
+                    />
+                  )}
+                  {column.squadName && (
+                    <span className="min-w-0 truncate px-1.5 py-0.5 rounded bg-violet-950/40 border border-violet-700/40 text-violet-200 text-[10px]" title={`Flujo: ${column.squadName}`}>
+                      {column.squadName}
+                    </span>
+                  )}
+                </div>
               </div>
             )}
             <div className="flex-1 min-h-0 flex flex-col">{/* el título de la columna resta altura: sin esto el chat (h-full) empuja el composer fuera */}

@@ -1,0 +1,197 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" width="100%" height="100%">
+  <defs>
+    <radialGradient id="filesBgGlow" cx="50%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#141c2e" stop-opacity="0.9" />
+      <stop offset="60%" stop-color="#0a0e17" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#07090e" stop-opacity="1" />
+    </radialGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#131927" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#0e131f" stop-opacity="0.98" />
+    </linearGradient>
+    <filter id="shadowBox" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000000" flood-opacity="0.5" />
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="960" height="560" fill="url(#filesBgGlow)" />
+
+  <!-- Top Title -->
+  <g transform="translate(40, 28)">
+    <text x="0" y="20" fill="#f1f5f9" font-family="'Plus Jakarta Sans', sans-serif" font-size="15" font-weight="800" letter-spacing="1">ARQUITECTURA DEL EXPLORADOR TÁCTICO // PROJECT FILES SIDEBAR</text>
+    <text x="0" y="38" fill="#94a3b8" font-family="'JetBrains Mono', monospace" font-size="11">SISTEMA INTEGRADO: MONITOREO GIT · BÚSQUEDA GREP · DISPARADORES INTELIGENTES · DIFFS INTERACTIVOS</text>
+  </g>
+
+  <!-- Main Pipeline Flow (4 connected nodes) -->
+  <g transform="translate(40, 85)">
+    <!-- 1. Workspace Indexer -->
+    <g transform="translate(0, 0)">
+      <rect width="200" height="130" rx="12" fill="url(#cardGrad)" stroke="#202b3f" stroke-width="1.2" filter="url(#shadowBox)" />
+      <rect x="12" y="12" width="28" height="28" rx="6" fill="#3b82f6" fill-opacity="0.15" stroke="#3b82f6" stroke-width="1" />
+      <text x="26" y="30" fill="#60a5fa" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="700" text-anchor="middle">📁</text>
+      <text x="48" y="26" fill="#f1f5f9" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="700">Workspace Tree</text>
+      <text x="48" y="38" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="9">Árbol de Directorios</text>
+      <line x1="12" y1="48" x2="188" y2="48" stroke="#202b3f" stroke-width="1" />
+      <text x="12" y="68" fill="#cbd5e1" font-family="'Plus Jakarta Sans', sans-serif" font-size="10">• Indexación jerárquica</text>
+      <text x="12" y="86" fill="#cbd5e1" font-family="'Plus Jakarta Sans', sans-serif" font-size="10">• Filtro de exclusión (.git)</text>
+      <text x="12" y="104" fill="#38bdf8" font-family="'JetBrains Mono', monospace" font-size="9 font-semibold">1,565 módulos mapeados</text>
+    </g>
+
+    <!-- Arrow 1 -> 2 -->
+    <path d="M 205 65 L 225 65" fill="none" stroke="#6366f1" stroke-width="2" marker-end="url(#arrow)" />
+
+    <!-- 2. Git Status Watcher -->
+    <g transform="translate(230, 0)">
+      <rect width="210" height="130" rx="12" fill="url(#cardGrad)" stroke="#202b3f" stroke-width="1.2" filter="url(#shadowBox)" />
+      <rect x="12" y="12" width="28" height="28" rx="6" fill="#f59e0b" fill-opacity="0.15" stroke="#f59e0b" stroke-width="1" />
+      <text x="26" y="30" fill="#fbbf24" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="700" text-anchor="middle">⎇</text>
+      <text x="48" y="26" fill="#f1f5f9" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="700">Git Status Engine</text>
+      <text x="48" y="38" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="9">Detección de Cambios</text>
+      <line x1="12" y1="48" x2="198" y2="48" stroke="#202b3f" stroke-width="1" />
+      <!-- Status Badges Preview -->
+      <g transform="translate(12, 60)">
+        <rect x="0" y="0" width="38" height="18" rx="4" fill="#f59e0b" fill-opacity="0.15" stroke="#f59e0b" stroke-width="0.8" />
+        <text x="19" y="12" fill="#fcd34d" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" text-anchor="middle">M 3</text>
+
+        <rect x="44" y="0" width="38" height="18" rx="4" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="0.8" />
+        <text x="63" y="12" fill="#6ee7b7" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" text-anchor="middle">A 1</text>
+
+        <rect x="88" y="0" width="38" height="18" rx="4" fill="#f43f5e" fill-opacity="0.15" stroke="#f43f5e" stroke-width="0.8" />
+        <text x="107" y="12" fill="#fda4af" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" text-anchor="middle">D 0</text>
+
+        <rect x="132" y="0" width="38" height="18" rx="4" fill="#06b6d4" fill-opacity="0.15" stroke="#06b6d4" stroke-width="0.8" />
+        <text x="151" y="12" fill="#67e8f9" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" text-anchor="middle">? 2</text>
+      </g>
+      <text x="12" y="104" fill="#a3e635" font-family="'JetBrains Mono', monospace" font-size="9 font-semibold">Live Branch Status OK</text>
+    </g>
+
+    <!-- Arrow 2 -> 3 -->
+    <path d="M 445 65 L 465 65" fill="none" stroke="#6366f1" stroke-width="2" />
+
+    <!-- 3. Grep Content Search -->
+    <g transform="translate(470, 0)">
+      <rect width="200" height="130" rx="12" fill="url(#cardGrad)" stroke="#202b3f" stroke-width="1.2" filter="url(#shadowBox)" />
+      <rect x="12" y="12" width="28" height="28" rx="6" fill="#a855f7" fill-opacity="0.15" stroke="#a855f7" stroke-width="1" />
+      <text x="26" y="30" fill="#c084fc" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="700" text-anchor="middle">🔍</text>
+      <text x="48" y="26" fill="#f1f5f9" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="700">Content Grep</text>
+      <text x="48" y="38" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="9">Búsqueda en Código</text>
+      <line x1="12" y1="48" x2="188" y2="48" stroke="#202b3f" stroke-width="1" />
+      <text x="12" y="68" fill="#cbd5e1" font-family="'Plus Jakarta Sans', sans-serif" font-size="10">• Búsqueda por regex</text>
+      <text x="12" y="86" fill="#cbd5e1" font-family="'Plus Jakarta Sans', sans-serif" font-size="10">• Número de línea exacto</text>
+      <text x="12" y="104" fill="#c084fc" font-family="'JetBrains Mono', monospace" font-size="9 font-semibold">Salto directo con preview</text>
+    </g>
+
+    <!-- Arrow 3 -> 4 -->
+    <path d="M 675 65 L 695 65" fill="none" stroke="#6366f1" stroke-width="2" />
+
+    <!-- 4. Smart Triggers & Actions -->
+    <g transform="translate(700, 0)">
+      <rect width="180" height="130" rx="12" fill="url(#cardGrad)" stroke="#6366f1" stroke-width="1.2" filter="url(#shadowBox)" />
+      <rect x="12" y="12" width="28" height="28" rx="6" fill="#6366f1" fill-opacity="0.2" stroke="#6366f1" stroke-width="1" />
+      <text x="26" y="30" fill="#a5b4fc" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="700" text-anchor="middle">⚡</text>
+      <text x="48" y="26" fill="#f1f5f9" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="700">Disparadores</text>
+      <text x="48" y="38" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="9">Acciones Autónomas</text>
+      <line x1="12" y1="48" x2="168" y2="48" stroke="#202b3f" stroke-width="1" />
+      <text x="12" y="68" fill="#10b981" font-family="'JetBrains Mono', monospace" font-size="9 font-bold">Auto Commit</text>
+      <text x="12" y="86" fill="#c084fc" font-family="'JetBrains Mono', monospace" font-size="9 font-bold">Auditar Cambios</text>
+      <text x="12" y="104" fill="#38bdf8" font-family="'JetBrains Mono', monospace" font-size="9 font-bold">Adjuntar al Chat (@)</text>
+    </g>
+  </g>
+
+  <!-- Detailed Tactical Sidebar Mockup in SVG -->
+  <g transform="translate(40, 240)">
+    <rect width="880" height="280" rx="14" fill="#0b0f19" stroke="#202b3f" stroke-width="1.2" filter="url(#shadowBox)" />
+    
+    <!-- Left: Sidebar Visual Frame (300px) -->
+    <g transform="translate(16, 16)">
+      <rect width="280" height="248" rx="10" fill="#0e131f" stroke="#202b3f" stroke-width="1" />
+      <!-- Header Tabs -->
+      <g transform="translate(10, 10)">
+        <rect width="90" height="24" rx="6" fill="#4f46e5" />
+        <text x="45" y="16" fill="#ffffff" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" font-weight="700" text-anchor="middle">Git (4)</text>
+
+        <rect x="96" y="0" width="105" height="24" rx="6" fill="#131927" stroke="#202b3f" stroke-width="0.8" />
+        <text x="148" y="16" fill="#94a3b8" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" font-weight="600" text-anchor="middle">Archivos (142)</text>
+      </g>
+
+      <!-- Search Input -->
+      <g transform="translate(10, 42)">
+        <rect width="260" height="26" rx="6" fill="#131927" stroke="#202b3f" stroke-width="0.8" />
+        <text x="10" y="17" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="9">🔍 Filtrar cambios...</text>
+      </g>
+
+      <!-- File List -->
+      <g transform="translate(10, 78)">
+        <!-- File 1: Modified -->
+        <g transform="translate(0, 0)">
+          <rect width="260" height="26" rx="5" fill="#131927" />
+          <rect x="6" y="5" width="16" height="16" rx="3" fill="#f59e0b" fill-opacity="0.2" />
+          <text x="14" y="16" fill="#fbbf24" font-family="'JetBrains Mono', monospace" font-size="8" font-weight="700" text-anchor="middle">M</text>
+          <text x="28" y="17" fill="#f1f5f9" font-family="'JetBrains Mono', monospace" font-size="10">TacticalHudView.tsx</text>
+          <text x="250" y="17" fill="#38bdf8" font-family="'JetBrains Mono', monospace" font-size="9" text-anchor="end">Diff</text>
+        </g>
+        <!-- File 2: Modified -->
+        <g transform="translate(0, 30)">
+          <rect width="260" height="26" rx="5" fill="#090d16" />
+          <rect x="6" y="5" width="16" height="16" rx="3" fill="#f59e0b" fill-opacity="0.2" />
+          <text x="14" y="16" fill="#fbbf24" font-family="'JetBrains Mono', monospace" font-size="8" font-weight="700" text-anchor="middle">M</text>
+          <text x="28" y="17" fill="#f1f5f9" font-family="'JetBrains Mono', monospace" font-size="10">TelemetryDashboard.tsx</text>
+          <text x="250" y="17" fill="#38bdf8" font-family="'JetBrains Mono', monospace" font-size="9" text-anchor="end">Diff</text>
+        </g>
+        <!-- File 3: Added -->
+        <g transform="translate(0, 60)">
+          <rect width="260" height="26" rx="5" fill="#090d16" />
+          <rect x="6" y="5" width="16" height="16" rx="3" fill="#10b981" fill-opacity="0.2" />
+          <text x="14" y="16" fill="#34d399" font-family="'JetBrains Mono', monospace" font-size="8" font-weight="700" text-anchor="middle">A</text>
+          <text x="28" y="17" fill="#f1f5f9" font-family="'JetBrains Mono', monospace" font-size="10">chat-message-anatomy.svg</text>
+        </g>
+        <!-- File 4: Untracked -->
+        <g transform="translate(0, 90)">
+          <rect width="260" height="26" rx="5" fill="#090d16" />
+          <rect x="6" y="5" width="16" height="16" rx="3" fill="#06b6d4" fill-opacity="0.2" />
+          <text x="14" y="16" fill="#22d3ee" font-family="'JetBrains Mono', monospace" font-size="8" font-weight="700" text-anchor="middle">?</text>
+          <text x="28" y="17" fill="#f1f5f9" font-family="'JetBrains Mono', monospace" font-size="10">message-list-redesign.html</text>
+        </g>
+      </g>
+    </g>
+
+    <!-- Right: Integrated Workspace Actions & Intelligence -->
+    <g transform="translate(320, 24)">
+      <text x="0" y="16" fill="#f1f5f9" font-family="'Plus Jakarta Sans', sans-serif" font-size="13" font-weight="700">Capacidades del Explorador Táctico</text>
+      
+      <!-- Feature 1 -->
+      <g transform="translate(0, 32)">
+        <circle cx="8" cy="8" r="4" fill="#38bdf8" />
+        <text x="20" y="11" fill="#e2e8f0" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="600">Disparadores Inteligentes con un clic</text>
+        <text x="20" y="26" fill="#94a3b8" font-family="'Plus Jakarta Sans', sans-serif" font-size="10">Auto-genera mensajes de commit convencional o envía los diffs al agente revisor para auditoría de seguridad.</text>
+      </g>
+
+      <!-- Feature 2 -->
+      <g transform="translate(0, 75)">
+        <circle cx="8" cy="8" r="4" fill="#10b981" />
+        <text x="20" y="11" fill="#e2e8f0" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="600">Comparación Diferencial Interactiva (Diff Modal)</text>
+        <text x="20" y="26" fill="#94a3b8" font-family="'Plus Jakarta Sans', sans-serif" font-size="10">Inspecciona adiciones y supresiones línea por línea sin salir de AgentHub, con opción de rollback selectivo.</text>
+      </g>
+
+      <!-- Feature 3 -->
+      <g transform="translate(0, 118)">
+        <circle cx="8" cy="8" r="4" fill="#c084fc" />
+        <text x="20" y="11" fill="#e2e8f0" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="600">Integración con el Chat mediante @ Attachment</text>
+        <text x="20" y="26" fill="#94a3b8" font-family="'Plus Jakarta Sans', sans-serif" font-size="10">Adjunta archivos individuales o todos los cambios de Git directamente a la ventana de contexto del asistente.</text>
+      </g>
+
+      <!-- Quick Actions Grid -->
+      <g transform="translate(0, 160)">
+        <rect width="160" height="34" rx="8" fill="#10b981" fill-opacity="0.12" stroke="#10b981" stroke-width="0.8" />
+        <text x="80" y="21" fill="#6ee7b7" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" text-anchor="middle">⚡ Auto Commit</text>
+
+        <rect x="175" y="0" width="160" height="34" rx="8" fill="#a855f7" fill-opacity="0.12" stroke="#a855f7" stroke-width="0.8" />
+        <text x="255" y="21" fill="#d8b4fe" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" text-anchor="middle">🛡️ Auditar Cambios</text>
+
+        <rect x="350" y="0" width="170" height="34" rx="8" fill="#38bdf8" fill-opacity="0.12" stroke="#38bdf8" stroke-width="0.8" />
+        <text x="435" y="21" fill="#7dd3fc" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" text-anchor="middle">📎 Adjuntar Todos</text>
+      </g>
+    </g>
+  </g>
+</svg>

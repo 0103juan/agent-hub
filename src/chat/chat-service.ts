@@ -1,5 +1,8 @@
+import * as fs from 'fs';
+import * as os from 'os';
 import { createCheckpoint, getCheckpointDiff, getCheckpointFiles, listUntracked } from '../host/git-checkpoint';
 import { commitStage } from '../host/git-worktree';
+import { isSystemOrAppDir } from '../host/safe-path';
 import { AgentEvent, AgentRun, TurnOutcome } from '../agents/agent-provider';
 import { composePrompt, loadExperience, loadProjectRules, missingHandoffFields } from '../agents/prompt-composer';
 import { ProviderRegistry } from '../agents/provider-registry';
@@ -254,7 +257,11 @@ export class ChatService {
 
   /** Tras detener un turno la cola queda en espera; esto la retoma. */
   public async resumeQueue(sessionId: string): Promise<void> {
-    if (!this.isRunning(sessionId)) await this.drain(sessionId, this.sessions.get(sessionId)?.projectPath ?? process.cwd());
+    const session = this.sessions.get(sessionId);
+    const dir = (session?.projectPath && !isSystemOrAppDir(session.projectPath) && fs.existsSync(session.projectPath))
+      ? session.projectPath
+      : (session?.projectName ? this.sessions.projectPath(session.projectName) : undefined) ?? os.homedir();
+    if (!this.isRunning(sessionId)) await this.drain(sessionId, dir);
   }
 
   private async drain(sessionId: string, workspaceDir: string): Promise<void> {
@@ -374,9 +381,23 @@ export class ChatService {
   }
 
   public async send(options: SendPromptOptions): Promise<void> {
-    const { sessionId, prompt, attachments = [], workspaceDir } = options;
+    const { sessionId, prompt, attachments = [] } = options;
     const session = this.sessions.get(sessionId);
     if (!session) return;
+    let workspaceDir = options.workspaceDir;
+    // Cada agente SIEMPRE corre en la carpeta en la que está asignado
+    if (session.projectPath && !isSystemOrAppDir(session.projectPath) && fs.existsSync(session.projectPath)) {
+      workspaceDir = session.projectPath;
+    } else if (session.projectName && (!workspaceDir || isSystemOrAppDir(workspaceDir) || !fs.existsSync(workspaceDir))) {
+      const fromProj = this.sessions.projectPath(session.projectName);
+      if (fromProj && !isSystemOrAppDir(fromProj) && fs.existsSync(fromProj)) {
+        workspaceDir = fromProj;
+      }
+    }
+    if (!workspaceDir || isSystemOrAppDir(workspaceDir) || !fs.existsSync(workspaceDir)) {
+      workspaceDir = os.homedir();
+    }
+    const resolvedOptions = { ...options, workspaceDir };
     if (this.isRunning(sessionId)) {
       const queue = this.queues.get(sessionId) ?? [];
       queue.push({
@@ -387,7 +408,7 @@ export class ChatService {
           attachments: attachments.length > 0 ? [...attachments] : undefined,
           at: Date.now()
         },
-        options
+        options: resolvedOptions
       });
       this.queues.set(sessionId, queue);
       this.publishSessions();
@@ -616,9 +637,10 @@ export class ChatService {
     }
     if (outcome.status !== 'cancelled' && session.id !== this.sessions.getActive().id) {
       this.attention.add(session.id);
+      const name = session.squadName && session.title ? session.title : agentName(session);
       this.emitNotice(
         session.id,
-        outcome.status === 'failed' ? `${agentName(session)} falló` : reply.questionOptions ? `${agentName(session)} te hace una pregunta` : `${agentName(session)} terminó`
+        outcome.status === 'failed' ? `${name} falló` : reply.questionOptions ? `${name} te hace una pregunta` : `${name} terminó`
       );
     }
     this.post({ type: 'state', patch: { telemetry: this.telemetry.getRegistry() } });
@@ -753,12 +775,17 @@ export class ChatService {
         const isHandoff = Boolean(target.protocolRole && nextRoles(sender).includes(target.protocolRole));
         const missing = isHandoff ? missingHandoffFields(body) : [];
         if (missing.length > 0) this.addNote(sender.id, `Traspaso a ${name} sin los campos: ${missing.join(' ')}`, true);
+        const targetDir = (target.projectPath && !isSystemOrAppDir(target.projectPath) && fs.existsSync(target.projectPath))
+          ? target.projectPath
+          : (sender.projectPath && !isSystemOrAppDir(sender.projectPath) && fs.existsSync(sender.projectPath))
+            ? sender.projectPath
+            : (target.projectName ? this.sessions.projectPath(target.projectName) : undefined) ?? os.homedir();
         if (isHandoff && sender.approveStages) {
           const id = newMessageId();
           this.pendingHandoffs.set(id, {
             message: { id, at: Date.now(), from, to: agentName(target), text: body.trim() },
             targetId: target.id,
-            workspaceDir: target.projectPath ?? sender.projectPath ?? '',
+            workspaceDir: targetDir,
             hops: hops + 1
           });
           this.savePending();
@@ -772,7 +799,7 @@ export class ChatService {
           prompt: body.trim(),
           from,
           hops: hops + 1,
-          workspaceDir: target.projectPath ?? sender.projectPath ?? ''
+          workspaceDir: targetDir
         });
       }
     }

@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tactical Protocol Roles &amp; Reasoning Effort Engine — Showcase</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* 5 Canonical Elevation Layers */
+    .bg-layer-1 { background-color: #07090e; }
+    .bg-layer-2 { background-color: #0a0e17; }
+    .bg-layer-3 { background-color: #0c1220; }
+    .bg-layer-4 { background-color: #162035; }
+    .border-layer-5 { border-color: #202b3f; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-[#07090e] text-slate-200 font-sans h-full overflow-hidden flex flex-col antialiased selection:bg-purple-500/30 selection:text-purple-200">
+
+  <!-- Top Tactical Navigation Bar -->
+  <header class="h-14 border-b border-[#202b3f] bg-[#0a0e17] flex items-center justify-between px-6 shrink-0 z-20">
+    <div class="flex items-center gap-4">
+      <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-purple-500/15 border border-purple-500/30 text-purple-400 font-mono font-bold text-sm">
+        #64
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-sm font-bold tracking-tight text-white">Matriz de Roles del Protocolo y Esfuerzo de Razonamiento</h1>
+          <span class="px-2 py-0.5 text-[10px] font-mono rounded bg-purple-500/20 text-purple-300 border border-purple-500/40">SPEC CARD #64</span>
+        </div>
+        <p class="text-[11px] text-slate-400 font-mono">10 Roles Canónicos · Cadena de Traspaso (handoffTo) · 5 Tiers CoT</p>
+      </div>
+    </div>
+
+    <!-- Live Controls In Header -->
+    <div class="flex items-center gap-3">
+      <!-- Live Protocol Role Selector Preview (Compact) -->
+      <div class="relative group" id="compact-role-wrapper">
+        <label id="compact-role-badge" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-purple-500/40 bg-purple-950/40 text-purple-200 text-xs font-semibold cursor-pointer shadow-xs transition hover:brightness-110">
+          <svg class="w-3 h-3 text-purple-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+          <select id="role-select" class="bg-transparent text-[11px] font-semibold focus:outline-none cursor-pointer pr-1">
+            <option value="explorador" class="bg-[#0a0e17] text-slate-200">Explorador</option>
+            <option value="arquitecto" selected class="bg-[#0a0e17] text-slate-200">Arquitecto</option>
+            <option value="tester" class="bg-[#0a0e17] text-slate-200">Tester</option>
+            <option value="desarrollador" class="bg-[#0a0e17] text-slate-200">Desarrollador</option>
+            <option value="revisor" class="bg-[#0a0e17] text-slate-200">Revisor</option>
+            <option value="externo" class="bg-[#0a0e17] text-slate-200">Externo</option>
+            <option value="documentador" class="bg-[#0a0e17] text-slate-200">Documentador</option>
+            <option value="disenador" class="bg-[#0a0e17] text-slate-200">Diseñador</option>
+            <option value="coordinador" class="bg-[#0a0e17] text-slate-200">Coordinador</option>
+            <option value="depurador" class="bg-[#0a0e17] text-slate-200">Depurador</option>
+          </select>
+        </label>
+      </div>
+
+      <!-- Live Effort Selector Preview -->
+      <div class="flex items-center gap-1.5 text-[11px]">
+        <div class="flex items-center gap-1 text-slate-400 font-medium">
+          <svg class="w-3 h-3 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-width="2"/><path stroke-linecap="round" stroke-width="2" d="M12 7v5l3 3"/></svg>
+          <span class="hidden sm:inline">Esfuerzo:</span>
+        </div>
+        <div id="effort-group" class="flex bg-[#07090e] border border-[#202b3f] rounded-lg p-0.5 shadow-xs font-mono">
+          <button data-effort="low" class="effort-btn px-2 py-0.5 rounded-md text-[10.5px] text-slate-400 hover:text-slate-200 hover:bg-[#162035] transition cursor-pointer">Bajo</button>
+          <button data-effort="medium" class="effort-btn px-2 py-0.5 rounded-md text-[10.5px] text-slate-400 hover:text-slate-200 hover:bg-[#162035] transition cursor-pointer">Medio</button>
+          <button data-effort="high" class="effort-btn active px-2 py-0.5 rounded-md text-[10.5px] bg-cyan-500/20 text-cyan-200 border border-cyan-400/50 shadow-[0_0_8px_rgba(6,182,212,0.25)] font-bold transition cursor-pointer">Alto</button>
+          <button data-effort="xhigh" class="effort-btn px-2 py-0.5 rounded-md text-[10.5px] text-slate-400 hover:text-slate-200 hover:bg-[#162035] transition cursor-pointer">Xalto</button>
+          <button data-effort="max" class="effort-btn px-2 py-0.5 rounded-md text-[10.5px] text-slate-400 hover:text-slate-200 hover:bg-[#162035] transition cursor-pointer">Max</button>
+        </div>
+      </div>
+
+      <a href="master-design-portal-and-component-gallery-showcase.html" class="px-3 py-1.5 rounded-lg bg-[#0c1220] hover:bg-[#162035] text-slate-300 hover:text-white border border-[#202b3f] text-xs font-medium transition cursor-pointer">
+        Volver al Portal
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Canvas: Protocol Role Inspector & Handoff Simulator -->
+  <main class="flex-1 p-6 overflow-y-auto bg-[#07090e] space-y-6">
+    <!-- Top Hero Banner with Handoff Simulator -->
+    <div class="p-6 rounded-2xl bg-[#0a0e17] border border-[#202b3f] flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl">
+      <div class="space-y-1">
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 font-mono text-xs font-bold border border-purple-500/40">PROTOCOL PIPELINE</span>
+          <h2 class="text-lg font-bold text-white">Flujo de Traspaso Autónomo y Escalado de Razonamiento</h2>
+        </div>
+        <p class="text-xs text-slate-400 max-w-2xl">
+          Cada rol del protocolo define un conjunto estricto de permisos (edición vs solo lectura), un modelo sugerido, un nivel óptimo de pensamiento (CoT) y el siguiente rol en la cadena de traspaso.
+        </p>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="sim-handoff-btn" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs font-mono transition shadow-md shadow-purple-600/30 cursor-pointer">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          <span>SIMULAR SIGUIENTE TRASPASO</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Active Role Details Card & Live Tooltip Replicator -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Left: Role Specs & Tooltip Preview -->
+      <div class="p-5 rounded-xl bg-[#0a0e17] border border-[#202b3f] space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-[#202b3f]">
+          <span class="text-xs font-mono font-bold text-slate-400">FICHA TÉCNICA DEL ROL SELECCIONADO</span>
+          <span id="role-type-badge" class="text-[9px] font-mono px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/40 font-bold uppercase">
+            PROTOCOLO ACTIVO
+          </span>
+        </div>
+
+        <!-- Role Banner -->
+        <div class="flex items-center gap-3">
+          <div id="role-icon-box" class="w-10 h-10 rounded-xl bg-purple-950/60 border border-purple-500/40 flex items-center justify-center text-purple-400">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+          </div>
+          <div>
+            <h3 id="role-name-display" class="text-base font-bold text-white">Arquitecto</h3>
+            <p id="role-desc-display" class="text-xs text-slate-400">Diseña estructuras, contratos y define el plan de trabajo antes de codificar.</p>
+          </div>
+        </div>
+
+        <!-- Role Metadata Grid (Replicates Tooltip in ProtocolRoleSelector.tsx) -->
+        <div class="p-3.5 rounded-lg bg-[#07090e] border border-[#202b3f] space-y-2 font-mono text-xs">
+          <div class="grid grid-cols-[110px_1fr] gap-1 items-center">
+            <span class="text-slate-500 font-medium">Modelo:</span>
+            <span id="meta-model" class="text-cyan-300 font-bold">Claude 3.5 Sonnet / Antigravity</span>
+          </div>
+          <div class="grid grid-cols-[110px_1fr] gap-1 items-center">
+            <span class="text-slate-500 font-medium">Esfuerzo CoT:</span>
+            <span id="meta-effort" class="text-emerald-400 font-bold">High (Razonamiento profundo)</span>
+          </div>
+          <div class="grid grid-cols-[110px_1fr] gap-1 items-center">
+            <span class="text-slate-500 font-medium">Acceso a Disco:</span>
+            <span id="meta-access" class="text-emerald-400 font-bold">Puede editar archivos</span>
+          </div>
+          <div class="grid grid-cols-[110px_1fr] gap-1 items-center">
+            <span class="text-slate-500 font-medium">Pasa a (Handoff):</span>
+            <span id="meta-handoff" class="text-purple-300 font-bold">Tester, Desarrollador</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Reasoning Effort & Latency Simulator -->
+      <div class="p-5 rounded-xl bg-[#0a0e17] border border-[#202b3f] space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-[#202b3f]">
+          <span class="text-xs font-mono font-bold text-slate-400">TELEMETRÍA DE RAZONAMIENTO (CHAIN-OF-THOUGHT)</span>
+          <span id="effort-status-pill" class="text-[9px] font-mono px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold">
+            TIER: HIGH
+          </span>
+        </div>
+
+        <p id="effort-hint-display" class="text-xs text-slate-300 leading-relaxed">
+          Razona más antes de responder: mejor para código difícil y validación arquitectónica.
+        </p>
+
+        <!-- Simulated Metrics -->
+        <div class="grid grid-cols-3 gap-2 pt-2">
+          <div class="p-3 rounded-lg bg-[#07090e] border border-[#202b3f] text-center">
+            <div class="text-[10px] text-slate-500 font-mono">TOKENS RAZONAMIENTO</div>
+            <div id="sim-cot-tokens" class="text-sm font-bold font-mono text-cyan-300 mt-1">~2,400 tok</div>
+          </div>
+          <div class="grid grid-cols-1 p-3 rounded-lg bg-[#07090e] border border-[#202b3f] text-center">
+            <div class="text-[10px] text-slate-500 font-mono">LATENCIA MEDIA</div>
+            <div id="sim-cot-latency" class="text-sm font-bold font-mono text-emerald-400 mt-1">2.8 s</div>
+          </div>
+          <div class="grid grid-cols-1 p-3 rounded-lg bg-[#07090e] border border-[#202b3f] text-center">
+            <div class="text-[10px] text-slate-500 font-mono">CONSUMO CUOTA</div>
+            <div id="sim-cot-quota" class="text-sm font-bold font-mono text-amber-300 mt-1">Normal</div>
+          </div>
+        </div>
+
+        <!-- Compatibility Switcher -->
+        <div class="p-3 rounded-lg bg-[#07090e] border border-[#202b3f] flex items-center justify-between text-xs">
+          <span class="text-slate-400 font-mono">Simular Modelo Ligero (Solo Low/Medium):</span>
+          <button id="toggle-compatibility-btn" class="px-2.5 py-1 rounded bg-[#0c1220] hover:bg-[#162035] text-slate-300 border border-[#202b3f] font-mono text-[10.5px] cursor-pointer">
+            Deshabilitar Xhigh/Max
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Handoff Progression Timeline -->
+    <div class="p-5 rounded-xl bg-[#0a0e17] border border-[#202b3f] space-y-4">
+      <div class="flex items-center justify-between pb-2 border-b border-[#202b3f]">
+        <span class="text-xs font-mono font-bold text-slate-400">SECUENCIA DE TRASPASO DEL ESCUADRÓN (PIPELINE STEPPER)</span>
+        <span class="text-[10px] text-slate-500 font-mono">Handoffs automáticos sin pérdida de contexto CWD</span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+        <!-- Step 1 -->
+        <div id="step-arquitecto" class="p-3 rounded-xl border border-purple-500/60 bg-purple-950/30 space-y-1">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-mono text-purple-300 font-bold">01. ARQUITECTO</span>
+            <span class="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
+          </div>
+          <div class="text-xs font-bold text-white">Diseño del Plan</div>
+          <div class="text-[10px] text-slate-400">Spec modular &amp; contratos</div>
+        </div>
+
+        <!-- Step 2 -->
+        <div id="step-tester" class="p-3 rounded-xl border border-[#202b3f] bg-[#07090e] space-y-1 opacity-60">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-mono text-slate-400 font-bold">02. TESTER</span>
+            <span class="w-2 h-2 rounded-full bg-slate-600"></span>
+          </div>
+          <div class="text-xs font-bold text-slate-300">Suites TDD</div>
+          <div class="text-[10px] text-slate-500">Pruebas en rojo</div>
+        </div>
+
+        <!-- Step 3 -->
+        <div id="step-desarrollador" class="p-3 rounded-xl border border-[#202b3f] bg-[#07090e] space-y-1 opacity-60">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-mono text-slate-400 font-bold">03. DESARROLLADOR</span>
+            <span class="w-2 h-2 rounded-full bg-slate-600"></span>
+          </div>
+          <div class="text-xs font-bold text-slate-300">Implementación</div>
+          <div class="text-[10px] text-slate-500">Pruebas en verde 100%</div>
+        </div>
+
+        <!-- Step 4 -->
+        <div id="step-revisor" class="p-3 rounded-xl border border-[#202b3f] bg-[#07090e] space-y-1 opacity-60">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-mono text-slate-400 font-bold">04. REVISOR</span>
+            <span class="w-2 h-2 rounded-full bg-slate-600"></span>
+          </div>
+          <div class="text-xs font-bold text-slate-300">Auditoría Diff</div>
+          <div class="text-[10px] text-slate-500">ReadOnly &amp; Merge Ready</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Interactive JavaScript Logic -->
+  <script>
+    const ROLES = {
+      explorador: {
+        label: 'Explorador',
+        desc: 'Inspecciona y analiza la base de código sin realizar modificaciones en disco.',
+        model: 'Gemini 2.5 Flash / Haiku',
+        effort: 'Low (Rápido)',
+        readOnly: true,
+        handoff: 'Arquitecto',
+        color: 'border-cyan-500/50 bg-cyan-950/40 text-cyan-200'
+      },
+      arquitecto: {
+        label: 'Arquitecto',
+        desc: 'Diseña estructuras, contratos y define el plan de trabajo antes de codificar.',
+        model: 'Claude 3.5 Sonnet / Antigravity',
+        effort: 'High (Razonamiento profundo)',
+        readOnly: false,
+        handoff: 'Tester, Desarrollador',
+        color: 'border-purple-500/50 bg-purple-950/40 text-purple-200'
+      },
+      tester: {
+        label: 'Tester',
+        desc: 'Escribe pruebas automatizadas y verifica que los requerimientos se cumplan.',
+        model: 'Claude 3.5 Sonnet',
+        effort: 'Medium (Equilibrado)',
+        readOnly: false,
+        handoff: 'Desarrollador',
+        color: 'border-emerald-500/50 bg-emerald-950/40 text-emerald-200'
+      },
+      desarrollador: {
+        label: 'Desarrollador',
+        desc: 'Implementa funcionalidades y refactoriza código asegurando tests en verde.',
+        model: 'Claude 3.5 Sonnet / Copilot',
+        effort: 'High (Razonamiento profundo)',
+        readOnly: false,
+        handoff: 'Revisor',
+        color: 'border-blue-500/50 bg-blue-950/40 text-blue-200'
+      },
+      revisor: {
+        label: 'Revisor',
+        desc: 'Revisa diffs, analiza seguridad y valida que el código esté listo para producción.',
+        model: 'Claude 3.5 Sonnet',
+        effort: 'High (Razonamiento profundo)',
+        readOnly: true,
+        handoff: 'Ninguno (Merge Final)',
+        color: 'border-amber-500/50 bg-amber-950/40 text-amber-200'
+      },
+      externo: {
+        label: 'Externo',
+        desc: 'Interactúa con APIs públicas o recursos externos en sandbox.',
+        model: 'Antigravity Pro',
+        effort: 'Medium (Equilibrado)',
+        readOnly: false,
+        handoff: 'Coordinador',
+        color: 'border-rose-500/50 bg-rose-950/40 text-rose-200'
+      },
+      documentador: {
+        label: 'Documentador',
+        desc: 'Genera diagramas, especificaciones técnicas y documentación de arquitectura.',
+        model: 'Gemini 2.5 Flash',
+        effort: 'Low (Rápido)',
+        readOnly: false,
+        handoff: 'Revisor',
+        color: 'border-teal-500/50 bg-teal-950/40 text-teal-200'
+      },
+      disenador: {
+        label: 'Diseñador',
+        desc: 'Crea prototipos interactivos, diagramas vectoriales SVG y tokens visuales HUD.',
+        model: 'Claude 3.7 Sonnet / Antigravity',
+        effort: 'High (Razonamiento profundo)',
+        readOnly: false,
+        handoff: 'Desarrollador',
+        color: 'border-pink-500/50 bg-pink-950/40 text-pink-200'
+      },
+      coordinador: {
+        label: 'Coordinador',
+        desc: 'Supervisa la ejecución global del enjambre y resuelve bloqueos entre agentes.',
+        model: 'Claude 3.5 Sonnet',
+        effort: 'Medium (Equilibrado)',
+        readOnly: false,
+        handoff: 'Todos',
+        color: 'border-sky-500/50 bg-sky-950/40 text-sky-200'
+      },
+      depurador: {
+        label: 'Depurador',
+        desc: 'Analiza trazas de error, excepciones no controladas y crea parches rápidos.',
+        model: 'Claude 3.5 Sonnet',
+        effort: 'High (Razonamiento profundo)',
+        readOnly: false,
+        handoff: 'Tester',
+        color: 'border-red-500/50 bg-red-950/40 text-red-200'
+      }
+    };
+
+    const EFFORT_HINTS = {
+      low: { hint: 'Respuestas rápidas y baratas, con poco razonamiento.', tokens: '~350 tok', latency: '0.9 s', quota: 'Mínimo' },
+      medium: { hint: 'Equilibrio entre velocidad y profundidad para tareas estándar.', tokens: '~1,200 tok', latency: '1.8 s', quota: 'Moderado' },
+      high: { hint: 'Razona más antes de responder: mejor para código difícil y validación.', tokens: '~2,400 tok', latency: '2.8 s', quota: 'Normal' },
+      xhigh: { hint: 'Razonamiento muy profundo con menos costo que Max.', tokens: '~4,800 tok', latency: '4.5 s', quota: 'Elevado' },
+      max: { hint: 'Máximo razonamiento: el más lento y el que más cuota gasta.', tokens: '~8,000+ tok', latency: '7.2 s', quota: 'Crítico' }
+    };
+
+    const roleSelect = document.getElementById('role-select');
+    const roleBadge = document.getElementById('compact-role-badge');
+    const roleNameDisplay = document.getElementById('role-name-display');
+    const roleDescDisplay = document.getElementById('role-desc-display');
+    const metaModel = document.getElementById('meta-model');
+    const metaEffort = document.getElementById('meta-effort');
+    const metaAccess = document.getElementById('meta-access');
+    const metaHandoff = document.getElementById('meta-handoff');
+    const effortBtns = document.querySelectorAll('.effort-btn');
+    const effortHintDisplay = document.getElementById('effort-hint-display');
+    const effortStatusPill = document.getElementById('effort-status-pill');
+    const simCotTokens = document.getElementById('sim-cot-tokens');
+    const simCotLatency = document.getElementById('sim-cot-latency');
+    const simCotQuota = document.getElementById('sim-cot-quota');
+    const simHandoffBtn = document.getElementById('sim-handoff-btn');
+    const toggleCompBtn = document.getElementById('toggle-compatibility-btn');
+
+    function applyRole(key) {
+      const r = ROLES[key];
+      if (!r) return;
+
+      roleSelect.value = key;
+      roleBadge.className = `flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold cursor-pointer shadow-xs transition hover:brightness-110 ${r.color}`;
+      roleNameDisplay.textContent = r.label;
+      roleDescDisplay.textContent = r.desc;
+      metaModel.textContent = r.model;
+      metaEffort.textContent = r.effort;
+      metaAccess.textContent = r.readOnly ? 'Solo lectura (readOnly)' : 'Puede editar archivos';
+      metaAccess.className = r.readOnly ? 'text-amber-300 font-bold' : 'text-emerald-400 font-bold';
+      metaHandoff.textContent = r.handoff;
+    }
+
+    roleSelect.addEventListener('change', (e) => applyRole(e.target.value));
+
+    function setEffort(effortKey) {
+      effortBtns.forEach(btn => {
+        if (btn.dataset.effort === effortKey) {
+          btn.className = "effort-btn px-2 py-0.5 rounded-md text-[10.5px] bg-cyan-500/20 text-cyan-200 border border-cyan-400/50 shadow-[0_0_8px_rgba(6,182,212,0.25)] font-bold transition cursor-pointer";
+        } else {
+          btn.className = "effort-btn px-2 py-0.5 rounded-md text-[10.5px] text-slate-400 hover:text-slate-200 hover:bg-[#162035] transition cursor-pointer";
+        }
+      });
+
+      const metrics = EFFORT_HINTS[effortKey];
+      if (metrics) {
+        effortHintDisplay.textContent = metrics.hint;
+        effortStatusPill.textContent = `TIER: ${effortKey.toUpperCase()}`;
+        simCotTokens.textContent = metrics.tokens;
+        simCotLatency.textContent = metrics.latency;
+        simCotQuota.textContent = metrics.quota;
+      }
+    }
+
+    effortBtns.forEach(btn => {
+      btn.addEventListener('click', () => setEffort(btn.dataset.effort));
+    });
+
+    // Handoff Sequence Animation
+    const pipelineSequence = ['arquitecto', 'tester', 'desarrollador', 'revisor'];
+    let pipelineIndex = 0;
+
+    simHandoffBtn.addEventListener('click', () => {
+      pipelineIndex = (pipelineIndex + 1) % pipelineSequence.length;
+      const current = pipelineSequence[pipelineIndex];
+      applyRole(current);
+
+      pipelineSequence.forEach((step, idx) => {
+        const el = document.getElementById(`step-${step}`);
+        if (idx === pipelineIndex) {
+          el.className = "p-3 rounded-xl border border-purple-500/60 bg-purple-950/30 space-y-1";
+          el.querySelector('.rounded-full').className = "w-2 h-2 rounded-full bg-purple-400 animate-pulse";
+        } else if (idx < pipelineIndex) {
+          el.className = "p-3 rounded-xl border border-emerald-500/40 bg-emerald-950/20 space-y-1";
+          el.querySelector('.rounded-full').className = "w-2 h-2 rounded-full bg-emerald-400";
+        } else {
+          el.className = "p-3 rounded-xl border border-[#202b3f] bg-[#07090e] space-y-1 opacity-60";
+          el.querySelector('.rounded-full').className = "w-2 h-2 rounded-full bg-slate-600";
+        }
+      });
+    });
+
+    // Compatibility Toggle
+    let isLimited = false;
+    toggleCompBtn.addEventListener('click', () => {
+      isLimited = !isLimited;
+      const xhighBtn = document.querySelector('[data-effort="xhigh"]');
+      const maxBtn = document.querySelector('[data-effort="max"]');
+
+      if (isLimited) {
+        xhighBtn.disabled = true;
+        maxBtn.disabled = true;
+        xhighBtn.classList.add('opacity-30', 'pointer-events-none');
+        maxBtn.classList.add('opacity-30', 'pointer-events-none');
+        toggleCompBtn.textContent = "Habilitar Todos los Tiers";
+        setEffort('high');
+      } else {
+        xhighBtn.disabled = false;
+        maxBtn.disabled = false;
+        xhighBtn.classList.remove('opacity-30', 'pointer-events-none');
+        maxBtn.classList.remove('opacity-30', 'pointer-events-none');
+        toggleCompBtn.textContent = "Deshabilitar Xhigh/Max";
+      }
+    });
+
+    applyRole('arquitecto');
+    setEffort('high');
+  </script>
+</body>
+</html>

@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { ArchivedSessionInfo, ConversationSession, ProtocolRole, SearchHit } from '../../shared/types';
+import { agentLabel, groupByFlow } from '../../shared/flows';
 import { formatFull, relativeTime } from '../utils/format';
 import { postToHost } from '../vscode-api';
 import { PROTOCOL_ROLES } from '../../shared/protocol-roles';
+import { ROLE_COLORS } from './SquadCanvas';
 import { normalizeText } from '../../shared/workspace-actions';
 import {
   Plus,
@@ -193,20 +195,20 @@ export const SessionDrawer: React.FC<Props> = ({
 
   const drawerContent = (
     <div
-      className="h-full flex flex-col space-y-3 w-96 max-w-[90vw] bg-zinc-900 border-r border-zinc-800 p-3 shadow-2xl"
+      className="h-full flex flex-col space-y-3 w-96 max-w-[90vw] bg-[#0a0e17]/98 border-r border-[#202b3f] p-3.5 shadow-2xl backdrop-blur-md"
     >
       {/* Header */}
-      <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
-        <div className="text-xs font-bold text-zinc-100 flex items-center gap-1.5">
-          <Layers className="w-4 h-4 text-indigo-400" />
-          <span>Historial y tareas</span>
-          <span className="font-mono text-[11px] font-normal text-zinc-500">({sessions.length})</span>
+      <div className="flex items-center justify-between pb-2 border-b border-[#202b3f]">
+        <div className="text-xs font-bold text-slate-100 flex items-center gap-2">
+          <Layers className="w-4 h-4 text-cyan-400" />
+          <span>Historial y Flujos</span>
+          <span className="font-mono text-[10px] px-1.5 py-0.2 rounded-full bg-[#0c1220] border border-[#202b3f] text-slate-400">({sessions.length})</span>
         </div>
         <button
           type="button"
           aria-label="Cerrar"
           onClick={onClose}
-          className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition"
+          className="p-1 rounded-lg hover:bg-[#162035] text-slate-400 hover:text-white transition"
         >
           <X className="w-4 h-4" />
         </button>
@@ -216,19 +218,19 @@ export const SessionDrawer: React.FC<Props> = ({
         {!showNewTaskForm ? (
           <button
             onClick={() => setShowNewTaskForm(true)}
-            className="flex items-center justify-center gap-1.5 w-full py-2 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium transition shadow"
+            className="flex items-center justify-center gap-1.5 w-full py-2 px-3 rounded-xl bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-slate-950 text-xs font-bold shadow-md shadow-cyan-500/20 transition cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Nueva tarea</span>
           </button>
         ) : (
-          <form onSubmit={handleCreateSubmit} className="p-2.5 bg-zinc-800/80 border border-zinc-700 rounded-lg space-y-2 text-xs">
-            <div className="font-semibold text-zinc-200 text-[11px] flex items-center justify-between">
+          <form onSubmit={handleCreateSubmit} className="p-3 bg-[#0a0e17] border border-[#202b3f] rounded-xl space-y-2.5 text-xs shadow-lg">
+            <div className="font-semibold text-slate-200 text-[11px] flex items-center justify-between">
               <span>Organizar nueva tarea</span>
               <button
                 type="button"
                 onClick={() => setShowNewTaskForm(false)}
-                className="text-zinc-400 hover:text-zinc-200 text-[11px]"
+                className="text-slate-400 hover:text-white text-[11px]"
               >
                 Cancelar
               </button>
@@ -239,7 +241,7 @@ export const SessionDrawer: React.FC<Props> = ({
                 aria-label="Proyecto"
                 value={newProjectName}
                 onChange={(e) => setNewProjectName(e.target.value)}
-                className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-zinc-200 text-[11px] focus:outline-none focus:border-indigo-500"
+                className="w-full bg-[#07090e] border border-[#202b3f] rounded-lg px-2.5 py-1.5 text-slate-200 text-[11px] focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30"
               >
                 <option value="">Carpeta abierta (por defecto)</option>
                 {namedProjects.map((name) => (
@@ -254,7 +256,7 @@ export const SessionDrawer: React.FC<Props> = ({
                   placeholder="Nombre del proyecto (ej: portafolio, finesa)"
                   value={newProjectText}
                   onChange={(e) => setNewProjectText(e.target.value)}
-                  className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-zinc-200 text-[11px] focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#07090e] border border-[#202b3f] rounded-lg px-2.5 py-1.5 text-slate-200 text-[11px] focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30"
                 />
               )}
             </div>
@@ -265,7 +267,7 @@ export const SessionDrawer: React.FC<Props> = ({
                 placeholder="Tarea / Slug (ej: feat-auth, bug-secop)"
                 value={newTaskSlug}
                 onChange={(e) => setNewTaskSlug(e.target.value)}
-                className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-zinc-200 text-[11px] focus:outline-none focus:border-indigo-500"
+                className="w-full bg-[#07090e] border border-[#202b3f] rounded-lg px-2.5 py-1.5 text-slate-200 text-[11px] focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30"
               />
             </div>
 
@@ -273,7 +275,7 @@ export const SessionDrawer: React.FC<Props> = ({
               <select
                 value={newRole}
                 onChange={(e) => setNewRole(e.target.value as ProtocolRole)}
-                className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-zinc-200 text-[11px] focus:outline-none focus:border-indigo-500"
+                className="w-full bg-[#07090e] border border-[#202b3f] rounded-lg px-2.5 py-1.5 text-slate-200 text-[11px] focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30"
               >
                 <option value="">Sin rol inicial (libre)</option>
                 {Object.values(PROTOCOL_ROLES).map((r) => (
@@ -286,7 +288,7 @@ export const SessionDrawer: React.FC<Props> = ({
 
             <button
               type="submit"
-              className="w-full py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded font-medium text-[11px] transition"
+              className="w-full py-2 bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-slate-950 rounded-lg font-bold text-[11px] transition shadow-md shadow-cyan-500/20 cursor-pointer"
             >
               Iniciar tarea
             </button>
@@ -296,7 +298,7 @@ export const SessionDrawer: React.FC<Props> = ({
         {/* Search & Project Filter Bar */}
         <div className="space-y-1.5">
           <div className="relative">
-            <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-2 top-2" />
+            <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Buscar tareas, chats o proyectos..."
@@ -308,31 +310,31 @@ export const SessionDrawer: React.FC<Props> = ({
                   setSearchQuery('');
                 }
               }}
-              className="w-full pl-7 pr-7 py-1 bg-zinc-800/60 border border-zinc-800 rounded text-xs text-zinc-200 placeholder-zinc-400 focus:outline-none focus:border-zinc-700"
+              className="w-full pl-8 pr-8 py-1.5 bg-[#07090e] border border-[#202b3f] rounded-xl text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30 transition"
             />
             {searchQuery && (
-              <button type="button" aria-label="Borrar la búsqueda" onClick={() => setSearchQuery('')} className="absolute right-1.5 top-1.5 text-zinc-400 hover:text-zinc-200">
+              <button type="button" aria-label="Borrar la búsqueda" onClick={() => setSearchQuery('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
                 <X className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
           <div className="flex items-center gap-1 text-[11px]">
-            <span className="text-zinc-500">Ordenar:</span>
+            <span className="text-slate-500">Ordenar:</span>
             {([['recent', 'Recientes'], ['name', 'Nombre'], ['messages', 'Más largas']] as const).map(([id, label]) => (
               <button
                 key={id}
                 type="button"
                 aria-pressed={sortBy === id}
                 onClick={() => setSortBy(id)}
-                className={`px-1.5 py-0.5 rounded transition ${sortBy === id ? 'bg-zinc-800 text-zinc-200 font-medium' : 'text-zinc-400 hover:text-zinc-200'}`}
+                className={`px-2 py-0.5 rounded-md transition ${sortBy === id ? 'bg-cyan-500 text-slate-950 font-bold shadow-sm shadow-cyan-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-[#0c1220]'}`}
               >
                 {label}
               </button>
             ))}
-            {searching && <span className="ml-auto font-mono text-zinc-500">{filteredSessions.length} de {sessions.length}</span>}
+            {searching && <span className="ml-auto font-mono text-[10px] text-slate-500">{filteredSessions.length} de {sessions.length}</span>}
           </div>
           {emptySessions.length > 0 && sessions.length - emptySessions.length >= 1 && (
-            <div className="flex items-center gap-1.5 text-[11px]">
+            <div className="flex items-center gap-1.5 text-[11px] pt-0.5">
               {confirmClearEmpty ? (
                 <>
                   <span className="text-red-300">¿Eliminar {emptySessions.length} vacías?</span>
@@ -342,16 +344,16 @@ export const SessionDrawer: React.FC<Props> = ({
                       emptySessions.forEach((s) => onDeleteSession(s.id));
                       setConfirmClearEmpty(false);
                     }}
-                    className="px-1.5 bg-red-700 hover:bg-red-600 text-white rounded"
+                    className="px-2 py-0.5 bg-red-700 hover:bg-red-600 text-white rounded-md text-[10px]"
                   >
                     Sí
                   </button>
-                  <button type="button" aria-label="Cancelar" onClick={() => setConfirmClearEmpty(false)} className="text-zinc-400 hover:text-zinc-200">
+                  <button type="button" aria-label="Cancelar" onClick={() => setConfirmClearEmpty(false)} className="text-slate-400 hover:text-white">
                     <X className="w-3 h-3" />
                   </button>
                 </>
               ) : (
-                <button type="button" onClick={() => setConfirmClearEmpty(true)} className="text-zinc-400 hover:text-red-300">
+                <button type="button" onClick={() => setConfirmClearEmpty(true)} className="text-[10px] text-slate-500 hover:text-red-400 transition">
                   Limpiar {emptySessions.length} conversaciones vacías
                 </button>
               )}
@@ -359,22 +361,22 @@ export const SessionDrawer: React.FC<Props> = ({
           )}
 
           {availableProjects.length > 1 && (
-            <div className="flex items-center gap-1 py-0.5 text-[11px] overflow-x-auto whitespace-nowrap pb-1">
+            <div className="flex items-center gap-1.5 py-0.5 text-[11px] overflow-x-auto whitespace-nowrap pb-1 custom-scroll">
               <button
                 type="button"
                 onClick={() => setAllCollapsed(!allCollapsed)}
                 title={allCollapsed ? 'Expandir todos los proyectos' : 'Colapsar todos los proyectos'}
                 aria-label={allCollapsed ? 'Expandir todos' : 'Colapsar todos'}
-                className="p-0.5 rounded text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 shrink-0"
+                className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-[#0c1220] shrink-0"
               >
                 {allCollapsed ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
               </button>
               <button
                 onClick={() => setSelectedProjectFilter('all')}
-                className={`px-1.5 py-0.5 rounded transition shrink-0 ${
+                className={`px-2.5 py-0.5 rounded-full transition shrink-0 ${
                   selectedProjectFilter === 'all'
-                    ? 'bg-zinc-800 text-zinc-200 font-medium'
-                    : 'text-zinc-400 hover:text-zinc-200'
+                    ? 'bg-cyan-500 text-slate-950 font-bold shadow-sm shadow-cyan-500/20'
+                    : 'bg-[#07090e] text-slate-400 hover:text-slate-200 border border-[#202b3f]'
                 }`}
               >
                 Todos
@@ -383,10 +385,10 @@ export const SessionDrawer: React.FC<Props> = ({
                 <button
                   key={p}
                   onClick={() => setSelectedProjectFilter(p)}
-                  className={`px-1.5 py-0.5 rounded transition shrink-0 ${
+                  className={`px-2.5 py-0.5 rounded-full transition shrink-0 ${
                     selectedProjectFilter === p
-                      ? 'bg-indigo-600/30 text-indigo-300 font-medium border border-indigo-500/30'
-                      : 'text-zinc-400 hover:text-zinc-200'
+                      ? 'bg-cyan-500 text-slate-950 font-bold shadow-sm shadow-cyan-500/20'
+                      : 'bg-[#07090e] text-slate-400 hover:text-slate-200 border border-[#202b3f]'
                   }`}
                 >
                   {p}
@@ -398,7 +400,7 @@ export const SessionDrawer: React.FC<Props> = ({
 
         {messageHits.length > 0 && (
           <div className="space-y-1 max-h-40 overflow-y-auto shrink-0">
-            <div className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wide">En mensajes</div>
+            <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">En mensajes</div>
             {messageHits.map((hit, index) => (
               <button
                 key={`${hit.sessionId}-${index}`}
@@ -407,10 +409,10 @@ export const SessionDrawer: React.FC<Props> = ({
                   onSelectSession(hit.sessionId);
                   onClose();
                 }}
-                className="w-full text-left p-1.5 rounded hover:bg-zinc-800/50 border border-zinc-800/60"
+                className="w-full text-left p-1.5 rounded-lg hover:bg-[#162035] border border-[#202b3f] transition-colors cursor-pointer"
               >
-                <span className="block truncate text-[11px] font-medium text-zinc-200">{hit.title || 'Conversación'}</span>
-                <span className="block truncate text-[11px] text-zinc-400">{hit.snippet}</span>
+                <span className="block truncate text-[11px] font-medium text-slate-200">{hit.title || 'Conversación'}</span>
+                <span className="block truncate text-[11px] text-slate-400">{hit.snippet}</span>
               </button>
             ))}
           </div>
@@ -419,7 +421,7 @@ export const SessionDrawer: React.FC<Props> = ({
         {/* Sessions Grouped by Project */}
         <div className="flex-1 overflow-y-auto space-y-3 pr-1">
           {Object.keys(groupedByProject).length === 0 ? (
-            <div className="text-center p-6 text-zinc-400 text-xs">
+            <div className="text-center p-6 text-slate-400 text-xs">
               No hay sesiones que coincidan con la búsqueda.
             </div>
           ) : (
@@ -428,7 +430,7 @@ export const SessionDrawer: React.FC<Props> = ({
               return (
                 <div
                   key={projectName}
-                  className={`space-y-1 rounded ${dropTarget === projectName ? 'ring-1 ring-indigo-500 bg-indigo-500/10' : ''}`}
+                  className={`space-y-1.5 rounded-xl border border-[#202b3f] bg-[#0a0e17]/70 p-2 shadow-sm transition ${dropTarget === projectName ? 'ring-2 ring-cyan-500 bg-cyan-500/20' : ''}`}
                   onDragOver={(event) => {
                     event.preventDefault();
                     setDropTarget(projectName);
@@ -441,7 +443,7 @@ export const SessionDrawer: React.FC<Props> = ({
                     if (sessionId) onMoveSession(sessionId, projectName === UNASSIGNED ? undefined : projectName);
                   }}
                 >
-                  <div className="flex items-center gap-1 text-[11px] font-semibold text-zinc-400 p-1 rounded hover:bg-zinc-800/40 select-none">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 p-1 rounded-lg hover:bg-[#0c1220] select-none">
                     {renaming?.from === projectName ? (
                       <input
                         autoFocus
@@ -458,25 +460,25 @@ export const SessionDrawer: React.FC<Props> = ({
                           }
                         }}
                         onBlur={() => setRenaming(null)}
-                        className="flex-1 min-w-0 bg-zinc-900 border border-indigo-500 rounded px-1.5 py-0.5 text-zinc-200 text-[11px] focus:outline-none"
+                        className="flex-1 min-w-0 bg-[#07090e] border border-cyan-500 rounded-lg px-2 py-0.5 text-slate-100 text-[11px] focus:outline-none"
                       />
                     ) : (
                       <button
                         type="button"
                         aria-expanded={!isCollapsed}
                         onClick={() => toggleProjectCollapse(projectName)}
-                        className="flex-1 min-w-0 flex items-center gap-1.5 text-left hover:text-zinc-200"
+                        className="flex-1 min-w-0 flex items-center gap-1.5 text-left hover:text-white"
                       >
                         {isCollapsed ? (
-                          <ChevronRight className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                          <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                         ) : (
-                          <ChevronDown className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                          <ChevronDown className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                         )}
-                        <FolderGit2 className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                        <FolderGit2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
                         <span className="truncate">{projectName}</span>
                       </button>
                     )}
-                    <span className="text-[11px] text-zinc-400 font-mono px-1 rounded bg-zinc-800/80 shrink-0">
+                    <span className="text-[10px] text-slate-400 font-mono px-1.5 py-0.2 rounded-full bg-[#0c1220] border border-[#202b3f] shrink-0">
                       {pSessions.length}
                     </span>
                     {renaming?.from !== projectName && pendingDeleteProject !== projectName && (
@@ -489,7 +491,7 @@ export const SessionDrawer: React.FC<Props> = ({
                           setCollapsedProjects((prev) => ({ ...prev, [projectName]: false }));
                           setAddingTo({ project: projectName, slug: '' });
                         }}
-                        className="text-zinc-400 hover:text-emerald-400 transition shrink-0 p-0.5 rounded hover:bg-zinc-800"
+                        className="text-slate-400 hover:text-emerald-400 transition shrink-0 p-1 rounded-md hover:bg-[#0c1220]"
                       >
                         <Plus className="w-3.5 h-3.5" />
                       </button>
@@ -504,7 +506,7 @@ export const SessionDrawer: React.FC<Props> = ({
                               onDeleteProject(projectName);
                               setPendingDeleteProject(null);
                             }}
-                            className="text-[11px] px-1.5 bg-red-700 hover:bg-red-600 text-white rounded transition shrink-0"
+                            className="text-[10px] px-1.5 py-0.5 bg-red-700 hover:bg-red-600 text-white rounded-md transition shrink-0"
                           >
                             Sí
                           </button>
@@ -512,7 +514,7 @@ export const SessionDrawer: React.FC<Props> = ({
                             type="button"
                             aria-label="Cancelar"
                             onClick={() => setPendingDeleteProject(null)}
-                            className="text-zinc-400 hover:text-zinc-200 shrink-0"
+                            className="text-slate-400 hover:text-white shrink-0 p-0.5"
                           >
                             <X className="w-3 h-3" />
                           </button>
@@ -524,7 +526,7 @@ export const SessionDrawer: React.FC<Props> = ({
                             aria-label={`Renombrar ${projectName}`}
                             title="Renombrar proyecto"
                             onClick={() => setRenaming({ from: projectName, to: projectName })}
-                            className="text-zinc-400 hover:text-indigo-300 transition shrink-0"
+                            className="text-slate-400 hover:text-cyan-300 transition shrink-0 p-1 rounded hover:bg-[#0c1220]"
                           >
                             <Pencil className="w-3 h-3" />
                           </button>
@@ -533,7 +535,7 @@ export const SessionDrawer: React.FC<Props> = ({
                             aria-label={`Eliminar ${projectName}`}
                             title="Eliminar proyecto y sus conversaciones"
                             onClick={() => setPendingDeleteProject(projectName)}
-                            className="text-zinc-400 hover:text-red-400 transition shrink-0"
+                            className="text-slate-400 hover:text-red-400 transition shrink-0 p-1 rounded hover:bg-[#0c1220]"
                           >
                             <Trash2 className="w-3 h-3" />
                           </button>
@@ -557,14 +559,21 @@ export const SessionDrawer: React.FC<Props> = ({
                         }
                       }}
                       onBlur={() => setAddingTo(null)}
-                      className="w-[calc(100%-1rem)] ml-2 bg-zinc-900 border border-emerald-500 rounded px-2 py-1 text-zinc-200 text-[11px] focus:outline-none"
+                      className="w-[calc(100%-1rem)] ml-2 bg-[#07090e] border border-emerald-500/80 rounded-lg px-2.5 py-1 text-slate-100 text-[11px] focus:outline-none"
                     />
                   )}
 
                   {/* Tasks / Sessions in this Project */}
-                  {!isCollapsed && (
-                    <div className="space-y-1 pl-2 border-l border-zinc-800/80 ml-2">
-                      {pSessions.map((s) => (
+                  {!isCollapsed && (() => {
+                    const { flows, loose } = groupByFlow(pSessions, []);
+                    const renderRow = (s: ConversationSession, mates?: ConversationSession[]) => {
+                      const isTeam = Boolean(s.squad);
+                      const tag = isTeam ? agentLabel(s, mates ?? [s]) : (s.taskSlug ? `#${s.taskSlug}` : null);
+                      const roleMeta = s.protocolRole ? PROTOCOL_ROLES[s.protocolRole] : undefined;
+                      const roleBadgeClass = s.protocolRole && ROLE_COLORS[s.protocolRole]
+                        ? ROLE_COLORS[s.protocolRole]
+                        : 'border-cyan-500/30 bg-cyan-500/10 text-cyan-300';
+                      return (
                         <div
                           key={s.id}
                           draggable
@@ -573,10 +582,10 @@ export const SessionDrawer: React.FC<Props> = ({
                             event.dataTransfer.effectAllowed = 'move';
                           }}
                           onDragEnd={() => setDropTarget(null)}
-                          className={`flex items-center justify-between p-2 rounded-lg text-xs transition cursor-grab active:cursor-grabbing ${
+                          className={`flex items-center justify-between p-2 rounded-xl text-xs transition cursor-grab active:cursor-grabbing border ${
                             s.id === activeSessionId
-                              ? 'bg-zinc-800 text-indigo-300 font-medium border border-zinc-700'
-                              : 'hover:bg-zinc-800/50 text-zinc-300'
+                              ? 'bg-cyan-500/15 text-white font-medium border-cyan-500/50 shadow-sm shadow-cyan-500/10'
+                              : 'hover:bg-[#0c1220] hover:border-[#202b3f] text-slate-300 border-transparent'
                           }`}
                         >
                           <button
@@ -587,23 +596,23 @@ export const SessionDrawer: React.FC<Props> = ({
                             }}
                             className="flex-1 min-w-0 flex items-center gap-2 mr-2 text-left"
                           >
-                            <MessageSquare className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
-                            <span className="block min-w-0">
-                              <span className="truncate text-[11px] flex items-center gap-1">
-                                <span className="truncate">{s.title || 'Conversación'}</span>
-                                {s.taskSlug && (
-                                  <span className="text-[11px] px-1 rounded bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 font-mono shrink-0">
-                                    #{s.taskSlug}
+                            <MessageSquare className={`w-3.5 h-3.5 shrink-0 ${s.id === activeSessionId ? 'text-cyan-400' : 'text-slate-400'}`} />
+                            <span className="block min-w-0 flex-1">
+                              <span className="truncate text-[11px] flex items-center gap-1.5">
+                                <span className={`truncate ${s.id === activeSessionId ? 'font-bold text-white' : 'font-medium text-slate-200'}`}>{s.title || 'Conversación'}</span>
+                                {tag && (
+                                  <span className={`text-[10px] px-1.5 py-0.2 rounded-md bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 shrink-0 ${isTeam ? 'font-medium' : 'font-mono'}`}>
+                                    {tag}
                                   </span>
                                 )}
                               </span>
-                              <span className="text-[11px] text-zinc-400 font-mono flex items-center gap-1 truncate">
-                                <span className="truncate">{s.modelId}</span>
+                              <span className="text-[10px] text-slate-400 font-mono flex items-center gap-1.5 truncate mt-0.5">
+                                <span className="truncate text-slate-400">{s.modelId}</span>
                                 {s.protocolRole && (
                                   <>
                                     <span>•</span>
-                                    <span className="text-purple-400 uppercase font-semibold">
-                                      {PROTOCOL_ROLES[s.protocolRole]?.label ?? s.protocolRole}
+                                    <span className={`text-[9px] px-1 rounded uppercase font-bold border ${roleBadgeClass}`}>
+                                      {roleMeta?.label ?? s.protocolRole}
                                     </span>
                                   </>
                                 )}
@@ -612,7 +621,7 @@ export const SessionDrawer: React.FC<Props> = ({
                                 {s.updatedAt > 0 && (
                                   <>
                                     <span>•</span>
-                                    <span className="shrink-0" title={formatFull(s.updatedAt)}>{relativeTime(s.updatedAt)}</span>
+                                    <span className="shrink-0 text-slate-500" title={formatFull(s.updatedAt)}>{relativeTime(s.updatedAt)}</span>
                                   </>
                                 )}
                               </span>
@@ -626,24 +635,24 @@ export const SessionDrawer: React.FC<Props> = ({
                               aria-label={favorites.includes(s.id) ? 'Quitar de favoritas' : 'Marcar como favorita'}
                               title={favorites.includes(s.id) ? 'Quitar de favoritas' : 'Marcar como favorita (sube al principio)'}
                               onClick={() => toggleFavorite(s.id)}
-                              className="text-zinc-500 hover:text-amber-300"
+                              className="text-slate-500 hover:text-amber-400 p-0.5 transition"
                             >
-                              <Star className={`w-3 h-3 ${favorites.includes(s.id) ? 'text-amber-400 fill-amber-400' : ''}`} />
+                              <Star className={`w-3.5 h-3.5 ${favorites.includes(s.id) ? 'text-amber-400 fill-amber-400' : ''}`} />
                             </button>
                             {s.id === activeSessionId && (
-                              <Check className="w-3.5 h-3.5 text-indigo-400" />
+                              <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                             )}
 
                             {sessions.length > 1 && (pendingDeleteId === s.id ? (
                               <>
-                                <span className="text-[11px] text-red-300">¿Eliminar?</span>
+                                <span className="text-[10px] text-red-300">¿Eliminar?</span>
                                 <button
                                   type="button"
                                   onClick={() => {
                                     onDeleteSession(s.id);
                                     setPendingDeleteId(null);
                                   }}
-                                  className="text-[11px] px-1.5 bg-red-700 hover:bg-red-600 text-white rounded transition"
+                                  className="text-[10px] px-1.5 py-0.5 bg-red-700 hover:bg-red-600 text-white rounded transition"
                                 >
                                   Sí
                                 </button>
@@ -651,7 +660,7 @@ export const SessionDrawer: React.FC<Props> = ({
                                   type="button"
                                   aria-label="Cancelar"
                                   onClick={() => setPendingDeleteId(null)}
-                                  className="flex items-center justify-center text-zinc-400 hover:text-zinc-200 rounded transition"
+                                  className="flex items-center justify-center text-slate-400 hover:text-white rounded p-0.5"
                                 >
                                   <X className="w-3 h-3" />
                                 </button>
@@ -660,7 +669,7 @@ export const SessionDrawer: React.FC<Props> = ({
                               <button
                                 type="button"
                                 onClick={() => setPendingDeleteId(s.id)}
-                                className="flex items-center justify-center hover:text-red-400 text-zinc-400 rounded transition"
+                                className="flex items-center justify-center hover:text-red-400 text-slate-500 p-1 rounded hover:bg-[#0c1220] transition"
                                 aria-label={`Eliminar ${s.title || 'conversación'}`}
                                 title="Eliminar conversación"
                               >
@@ -669,16 +678,31 @@ export const SessionDrawer: React.FC<Props> = ({
                             ))}
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  )}
+                      );
+                    };
+
+                    return (
+                      <div className="space-y-1.5 pl-2.5 border-l-2 border-cyan-500/30 ml-2">
+                        {flows.map((flow) => (
+                          <div key={flow.squad} className="space-y-1">
+                            <div className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider px-1 pt-1.5 pb-0.5 flex items-center gap-1.5">
+                              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0" />
+                              <span className="truncate">{flow.name}</span>
+                            </div>
+                            {flow.members.map((s) => renderRow(s, flow.members))}
+                          </div>
+                        ))}
+                        {loose.map((s) => renderRow(s, loose))}
+                      </div>
+                    );
+                  })()}
                 </div>
               );
             })
           )}
         </div>
 
-        <div className="shrink-0 border-t border-zinc-800 pt-2">
+        <div className="shrink-0 border-t border-[#202b3f] pt-2">
           <button
             type="button"
             onClick={() => {
@@ -686,24 +710,24 @@ export const SessionDrawer: React.FC<Props> = ({
               setShowArchive(!showArchive);
             }}
             aria-expanded={showArchive}
-            className="flex items-center gap-1 text-[11px] font-semibold text-zinc-400 hover:text-zinc-200 uppercase tracking-wide"
+            className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 hover:text-white uppercase tracking-wider transition"
           >
-            {showArchive ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
-            Archivadas
+            {showArchive ? <ChevronDown className="w-3.5 h-3.5 text-slate-400" /> : <ChevronRight className="w-3.5 h-3.5 text-slate-400" />}
+            <span>Conversaciones Archivadas</span>
           </button>
           {showArchive && (
-            <ul className="mt-1 max-h-40 overflow-y-auto space-y-1">
-              {archive.length === 0 && <li className="text-[11px] text-zinc-400 p-1">No hay conversaciones archivadas.</li>}
+            <ul className="mt-1.5 max-h-40 overflow-y-auto space-y-1.5 custom-scroll">
+              {archive.length === 0 && <li className="text-[11px] text-slate-500 p-2 text-center">No hay conversaciones archivadas.</li>}
               {archive.map((item) => (
-                <li key={item.id} className="flex items-center gap-2 p-1.5 rounded border border-zinc-800/60 text-[11px]">
+                <li key={item.id} className="flex items-center gap-2 p-2 rounded-xl bg-[#0a0e17] border border-[#202b3f] text-[11px]">
                   <span className="flex-1 min-w-0">
-                    <span className="block truncate font-medium text-zinc-200">{item.title || 'Conversación'}</span>
-                    <span className="block text-zinc-400">{new Date(item.updatedAt).toLocaleString()}</span>
+                    <span className="block truncate font-medium text-slate-200">{item.title || 'Conversación'}</span>
+                    <span className="block text-[10px] text-slate-500 font-mono">{new Date(item.updatedAt).toLocaleString()}</span>
                   </span>
                   <button
                     type="button"
                     onClick={() => postToHost({ command: 'restoreSession', sessionId: item.id })}
-                    className="px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-indigo-300 border border-zinc-700 transition shrink-0"
+                    className="px-2.5 py-1 rounded-lg bg-[#0c1220] hover:bg-[#162035] text-cyan-300 hover:text-white border border-[#202b3f] transition shrink-0 font-medium text-[10px]"
                   >
                     Restaurar
                   </button>
@@ -716,7 +740,7 @@ export const SessionDrawer: React.FC<Props> = ({
     );
 
     return (
-      <div className="fixed inset-0 bg-black/70 flex z-40">
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex z-40">
         {drawerContent}
         <div className="flex-1" onClick={onClose} />
       </div>

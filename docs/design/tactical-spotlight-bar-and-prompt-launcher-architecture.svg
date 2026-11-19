@@ -1,0 +1,256 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" style="background:#07090e; font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;">
+  <defs>
+    <!-- Background Grid -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#162035" stroke-width="0.8" opacity="0.4"/>
+    </pattern>
+    <radialGradient id="cyan-glow" cx="50%" cy="0%" r="70%">
+      <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#07090e" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow-drop" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.65"/>
+    </filter>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="1600" height="900" fill="#07090e"/>
+  <rect width="1600" height="900" fill="url(#grid)"/>
+  <rect width="1600" height="500" fill="url(#cyan-glow)"/>
+
+  <!-- Master Header -->
+  <g transform="translate(48, 36)">
+    <!-- Brand / Badge -->
+    <rect x="0" y="0" width="132" height="26" rx="6" fill="#0c1220" stroke="#06b6d4" stroke-width="1.2"/>
+    <text x="12" y="17" fill="#22d3ee" font-size="11" font-weight="700" letter-spacing="1.5" font-family="ui-monospace, monospace">SPEC CARD #69</text>
+
+    <text x="148" y="18" fill="#64748b" font-size="12" font-family="ui-monospace, monospace">|</text>
+    <text x="164" y="18" fill="#94a3b8" font-size="12" font-weight="600" letter-spacing="0.5">SECTION 2.V TACTICAL SPOTLIGHT BAR &amp; INTENT LAUNCHER</text>
+
+    <!-- Master Title -->
+    <text x="0" y="62" fill="#f8fafc" font-size="28" font-weight="800" letter-spacing="-0.5">Barra Táctica Spotlight y Lanzador Global de Intenciones</text>
+    <text x="0" y="86" fill="#94a3b8" font-size="14">Buscador global tipo Raycast, trampa de foco W3C APG, navegación de historial con flechas Up/Down y píldoras de acción rápida en 1-clic</text>
+
+    <!-- Top Right Telemetry Badges -->
+    <g transform="translate(1120, 10)">
+      <rect x="0" y="0" width="384" height="64" rx="10" fill="#0a0e17" stroke="#202b3f" stroke-width="1.2" filter="url(#shadow-drop)"/>
+      <circle cx="24" cy="32" r="6" fill="#06b6d4"/>
+      <circle cx="24" cy="32" r="10" fill="none" stroke="#06b6d4" stroke-width="1.5" opacity="0.4"/>
+      <text x="42" y="27" fill="#f8fafc" font-size="12" font-weight="700">SPOTLIGHT LAUNCHER: ACTIVE</text>
+      <text x="42" y="45" fill="#64748b" font-size="10" font-family="ui-monospace, monospace">W3C APG Trap • History Buffer • 1-Click Intents</text>
+      <rect x="300" y="16" width="70" height="32" rx="6" fill="#0c1220" stroke="#06b6d4" stroke-width="1"/>
+      <text x="314" y="36" fill="#22d3ee" font-size="12" font-weight="800" font-family="ui-monospace, monospace">60 FPS</text>
+    </g>
+  </g>
+
+  <!-- Three Architecture Pillars -->
+
+  <!-- ================= PILLAR 1: SPOTLIGHT MODAL & FOCUS TRAP ================= -->
+  <g transform="translate(48, 150)">
+    <rect x="0" y="0" width="470" height="540" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.4" filter="url(#shadow-drop)"/>
+    <rect x="0" y="0" width="470" height="48" rx="14" fill="#0c1220"/>
+    <path d="M 0 48 L 470 48" stroke="#202b3f" stroke-width="1.2"/>
+
+    <!-- Pillar 1 Header -->
+    <rect x="16" y="12" width="24" height="24" rx="6" fill="#06b6d4" fill-opacity="0.15" stroke="#06b6d4" stroke-width="1"/>
+    <circle cx="28" cy="24" r="5" fill="none" stroke="#22d3ee" stroke-width="1.5"/>
+    <text x="48" y="28" fill="#f8fafc" font-size="14" font-weight="700">1. Modal Spotlight &amp; Foco W3C APG</text>
+    <rect x="340" y="14" width="114" height="20" rx="4" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+    <text x="354" y="28" fill="#22d3ee" font-size="10" font-family="ui-monospace, monospace">trapFocus()</text>
+
+    <!-- Content 1 -->
+    <g transform="translate(20, 68)">
+      <!-- Focus trap card -->
+      <rect x="0" y="0" width="430" height="136" rx="8" fill="#07090e" stroke="#06b6d4" stroke-width="1.2"/>
+      <text x="14" y="22" fill="#22d3ee" font-size="11" font-weight="700" font-family="ui-monospace, monospace">TRAMPA DE FOCO CÍCLICA ACCESIBLE</text>
+      <text x="14" y="42" fill="#e2e8f0" font-size="11">Impide que la navegación por teclado escape del modal:</text>
+
+      <rect x="14" y="52" width="402" height="44" rx="4" fill="#162035"/>
+      <text x="22" y="69" fill="#94a3b8" font-size="10" font-family="ui-monospace, monospace">if (shiftKey &amp;&amp; activeElement === first) last.focus();</text>
+      <text x="22" y="85" fill="#38bdf8" font-size="10" font-family="ui-monospace, monospace">else if (!shiftKey &amp;&amp; activeElement === last) first.focus();</text>
+      <text x="14" y="118" fill="#64748b" font-size="9">Cumplimiento estricto de pautas W3C APG Modal Dialog pattern.</text>
+
+      <!-- Opener restoration card -->
+      <g transform="translate(0, 150)">
+        <rect x="0" y="0" width="430" height="126" rx="8" fill="#07090e" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700" font-family="ui-monospace, monospace">RESTAURACIÓN AUTOMÁTICA DEL FOCO</text>
+        <text x="14" y="42" fill="#e2e8f0" font-size="11">Al desmontar la barra Spotlight, el cursor regresa al elemento origen:</text>
+        <rect x="14" y="52" width="402" height="34" rx="4" fill="#162035"/>
+        <text x="22" y="67" fill="#fbbf24" font-size="10" font-family="ui-monospace, monospace">const opener = document.activeElement as HTMLElement;</text>
+        <text x="22" y="80" fill="#34d399" font-size="9" font-family="ui-monospace, monospace">return () => opener?.focus?.();</text>
+        <text x="14" y="112" fill="#94a3b8" font-size="9">Elimina desorientación al pulsar Escape o despachar una orden.</text>
+      </g>
+
+      <!-- Subpixel design -->
+      <g transform="translate(0, 290)">
+        <rect x="0" y="0" width="430" height="136" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">ANIMACIÓN HUD &amp; BACKDROP BLUR</text>
+        <text x="14" y="42" fill="#94a3b8" font-size="11">Fondo translúcido `rgba(0,0,0,0.75)` con desenfoque gaussiano</text>
+        <text x="14" y="58" fill="#94a3b8" font-size="11">`backdrop-blur-md` y transición de escala suave `animate-modal-pop`.</text>
+        <text x="14" y="74" fill="#94a3b8" font-size="11">Cero parpadeos ni deformación tipográfica durante la apertura.</text>
+        <text x="14" y="104" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">Atajo de teclado global: Ctrl+K / Cmd+K</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ================= PILLAR 2: PROMPT HISTORY ENGINE ================= -->
+  <g transform="translate(565, 150)">
+    <rect x="0" y="0" width="470" height="540" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.4" filter="url(#shadow-drop)"/>
+    <rect x="0" y="0" width="470" height="48" rx="14" fill="#0c1220"/>
+    <path d="M 0 48 L 470 48" stroke="#202b3f" stroke-width="1.2"/>
+
+    <!-- Pillar 2 Header -->
+    <rect x="16" y="12" width="24" height="24" rx="6" fill="#f59e0b" fill-opacity="0.15" stroke="#f59e0b" stroke-width="1"/>
+    <polygon points="28,16 31,23 38,24 33,29 35,36 28,32 21,36 23,29 18,24 25,23" fill="#fbbf24"/>
+    <text x="48" y="28" fill="#f8fafc" font-size="14" font-weight="700">2. Buffer de Historial &amp; Teclas Up/Down</text>
+    <rect x="340" y="14" width="114" height="20" rx="4" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+    <text x="352" y="28" fill="#fbbf24" font-size="10" font-family="ui-monospace, monospace">promptHistory</text>
+
+    <!-- Content 2 -->
+    <g transform="translate(20, 68)">
+      <!-- History Navigation card -->
+      <rect x="0" y="0" width="430" height="142" rx="8" fill="#07090e" stroke="#f59e0b" stroke-width="1.2"/>
+      <text x="14" y="22" fill="#fbbf24" font-size="11" font-weight="700" font-family="ui-monospace, monospace">CICLADO CON FLECHAS ARRIBA Y ABAJO</text>
+      <text x="14" y="42" fill="#e2e8f0" font-size="11">Permite recuperar prompts enviados anteriormente:</text>
+
+      <g transform="translate(14, 52)">
+        <rect x="0" y="0" width="402" height="42" rx="4" fill="#162035"/>
+        <text x="10" y="18" fill="#38bdf8" font-size="9" font-family="ui-monospace, monospace">ArrowUp: historyPos.current++ => setPrompt(history[pos])</text>
+        <text x="10" y="34" fill="#34d399" font-size="9" font-family="ui-monospace, monospace">ArrowDown: historyPos.current-- => restaura buffer de trabajo</text>
+      </g>
+      <text x="14" y="126" fill="#94a3b8" font-size="9">Preserva el texto que el usuario estaba redactando antes de subir.</text>
+
+      <!-- Recent prompt chips card -->
+      <g transform="translate(0, 156)">
+        <rect x="0" y="0" width="430" height="154" rx="8" fill="#07090e" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700" font-family="ui-monospace, monospace">CHIPS DE PROMPTS RECIENTES (RECENT_SHOWN = 5)</text>
+        <text x="14" y="42" fill="#94a3b8" font-size="11">Accesos directos con 1-clic debajo del campo de búsqueda:</text>
+
+        <g transform="translate(14, 52)">
+          <rect x="0" y="0" width="402" height="26" rx="4" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+          <text x="10" y="17" fill="#cbd5e1" font-size="10" font-family="ui-monospace, monospace">"Refactoriza los tests de flujos para validar CWD"</text>
+        </g>
+
+        <g transform="translate(14, 84)">
+          <rect x="0" y="0" width="402" height="26" rx="4" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+          <text x="10" y="17" fill="#cbd5e1" font-size="10" font-family="ui-monospace, monospace">"Ejecuta auditoría de seguridad buscando tokens"</text>
+        </g>
+
+        <text x="14" y="138" fill="#64748b" font-size="9">Al hacer clic en un chip, se inyecta en el input y se enfoca el cursor.</text>
+      </g>
+
+      <!-- LocalStorage deduplication -->
+      <g transform="translate(0, 324)">
+        <rect x="0" y="0" width="430" height="102" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">DEDUPLICACIÓN INTELIGENTE DE HISTORIAL</text>
+        <text x="14" y="42" fill="#94a3b8" font-size="11">Al enviar un prompt repetido, se mueve al inicio sin duplicar entradas:</text>
+        <text x="14" y="60" fill="#22d3ee" font-size="9" font-family="ui-monospace, monospace">[trimmed, ...history.filter(p => p !== trimmed)].slice(0, 50)</text>
+        <text x="14" y="86" fill="#64748b" font-size="9">Persiste permanentemente en 'agent-hub.promptHistory'.</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ================= PILLAR 3: QUICK INTENT PILLS & CHAT INJECTION ================= -->
+  <g transform="translate(1082, 150)">
+    <rect x="0" y="0" width="470" height="540" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.4" filter="url(#shadow-drop)"/>
+    <rect x="0" y="0" width="470" height="48" rx="14" fill="#0c1220"/>
+    <path d="M 0 48 L 470 48" stroke="#202b3f" stroke-width="1.2"/>
+
+    <!-- Pillar 3 Header -->
+    <rect x="16" y="12" width="24" height="24" rx="6" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="1"/>
+    <path d="M 22 24 L 26 28 L 34 20" fill="none" stroke="#34d399" stroke-width="1.5"/>
+    <text x="48" y="28" fill="#f8fafc" font-size="14" font-weight="700">3. Píldoras de Acción Rápida (Intents)</text>
+    <rect x="350" y="14" width="104" height="20" rx="4" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+    <text x="362" y="28" fill="#34d399" font-size="10" font-family="ui-monospace, monospace">1-Click Intents</text>
+
+    <!-- Content 3 -->
+    <g transform="translate(20, 68)">
+      <!-- 3 Quick Action Buttons -->
+      <rect x="0" y="0" width="430" height="170" rx="8" fill="#07090e" stroke="#10b981" stroke-width="1"/>
+      <text x="14" y="22" fill="#34d399" font-size="11" font-weight="700" font-family="ui-monospace, monospace">ACCIONES DE DESARROLLO INMEDIATAS</text>
+
+      <!-- Intent 1: Generate Commit -->
+      <g transform="translate(14, 34)">
+        <rect x="0" y="0" width="402" height="38" rx="6" fill="#0c1220" stroke="#10b981" stroke-width="1"/>
+        <text x="12" y="17" fill="#34d399" font-size="11" font-weight="700">⑂ Generar Commit Semántico</text>
+        <text x="12" y="30" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">onGenerateCommit() -> Analiza staged diffs con LLM</text>
+      </g>
+
+      <!-- Intent 2: Audit Branch -->
+      <g transform="translate(14, 78)">
+        <rect x="0" y="0" width="402" height="38" rx="6" fill="#0c1220" stroke="#f59e0b" stroke-width="1"/>
+        <text x="12" y="17" fill="#fbbf24" font-size="11" font-weight="700">🛡 Auditar Seguridad de la Rama</text>
+        <text x="12" y="30" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">onAuditBranch() -> Lanza escáner multi-dominio</text>
+      </g>
+
+      <!-- Intent 3: Run Tests -->
+      <g transform="translate(14, 122)">
+        <rect x="0" y="0" width="402" height="38" rx="6" fill="#0c1220" stroke="#06b6d4" stroke-width="1"/>
+        <text x="12" y="17" fill="#22d3ee" font-size="11" font-weight="700">🧪 Ejecutar Suites de Pruebas</text>
+        <text x="12" y="30" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">onRunTests() -> Lanza test runner con reporte live</text>
+      </g>
+
+      <!-- Enter submission card -->
+      <g transform="translate(0, 182)">
+        <rect x="0" y="0" width="430" height="120" rx="8" fill="#07090e" stroke="#202b3f" stroke-width="1.2"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700" font-family="ui-monospace, monospace">DESPACHO DIRECTO AL CHAT (Enter ↵)</text>
+        <text x="14" y="42" fill="#e2e8f0" font-size="11">Cierra el modal y despacha el prompt a la sesión activa:</text>
+
+        <rect x="14" y="52" width="402" height="34" rx="4" fill="#162035"/>
+        <text x="22" y="67" fill="#22d3ee" font-size="10" font-family="ui-monospace, monospace">onSubmitPrompt(prompt.trim()) &amp;&amp; onClose()</text>
+        <text x="22" y="80" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">Sin transiciones lentas ni pérdida del scroll en el chat</text>
+        <text x="14" y="106" fill="#34d399" font-size="10">El foco se transfiere automáticamente al compositor.</text>
+      </g>
+
+      <!-- Visual hint -->
+      <g transform="translate(0, 314)">
+        <rect x="0" y="0" width="430" height="112" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">PIE CON INDICADORES DE TECLADO</text>
+        <text x="14" y="42" fill="#94a3b8" font-size="11">Muestra atajos claros en la barra inferior:</text>
+        <text x="14" y="62" fill="#cbd5e1" font-size="10" font-family="ui-monospace, monospace">[Enter] Enviar  •  [↑↓] Historial  •  [Esc] Cerrar</text>
+        <text x="14" y="94" fill="#64748b" font-size="9">Claridad operativa sin conjeturas para el usuario.</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ================= BOTTOM TELEMETRY / ARCHITECTURE SUMMARY BAR ================= -->
+  <g transform="translate(48, 712)">
+    <rect x="0" y="0" width="1504" height="152" rx="12" fill="#0a0e17" stroke="#202b3f" stroke-width="1.2" filter="url(#shadow-drop)"/>
+
+    <g transform="translate(24, 20)">
+      <text x="0" y="18" fill="#f8fafc" font-size="14" font-weight="700" letter-spacing="0.5">RESUMEN DE ELEVACIÓN &amp; SISTEMA DE LANZADOR SPOTLIGHT</text>
+
+      <g transform="translate(0, 36)">
+        <!-- Layer 1 -->
+        <rect x="0" y="0" width="280" height="66" rx="8" fill="#07090e" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">CAPA 1: #07090e</text>
+        <text x="14" y="40" fill="#94a3b8" font-size="10">Search Input Canvas &amp; Prompt Chips</text>
+        <text x="14" y="54" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">Fondo no reflectivo para inputs</text>
+
+        <!-- Layer 2 -->
+        <rect x="296" y="0" width="280" height="66" rx="8" fill="#0a0e17" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">CAPA 2: #0a0e17</text>
+        <text x="14" y="40" fill="#94a3b8" font-size="10">Spotlight Modal Shell &amp; Backdrop</text>
+        <text x="14" y="54" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">Shadow-2xl shadow-black/90</text>
+
+        <!-- Layer 3 -->
+        <rect x="592" y="0" width="280" height="66" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">CAPA 3: #0c1220</text>
+        <text x="14" y="40" fill="#94a3b8" font-size="10">Quick Intent Action Pills</text>
+        <text x="14" y="54" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">Commit, Audit, Test buttons</text>
+
+        <!-- Layer 4 -->
+        <rect x="888" y="0" width="280" height="66" rx="8" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">CAPA 4: #162035</text>
+        <text x="14" y="40" fill="#94a3b8" font-size="10">Hover States &amp; Kbd Shortcuts</text>
+        <text x="14" y="54" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">Micro-interacción fluida a 60 FPS</text>
+
+        <!-- Layer 5 -->
+        <rect x="1184" y="0" width="272" height="66" rx="8" fill="#202b3f" stroke="#06b6d4" stroke-width="1"/>
+        <text x="14" y="22" fill="#22d3ee" font-size="11" font-weight="700">CAPA 5: #202b3f</text>
+        <text x="14" y="40" fill="#e2e8f0" font-size="10">Bordes estructurales &amp; Divisores</text>
+        <text x="14" y="54" fill="#94a3b8" font-size="9" font-family="ui-monospace, monospace">Contrast ratio &gt; 7:1 WCAG AAA</text>
+      </g>
+    </g>
+  </g>
+</svg>

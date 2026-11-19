@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tactical Long-Term Memory & Context Tail // Showcase</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-void: #07090e;
+      --bg-card: #0a0e17;
+      --bg-inset: #0c1220;
+      --bg-hover: #162035;
+      --border-subtle: #162035;
+      --border-strong: #202b3f;
+      --border-focus: #06b6d4;
+      
+      --cyan-primary: #06b6d4;
+      --cyan-bright: #22d3ee;
+      --cyan-glow: rgba(6, 182, 212, 0.4);
+      --emerald-accent: #10b981;
+      --emerald-bright: #34d399;
+      --violet-accent: #8b5cf6;
+      --amber-accent: #f59e0b;
+      --rose-accent: #ef4444;
+      
+      --text-main: #f8fafc;
+      --text-muted: #cbd5e1;
+      --text-dim: #94a3b8;
+      --text-faint: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-void);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.08), transparent 60%),
+        radial-gradient(circle at 100% 100%, rgba(6, 182, 212, 0.05), transparent 50%),
+        linear-gradient(to right, rgba(22, 32, 53, 0.35) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(22, 32, 53, 0.35) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 28px 28px, 28px 28px;
+    }
+
+    .font-mono {
+      font-family: 'Fira Code', monospace;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 6px 12px;
+      font-size: 11.5px;
+      font-weight: 700;
+      font-family: 'Fira Code', monospace;
+      border-radius: 8px;
+      border: 1px solid var(--border-strong);
+      background: var(--bg-card);
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-decoration: none;
+    }
+    .btn:hover {
+      background: var(--bg-hover);
+      border-color: var(--cyan-primary);
+      color: var(--cyan-bright);
+    }
+    .btn-emerald {
+      background: linear-gradient(135deg, #059669, #10b981);
+      border-color: #34d399;
+      color: #07090e;
+    }
+    .btn-emerald:hover {
+      filter: brightness(1.15);
+      color: #07090e;
+      box-shadow: 0 0 14px rgba(16, 185, 129, 0.4);
+    }
+    .btn-cyan {
+      background: linear-gradient(135deg, #0891b2, #06b6d4);
+      border-color: #22d3ee;
+      color: #07090e;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      font-family: 'Fira Code', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-cyan { background: rgba(6, 182, 212, 0.15); border: 1px solid rgba(6, 182, 212, 0.35); color: var(--cyan-bright); }
+    .badge-emerald { background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.35); color: var(--emerald-bright); }
+    .badge-violet { background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.35); color: #c4b5fd; }
+    .badge-amber { background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.35); color: #fcd34d; }
+
+    /* Lesson Card */
+    .lesson-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-strong);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .lesson-card:hover {
+      border-color: var(--cyan-primary);
+      transform: translateY(-1px);
+    }
+    .lesson-card.in-context {
+      border-color: rgba(16, 185, 129, 0.6);
+      box-shadow: 0 0 16px rgba(16, 185, 129, 0.12);
+    }
+
+    /* Tabs */
+    .view-tab {
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      font-family: 'Fira Code', monospace;
+      border: 1px solid transparent;
+      cursor: pointer;
+      background: transparent;
+      color: var(--text-dim);
+      transition: all 0.15s;
+    }
+    .view-tab.active {
+      background: var(--cyan-primary);
+      color: #07090e;
+      border-color: var(--cyan-bright);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP APP BAR -->
+  <header style="background: rgba(10, 14, 23, 0.95); border-bottom: 1px solid var(--border-strong); backdrop-filter: blur(12px); padding: 12px 24px; position: sticky; top: 0; z-index: 50;">
+    <div style="max-width: 1440px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+      
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, var(--emerald-accent), var(--cyan-primary)); display: flex; align-items: center; justify-content: center; color: #07090e; font-weight: 900; font-size: 18px; box-shadow: 0 0 14px rgba(16,185,129,0.3);">
+          🧠
+        </div>
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <h1 style="font-size: 15px; font-weight: 800; color: #fff;">Tactical Long-Term Memory &amp; Context Tail</h1>
+            <span class="badge badge-emerald">SPEC #73</span>
+            <span class="badge badge-cyan">TAIL 2000c</span>
+          </div>
+          <p style="font-size: 11px; color: var(--text-dim); margin-top: 2px;" class="font-mono">
+            .agent-hub/experience.md • Sliding Window • Structured Protocol Lessons • Raw Sync
+          </p>
+        </div>
+      </div>
+
+      <!-- Header Metrics -->
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div style="background: var(--bg-inset); border: 1px solid var(--border-strong); border-radius: 8px; padding: 4px 10px; display: flex; align-items: center; gap: 6px;">
+          <span style="width: 7px; height: 7px; border-radius: 50%; background: var(--emerald-accent); box-shadow: 0 0 6px var(--emerald-accent);"></span>
+          <span style="font-size: 11px; font-weight: 700; color: var(--emerald-bright);" class="font-mono" id="headerTailStatus">COLA: 2,000 / 2,000 c</span>
+        </div>
+        <button class="btn btn-emerald" onclick="toggleAddLessonModal()">
+          <span>+ Nueva Lección</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MAIN SHOWCASE CONTENT -->
+  <main style="max-width: 1200px; margin: 0 auto; padding: 24px; flex: 1; width: 100%; display: flex; flex-direction: column; gap: 20px;">
+    
+    <!-- MASTER CONTROLLER CARD -->
+    <div style="background: var(--bg-card); border: 1px solid var(--border-strong); border-radius: 14px; padding: 18px 22px; display: flex; flex-direction: column; gap: 16px;">
+      
+      <!-- Top Row Controls -->
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <h2 style="font-size: 14px; font-weight: 800; color: #fff; font-family: 'Fira Code', monospace;">Memoria Persistente de Aprendizajes</h2>
+            <span class="badge badge-emerald" id="lessonsTotalCountBadge">4 lecciones</span>
+          </div>
+          <p style="font-size: 11.5px; color: var(--text-dim); margin-top: 2px;">
+            Directivas aprendidas de ejecuciones previas. Los últimos 2000 caracteres se inyectan en cada turno del agente.
+          </p>
+        </div>
+
+        <!-- Mode Tabs & Actions -->
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="background: var(--bg-void); border: 1px solid var(--border-strong); border-radius: 8px; padding: 2px; display: flex; gap: 2px;">
+            <button class="view-tab active" id="tab-structured" onclick="setViewMode('structured')">Modo Estructurado</button>
+            <button class="view-tab" id="tab-raw" onclick="setViewMode('raw')">Editor Raw (MD)</button>
+          </div>
+          <button class="btn" onclick="copyFullMemory()">📋 Copiar Todo</button>
+        </div>
+      </div>
+
+      <!-- Context Tail Sliding Window Indicator Bar -->
+      <div style="background: var(--bg-inset); border: 1px solid var(--border-strong); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; font-family: 'Fira Code', monospace;">
+          <span style="color: var(--text-dim); font-weight: 700;">DELIMITADOR DE CONTEXTO TAIL (LLM WINDOW)</span>
+          <span style="color: var(--emerald-bright); font-weight: 700;" id="overflowNoteText">En Contexto: 1,840 c · Histórico: 0 c</span>
+        </div>
+
+        <!-- Visual Bar Meter -->
+        <div style="width: 100%; height: 10px; background: #07090e; border: 1px solid var(--border-strong); border-radius: 9999px; overflow: hidden; display: flex;">
+          <div id="meterHistoric" style="width: 0%; height: 100%; background: #162035; transition: width 0.3s;" title="Histórico guardado en disco"></div>
+          <div id="meterInContext" style="width: 92%; height: 100%; background: linear-gradient(90deg, #10b981, #06b6d4); box-shadow: 0 0 10px rgba(16,185,129,0.5); transition: width 0.3s;" title="En contexto activo del agente"></div>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 10.5px; color: var(--text-faint); font-family: 'Fira Code', monospace;">
+          <span>Inicio de archivo</span>
+          <span style="color: var(--emerald-bright);">◀ Límite de corte (Últimos 2,000 caracteres)</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- STRUCTURED VIEW CONTAINER -->
+    <div id="structuredViewContainer" style="display: flex; flex-direction: column; gap: 14px;">
+      
+      <!-- Search & Filters -->
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+        <div style="position: relative; max-width: 380px; width: 100%;">
+          <input 
+            type="text" 
+            id="lessonSearchInput" 
+            placeholder="Buscar por señal, directiva o evidencia..." 
+            oninput="handleSearch(this.value)"
+            style="width: 100%; background: #07090e; border: 1px solid var(--border-strong); border-radius: 8px; padding: 7px 12px 7px 32px; font-size: 11.5px; color: #fff; font-family: 'Fira Code', monospace; outline: none;"
+          >
+          <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 12px; color: var(--text-faint);">🔍</span>
+        </div>
+
+        <button class="btn btn-emerald" onclick="toggleAddLessonModal()">+ Añadir Lección</button>
+      </div>
+
+      <!-- Lessons Deck -->
+      <div id="lessonsGrid" style="display: grid; grid-template-columns: 1fr; gap: 14px;">
+        <!-- Injected dynamically -->
+      </div>
+
+    </div>
+
+    <!-- RAW MARKDOWN EDITOR CONTAINER (Initially Hidden) -->
+    <div id="rawEditorContainer" style="display: none; flex-direction: column; gap: 12px;">
+      
+      <div style="background: var(--bg-card); border: 1px solid var(--border-strong); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+        
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div style="font-family: 'Fira Code', monospace; font-size: 11px; color: var(--text-dim);">
+            <span>Ruta: <code style="color: var(--cyan-bright);">.agent-hub/experience.md</code></span>
+            <span id="dirtyStateBadge" style="display: none; margin-left: 10px; color: var(--amber-accent); font-weight: 700;">● Modificado sin guardar</span>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn" onclick="undoRawChanges()" id="rawUndoBtn" disabled style="opacity: 0.5;">Deshacer</button>
+            <button class="btn btn-emerald" onclick="saveRawMemory()" id="rawSaveBtn" disabled style="opacity: 0.5;">Guardar Cambios</button>
+          </div>
+        </div>
+
+        <textarea 
+          id="rawMemoryTextarea" 
+          rows="18" 
+          oninput="handleRawInput(this.value)"
+          style="width: 100%; background: #07090e; border: 1px solid var(--border-strong); border-radius: 8px; padding: 14px; color: #f8fafc; font-family: 'Fira Code', monospace; font-size: 12px; line-height: 1.6; outline: none; resize: vertical;"
+        ></textarea>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 10.5px; color: var(--text-faint); font-family: 'Fira Code', monospace;">
+          <span id="rawWordCountText">340 palabras · 48 líneas</span>
+          <span>Codificación: UTF-8 · Persistencia en disco</span>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ADD LESSON MODAL -->
+  <div id="addLessonModal" class="modal-backdrop" style="display: none;" onclick="if(event.target===this) toggleAddLessonModal()">
+    <div style="background: var(--bg-card); border: 1px solid var(--border-strong); border-radius: 14px; width: 100%; max-width: 520px; padding: 20px; box-shadow: 0 25px 60px rgba(0,0,0,0.9); display: flex; flex-direction: column; gap: 16px;">
+      
+      <div style="display: flex; align-items: center; justify-content: space-between;">
+        <h3 style="font-size: 14px; font-weight: 800; color: #fff;">Registrar Nueva Lección de Protocolo</h3>
+        <button class="btn" style="padding: 2px 6px;" onclick="toggleAddLessonModal()">✕</button>
+      </div>
+
+      <form onsubmit="handleNewLessonSubmit(event)" style="display: flex; flex-direction: column; gap: 12px;">
+        <label style="display: block;">
+          <span style="font-size: 10.5px; font-weight: 700; color: var(--text-dim); text-transform: uppercase;" class="font-mono">SEÑAL (CUÁNDO APLICA):</span>
+          <input type="text" id="inputSignal" placeholder="ej. Al modificar handlers IPC o tests de flujos" required style="width: 100%; background: #07090e; border: 1px solid var(--border-strong); border-radius: 6px; padding: 8px 12px; font-size: 12px; color: #fff; margin-top: 4px; outline: none;">
+        </label>
+
+        <label style="display: block;">
+          <span style="font-size: 10.5px; font-weight: 700; color: var(--text-dim); text-transform: uppercase;" class="font-mono">LECCIÓN (DIRECTIVA REGLAMENTARIA):</span>
+          <textarea id="inputLesson" rows="3" placeholder="ej. Mantener CWD seguro con resolveSafeCwd y validar con isSystemOrAppDir." required style="width: 100%; background: #07090e; border: 1px solid var(--border-strong); border-radius: 6px; padding: 8px 12px; font-size: 12px; color: #fff; margin-top: 4px; outline: none; resize: vertical;"></textarea>
+        </label>
+
+        <label style="display: block;">
+          <span style="font-size: 10.5px; font-weight: 700; color: var(--text-dim); text-transform: uppercase;" class="font-mono">EVIDENCIA VERIFICADA (OPCIONAL):</span>
+          <input type="text" id="inputEvidence" placeholder="ej. tests/flows.test.ts 14/14 tests superados" style="width: 100%; background: #07090e; border: 1px solid var(--border-strong); border-radius: 6px; padding: 8px 12px; font-size: 12px; color: #fff; margin-top: 4px; outline: none;">
+        </label>
+
+        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px;">
+          <button type="button" class="btn" onclick="toggleAddLessonModal()">Cancelar</button>
+          <button type="submit" class="btn btn-emerald">Guardar Lección</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toastBox" style="display: none; position: fixed; bottom: 24px; right: 24px; background: rgba(10, 14, 23, 0.95); border: 1px solid var(--emerald-accent); border-radius: 10px; padding: 10px 16px; color: var(--emerald-bright); font-family: 'Fira Code', monospace; font-size: 11.5px; font-weight: 700; box-shadow: 0 10px 30px rgba(0,0,0,0.8); z-index: 200;">
+    ✓ Guardado exitosamente
+  </div>
+
+  <footer style="padding: 16px 24px; text-align: center; border-top: 1px solid var(--border-subtle); color: var(--text-faint); font-size: 11px;" class="font-mono">
+    AgentHub Tactical HUD // Long-Term Memory &amp; Sliding Window Engine // Certified WCAG AAA &amp; Zero Leaks
+  </footer>
+
+  <script>
+    const SENT_TAIL_CHARS = 2000;
+
+    let memoryDraft = `# Lecciones Aprendidas de Protocolo
+
+Señal: Al despachar turnos de agentes en Windows PowerShell
+Lección: Emplear estrictamente resolución de safe-cwd y verificar con isSystemOrAppDir para impedir contaminación en System32 o carpetas de aplicación.
+Evidencia: tests/flows.test.ts verificado al 100% (14/14 superados)
+
+Señal: Al diseñar componentes y vistas HUD tácticas
+Lección: Respetar rigurosamente las 5 capas tácticas Dark HUD (#07090e a #202b3f) garantizando contraste WCAG AAA y cero fugas de tonos índigo obsoletos.
+Evidencia: docs/design/tactical-* auditados con 0 coincidencias prohibidas
+
+Señal: Al manipular la cola y buffers de entrada en el chat
+Lección: Confinar el foco cíclico mediante W3C APG y permitir navegación de historial con flechas Up/Down preservando el texto borrador en edición.
+Evidencia: SpotlightBar.tsx y Spec Card #69 funcionando a 60 FPS
+
+Señal: Al inicializar el gestor de cuentas y multi-proveedor
+Lección: Detectar conmutación automática de credenciales al 90% de saturación de cuota y permitir copia de email con confirmación rápida.
+Evidencia: AccountsView.tsx y ProfileCard.tsx certificados`;
+
+    let originalMemory = memoryDraft;
+    let searchQuery = '';
+    let currentViewMode = 'structured';
+
+    function parseLessons(text) {
+      const blocks = text.split(/\n\n+/);
+      const items = [];
+      const tailStart = Math.max(0, text.length - SENT_TAIL_CHARS);
+      let cumulativeIndex = 0;
+
+      blocks.forEach((block, idx) => {
+        const trimmed = block.trim();
+        const startIndex = cumulativeIndex;
+        cumulativeIndex += block.length + 2;
+
+        if (!trimmed || trimmed.startsWith('# Lecciones')) return;
+
+        const isInContext = startIndex >= tailStart || (startIndex + block.length) >= tailStart;
+        const signalMatch = trimmed.match(/Señal:\s*([\s\S]*?)(?=\nLección:|$)/i);
+        const lessonMatch = trimmed.match(/Lección:\s*([\s\S]*?)(?=\nEvidencia:|$)/i);
+        const evidenceMatch = trimmed.match(/Evidencia:\s*([\s\S]*?)$/i);
+
+        if (signalMatch && lessonMatch) {
+          items.push({
+            id: `lesson-${idx}`,
+            signal: signalMatch[1].trim(),
+            lesson: lessonMatch[1].trim(),
+            evidence: evidenceMatch ? evidenceMatch[1].trim() : null,
+            isInContext,
+            raw: trimmed
+          });
+        }
+      });
+
+      return items;
+    }
+
+    function renderView() {
+      const lessons = parseLessons(memoryDraft);
+      const totalChars = memoryDraft.length;
+      const overflow = Math.max(0, totalChars - SENT_TAIL_CHARS);
+      const inContextChars = Math.min(totalChars, SENT_TAIL_CHARS);
+
+      // Header telemetry
+      document.getElementById('headerTailStatus').innerText = `COLA: ${inContextChars} / ${SENT_TAIL_CHARS} c`;
+      document.getElementById('lessonsTotalCountBadge').innerText = `${lessons.length} lecciones`;
+      document.getElementById('overflowNoteText').innerText = `En Contexto: ${inContextChars} c · Histórico: ${overflow} c`;
+
+      // Visual meter calculation
+      const inContextPct = Math.min(100, (inContextChars / (overflow + inContextChars || 1)) * 100);
+      const overflowPct = 100 - inContextPct;
+      document.getElementById('meterHistoric').style.width = `${overflowPct}%`;
+      document.getElementById('meterInContext').style.width = `${inContextPct}%`;
+
+      // Render cards
+      const container = document.getElementById('lessonsGrid');
+      const filtered = lessons.filter(item => {
+        if (!searchQuery) return true;
+        const q = searchQuery.toLowerCase();
+        return item.signal.toLowerCase().includes(q) ||
+               item.lesson.toLowerCase().includes(q) ||
+               (item.evidence && item.evidence.toLowerCase().includes(q));
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div style="padding: 32px; text-align: center; background: var(--bg-card); border: 1px dashed var(--border-strong); border-radius: 12px; color: var(--text-dim);">
+            🔍 No se encontraron lecciones que coincidan con la búsqueda.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(item => `
+        <div class="lesson-card ${item.isInContext ? 'in-context' : ''}">
+          <!-- Top Row -->
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="badge badge-cyan">PROTOCOLO</span>
+              <span style="font-size: 11px; color: var(--text-faint); font-family: 'Fira Code', monospace;">${item.id}</span>
+            </div>
+
+            <span class="badge ${item.isInContext ? 'badge-emerald' : 'badge-amber'}" style="font-size: 9.5px;">
+              ${item.isInContext ? '● EN CONTEXTO ACTIVO' : 'HISTÓRICO'}
+            </span>
+          </div>
+
+          <!-- Signal -->
+          <div style="font-size: 11.5px; line-height: 1.5;">
+            <span style="color: var(--text-dim); font-weight: 700; font-family: 'Fira Code', monospace; margin-right: 6px;">SEÑAL:</span>
+            <span style="color: #fff; font-weight: 600;">${item.signal}</span>
+          </div>
+
+          <!-- Lesson Directiva -->
+          <div style="background: #07090e; border: 1px solid var(--border-strong); border-radius: 8px; padding: 10px 12px;">
+            <div style="font-size: 10px; font-weight: 700; color: var(--cyan-bright); font-family: 'Fira Code', monospace; margin-bottom: 2px;">DIRECTIVA DE PROTOCOLO:</div>
+            <div style="font-size: 12px; color: var(--text-main); line-height: 1.5;">${item.lesson}</div>
+          </div>
+
+          <!-- Evidence -->
+          ${item.evidence ? `
+            <div style="font-size: 11px; color: var(--emerald-bright); font-family: 'Fira Code', monospace;">
+              <span style="color: var(--text-dim); font-weight: 700;">EVIDENCIA:</span> ${item.evidence}
+            </div>
+          ` : ''}
+
+          <!-- Footer Copy Action -->
+          <div style="display: flex; justify-content: flex-end; padding-top: 6px; border-top: 1px solid var(--border-subtle);">
+            <button class="btn" style="padding: 3px 8px; font-size: 10.5px;" onclick="copySnippet('${encodeURIComponent(item.raw)}')">
+              📋 Copiar Lección
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function setViewMode(mode) {
+      currentViewMode = mode;
+      document.getElementById('tab-structured').classList.toggle('active', mode === 'structured');
+      document.getElementById('tab-raw').classList.toggle('active', mode === 'raw');
+
+      document.getElementById('structuredViewContainer').style.display = mode === 'structured' ? 'flex' : 'none';
+      document.getElementById('rawEditorContainer').style.display = mode === 'raw' ? 'flex' : 'none';
+
+      if (mode === 'raw') {
+        const textarea = document.getElementById('rawMemoryTextarea');
+        textarea.value = memoryDraft;
+        updateRawTelemetry(memoryDraft);
+      }
+    }
+
+    function handleRawInput(val) {
+      const isDirty = val !== originalMemory;
+      document.getElementById('dirtyStateBadge').style.display = isDirty ? 'inline-block' : 'none';
+      document.getElementById('rawSaveBtn').disabled = !isDirty;
+      document.getElementById('rawSaveBtn').style.opacity = isDirty ? '1' : '0.5';
+      document.getElementById('rawUndoBtn').disabled = !isDirty;
+      document.getElementById('rawUndoBtn').style.opacity = isDirty ? '1' : '0.5';
+      updateRawTelemetry(val);
+    }
+
+    function updateRawTelemetry(val) {
+      const words = val.trim() ? val.trim().split(/\s+/).length : 0;
+      const lines = val ? val.split('\n').length : 0;
+      document.getElementById('rawWordCountText').innerText = `${words} palabras · ${lines} líneas · ${val.length} caracteres`;
+    }
+
+    function saveRawMemory() {
+      const val = document.getElementById('rawMemoryTextarea').value;
+      memoryDraft = val;
+      originalMemory = val;
+      handleRawInput(val);
+      renderView();
+      showToast('Memoria guardada y sincronizada en disco');
+    }
+
+    function undoRawChanges() {
+      document.getElementById('rawMemoryTextarea').value = originalMemory;
+      handleRawInput(originalMemory);
+      showToast('Cambios deshechos');
+    }
+
+    function handleSearch(val) {
+      searchQuery = val.trim();
+      renderView();
+    }
+
+    function copySnippet(encoded) {
+      const raw = decodeURIComponent(encoded);
+      navigator.clipboard.writeText(raw).catch(() => {});
+      showToast('Lección copiada al portapapeles');
+    }
+
+    function copyFullMemory() {
+      navigator.clipboard.writeText(memoryDraft).catch(() => {});
+      showToast('Archivo completo de memoria copiado');
+    }
+
+    function toggleAddLessonModal() {
+      const modal = document.getElementById('addLessonModal');
+      const isVisible = modal.style.display === 'flex';
+      modal.style.display = isVisible ? 'none' : 'flex';
+      if (!isVisible) {
+        document.getElementById('inputSignal').value = '';
+        document.getElementById('inputLesson').value = '';
+        document.getElementById('inputEvidence').value = '';
+        document.getElementById('inputSignal').focus();
+      }
+    }
+
+    function handleNewLessonSubmit(e) {
+      e.preventDefault();
+      const sig = document.getElementById('inputSignal').value.trim();
+      const les = document.getElementById('inputLesson').value.trim();
+      const evi = document.getElementById('inputEvidence').value.trim();
+
+      let newBlock = `\n\nSeñal: ${sig}\nLección: ${les}`;
+      if (evi) newBlock += `\nEvidencia: ${evi}`;
+
+      memoryDraft += newBlock;
+      originalMemory = memoryDraft;
+      toggleAddLessonModal();
+      renderView();
+      showToast('Nueva lección de protocolo agregada');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toastBox');
+      toast.innerText = `✓ ${msg}`;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 2000);
+    }
+
+    // Init
+    renderView();
+  </script>
+</body>
+</html>

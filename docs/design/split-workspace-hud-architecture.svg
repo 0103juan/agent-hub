@@ -1,0 +1,149 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#07090e" />
+      <stop offset="50%" stop-color="#0a0d16" />
+      <stop offset="100%" stop-color="#07090e" />
+    </linearGradient>
+    <linearGradient id="primaryGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#6366f1" />
+      <stop offset="100%" stop-color="#06b6d4" />
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0e131f" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#0a0d16" stop-opacity="0.98" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <style>
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    .sans { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+  </style>
+
+  <!-- Background Canvas -->
+  <rect width="960" height="540" fill="url(#bgGrad)" />
+
+  <!-- Subtle Blueprint Grid -->
+  <g opacity="0.08" stroke="#38bdf8" stroke-width="1">
+    <path d="M 0 40 L 960 40 M 0 80 L 960 80 M 0 120 L 960 120 M 0 160 L 960 160 M 0 200 L 960 200 M 0 240 L 960 240 M 0 280 L 960 280 M 0 320 L 960 320 M 0 360 L 960 360 M 0 400 L 960 400 M 0 440 L 960 440 M 0 480 L 960 480 M 0 520 L 960 520" />
+    <path d="M 60 0 L 60 540 M 120 0 L 120 540 M 180 0 L 180 540 M 240 0 L 240 540 M 300 0 L 300 540 M 360 0 L 360 540 M 420 0 L 420 540 M 480 0 L 480 540 M 540 0 L 540 540 M 600 0 L 600 540 M 660 0 L 660 540 M 720 0 L 720 540 M 780 0 L 780 540 M 840 0 L 840 540 M 900 0 L 900 540" />
+  </g>
+
+  <!-- Header Banner -->
+  <g transform="translate(60, 26)">
+    <rect x="0" y="0" width="840" height="42" rx="8" fill="#0e131f" stroke="#202b3f" stroke-width="1.5" />
+    <circle cx="24" cy="21" r="5" fill="#06b6d4" filter="url(#glow)" />
+    <text x="42" y="26" fill="#f8fafc" font-size="13" font-weight="700" class="sans" letter-spacing="0.5">AGENTHUB HUD :: SPLIT WORKSPACE &amp; MULTI-STREAM BROKER</text>
+    <rect x="670" y="9" width="150" height="24" rx="4" fill="#06b6d4" fill-opacity="0.15" stroke="#06b6d4" stroke-width="1" />
+    <text x="745" y="25" fill="#38bdf8" font-size="11" font-weight="600" text-anchor="middle" class="mono">MULTI-COLUMN HUD</text>
+  </g>
+
+  <!-- Central Split Workspace Container -->
+  <g transform="translate(60, 84)">
+    <rect x="0" y="0" width="840" height="426" rx="14" fill="url(#cardGrad)" stroke="#202b3f" stroke-width="1.5" />
+
+    <!-- SplitBar Header Controls -->
+    <rect x="0" y="0" width="840" height="46" rx="14" fill="#0a0d16" />
+    <rect x="0" y="45" width="840" height="1" fill="#202b3f" />
+
+    <g transform="translate(18, 10)">
+      <!-- Columns Selector Button -->
+      <rect x="0" y="0" width="108" height="26" rx="6" fill="#6366f1" fill-opacity="0.2" stroke="#6366f1" stroke-width="1" />
+      <path d="M 12 7 L 12 19 M 18 7 L 18 19 M 24 7 L 24 19" stroke="#818cf8" stroke-width="1.2" />
+      <text x="32" y="17" fill="#a5b4fc" font-size="11" font-weight="600" class="sans">Columnas (3)</text>
+
+      <!-- Layout Switcher Segmented Control -->
+      <rect x="120" y="0" width="84" height="26" rx="6" fill="#07090e" stroke="#202b3f" />
+      <rect x="122" y="2" width="26" height="22" rx="4" fill="#131927" stroke="#38bdf8" stroke-opacity="0.6" />
+      <path d="M 129 8 L 129 18 M 135 8 L 135 18 M 141 8 L 141 18" stroke="#38bdf8" stroke-width="1" />
+      <path d="M 154 9 L 168 9 M 154 13 L 168 13 M 154 17 L 168 17" stroke="#64748b" stroke-width="1" />
+      <rect x="178" y="8" width="10" height="10" fill="none" stroke="#64748b" stroke-width="1" />
+
+      <!-- Broadcast Prompt Input -->
+      <rect x="216" y="0" width="340" height="26" rx="6" fill="#07090e" stroke="#202b3f" />
+      <text x="228" y="17" fill="#64748b" font-size="11" class="mono">Enviar a las 3 columnas en paralelo...</text>
+      <rect x="526" y="3" width="26" height="20" rx="4" fill="#6366f1" />
+      <path d="M 534 13 L 542 9 L 542 17 Z" fill="#ffffff" />
+
+      <!-- Right Toolbar Tools -->
+      <rect x="650" y="0" width="106" height="26" rx="6" fill="#f59e0b" fill-opacity="0.15" stroke="#f59e0b" stroke-opacity="0.3" />
+      <text x="703" y="17" fill="#fbbf24" font-size="10" font-weight="600" text-anchor="middle" class="mono">Pendientes (1)</text>
+
+      <rect x="766" y="0" width="60" height="26" rx="6" fill="#131927" stroke="#202b3f" />
+      <text x="796" y="17" fill="#cbd5e1" font-size="10" font-weight="600" text-anchor="middle" class="mono">Popout</text>
+    </g>
+
+    <!-- 3 Parallel Columns Viewport -->
+    <g transform="translate(14, 58)">
+      <!-- Column 1: Agent 1 (Coordinador) -->
+      <g transform="translate(0, 0)">
+        <rect x="0" y="0" width="264" height="354" rx="10" fill="#05070c" stroke="#202b3f" stroke-width="1" />
+        <rect x="0" y="0" width="264" height="34" rx="10" fill="#0a0d16" />
+        <rect x="0" y="33" width="264" height="1" fill="#202b3f" />
+        
+        <circle cx="16" cy="17" r="4" fill="#38bdf8" />
+        <text x="28" y="21" fill="#f8fafc" font-size="11" font-weight="700" class="sans">1 · Coordinador</text>
+        <rect x="180" y="7" width="74" height="20" rx="4" fill="#131927" stroke="#202b3f" />
+        <text x="217" y="20" fill="#38bdf8" font-size="9" font-weight="600" text-anchor="middle" class="mono">claude-3-7</text>
+
+        <!-- Messages preview -->
+        <g transform="translate(12, 48)">
+          <rect x="0" y="0" width="240" height="54" rx="6" fill="#0e131f" stroke="#202b3f" />
+          <text x="10" y="18" fill="#94a3b8" font-size="9" font-weight="600" class="mono">COORDINADOR</text>
+          <text x="10" y="36" fill="#e2e8f0" font-size="10" class="sans">Desglosando tareas de la iteración 13...</text>
+        </g>
+      </g>
+
+      <!-- Resizer divider 1 -->
+      <line x1="270" y1="0" x2="270" y2="354" stroke="#6366f1" stroke-width="2" stroke-opacity="0.4" />
+
+      <!-- Column 2: Agent 2 (Desarrollador - Active focused column) -->
+      <g transform="translate(276, 0)">
+        <rect x="-2" y="-2" width="268" height="358" rx="12" fill="none" stroke="#6366f1" stroke-width="2" filter="url(#glow)" stroke-opacity="0.5" />
+        <rect x="0" y="0" width="264" height="354" rx="10" fill="#05070c" stroke="#6366f1" stroke-width="1.5" />
+        <rect x="0" y="0" width="264" height="34" rx="10" fill="#131927" />
+        <rect x="0" y="33" width="264" height="1" fill="#6366f1" fill-opacity="0.4" />
+
+        <circle cx="16" cy="17" r="4" fill="#10b981" filter="url(#glow)" />
+        <text x="28" y="21" fill="#f8fafc" font-size="11" font-weight="700" class="sans">2 · Desarrollador</text>
+        <rect x="180" y="7" width="74" height="20" rx="4" fill="#07090e" stroke="#10b981" stroke-opacity="0.4" />
+        <text x="217" y="20" fill="#34d399" font-size="9" font-weight="700" text-anchor="middle" class="mono">ACTIVO</text>
+
+        <!-- Messages preview with code snippet -->
+        <g transform="translate(12, 48)">
+          <rect x="0" y="0" width="240" height="90" rx="6" fill="#0e131f" stroke="#202b3f" />
+          <text x="10" y="18" fill="#34d399" font-size="9" font-weight="600" class="mono">DESARROLLADOR</text>
+          <text x="10" y="36" fill="#e2e8f0" font-size="10" class="sans">Compilando componentes de Split:</text>
+          <rect x="10" y="46" width="220" height="32" rx="4" fill="#07090e" />
+          <text x="16" y="66" fill="#38bdf8" font-size="9" class="mono">$ npm run build:webview</text>
+        </g>
+      </g>
+
+      <!-- Resizer divider 2 -->
+      <line x1="546" y1="0" x2="546" y2="354" stroke="#6366f1" stroke-width="2" stroke-opacity="0.4" />
+
+      <!-- Column 3: Agent 3 (Revisor) -->
+      <g transform="translate(552, 0)">
+        <rect x="0" y="0" width="260" height="354" rx="10" fill="#05070c" stroke="#202b3f" stroke-width="1" />
+        <rect x="0" y="0" width="260" height="34" rx="10" fill="#0a0d16" />
+        <rect x="0" y="33" width="260" height="1" fill="#202b3f" />
+
+        <circle cx="16" cy="17" r="4" fill="#fbbf24" />
+        <text x="28" y="21" fill="#f8fafc" font-size="11" font-weight="700" class="sans">3 · Revisor</text>
+        <rect x="176" y="7" width="74" height="20" rx="4" fill="#131927" stroke="#202b3f" />
+        <text x="213" y="20" fill="#fbbf24" font-size="9" font-weight="600" text-anchor="middle" class="mono">claude-3-5</text>
+
+        <!-- Messages preview -->
+        <g transform="translate(12, 48)">
+          <rect x="0" y="0" width="236" height="54" rx="6" fill="#0e131f" stroke="#202b3f" />
+          <text x="10" y="18" fill="#fbbf24" font-size="9" font-weight="600" class="mono">REVISOR</text>
+          <text x="10" y="36" fill="#e2e8f0" font-size="10" class="sans">Verificando tokens WCAG AA ≥ 4.5:1...</text>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

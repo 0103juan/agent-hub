@@ -32,6 +32,17 @@ export function relativeTime(at: number, now = Date.now()): string {
   return `hace ${Math.floor(seconds / 86400)} d`;
 }
 
+/** Cuánto falta para que se reinicie una ventana de cuota; la CLI da `resetsAt` en segundos. */
+export function timeUntil(resetsAt: number, now = Date.now()): string {
+  const at = resetsAt < 1e12 ? resetsAt * 1000 : resetsAt;
+  const minutes = Math.ceil((at - now) / 60_000);
+  if (minutes <= 0) return 'ya se reinició';
+  if (minutes < 60) return `${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} h ${minutes % 60} min`;
+  return `${Math.floor(hours / 24)} d ${hours % 24} h`;
+}
+
 /** Descarga un texto como archivo desde el navegador o la app. */
 export function downloadText(fileName: string, text: string, mime = 'text/plain'): void {
   const url = URL.createObjectURL(new Blob([text], { type: `${mime};charset=utf-8` }));

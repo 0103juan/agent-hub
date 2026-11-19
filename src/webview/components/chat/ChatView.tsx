@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
-import { CheckSquare, ChevronDown, ChevronUp, Cpu, Download, Pencil, FolderGit2, Layers, ListTree, Pin, Plus, Repeat, SlidersHorizontal, Square, Wallet, X } from 'lucide-react';
+import { CheckSquare, ChevronDown, ChevronUp, Cpu, Download, Pencil, FolderGit2, Layers, ListTree, MoreHorizontal, Pin, Plus, Repeat, SlidersHorizontal, Square, Wallet, X } from 'lucide-react';
 import { agentName } from '../../../shared/agent-name';
 import { PROTOCOL_ROLES } from '../../../shared/protocol-roles';
 import { resolveSelection } from '../../../shared/model-selection';
@@ -16,11 +16,12 @@ import { TelemetryBar } from '../TelemetryBar';
 import { withThumbnails } from '../../state/thumbnails';
 import { Composer } from './Composer';
 import { MessageList } from './MessageList';
-import { AccountNotice, ModelAccountBar } from './ModelAccountBar';
+import { AccountNotice } from './ModelAccountBar';
+import { AgentCrumbs } from './AgentCrumbs';
 import { QuotaNotice } from './QuotaNotice';
 
 // El stream cambia la sesión muchas veces por segundo; estas piezas no dependen de él.
-const AccountBar = memo(ModelAccountBar);
+const Crumbs = memo(AgentCrumbs);
 const Effort = memo(EffortSelector);
 const Roles = memo(ProtocolRoleSelector);
 const Usage = memo(TelemetryBar);
@@ -55,9 +56,11 @@ const Onboarding: React.FC<{ state: HubState }> = ({ state }) => {
     { label: 'Lanzar un equipo de agentes', done: state.sessions.some((s) => s.squad) }
   ];
   return (
-    <div className="shrink-0 p-2 rounded-lg border border-zinc-800 bg-zinc-900/60 text-[11px]">
-      <div className="flex items-center justify-between mb-1">
-        <span className="font-semibold text-zinc-200">Primeros pasos</span>
+    <div className="shrink-0 p-2.5 rounded-xl border border-[#202b3f] bg-[#0a0e17] text-[11px] space-y-1.5 shadow-sm">
+      <div className="flex items-center justify-between">
+        <span className="font-semibold text-slate-100 flex items-center gap-1.5 font-mono text-xs">
+          <span className="text-cyan-400">⚡</span> Primeros pasos
+        </span>
         <button
           type="button"
           aria-label="Descartar primeros pasos"
@@ -65,20 +68,20 @@ const Onboarding: React.FC<{ state: HubState }> = ({ state }) => {
             localStorage.setItem(ONBOARDING_KEY, '1');
             setDismissed(true);
           }}
-          className="text-zinc-400 hover:text-zinc-200"
+          className="text-slate-400 hover:text-cyan-300 p-0.5 rounded hover:bg-[#162035] transition"
         >
           <X className="w-3 h-3" />
         </button>
       </div>
-      <ul className="space-y-0.5">
+      <ul className="space-y-1">
         {steps.map((step) => (
-          <li key={step.label} className={`flex items-center gap-1.5 ${step.done ? 'text-emerald-400' : 'text-zinc-400'}`}>
-            {step.done ? <CheckSquare className="w-3 h-3" /> : <Square className="w-3 h-3" />}
+          <li key={step.label} className={`flex items-center gap-1.5 ${step.done ? 'text-emerald-400 font-medium' : 'text-slate-400'}`}>
+            {step.done ? <CheckSquare className="w-3.5 h-3.5 text-emerald-400" /> : <Square className="w-3.5 h-3.5 text-slate-500" />}
             <span>{step.label}</span>
           </li>
         ))}
       </ul>
-      <div className="mt-1 text-[10px] text-zinc-500">Atajos: Ctrl+K paleta de comandos · Ctrl+/ todos los atajos</div>
+      <div className="pt-1 border-t border-[#202b3f]/60 text-[10px] text-slate-400 font-mono">Atajos: <span className="text-slate-300">Ctrl+K</span> paleta · <span className="text-slate-300">Ctrl+/</span> atajos</div>
     </div>
   );
 };
@@ -98,31 +101,31 @@ const ConversationIndex: React.FC<{ session: ConversationSession }> = ({ session
         type="button"
         onClick={() => setOpen(!open)}
         aria-expanded={open}
-        className="p-1 rounded bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 border border-zinc-700/60 transition"
+        className="p-1 rounded-md bg-[#0c1220] hover:bg-[#162035] text-slate-300 border border-[#202b3f] hover:border-cyan-500/40 transition cursor-pointer"
         aria-label="Índice de la conversación"
         title="Índice de la conversación"
       >
-        <ListTree className="w-3 h-3 text-indigo-400" />
+        <ListTree className="w-3.5 h-3.5 text-cyan-400" />
       </button>
       {open && (
-        <ul className="absolute right-0 top-full mt-1 z-30 w-64 max-h-64 overflow-y-auto rounded-lg border border-zinc-700 bg-zinc-900 p-1 shadow-xl">
-          <li className="flex items-center justify-between px-1.5 py-1 text-[10px] text-zinc-500 uppercase tracking-wider">
+        <ul className="absolute right-0 top-full mt-1.5 z-30 w-64 max-h-64 overflow-y-auto rounded-xl border border-[#202b3f] bg-[#0a0e17] p-1.5 shadow-2xl">
+          <li className="flex items-center justify-between px-2 py-1 text-[10px] text-slate-400 uppercase tracking-wider font-mono">
             <span>{entries.length} entradas</span>
-            <button type="button" aria-pressed={onlyPinned} onClick={() => setOnlyPinned(!onlyPinned)} className={`normal-case tracking-normal text-[11px] ${onlyPinned ? 'text-amber-300' : 'text-zinc-400 hover:text-zinc-200'}`}>
+            <button type="button" aria-pressed={onlyPinned} onClick={() => setOnlyPinned(!onlyPinned)} className={`normal-case tracking-normal text-[11px] ${onlyPinned ? 'text-amber-400 font-semibold' : 'text-slate-400 hover:text-slate-200'}`}>
               Solo fijados
             </button>
           </li>
-          {entries.length === 0 && <li className="p-1.5 text-[11px] text-zinc-400">{onlyPinned ? 'No hay mensajes fijados.' : 'Aún no hay mensajes.'}</li>}
+          {entries.length === 0 && <li className="p-2 text-[11px] text-slate-400 font-mono">{onlyPinned ? 'No hay mensajes fijados.' : 'Aún no hay mensajes.'}</li>}
           {entries.map((m) => (
             <li key={m.id}>
               <button
                 type="button"
                 onClick={() => goTo(m.id)}
-                className="flex w-full items-center gap-1.5 text-left px-1.5 py-1 rounded text-[11px] text-zinc-300 hover:bg-zinc-800"
+                className="flex w-full items-center gap-1.5 text-left px-2 py-1.5 rounded-lg text-[11px] text-slate-300 hover:text-white hover:bg-[#162035] transition"
               >
                 {m.pinned && <Pin className="w-3 h-3 text-amber-400 fill-amber-400 shrink-0" aria-label="Fijado" />}
                 <span className="truncate">{m.content.trim().split('\n')[0] || '(sin texto)'}</span>
-                <span className="ml-auto shrink-0 font-mono text-[10px] text-zinc-500">{formatTime(m.timestamp)}</span>
+                <span className="ml-auto shrink-0 font-mono text-[10px] text-slate-400">{formatTime(m.timestamp)}</span>
               </button>
             </li>
           ))}
@@ -143,11 +146,11 @@ const AccentPicker: React.FC<{ current?: string; onPick: (color: string) => void
         aria-expanded={open}
         aria-label="Color del proyecto"
         title="Color del proyecto"
-        className="block w-3 h-3 rounded-full border border-zinc-600"
+        className="block w-3.5 h-3.5 rounded-full border border-[#202b3f] hover:border-cyan-400 transition"
         style={{ backgroundColor: current ?? 'transparent' }}
       />
       {open && (
-        <span className="absolute left-0 top-full mt-1 z-30 flex gap-1 p-1.5 rounded-lg border border-zinc-700 bg-zinc-900 shadow-xl">
+        <span className="absolute left-0 top-full mt-1.5 z-30 flex gap-1 p-1.5 rounded-xl border border-[#202b3f] bg-[#0a0e17] shadow-2xl">
           {ACCENTS.map((color) => (
             <button
               key={color}
@@ -262,7 +265,7 @@ export const ChatView: React.FC<Props> = ({ state, session, focusMode, embedded,
           <button
             type="button"
             onClick={() => setRenaming(session.title)}
-            className="p-1 rounded bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 border border-zinc-700/60 transition"
+            className="p-1 rounded-lg bg-[#0c1220] hover:bg-[#162035] text-slate-300 border border-[#202b3f] transition"
             aria-label="Renombrar la conversación"
             title="Renombrar la conversación"
           >
@@ -275,7 +278,7 @@ export const ChatView: React.FC<Props> = ({ state, session, focusMode, embedded,
             }
             aria-label="Permisos del agente"
             title="Solo lectura quita al agente las herramientas de escritura. Solo Claude lo hace cumplir; los demás proveedores lo ignoran."
-            className="text-[11px] px-1 py-0.5 rounded bg-zinc-800/80 text-zinc-300 border border-zinc-700/60 focus:outline-none focus:border-indigo-500"
+            className="text-[11px] px-2 py-0.5 rounded-lg bg-[#0c1220] text-slate-200 border border-[#202b3f] focus:outline-none focus:border-cyan-500"
           >
             <option value="full">Completo</option>
             <option value="readonly">Solo lectura</option>
@@ -285,26 +288,26 @@ export const ChatView: React.FC<Props> = ({ state, session, focusMode, embedded,
             <button
               type="button"
               onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
-              className="p-1 rounded bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 border border-zinc-700/60 transition cursor-pointer"
+              className="p-1 rounded-lg bg-[#0c1220] hover:bg-[#162035] text-slate-300 border border-[#202b3f] transition cursor-pointer"
               aria-label="Exportar conversación"
               title="Exportar conversación (Markdown, HTML, JSON)"
             >
-              <Download className="w-3 h-3 text-indigo-400" />
+              <Download className="w-3 h-3 text-cyan-400" />
             </button>
             {isExportMenuOpen && (
-              <div className="absolute right-0 top-full mt-1 w-52 bg-zinc-900 border border-zinc-750 rounded-lg shadow-2xl py-1 z-30 text-xs animate-in fade-in zoom-in-95 duration-100">
+              <div className="absolute right-0 top-full mt-1.5 w-52 bg-[#0a0e17] border border-[#202b3f] rounded-xl shadow-2xl py-1 z-30 text-xs animate-in fade-in zoom-in-95 duration-100">
                 <button
                   type="button"
                   onClick={() => {
                     postToHost({ command: 'exportSession', sessionId, format: 'markdown' });
                     setIsExportMenuOpen(false);
                   }}
-                  className="w-full px-3 py-1.5 text-left hover:bg-zinc-800 text-zinc-200 flex items-center gap-2 cursor-pointer transition"
+                  className="w-full px-3 py-1.5 text-left hover:bg-[#0c1220] text-slate-200 flex items-center gap-2 cursor-pointer transition"
                 >
                   <span className="text-sm">📝</span>
                   <div>
                     <div className="font-medium text-[11px]">Markdown (.md)</div>
-                    <div className="text-[10px] text-zinc-400">Documento estándar</div>
+                    <div className="text-[10px] text-slate-400">Documento estándar</div>
                   </div>
                 </button>
                 <button
@@ -313,12 +316,12 @@ export const ChatView: React.FC<Props> = ({ state, session, focusMode, embedded,
                     postToHost({ command: 'exportSession', sessionId, format: 'html' });
                     setIsExportMenuOpen(false);
                   }}
-                  className="w-full px-3 py-1.5 text-left hover:bg-zinc-800 text-zinc-200 flex items-center gap-2 cursor-pointer transition"
+                  className="w-full px-3 py-1.5 text-left hover:bg-[#0c1220] text-slate-200 flex items-center gap-2 cursor-pointer transition"
                 >
                   <span className="text-sm">🌐</span>
                   <div>
-                    <div className="font-medium text-indigo-300 text-[11px]">Reporte HTML (.html)</div>
-                    <div className="text-[10px] text-zinc-400">Autónomo con tema oscuro</div>
+                    <div className="font-medium text-cyan-300 text-[11px]">Reporte HTML (.html)</div>
+                    <div className="text-[10px] text-slate-400">Autónomo con tema oscuro</div>
                   </div>
                 </button>
                 <button
@@ -327,12 +330,12 @@ export const ChatView: React.FC<Props> = ({ state, session, focusMode, embedded,
                     postToHost({ command: 'exportSession', sessionId, format: 'json' });
                     setIsExportMenuOpen(false);
                   }}
-                  className="w-full px-3 py-1.5 text-left hover:bg-zinc-800 text-zinc-200 flex items-center gap-2 cursor-pointer transition"
+                  className="w-full px-3 py-1.5 text-left hover:bg-[#0c1220] text-slate-200 flex items-center gap-2 cursor-pointer transition"
                 >
                   <span className="text-sm">📊</span>
                   <div>
                     <div className="font-medium text-[11px]">Transcripción JSON (.json)</div>
-                    <div className="text-[10px] text-zinc-400">Datos y métricas completos</div>
+                    <div className="text-[10px] text-slate-400">Datos y métricas completos</div>
                   </div>
                 </button>
               </div>
@@ -372,44 +375,44 @@ export const ChatView: React.FC<Props> = ({ state, session, focusMode, embedded,
               onChange={(event) => setRenaming(event.target.value)}
               onBlur={() => setRenaming(null)}
               onKeyDown={(event) => event.key === 'Escape' && setRenaming(null)}
-              className="w-full bg-zinc-900 border border-indigo-500 rounded px-2 py-0.5 text-xs text-zinc-100 focus:outline-none"
+              className="w-full bg-[#07090e] border border-cyan-500 rounded-md px-2 py-0.5 text-xs text-slate-100 focus:outline-none"
             />
           </form>
         ) : (
         <button
           type="button"
           onClick={onOpenHistory}
-          className="flex-1 min-w-0 flex items-center gap-1.5 text-zinc-300 hover:text-indigo-300 transition font-medium p-1 rounded hover:bg-zinc-850"
+          className="flex-1 min-w-0 flex items-center gap-1.5 text-slate-200 hover:text-cyan-300 transition font-medium p-1 rounded-md hover:bg-[#162035]"
           title={`${session.projectName || 'General'} / ${session.title}`}
         >
-          <FolderGit2 className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-          <span className="hidden min-[420px]:inline max-w-[40%] truncate shrink-0 text-zinc-400 font-mono text-[11px]">{session.projectName || 'General'} /</span>
-          <span className="min-w-0 truncate font-semibold text-zinc-200">{session.title}</span>
-          <ChevronDown className="w-3 h-3 text-zinc-400 shrink-0" />
+          <FolderGit2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+          <span className="hidden min-[420px]:inline max-w-[40%] truncate shrink-0 text-slate-400 font-mono text-[11px]">{session.projectName || 'General'} /</span>
+          <span className="min-w-0 truncate font-semibold text-slate-100">{session.title}</span>
+          <ChevronDown className="w-3 h-3 text-slate-400 shrink-0" />
         </button>
         )}
 
-        <div className="flex items-center gap-1 shrink-0">
+        <div className="flex items-center gap-1.5 shrink-0">
           {!embedded && (<>
           {tools}
           <button
             type="button"
             onClick={onOpenHistory}
-            className="flex items-center gap-1 text-[11px] px-2 py-0.5 rounded bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 border border-zinc-700/60 transition"
+            className="flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-lg bg-[#0c1220] hover:bg-[#162035] text-slate-300 hover:text-white border border-[#202b3f] transition"
             aria-label={`Historial, ${state.sessions.length} conversaciones`}
             title="Abrir el historial de conversaciones"
           >
-            <Layers className="w-3 h-3 text-indigo-400" />
+            <Layers className="w-3.5 h-3.5 text-cyan-400" />
             <span><span className="hidden min-[420px]:inline">Historial </span>{state.sessions.length}</span>
           </button>
           <button
             type="button"
             onClick={onNewTask}
-            className="flex items-center justify-center gap-1 text-[11px] px-2 py-0.5 rounded bg-indigo-600 hover:bg-indigo-500 text-white font-medium transition shadow"
+            className="flex items-center justify-center gap-1.5 text-[11px] px-3 py-1 rounded-lg bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-slate-950 font-bold transition shadow-md shadow-cyan-950/40"
             aria-label="Nueva tarea"
             title="Crear nueva tarea en un proyecto"
           >
-            <Plus className="w-3 h-3" />
+            <Plus className="w-3.5 h-3.5" />
             <span className="hidden min-[420px]:inline">Nueva tarea</span>
           </button>
           </>)}
@@ -420,60 +423,62 @@ export const ChatView: React.FC<Props> = ({ state, session, focusMode, embedded,
       {!focusMode && (
         <div className="shrink-0 space-y-2">
           {/* Barra de control compacta y desplegable */}
-          <div className="flex items-center justify-between gap-x-1.5 px-2 py-1 rounded-lg bg-zinc-900/90 border border-zinc-800 text-xs shadow-xs overflow-x-auto no-scrollbar">
-            {/* Selector interactivo de Cuenta, Modelo y Rol arriba en la sección compacta */}
-            <div className="flex items-center gap-1.5 min-w-0 shrink-0">
-              <AccountBar
-                sessionId={sessionId}
-                accounts={state.accounts}
-                selection={selection}
-                compact={true}
-              />
-              <Roles
-                selectedRole={session.protocolRole}
-                onSelectRole={selectRole}
-                handoffTo={session.handoffTo}
-                compact={true}
-              />
-            </div>
+          <div className="flex flex-wrap items-center gap-1 px-1.5 py-0.5 rounded-xl bg-[#0a0e17]/95 border border-[#202b3f] text-xs shadow-md">
+            {/* Cuenta › Modelo › Rol › Esfuerzo; a la derecha cuota de 5 h, contexto y gasto. */}
+            <Crumbs
+              sessionId={sessionId}
+              accounts={state.accounts}
+              selection={selection}
+              effort={effort ?? sessionEffort}
+              supportedEfforts={model?.efforts ?? NO_EFFORTS}
+              onSelectEffort={selectEffort}
+              role={session.protocolRole}
+              onSelectRole={selectRole}
+              telemetry={telemetry}
+              contextPercent={contextBudget.percentage}
+              contextTitle={`Contexto: ${formatTokens(contextBudget.usedTokens)} de ${formatTokens(contextBudget.limit)} tokens (${contextBudget.percentage}%)
+Historial: ${formatTokens(contextBudget.historyTokens)} | Adjuntos: ${formatTokens(contextBudget.attachmentTokens)}`}
+              spentUSD={spentUSD}
+            >
 
             {embedded && (
               <div className="relative shrink-0">
                 <button
                   type="button"
                   onClick={() => setIsEmbeddedToolsOpen(!isEmbeddedToolsOpen)}
-                  className={`p-1 rounded transition border cursor-pointer ${
+                  className={`p-1 rounded-md transition border cursor-pointer ${
                     isEmbeddedToolsOpen
-                      ? 'bg-zinc-700 text-zinc-100 border-zinc-600'
-                      : 'bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 border-zinc-700/60'
+                      ? 'bg-cyan-950/50 text-cyan-300 border-cyan-500/50'
+                      : 'bg-[#0c1220] hover:bg-[#162035] text-slate-300 border-[#202b3f]'
                   }`}
                   title="Opciones de la sesión (Permisos, Renombrar, Exportar)"
+                  aria-label="Opciones de la sesión"
                 >
-                  <SlidersHorizontal className="w-3 h-3 text-zinc-400" />
+                  <MoreHorizontal className="w-3 h-3 text-slate-400" />
                 </button>
                 {isEmbeddedToolsOpen && (
-                  <div className="absolute right-0 top-full mt-1 w-52 bg-zinc-900 border border-zinc-750 rounded-lg shadow-2xl p-2.5 z-40 space-y-2 text-xs animate-in fade-in zoom-in-95">
+                  <div className="absolute right-0 top-full mt-1.5 w-52 bg-[#0a0e17] border border-[#202b3f] rounded-xl shadow-2xl p-2.5 z-40 space-y-2 text-xs animate-in fade-in zoom-in-95">
                     <div className="flex items-center justify-between">
-                      <span className="text-[11px] text-zinc-400">Permisos:</span>
+                      <span className="text-[11px] text-slate-400">Permisos:</span>
                       <select
                         value={session.permission ?? 'full'}
                         onChange={(e) => {
                           postToHost({ command: 'updateSession', sessionId, patch: { permission: e.target.value as SessionPermission } });
                         }}
-                        className="text-[11px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-200 border border-zinc-700"
+                        className="text-[11px] px-2 py-0.5 rounded-lg bg-[#0c1220] text-slate-200 border border-[#202b3f]"
                       >
                         <option value="full">Completo</option>
                         <option value="readonly">Solo lectura</option>
                       </select>
                     </div>
-                    <div className="flex items-center gap-1.5 pt-1.5 border-t border-zinc-800">
+                    <div className="flex items-center gap-1.5 pt-1.5 border-t border-[#202b3f]">
                       <button
                         type="button"
                         onClick={() => {
                           setRenaming(session.title);
                           setIsEmbeddedToolsOpen(false);
                         }}
-                        className="flex-1 flex items-center justify-center gap-1 py-1 rounded bg-zinc-800 hover:bg-zinc-750 text-zinc-300 text-[11px]"
+                        className="flex-1 flex items-center justify-center gap-1 py-1 rounded-lg bg-[#0c1220] hover:bg-[#162035] text-slate-300 text-[11px] transition"
                       >
                         <Pencil className="w-3 h-3 text-cyan-400" />
                         <span>Renombrar</span>
@@ -484,10 +489,10 @@ export const ChatView: React.FC<Props> = ({ state, session, focusMode, embedded,
                           postToHost({ command: 'exportSession', sessionId, format: 'markdown' });
                           setIsEmbeddedToolsOpen(false);
                         }}
-                        className="p-1 rounded bg-zinc-800 hover:bg-zinc-750 text-zinc-300 text-[11px]"
+                        className="p-1 rounded-lg bg-[#0c1220] hover:bg-[#162035] text-slate-300 text-[11px] transition"
                         title="Exportar Markdown"
                       >
-                        <Download className="w-3 h-3 text-indigo-400" />
+                        <Download className="w-3 h-3 text-cyan-400" />
                       </button>
                     </div>
                   </div>
@@ -495,76 +500,47 @@ export const ChatView: React.FC<Props> = ({ state, session, focusMode, embedded,
               </div>
             )}
 
-            {/* Métricas clave y botón desplegar */}
-            <div className="flex items-center gap-1.5 shrink-0">
-              {/* Medidor de contexto compacto con barra visual */}
-              <div
-                className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-zinc-850 border border-zinc-750 text-[11px]"
-                title={`Contexto: ${formatTokens(contextBudget.usedTokens)} de ${formatTokens(contextBudget.limit)} tokens (${contextBudget.percentage}%)\nHistorial: ${formatTokens(contextBudget.historyTokens)} | Adjuntos: ${formatTokens(contextBudget.attachmentTokens)}`}
-              >
-                <Cpu className="w-3 h-3 text-indigo-400 shrink-0" />
-                <div className="w-10 h-1 bg-zinc-700 rounded-full overflow-hidden hidden min-[360px]:block">
-                  <div
-                    className={`h-full rounded-full transition-all duration-300 ${
-                      contextBudget.percentage > 85 ? 'bg-red-500' : contextBudget.percentage > 60 ? 'bg-amber-400' : 'bg-emerald-400'
-                    }`}
-                    style={{ width: `${contextBudget.percentage}%` }}
-                  />
-                </div>
-                <span className={`font-mono text-[10px] font-medium ${
-                  contextBudget.percentage > 85 ? 'text-red-400' : contextBudget.percentage > 60 ? 'text-amber-400' : 'text-zinc-300'
-                }`}>
-                  {contextBudget.percentage}%
-                </span>
-              </div>
-
-              {/* Gasto compacto */}
-              <div
-                className="flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-850 border border-zinc-750 text-[11px] font-mono text-zinc-300"
-                title={`Gasto acumulado: $${spentUSD.toFixed(4)}${session.budgetUSD ? ` / Límite $${session.budgetUSD}` : ''}`}
-              >
-                <Wallet className="w-3 h-3 text-emerald-400 shrink-0" />
-                <span className="font-semibold text-emerald-400">${spentUSD.toFixed(spentUSD >= 1 ? 2 : 4)}</span>
-              </div>
+            <div className="flex items-center gap-1 shrink-0">
 
               {/* Botón Desplegar / Plegar */}
               <button
                 type="button"
                 onClick={toggleDeck}
-                className={`flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium transition cursor-pointer border ${
+                className={`flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[11px] font-medium transition cursor-pointer border ${
                   deckExpanded
-                    ? 'bg-indigo-600 text-white border-indigo-500 shadow-xs'
-                    : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700'
+                    ? 'bg-cyan-600 text-white border-cyan-500 shadow-sm'
+                    : 'bg-[#0c1220] hover:bg-[#162035] text-slate-200 border-[#202b3f] hover:border-cyan-500/40'
                 }`}
                 aria-expanded={deckExpanded}
                 aria-label={deckExpanded ? 'Plegar panel de controles' : 'Desplegar panel de controles'}
                 title={deckExpanded ? 'Plegar controles detallados' : 'Desplegar controles detallados (esfuerzo, rol, métricas y límites)'}
               >
-                <SlidersHorizontal className="w-3 h-3 text-indigo-400 group-hover:text-white" />
-                <span className="hidden min-[440px]:inline">{deckExpanded ? 'Plegar' : 'Desplegar'}</span>
-                {deckExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                <SlidersHorizontal className="w-3 h-3 text-cyan-400 group-hover:text-white" />
+                <span className={embedded ? 'hidden' : 'hidden min-[440px]:inline'}>{deckExpanded ? 'Plegar' : 'Desplegar'}</span>
+                {deckExpanded ? <ChevronUp className="w-2.5 h-2.5" /> : <ChevronDown className="w-2.5 h-2.5" />}
               </button>
             </div>
+            </Crumbs>
           </div>
 
           {/* Panel Desplegado / Expandido con organización modular */}
           {deckExpanded && (
-            <div className="p-2.5 rounded-xl bg-zinc-900/95 border border-zinc-800 shadow-xl space-y-2.5 animate-message-fade">
+            <div className="p-3 rounded-xl bg-[#0a0e17] border border-[#202b3f] shadow-2xl space-y-2.5 animate-message-fade">
               {/* Fila 1: Esfuerzo de razonamiento, Rol de protocolo y Permisos */}
-              <div className="flex flex-wrap items-center justify-between gap-2 p-1.5 rounded-lg bg-zinc-950/60 border border-zinc-800/80">
+              <div className="flex flex-wrap items-center justify-between gap-2 p-2 rounded-lg bg-[#07090e] border border-[#202b3f]">
                 <div className="flex items-center gap-2">
                   <Effort effort={effort ?? sessionEffort} supportedEfforts={model?.efforts ?? NO_EFFORTS} onChange={selectEffort} />
                   <Roles selectedRole={session.protocolRole} onSelectRole={selectRole} handoffTo={session.handoffTo} />
                 </div>
                 <div className="flex items-center gap-1.5 ml-auto text-[11px]">
-                  <span className="text-zinc-400 font-medium">Permisos:</span>
+                  <span className="text-slate-400 font-medium">Permisos:</span>
                   <select
                     value={session.permission ?? 'full'}
                     onChange={(event) =>
                       postToHost({ command: 'updateSession', sessionId, patch: { permission: event.target.value as SessionPermission } })
                     }
                     aria-label="Permisos de sesión"
-                    className="text-[11px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-200 border border-zinc-700 focus:outline-none focus:border-indigo-500"
+                    className="text-[11px] px-2 py-0.5 rounded bg-[#0c1220] text-slate-200 border border-[#202b3f] focus:outline-none focus:border-cyan-500 font-mono"
                   >
                     <option value="full">Completo (Lectura y Escritura)</option>
                     <option value="readonly">Solo lectura</option>
@@ -575,25 +551,25 @@ export const ChatView: React.FC<Props> = ({ state, session, focusMode, embedded,
               {/* Fila 3: Tarjetas de Métricas de Contexto y Límite de Gasto en Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px]">
                 {/* Tarjeta Contexto */}
-                <div className="p-2 rounded-lg bg-zinc-950/60 border border-zinc-800/80 space-y-1">
+                <div className="p-2.5 rounded-lg bg-[#07090e] border border-[#202b3f] space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-1 font-medium text-zinc-300">
-                      <Cpu className="w-3.5 h-3.5 text-indigo-400" />
+                    <span className="flex items-center gap-1.5 font-medium text-slate-200 font-mono">
+                      <Cpu className="w-3.5 h-3.5 text-cyan-400" />
                       Ventana de Contexto
                     </span>
-                    <span className="font-mono text-zinc-400 text-[10px]">
-                      <strong className="text-zinc-200">{formatTokens(contextBudget.usedTokens)}</strong> / {formatTokens(contextBudget.limit)} ({contextBudget.percentage}%)
+                    <span className="font-mono text-slate-400 text-[10px]">
+                      <strong className="text-slate-100">{formatTokens(contextBudget.usedTokens)}</strong> / {formatTokens(contextBudget.limit)} ({contextBudget.percentage}%)
                     </span>
                   </div>
-                  <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                  <div className="w-full h-1.5 bg-[#0c1220] rounded-full overflow-hidden border border-[#202b3f]/60">
                     <div
                       className={`h-full rounded-full transition-all duration-300 ${
-                        contextBudget.percentage > 85 ? 'bg-red-500' : contextBudget.percentage > 60 ? 'bg-amber-400' : 'bg-emerald-400'
+                        contextBudget.percentage > 85 ? 'bg-red-500' : contextBudget.percentage > 60 ? 'bg-amber-400' : 'bg-cyan-400'
                       }`}
                       style={{ width: `${contextBudget.percentage}%` }}
                     />
                   </div>
-                  <div className="flex items-center justify-between text-[10px] text-zinc-400 font-mono pt-0.5">
+                  <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono pt-0.5">
                     <span>Historial: {formatTokens(contextBudget.historyTokens)}</span>
                     <span>Adjuntos: {formatTokens(contextBudget.attachmentTokens)}</span>
                     <span>Sistema: {formatTokens(contextBudget.systemTokens)}</span>
@@ -601,25 +577,25 @@ export const ChatView: React.FC<Props> = ({ state, session, focusMode, embedded,
                 </div>
 
                 {/* Tarjeta Presupuesto y Gasto */}
-                <div className="p-2 rounded-lg bg-zinc-950/60 border border-zinc-800/80 space-y-1">
+                <div className="p-2.5 rounded-lg bg-[#07090e] border border-[#202b3f] space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-1 font-medium text-zinc-300">
+                    <span className="flex items-center gap-1.5 font-medium text-slate-200 font-mono">
                       <Wallet className="w-3.5 h-3.5 text-emerald-400" />
                       Gasto de la Sesión
                     </span>
-                    <span className="font-mono text-emerald-400 font-semibold">${spentUSD.toFixed(4)}</span>
+                    <span className="font-mono text-emerald-400 font-bold">${spentUSD.toFixed(4)}</span>
                   </div>
                   {session.budgetUSD ? (
-                    <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden" title={`${budgetPercent}% del límite`}>
+                    <div className="w-full h-1.5 bg-[#0c1220] rounded-full overflow-hidden border border-[#202b3f]/60" title={`${budgetPercent}% del límite`}>
                       <div
                         className={`h-full rounded-full ${budgetPercent >= 100 ? 'bg-red-500' : budgetPercent > 75 ? 'bg-amber-400' : 'bg-emerald-400'}`}
                         style={{ width: `${budgetPercent}%` }}
                       />
                     </div>
                   ) : (
-                    <div className="w-full h-1.5 bg-zinc-800/50 rounded-full" />
+                    <div className="w-full h-1.5 bg-[#0c1220] rounded-full" />
                   )}
-                  <div className="flex items-center justify-between text-[10px] text-zinc-400 font-mono pt-0.5">
+                  <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono pt-0.5">
                     <span>{session.budgetUSD ? `${budgetPercent}% consumido` : 'Sin límite asignado'}</span>
                     <label className="flex items-center gap-1">
                       <span>Límite $:</span>
@@ -633,7 +609,7 @@ export const ChatView: React.FC<Props> = ({ state, session, focusMode, embedded,
                         aria-label="Límite de gasto en USD"
                         onBlur={(event) => setBudget(event.target.value)}
                         onKeyDown={(event) => event.key === 'Enter' && event.currentTarget.blur()}
-                        className="w-16 bg-zinc-900 border border-zinc-700 rounded px-1 text-right text-zinc-200 focus:outline-none focus:border-indigo-500"
+                        className="w-16 bg-[#0c1220] border border-[#202b3f] rounded px-1.5 py-0.5 text-right text-slate-100 font-mono focus:outline-none focus:border-cyan-500"
                       />
                     </label>
                   </div>
@@ -654,17 +630,17 @@ export const ChatView: React.FC<Props> = ({ state, session, focusMode, embedded,
       )}
 
       {session.loopConfig?.active && (
-        <div className="bg-gradient-to-r from-purple-950/70 via-indigo-950/70 to-purple-950/70 border-b border-purple-500/40 px-3.5 py-2 flex items-center justify-between gap-3 text-xs shadow-inner shrink-0">
+        <div className="bg-gradient-to-r from-violet-950/80 via-[#180d2c] to-violet-950/80 border-b border-violet-500/40 px-3.5 py-2 flex items-center justify-between gap-3 text-xs shadow-inner shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
             <span className="flex h-2.5 w-2.5 relative shrink-0">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-purple-500"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-violet-500"></span>
             </span>
             <div className="flex items-baseline gap-1.5 min-w-0">
-              <span className="font-semibold text-purple-300 shrink-0">
+              <span className="font-semibold text-violet-300 shrink-0">
                 Modo Loop (Iteración {session.loopConfig.iteration}{session.loopConfig.maxIterations ? `/${session.loopConfig.maxIterations}` : ''}):
               </span>
-              <span className="text-zinc-200 truncate font-mono text-[11px]" title={session.loopConfig.instruction}>
+              <span className="text-slate-200 truncate font-mono text-[11px]" title={session.loopConfig.instruction}>
                 "{session.loopConfig.instruction}"
               </span>
             </div>
@@ -676,7 +652,7 @@ export const ChatView: React.FC<Props> = ({ state, session, focusMode, embedded,
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded font-medium text-[11px] transition shadow-sm cursor-pointer ${
                 session.loopConfig.stopAfterCurrent
                   ? 'bg-amber-500/20 text-amber-200 border border-amber-500/50 hover:bg-amber-500/30'
-                  : 'bg-purple-600/80 hover:bg-purple-500 text-white'
+                  : 'bg-violet-600/80 hover:bg-violet-500 text-white'
               }`}
               title={session.loopConfig.stopAfterCurrent ? 'Clic para seguir iterando' : 'Deja terminar la iteración en curso y no lanza la siguiente'}
             >

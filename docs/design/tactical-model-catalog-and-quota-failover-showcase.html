@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tactical Model Catalog &amp; Quota Failover Engine — Showcase</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* 5 Canonical Elevation Layers */
+    .bg-layer-1 { background-color: #07090e; }
+    .bg-layer-2 { background-color: #0a0e17; }
+    .bg-layer-3 { background-color: #0c1220; }
+    .bg-layer-4 { background-color: #162035; }
+    .border-layer-5 { border-color: #202b3f; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-[#07090e] text-slate-200 font-sans h-full overflow-hidden flex flex-col antialiased selection:bg-amber-500/30 selection:text-amber-200">
+
+  <!-- Top Tactical Navigation Bar -->
+  <header class="h-14 border-b border-[#202b3f] bg-[#0a0e17] flex items-center justify-between px-6 shrink-0 z-20">
+    <div class="flex items-center gap-4">
+      <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-400 font-mono font-bold text-sm">
+        #65
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-sm font-bold tracking-tight text-white">Catálogo de Modelos y Failover de Cuota</h1>
+          <span class="px-2 py-0.5 text-[10px] font-mono rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">SPEC CARD #65</span>
+        </div>
+        <p class="text-[11px] text-slate-400 font-mono">Umbral de Saturación 90% · Failover 1-Clic · Claude / Antigravity / Copilot / Ollama</p>
+      </div>
+    </div>
+
+    <!-- Active Model Bar Inside Header -->
+    <div class="flex items-center gap-3">
+      <!-- Account Button -->
+      <button id="account-btn" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#0c1220] hover:bg-[#162035] border border-[#202b3f] hover:border-cyan-500/40 transition text-left cursor-pointer shadow-xs text-xs">
+        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+        <span id="header-account-label" class="font-semibold text-slate-200 font-mono text-[11px]">Claude CLI</span>
+        <svg class="w-2.5 h-2.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </button>
+
+      <!-- Model Catalog Modal Button -->
+      <button id="open-catalog-btn" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-cyan-950/40 hover:bg-cyan-900/50 border border-cyan-500/40 text-left transition cursor-pointer group shadow-xs text-xs">
+        <span class="text-amber-400">🔥</span>
+        <span id="header-model-label" class="font-semibold text-slate-100 group-hover:text-white font-mono text-[11px]">Claude 3.5 Sonnet</span>
+        <svg class="w-2.5 h-2.5 text-slate-400 group-hover:text-cyan-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </button>
+
+      <a href="master-design-portal-and-component-gallery-showcase.html" class="px-3 py-1.5 rounded-lg bg-[#0c1220] hover:bg-[#162035] text-slate-300 hover:text-white border border-[#202b3f] text-xs font-medium transition cursor-pointer">
+        Volver al Portal
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Canvas -->
+  <main class="flex-1 p-6 overflow-y-auto bg-[#07090e] space-y-6">
+
+    <!-- Quota Alert Banner Replicator (Replicates QuotaNotice.tsx) -->
+    <div id="quota-banner-container" class="space-y-3">
+      <!-- Simulated Quota Notice Banner (Visible when >= 90%) -->
+      <div id="quota-notice-card" class="flex flex-wrap items-center justify-between px-4 py-3 rounded-xl bg-amber-950/40 border border-amber-600/50 text-amber-200 text-xs shadow-lg shadow-amber-950/20 gap-3">
+        <div class="flex items-center gap-3 min-w-0 flex-1">
+          <div class="w-8 h-8 rounded-lg bg-amber-900/60 border border-amber-500/50 flex items-center justify-center shrink-0">
+            <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          </div>
+          <div class="min-w-0">
+            <div class="font-semibold text-amber-100 flex items-center gap-1.5 flex-wrap">
+              <span>Alerta de cuota (<strong id="worst-pct-display">94%</strong>):</span>
+              <span id="quota-window-cause" class="text-amber-300 font-normal">ventana de 5 h saturada.</span>
+            </div>
+            <div class="flex items-center gap-2 text-[10.5px] text-amber-400/80 font-mono mt-0.5">
+              <span>5 h: <strong id="five-hour-val">94%</strong></span>
+              <span>•</span>
+              <span>Semanal: <strong id="weekly-val">48%</strong></span>
+              <span>•</span>
+              <span class="text-emerald-400 font-semibold flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                <span id="failover-target-name">Antigravity Pro</span> disponible para failover
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 shrink-0">
+          <button id="failover-btn" class="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg text-xs transition cursor-pointer shadow-md shadow-amber-500/20">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+            <span>Cambiar a <span id="failover-btn-name">Antigravity</span></span>
+          </button>
+          <button id="dismiss-quota-btn" class="p-1.5 rounded-lg text-amber-400 hover:bg-amber-900/50 hover:text-white transition cursor-pointer" title="Descartar (vuelve automáticamente si la cuota sube)">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive Simulation Switchboard -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Left: Telemetry Sliders -->
+      <div class="p-5 rounded-xl bg-[#0a0e17] border border-[#202b3f] space-y-4">
+        <div class="flex items-center justify-between pb-2 border-b border-[#202b3f]">
+          <span class="text-xs font-mono font-bold text-slate-400">SIMULADOR DE CONSUMO DE CUOTA</span>
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">UMBRAL 90%</span>
+        </div>
+
+        <div class="space-y-3 font-mono text-xs">
+          <div>
+            <div class="flex justify-between text-slate-400 mb-1">
+              <span>Ventana 5 Horas:</span>
+              <span id="slider-5h-val" class="text-cyan-300 font-bold">94%</span>
+            </div>
+            <input type="range" id="slider-5h" min="0" max="100" value="94" class="w-full accent-amber-500 cursor-pointer">
+          </div>
+
+          <div>
+            <div class="flex justify-between text-slate-400 mb-1">
+              <span>Cuota Semanal:</span>
+              <span id="slider-week-val" class="text-cyan-300 font-bold">48%</span>
+            </div>
+            <input type="range" id="slider-week" min="0" max="100" value="48" class="w-full accent-amber-500 cursor-pointer">
+          </div>
+
+          <div class="p-3 rounded-lg bg-[#07090e] border border-[#202b3f] text-slate-400 space-y-1 text-[11px]">
+            <div class="flex justify-between">
+              <span>Estado Re-arm:</span>
+              <span id="rearm-status" class="text-emerald-400 font-bold">Activo (Monitoreando)</span>
+            </div>
+            <div class="text-[10px] text-slate-500">
+              Si descartas el aviso en 94% y luego la cuota sube a 96%, el banner reaparece solo.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Provider Status Grid -->
+      <div class="p-5 rounded-xl bg-[#0a0e17] border border-[#202b3f] space-y-4">
+        <div class="flex items-center justify-between pb-2 border-b border-[#202b3f]">
+          <span class="text-xs font-mono font-bold text-slate-400">ESTADO DE CUENTAS VINCULADAS</span>
+          <button id="toggle-zero-accounts" class="text-[10px] font-mono px-2 py-0.5 rounded bg-[#162035] text-slate-300 hover:text-white border border-[#202b3f] cursor-pointer">
+            Simular Sin Cuentas
+          </button>
+        </div>
+
+        <div class="space-y-2" id="provider-cards-list">
+          <!-- Card 1 -->
+          <div class="p-3 rounded-lg bg-[#07090e] border border-amber-500/40 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+              <div>
+                <div class="text-xs font-bold text-white font-mono">Claude CLI (Principal)</div>
+                <div class="text-[10px] text-amber-300 font-mono">Saturado (94%)</div>
+              </div>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 font-mono">ACTIVO</span>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="p-3 rounded-lg bg-[#07090e] border border-emerald-500/40 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+              <div>
+                <div class="text-xs font-bold text-white font-mono">Antigravity Pro (Google)</div>
+                <div class="text-[10px] text-slate-400 font-mono">Cuota disponible (12%)</div>
+              </div>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono">FAILOVER</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Simulated Model Catalog Modal Backdrop -->
+    <div id="catalog-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="w-full max-w-2xl rounded-2xl bg-[#0a0e17] border border-[#202b3f] shadow-2xl flex flex-col max-h-[85vh] overflow-hidden animate-in zoom-in-95 duration-150">
+        <!-- Modal Header -->
+        <div class="p-4 border-b border-[#202b3f] flex items-center justify-between bg-[#07090e]">
+          <div>
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <span>Catálogo Unificado de Modelos</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">MULTI-PROVIDER</span>
+            </h3>
+            <p class="text-[11px] text-slate-400 font-mono">Filtra por familia o busca por nombre de modelo</p>
+          </div>
+          <button id="close-catalog-btn" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#162035] transition cursor-pointer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <!-- Search & Family Filter Bar -->
+        <div class="p-4 border-b border-[#202b3f] space-y-3 bg-[#0a0e17]">
+          <div class="relative">
+            <svg class="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <input type="text" id="model-search-input" placeholder="Buscar modelo por nombre o id..." class="w-full bg-[#07090e] border border-[#202b3f] rounded-xl pl-9 pr-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-mono">
+          </div>
+
+          <!-- Family Filter Tabs -->
+          <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar font-mono text-xs" id="family-tabs-container">
+            <button data-family="all" class="fam-filter-btn active px-3 py-1 rounded-lg bg-cyan-600/30 text-cyan-200 border border-cyan-500/50 font-bold transition">Todos</button>
+            <button data-family="argon" class="fam-filter-btn px-3 py-1 rounded-lg bg-[#07090e] text-slate-400 hover:text-slate-200 border border-[#202b3f] transition">Argon 🧠</button>
+            <button data-family="flash" class="fam-filter-btn px-3 py-1 rounded-lg bg-[#07090e] text-slate-400 hover:text-slate-200 border border-[#202b3f] transition">Flash ⚡</button>
+            <button data-family="opus" class="fam-filter-btn px-3 py-1 rounded-lg bg-[#07090e] text-slate-400 hover:text-slate-200 border border-[#202b3f] transition">Opus 🔥</button>
+            <button data-family="sonnet" class="fam-filter-btn px-3 py-1 rounded-lg bg-[#07090e] text-slate-400 hover:text-slate-200 border border-[#202b3f] transition">Sonnet</button>
+            <button data-family="haiku" class="fam-filter-btn px-3 py-1 rounded-lg bg-[#07090e] text-slate-400 hover:text-slate-200 border border-[#202b3f] transition">Haiku</button>
+          </div>
+        </div>
+
+        <!-- Model Entries List -->
+        <div id="catalog-entries-list" class="flex-1 overflow-y-auto p-4 space-y-2 no-scrollbar bg-[#07090e]">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Interactive JavaScript Logic -->
+  <script>
+    const MODELS = [
+      { id: "claude-3-7-sonnet", label: "Claude 3.7 Sonnet (Thinking)", provider: "claude", family: "sonnet", desc: "Razonamiento híbrido con CoT dinámico.", isFav: true },
+      { id: "claude-3-5-sonnet", label: "Claude 3.5 Sonnet", provider: "claude", family: "sonnet", desc: "El estándar para programación y arquitectura.", isFav: true },
+      { id: "claude-3-5-haiku", label: "Claude 3.5 Haiku", provider: "claude", family: "haiku", desc: "Ultrarrápido para autocompletado y tests ligeros.", isFav: false },
+      { id: "gemini-2.5-pro", label: "Gemini 2.5 Pro (Antigravity)", provider: "google", family: "argon", desc: "Ventana de contexto masiva de 2M tokens.", isFav: true },
+      { id: "gemini-2.5-flash", label: "Gemini 2.5 Flash", provider: "google", family: "flash", desc: "Respuestas instantáneas y muy bajo costo.", isFav: false },
+      { id: "claude-3-opus", label: "Claude 3 Opus", provider: "claude", family: "opus", desc: "Análisis conceptual profundo y literatura compleja.", isFav: false },
+      { id: "deepseek-r1-ollama", label: "DeepSeek R1 (Ollama Local)", provider: "ollama", family: "other", desc: "Ejecución 100% offline y privada.", isFav: false }
+    ];
+
+    let fiveHour = 94;
+    let weekly = 48;
+    let worst = Math.max(fiveHour, weekly);
+    let dismissedAt = undefined;
+    let activeModel = MODELS[1]; // Claude 3.5 Sonnet
+    let activeAccount = "Claude CLI";
+    let favoriteIds = JSON.parse(localStorage.getItem('agent-hub.favoriteModels') || '["claude:claude-3-5-sonnet"]');
+
+    const slider5h = document.getElementById('slider-5h');
+    const sliderWeek = document.getElementById('slider-week');
+    const slider5hVal = document.getElementById('slider-5h-val');
+    const sliderWeekVal = document.getElementById('slider-week-val');
+    const worstPctDisplay = document.getElementById('worst-pct-display');
+    const fiveHourVal = document.getElementById('five-hour-val');
+    const weeklyVal = document.getElementById('weekly-val');
+    const quotaNoticeCard = document.getElementById('quota-notice-card');
+    const failoverBtn = document.getElementById('failover-btn');
+    const dismissQuotaBtn = document.getElementById('dismiss-quota-btn');
+    const rearmStatus = document.getElementById('rearm-status');
+    const headerAccountLabel = document.getElementById('header-account-label');
+    const headerModelLabel = document.getElementById('header-model-label');
+    const openCatalogBtn = document.getElementById('open-catalog-btn');
+    const catalogModal = document.getElementById('catalog-modal');
+    const closeCatalogBtn = document.getElementById('close-catalog-btn');
+    const entriesList = document.getElementById('catalog-entries-list');
+    const searchInput = document.getElementById('model-search-input');
+    const familyTabs = document.querySelectorAll('.fam-filter-btn');
+
+    let activeFamily = 'all';
+    let searchQuery = '';
+
+    function updateQuota() {
+      fiveHour = parseInt(slider5h.value, 10);
+      weekly = parseInt(sliderWeek.value, 10);
+      slider5hVal.textContent = `${fiveHour}%`;
+      sliderWeekVal.textContent = `${weekly}%`;
+      fiveHourVal.textContent = `${fiveHour}%`;
+      weeklyVal.textContent = `${weekly}%`;
+
+      worst = Math.max(fiveHour, weekly);
+      worstPctDisplay.textContent = `${worst}%`;
+
+      // Auto re-arm logic
+      if (dismissedAt !== undefined && worst > dismissedAt) {
+        dismissedAt = undefined;
+        rearmStatus.textContent = "Auto Re-armado (Cuota subió)";
+        rearmStatus.className = "text-amber-400 font-bold";
+      }
+
+      if (worst >= 90 && dismissedAt === undefined) {
+        quotaNoticeCard.classList.remove('hidden');
+      } else {
+        quotaNoticeCard.classList.add('hidden');
+      }
+    }
+
+    slider5h.addEventListener('input', updateQuota);
+    sliderWeek.addEventListener('input', updateQuota);
+
+    dismissQuotaBtn.addEventListener('click', () => {
+      dismissedAt = worst;
+      quotaNoticeCard.classList.add('hidden');
+      rearmStatus.textContent = `Descartado en ${worst}% (Re-armará si sube)`;
+      rearmStatus.className = "text-slate-400 font-bold";
+    });
+
+    failoverBtn.addEventListener('click', () => {
+      // Switch to Antigravity
+      activeAccount = "Antigravity Pro";
+      activeModel = MODELS[3]; // Gemini 2.5 Pro
+      headerAccountLabel.textContent = activeAccount;
+      headerModelLabel.textContent = activeModel.label;
+
+      slider5h.value = 12;
+      sliderWeek.value = 8;
+      updateQuota();
+      alert("¡Failover completado con éxito!\n\nLa sesión se migró a Antigravity Pro con 12% de cuota sin perder la conversación ni el CWD.");
+    });
+
+    // Model Catalog Modal Controls
+    openCatalogBtn.addEventListener('click', () => {
+      catalogModal.classList.remove('hidden');
+      renderCatalog();
+    });
+
+    closeCatalogBtn.addEventListener('click', () => {
+      catalogModal.classList.add('hidden');
+    });
+
+    function renderCatalog() {
+      entriesList.innerHTML = '';
+      const filtered = MODELS.filter(m => {
+        if (activeFamily !== 'all' && m.family !== activeFamily) return false;
+        if (searchQuery && !m.label.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        entriesList.innerHTML = `<div class="p-6 text-center text-slate-500 font-mono text-xs">Ningún modelo coincide con el filtro.</div>`;
+        return;
+      }
+
+      filtered.forEach(m => {
+        const isSelected = activeModel.id === m.id;
+        const isFav = favoriteIds.includes(`${m.provider}:${m.id}`);
+
+        const row = document.createElement('div');
+        row.className = `p-3 rounded-xl border transition flex items-center justify-between gap-3 ${
+          isSelected
+            ? 'bg-[#0c1220] border-cyan-500/50 shadow-md shadow-cyan-500/10'
+            : 'bg-[#0a0e17] border-[#202b3f] hover:bg-[#162035] hover:border-slate-700'
+        }`;
+
+        row.innerHTML = `
+          <div class="flex items-center gap-3 min-w-0 flex-1 cursor-pointer select-row">
+            <div class="w-8 h-8 rounded-lg bg-[#07090e] border border-[#202b3f] flex items-center justify-center text-sm shrink-0">
+              ${m.family === 'argon' ? '🧠' : m.family === 'flash' ? '⚡' : m.family === 'opus' ? '🔥' : '💻'}
+            </div>
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-white font-mono truncate">${m.label}</span>
+                <span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-[#162035] text-slate-300 uppercase">${m.provider}</span>
+              </div>
+              <p class="text-[11px] text-slate-400 truncate">${m.desc}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button class="fav-toggle p-1.5 rounded-lg text-slate-500 hover:text-amber-400 transition cursor-pointer">
+              <svg class="w-3.5 h-3.5 ${isFav ? 'text-amber-400 fill-amber-400' : ''}" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" fill="${isFav ? '#fbbf24' : 'none'}" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            </button>
+            <button class="select-btn px-2.5 py-1 rounded-lg text-xs font-mono font-semibold transition cursor-pointer ${
+              isSelected
+                ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+                : 'bg-[#0c1220] hover:bg-[#162035] text-slate-300 border border-[#202b3f]'
+            }">
+              ${isSelected ? 'Activo' : 'Elegir'}
+            </button>
+          </div>
+        `;
+
+        row.querySelector('.select-row').addEventListener('click', () => chooseModel(m));
+        row.querySelector('.select-btn').addEventListener('click', () => chooseModel(m));
+        row.querySelector('.fav-toggle').addEventListener('click', () => toggleFav(m));
+
+        entriesList.appendChild(row);
+      });
+    }
+
+    function chooseModel(m) {
+      activeModel = m;
+      headerModelLabel.textContent = m.label;
+      catalogModal.classList.add('hidden');
+    }
+
+    function toggleFav(m) {
+      const key = `${m.provider}:${m.id}`;
+      if (favoriteIds.includes(key)) {
+        favoriteIds = favoriteIds.filter(k => k !== key);
+      } else {
+        favoriteIds.push(key);
+      }
+      localStorage.setItem('agent-hub.favoriteModels', JSON.stringify(favoriteIds));
+      renderCatalog();
+    }
+
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      renderCatalog();
+    });
+
+    familyTabs.forEach(btn => {
+      btn.addEventListener('click', () => {
+        familyTabs.forEach(b => {
+          b.className = "fam-filter-btn px-3 py-1 rounded-lg bg-[#07090e] text-slate-400 hover:text-slate-200 border border-[#202b3f] transition";
+        });
+        btn.className = "fam-filter-btn active px-3 py-1 rounded-lg bg-cyan-600/30 text-cyan-200 border border-cyan-500/50 font-bold transition";
+        activeFamily = btn.dataset.family;
+        renderCatalog();
+      });
+    });
+
+    updateQuota();
+  </script>
+</body>
+</html>

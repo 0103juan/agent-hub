@@ -9,7 +9,7 @@
   }
 
   select {
-    background-color: var(--vscode-dropdown-background, #131a29);
+    background-color: var(--vscode-dropdown-background, #0c1220);
     color: var(--vscode-dropdown-foreground, #dde4ef);
   }
 }
@@ -19,10 +19,10 @@
   /* Paleta del HUD Center para toda la app: fondo casi negro azulado, superficies navy y texto pizarra.
      Tailwind la lee en cada tono zinc; dentro de VS Code se anula abajo y vuelve el tema del editor. */
   --hub-zinc-950: #07090e;
-  --hub-zinc-900: #0e131f;
-  --hub-zinc-850: #131a29;
-  --hub-zinc-800: #1a2334;
-  --hub-zinc-750: #212c40;
+  --hub-zinc-900: #0a0e17;
+  --hub-zinc-850: #0c1220;
+  --hub-zinc-800: #162035;
+  --hub-zinc-750: #202b3f;
   --hub-zinc-700: #2a3750;
   --hub-zinc-600: #3b4a66;
   --hub-zinc-500: #8593ab;
@@ -71,11 +71,11 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--vscode-scrollbarSlider-background, #2a3750);
+  background: var(--vscode-scrollbarSlider-background, #202b3f);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--vscode-scrollbarSlider-hoverBackground, #3b4a66);
+  background: var(--vscode-scrollbarSlider-hoverBackground, #06b6d4);
 }
 
 /* Animación Aurora Wave para Razonamiento / Thinking */
@@ -92,7 +92,7 @@ body {
 }
 
 .aurora-border {
-  background: linear-gradient(90deg, #6366f1, #a855f7, #06b6d4, #6366f1);
+  background: linear-gradient(90deg, #06b6d4, #14b8a6, #a855f7, #06b6d4);
   background-size: 300% 300%;
   animation: auroraWave 3s ease infinite;
 }
@@ -115,19 +115,22 @@ body {
 
 /* Panel Glassmorphism para Control Strip */
 .glass-panel {
-  background: rgba(24, 24, 27, 0.75);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(63, 63, 70, 0.4);
+  background: rgba(10, 14, 23, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(32, 43, 63, 0.8);
 }
 
-/* Syntax Highlighting Tokens */
+/* Syntax Highlighting Tokens (Tactical Dark HUD) */
 .syn-kw { color: #c084fc; font-weight: 600; } /* Púrpura para keywords */
 .syn-str { color: #86efac; } /* Verde para strings */
-.syn-com { color: #71717a; font-style: italic; } /* Gris para comentarios */
+.syn-com { color: #64748b; font-style: italic; } /* Slate para comentarios */
 .syn-num { color: #fde047; } /* Amarillo para números/booleanos */
-.syn-fn { color: #60a5fa; } /* Azul para funciones */
-.syn-type { color: #38bdf8; } /* Celeste para tipos */
+.syn-fn { color: #60a5fa; font-weight: 500; } /* Azul para funciones */
+.syn-type { color: #38bdf8; font-weight: 500; } /* Celeste para tipos */
+.syn-op { color: #06b6d4; font-weight: 600; } /* Cian para operadores */
+.syn-const { color: #fbbf24; font-weight: 600; } /* Ámbar para constantes */
+.syn-tag { color: #f43f5e; font-weight: 600; } /* Rosa para tags HTML/JSX */
 .syn-diff-add { background-color: rgba(16, 185, 129, 0.15); color: #6ee7b7; display: block; }
 .syn-diff-del { background-color: rgba(244, 63, 94, 0.15); color: #fda4af; display: block; }
 
@@ -151,8 +154,8 @@ body {
 }
 
 /* Sombra suave y resplandor para tarjetas activas */
-.card-glow-indigo {
-  box-shadow: 0 0 15px -3px rgba(99, 102, 241, 0.15), 0 2px 6px -2px rgba(0, 0, 0, 0.4);
+.card-glow-cyan {
+  box-shadow: 0 0 15px -3px rgba(6, 182, 212, 0.25), 0 2px 6px -2px rgba(0, 0, 0, 0.5);
 }
 
 .card-glow-subtle {
@@ -206,8 +209,9 @@ body {
 
 /* Accesibilidad y pulido */
 :focus-visible {
-  outline: 2px solid #818cf8;
-  outline-offset: 1px;
+  outline: 2px solid #06b6d4;
+  outline-offset: 1.5px;
+  box-shadow: 0 0 10px rgba(6, 182, 212, 0.4);
 }
 
 textarea:focus-visible,
@@ -216,8 +220,8 @@ input:focus-visible {
 }
 
 ::selection {
-  background: rgba(99, 102, 241, 0.45);
-  color: #fff;
+  background: rgba(6, 182, 212, 0.35);
+  color: #f1f5f9;
 }
 
 .font-mono {
@@ -279,7 +283,7 @@ kbd {
 
 /* Controles nativos con el color de la marca, texto mejor repartido y detalles */
 :root {
-  accent-color: #6366f1;
+  accent-color: #06b6d4;
 }
 
 p,
@@ -326,20 +330,42 @@ textarea {
   }
 }
 
+/* Modal & Dialog Entrance Micro-Interactions */
+@keyframes modalPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.96) translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+.animate-modal-pop {
+  animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes backdropFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-backdrop-fade {
+  animation: backdropFade 0.18s ease-out forwards;
+}
+
 /* zinc-500 sobre zinc-900 da 3,7:1; este tono llega a 5:1 y conserva la jerarquía frente a zinc-400. */
 .text-zinc-500 {
   color: var(--hub-zinc-500, #8a8a93);
 }
 
-/* HUD Center: interacciones inspiradas en Awwwards (brillo bajo el cursor, entrada escalonada, ticker, dock).
+/* HUD Center: interacciones tácticas avanzadas (brillo bajo el cursor, entrada escalonada, ticker, dock).
    El movimiento solo acompaña a algo real: actividad de agentes, cambios de cifras o el puntero. */
-:where(.hub-view) :is(.rounded-lg, .rounded-xl).border:is([class*='bg-zinc-900'], [class*='bg-zinc-950']):not(.absolute, .fixed, .sticky) {
+:where(.hub-view) :is(.rounded-lg, .rounded-xl, .rounded-2xl).border:not(.absolute, .fixed, .sticky) {
   position: relative;
 }
-/* Tarjetas con brillo: las del HUD (.hud-spot) y, en las demás vistas, cualquier superficie de tarjeta.
-   ponytail: se detectan por sus clases de Tailwind; si una tarjeta nueva no brilla, añade .hud-spot. */
-:is(.hud-spot, .hub-view :is(.rounded-lg, .rounded-xl).border:is([class*='bg-zinc-900'], [class*='bg-zinc-950']))::before,
-:is(.hud-spot, .hub-view :is(.rounded-lg, .rounded-xl).border:is([class*='bg-zinc-900'], [class*='bg-zinc-950']))::after {
+/* Tarjetas con brillo: las del HUD (.hud-spot, .hud-card) y cualquier superficie de tarjeta con borde. */
+:is(.hud-spot, .hud-card, .hub-view :is(.rounded-lg, .rounded-xl, .rounded-2xl).border)::before,
+:is(.hud-spot, .hud-card, .hub-view :is(.rounded-lg, .rounded-xl, .rounded-2xl).border)::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -350,20 +376,24 @@ textarea {
   /* --mx/--my son coordenadas de ventana: un solo listener en .hub-view sirve para todas las tarjetas. */
   background-attachment: fixed;
 }
-/* Borde que se enciende donde está el puntero */
-:is(.hud-spot, .hub-view :is(.rounded-lg, .rounded-xl).border:is([class*='bg-zinc-900'], [class*='bg-zinc-950']))::before {
+/* Borde que se enciende donde está el puntero (Tactical Cyan por defecto) */
+:is(.hud-spot, .hud-card, .hub-view :is(.rounded-lg, .rounded-xl, .rounded-2xl).border)::before {
   padding: 1px;
-  background-image: radial-gradient(240px circle at var(--mx, -999px) var(--my, -999px), rgba(245, 158, 11, 0.8), transparent 65%);
+  background-image: radial-gradient(240px circle at var(--mx, -999px) var(--my, -999px), rgba(6, 182, 212, 0.75), transparent 65%);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
 }
-/* Halo neutro: el ámbar diluido sobre navy se ve turbio, así que el acento queda solo en el borde */
-:is(.hud-spot, .hub-view :is(.rounded-lg, .rounded-xl).border:is([class*='bg-zinc-900'], [class*='bg-zinc-950']))::after {
+/* Borde ámbar para tarjetas de telemetría y coste */
+.hud-spot-amber::before {
+  background-image: radial-gradient(240px circle at var(--mx, -999px) var(--my, -999px), rgba(245, 158, 11, 0.8), transparent 65%) !important;
+}
+/* Halo neutro: profundidad lumínica sobre superficies obsidian / carbon */
+:is(.hud-spot, .hud-card, .hub-view :is(.rounded-lg, .rounded-xl, .rounded-2xl).border)::after {
   background-image: radial-gradient(380px circle at var(--mx, -999px) var(--my, -999px), rgba(203, 213, 225, 0.07), transparent 55%);
 }
-.hub-view:hover :is(.hud-spot, :is(.rounded-lg, .rounded-xl).border:is([class*='bg-zinc-900'], [class*='bg-zinc-950']))::before,
-.hub-view:hover :is(.hud-spot, :is(.rounded-lg, .rounded-xl).border:is([class*='bg-zinc-900'], [class*='bg-zinc-950']))::after {
+.hub-view:hover :is(.hud-spot, .hud-card, :is(.rounded-lg, .rounded-xl, .rounded-2xl).border)::before,
+.hub-view:hover :is(.hud-spot, .hud-card, :is(.rounded-lg, .rounded-xl, .rounded-2xl).border)::after {
   opacity: 1;
 }
 
@@ -447,7 +477,7 @@ textarea {
 }
 .hub-lift:hover {
   transform: translateY(-2px);
-  box-shadow: 0 14px 28px -16px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(245, 158, 11, 0.18);
+  box-shadow: 0 14px 28px -16px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(6, 182, 212, 0.3);
 }
 
 /* Barras que crecen desde la izquierda al entrar y se deslizan al cambiar de valor */
@@ -493,7 +523,7 @@ textarea {
   border-radius: inherit;
   padding: 1.5px;
   pointer-events: none;
-  background: conic-gradient(from var(--hub-angle), transparent 0 50%, #6366f1 68%, #f59e0b 84%, #38bdf8 94%, transparent);
+  background: conic-gradient(from var(--hub-angle), transparent 0 50%, #06b6d4 68%, #f59e0b 84%, #38bdf8 94%, transparent);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;

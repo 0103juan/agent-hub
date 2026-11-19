@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 400" width="100%" height="100%" style="background:#07090e; font-family: Inter, system-ui, sans-serif;">
+  <defs>
+    <!-- Background Gradient -->
+    <radialGradient id="accBg" cx="50%" cy="50%" r="75%">
+      <stop offset="0%" stop-color="#141b2d" stop-opacity="0.4" />
+      <stop offset="70%" stop-color="#0e131f" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#07090e" stop-opacity="1" />
+    </radialGradient>
+
+    <!-- Glowing Filters -->
+    <filter id="accGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <!-- Provider Accents -->
+    <linearGradient id="claudeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f97316"/>
+      <stop offset="100%" stop-color="#ea580c"/>
+    </linearGradient>
+    <linearGradient id="googleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+    <linearGradient id="copilotGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <linearGradient id="ollamaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+
+    <!-- Pattern -->
+    <pattern id="accGrid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#162035" stroke-width="1" stroke-opacity="0.5"/>
+    </pattern>
+  </defs>
+
+  <rect width="780" height="400" fill="url(#accBg)"/>
+  <rect width="780" height="400" fill="url(#accGrid)"/>
+
+  <!-- Title & Context -->
+  <g transform="translate(40, 36)">
+    <rect width="32" height="32" rx="8" fill="#6366f1" fill-opacity="0.2" stroke="#818cf8" stroke-width="1.5"/>
+    <circle cx="16" cy="12" r="5" fill="none" stroke="#a5b4fc" stroke-width="2"/>
+    <path d="M 8 26 C 8 21 11 19 16 19 C 21 19 24 21 24 26" fill="none" stroke="#a5b4fc" stroke-width="2"/>
+    <text x="44" y="16" fill="#f3f6fc" font-size="14" font-weight="800" letter-spacing="0.04em">ORQUESTACIÓN MULTI-SUSCRIPCIÓN Y CUENTAS</text>
+    <text x="44" y="29" fill="#94a3b8" font-size="10" font-family="monospace">CONMUTACIÓN AUTOMÁTICA DE CUOTA · AISLAMIENTO DE PERFILES · SIN API KEYS</text>
+  </g>
+
+  <!-- Router Core (Center) -->
+  <g transform="translate(390, 180)">
+    <!-- Router Hub Box -->
+    <rect x="-110" y="-35" width="220" height="70" rx="14" fill="#0e131f" stroke="#6366f1" stroke-width="2" filter="url(#accGlow)"/>
+    <circle cx="-80" cy="0" r="14" fill="#1e1b4b" stroke="#818cf8" stroke-width="1.5"/>
+    <polygon points="-84,-4 -76,0 -84,4" fill="#38bdf8"/>
+    <text x="-56" y="-6" fill="#ffffff" font-size="12" font-weight="800">AGENTHUB ROUTER</text>
+    <text x="-56" y="8" fill="#a5b4fc" font-size="9" font-family="monospace">POOL DE PROVEEDORES</text>
+    <text x="-56" y="20" fill="#64748b" font-size="8">Rotación por cuota y balanceo</text>
+  </g>
+
+  <!-- Providers (4 satellite cards) -->
+
+  <!-- 1. Claude -->
+  <g transform="translate(50, 110)">
+    <line x1="220" y1="50" x2="280" y2="70" stroke="#f97316" stroke-width="2" stroke-dasharray="4 4"/>
+    <rect width="220" height="95" rx="12" fill="#0e131f" stroke="#ea580c" stroke-width="1.5" stroke-opacity="0.8"/>
+    <rect x="12" y="12" width="28" height="28" rx="6" fill="url(#claudeGrad)"/>
+    <text x="26" y="30" text-anchor="middle" fill="#ffffff" font-size="14" font-weight="900">C</text>
+    <text x="48" y="24" fill="#fdba74" font-size="12" font-weight="700">Claude Pro / Max</text>
+    <text x="48" y="36" fill="#94a3b8" font-size="9" font-family="monospace">OAuth · Claude Code CLI</text>
+    <rect x="12" y="52" width="196" height="32" rx="6" fill="#18131d" stroke="#2d2238" stroke-width="1"/>
+    <circle cx="26" cy="68" r="3.5" fill="#34d399"/>
+    <text x="36" y="71" fill="#cbd5e1" font-size="10">Trabajo · Personal 2</text>
+    <text x="180" y="71" fill="#f97316" font-size="9" font-family="monospace" font-weight="700">ROTACIÓN</text>
+  </g>
+
+  <!-- 2. Google Antigravity -->
+  <g transform="translate(510, 110)">
+    <line x1="0" y1="50" x2="-60" y2="70" stroke="#38bdf8" stroke-width="2" stroke-dasharray="4 4"/>
+    <rect width="220" height="95" rx="12" fill="#0e131f" stroke="#2563eb" stroke-width="1.5" stroke-opacity="0.8"/>
+    <rect x="12" y="12" width="28" height="28" rx="6" fill="url(#googleGrad)"/>
+    <polygon points="26,18 29,24 35,26 29,28 26,34 23,28 17,26 23,24" fill="#ffffff"/>
+    <text x="48" y="24" fill="#93c5fd" font-size="12" font-weight="700">Google Antigravity</text>
+    <text x="48" y="36" fill="#94a3b8" font-size="9" font-family="monospace">Gemini 3.8 · agy CLI</text>
+    <rect x="12" y="52" width="196" height="32" rx="6" fill="#0e1d2e" stroke="#1d3557" stroke-width="1"/>
+    <circle cx="26" cy="68" r="3.5" fill="#34d399"/>
+    <text x="36" y="71" fill="#cbd5e1" font-size="10">Cuenta Principal</text>
+    <text x="180" y="71" fill="#38bdf8" font-size="9" font-family="monospace" font-weight="700">ACTIVO</text>
+  </g>
+
+  <!-- 3. GitHub Copilot -->
+  <g transform="translate(50, 260)">
+    <line x1="220" y1="40" x2="280" y2="-10" stroke="#10b981" stroke-width="2" stroke-dasharray="4 4"/>
+    <rect width="220" height="85" rx="12" fill="#0e131f" stroke="#059669" stroke-width="1.5" stroke-opacity="0.8"/>
+    <rect x="12" y="12" width="28" height="28" rx="6" fill="url(#copilotGrad)"/>
+    <!-- Bot icon -->
+    <rect x="19" y="21" width="14" height="10" rx="2" fill="none" stroke="#ffffff" stroke-width="1.5"/>
+    <circle cx="23" cy="25" r="1" fill="#ffffff"/>
+    <circle cx="29" cy="25" r="1" fill="#ffffff"/>
+    <text x="48" y="24" fill="#6ee7b7" font-size="12" font-weight="700">GitHub Copilot</text>
+    <text x="48" y="36" fill="#94a3b8" font-size="9" font-family="monospace">Enterprise / Individual</text>
+    <text x="14" y="66" fill="#64748b" font-size="10">Suscripción conectada y modelos habilitados</text>
+  </g>
+
+  <!-- 4. Ollama Local -->
+  <g transform="translate(510, 260)">
+    <line x1="0" y1="40" x2="-60" y2="-10" stroke="#a78bfa" stroke-width="2" stroke-dasharray="4 4"/>
+    <rect width="220" height="85" rx="12" fill="#0e131f" stroke="#7c3aed" stroke-width="1.5" stroke-opacity="0.8"/>
+    <rect x="12" y="12" width="28" height="28" rx="6" fill="url(#ollamaGrad)"/>
+    <text x="26" y="30" text-anchor="middle" fill="#ffffff" font-size="14" font-weight="900">🦙</text>
+    <text x="48" y="24" fill="#d8b4fe" font-size="12" font-weight="700">Ollama Local</text>
+    <text x="48" y="36" fill="#94a3b8" font-size="9" font-family="monospace">127.0.0.1:11434 · Offline</text>
+    <text x="14" y="66" fill="#64748b" font-size="10">Modelos locales sin telemetría ni consumo</text>
+  </g>
+</svg>

@@ -1,0 +1,408 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1050" width="1600" height="1050">
+  <defs>
+    <!-- Background Gradients -->
+    <radialGradient id="bgGlow" cx="50%" cy="20%" r="70%">
+      <stop offset="0%" stop-color="#0e172a" stop-opacity="0.85"/>
+      <stop offset="60%" stop-color="#07090e" stop-opacity="0.98"/>
+      <stop offset="100%" stop-color="#040608" stop-opacity="1"/>
+    </radialGradient>
+    <radialGradient id="cyanCenter" cx="50%" cy="45%" r="35%">
+      <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#06b6d4" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Card Backgrounds & Borders -->
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0c1220"/>
+      <stop offset="100%" stop-color="#0a0e17"/>
+    </linearGradient>
+    <linearGradient id="cyanBorder" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.7"/>
+      <stop offset="50%" stop-color="#202b3f" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#0e7490" stop-opacity="0.3"/>
+    </linearGradient>
+    <linearGradient id="emeraldBar" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+
+    <!-- Grid Pattern -->
+    <pattern id="tacticalGrid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#162035" stroke-width="0.75" stroke-opacity="0.45"/>
+      <circle cx="0" cy="0" r="1" fill="#06b6d4" fill-opacity="0.3"/>
+    </pattern>
+  </defs>
+
+  <style>
+    .title-font { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 800; }
+    .mono-font { font-family: 'JetBrains Mono', 'Fira Code', Menlo, Monaco, Consolas, monospace; }
+    .body-font { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+  </style>
+
+  <!-- Deep Obsidian Void Canvas -->
+  <rect width="1600" height="1050" fill="#07090e"/>
+  <rect width="1600" height="1050" fill="url(#bgGlow)"/>
+  <rect width="1600" height="1050" fill="url(#tacticalGrid)"/>
+  <rect width="1600" height="1050" fill="url(#cyanCenter)" pointer-events="none"/>
+
+  <!-- Top Tactical Nav Header -->
+  <g transform="translate(60, 45)">
+    <rect x="0" y="0" width="1480" height="74" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.2"/>
+    
+    <rect x="18" y="16" width="42" height="42" rx="10" fill="#0c1220" stroke="#06b6d4" stroke-width="1.5"/>
+    <polygon points="39,24 48,34 39,44 30,34" fill="none" stroke="#06b6d4" stroke-width="2"/>
+    <circle cx="39" cy="34" r="3" fill="#14b8a6"/>
+
+    <text x="74" y="36" fill="#f8fafc" class="title-font" font-size="19" letter-spacing="-0.02em">AGENTHUB TACTICAL HUD <tspan fill="#06b6d4">::</tspan> SPEC CARD #53</text>
+    <text x="74" y="52" fill="#94a3b8" class="mono-font" font-size="11" letter-spacing="0.05em">COMMAND CENTER &amp; TELEMETRY ANALYTICS MATRIX (v2)</text>
+
+    <!-- Header Stats -->
+    <g transform="translate(1020, 20)">
+      <rect x="0" y="0" width="140" height="34" rx="8" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+      <circle cx="16" cy="17" r="4" fill="#10b981"/>
+      <text x="28" y="22" fill="#34d399" class="mono-font" font-size="11" font-weight="600">TOKENS: 48.2k</text>
+
+      <rect x="150" y="0" width="135" height="34" rx="8" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+      <text x="14" y="22" fill="#38bdf8" class="mono-font" font-size="11" font-weight="600">COST: $0.142</text>
+
+      <rect x="295" y="0" width="145" height="34" rx="8" fill="#162035" stroke="#06b6d4" stroke-width="1.2"/>
+      <circle cx="310" cy="17" r="4" fill="#06b6d4"/>
+      <text x="322" y="22" fill="#38bdf8" class="mono-font" font-size="11" font-weight="600">CWD: VERIFIED</text>
+    </g>
+  </g>
+
+  <!-- Live Marquee Ticker Stream -->
+  <g transform="translate(60, 134)">
+    <rect x="0" y="0" width="1480" height="42" rx="10" fill="#0a0e17" stroke="#202b3f" stroke-width="1"/>
+    <circle cx="20" cy="21" r="4" fill="#f59e0b"/>
+    <text x="32" y="25" fill="#f59e0b" class="mono-font" font-size="10" font-weight="700">LIVE TICKER</text>
+    <line x1="110" y1="12" x2="110" y2="30" stroke="#202b3f" stroke-width="1"/>
+    
+    <text x="125" y="25" fill="#cbd5e1" class="mono-font" font-size="11">[00:38:20] <tspan fill="#38bdf8">Revisor:</tspan> Test suite passes 14/14 flow tests in 53ms</text>
+    <text x="590" y="25" fill="#64748b" class="mono-font" font-size="10">◆</text>
+    <text x="610" y="25" fill="#cbd5e1" class="mono-font" font-size="11">[00:37:52] <tspan fill="#34d399">Desarrollador:</tspan> MCP mesh synchronized with 8 servers online</text>
+    <text x="1080" y="25" fill="#64748b" class="mono-font" font-size="10">◆</text>
+    <text x="1100" y="25" fill="#cbd5e1" class="mono-font" font-size="11">[00:36:40] <tspan fill="#c084fc">Arquitecto:</tspan> Strict 5-layer HUD tokens applied</text>
+  </g>
+
+  <!-- 3-COLUMN COMMAND DECK LAYOUT -->
+
+  <!-- ==================== LEFT COLUMN: SQUAD PROTOCOL AGENTS ==================== -->
+  <g transform="translate(60, 192)">
+    <rect x="0" y="0" width="410" height="580" rx="14" fill="url(#cardGrad)" stroke="#202b3f" stroke-width="1.2"/>
+    
+    <!-- Header -->
+    <g transform="translate(20, 20)">
+      <rect x="0" y="0" width="28" height="28" rx="6" fill="#8b5cf6" fill-opacity="0.15"/>
+      <circle cx="14" cy="14" r="6" fill="none" stroke="#a855f7" stroke-width="1.5"/>
+      <text x="38" y="18" fill="#f8fafc" class="title-font" font-size="14">Squad Protocol Roles</text>
+      <text x="38" y="32" fill="#64748b" class="mono-font" font-size="10">Active Pipeline &amp; Role Allocations</text>
+    </g>
+
+    <!-- Role Card 1: Arquitecto -->
+    <g transform="translate(20, 72)">
+      <rect x="0" y="0" width="370" height="110" rx="10" fill="#0a0e17" stroke="#8b5cf6" stroke-width="1"/>
+      <rect x="12" y="12" width="75" height="20" rx="4" fill="#162035" stroke="#8b5cf6" stroke-width="0.8"/>
+      <text x="18" y="26" fill="#c084fc" class="mono-font" font-size="9" font-weight="700">ARQUITECTO</text>
+      <text x="96" y="26" fill="#f8fafc" class="body-font" font-size="12" font-weight="600">Diseño Táctico &amp; Especificación</text>
+      
+      <circle cx="348" cy="22" r="4" fill="#10b981"/>
+      <text x="290" y="25" fill="#34d399" class="mono-font" font-size="9">DONE</text>
+
+      <text x="12" y="52" fill="#94a3b8" class="mono-font" font-size="10">Modelo: gemini-2.5-pro · Coste: $0.052</text>
+      <text x="12" y="70" fill="#cbd5e1" class="mono-font" font-size="10">Define contratos de arquitectura y tokens HUD.</text>
+      <rect x="12" y="86" width="346" height="4" rx="2" fill="#162035"/>
+      <rect x="12" y="86" width="346" height="4" rx="2" fill="#8b5cf6"/>
+    </g>
+
+    <!-- Role Card 2: Tester -->
+    <g transform="translate(20, 196)">
+      <rect x="0" y="0" width="370" height="110" rx="10" fill="#0a0e17" stroke="#202b3f" stroke-width="1"/>
+      <rect x="12" y="12" width="55" height="20" rx="4" fill="#162035" stroke="#10b981" stroke-width="0.8"/>
+      <text x="18" y="26" fill="#34d399" class="mono-font" font-size="9" font-weight="700">TESTER</text>
+      <text x="76" y="26" fill="#f8fafc" class="body-font" font-size="12" font-weight="600">TDD &amp; Suites de Flujos</text>
+
+      <circle cx="348" cy="22" r="4" fill="#10b981"/>
+      <text x="290" y="25" fill="#34d399" class="mono-font" font-size="9">DONE</text>
+
+      <text x="12" y="52" fill="#94a3b8" class="mono-font" font-size="10">npm run test:flows · 14/14 pasando en 53ms</text>
+      <text x="12" y="70" fill="#cbd5e1" class="mono-font" font-size="10">Verifica protección de workspace y System32.</text>
+      <rect x="12" y="86" width="346" height="4" rx="2" fill="#162035"/>
+      <rect x="12" y="86" width="346" height="4" rx="2" fill="#10b981"/>
+    </g>
+
+    <!-- Role Card 3: Desarrollador -->
+    <g transform="translate(20, 320)">
+      <rect x="0" y="0" width="370" height="110" rx="10" fill="#0a0e17" stroke="#202b3f" stroke-width="1"/>
+      <rect x="12" y="12" width="95" height="20" rx="4" fill="#162035" stroke="#06b6d4" stroke-width="0.8"/>
+      <text x="18" y="26" fill="#38bdf8" class="mono-font" font-size="9" font-weight="700">DESARROLLADOR</text>
+      <text x="116" y="26" fill="#f8fafc" class="body-font" font-size="12" font-weight="600">Frontend React &amp; CSS</text>
+
+      <circle cx="348" cy="22" r="4" fill="#10b981"/>
+      <text x="290" y="25" fill="#34d399" class="mono-font" font-size="9">DONE</text>
+
+      <text x="12" y="52" fill="#94a3b8" class="mono-font" font-size="10">Bundle: 841.78 kB · Reducción de 5 kB</text>
+      <text x="12" y="70" fill="#cbd5e1" class="mono-font" font-size="10">Unificación de 5 capas de elevación HUD.</text>
+      <rect x="12" y="86" width="346" height="4" rx="2" fill="#162035"/>
+      <rect x="12" y="86" width="346" height="4" rx="2" fill="#06b6d4"/>
+    </g>
+
+    <!-- Role Card 4: Revisor -->
+    <g transform="translate(20, 444)">
+      <rect x="0" y="0" width="370" height="110" rx="10" fill="#0a0e17" stroke="#202b3f" stroke-width="1"/>
+      <rect x="12" y="12" width="60" height="20" rx="4" fill="#162035" stroke="#f59e0b" stroke-width="0.8"/>
+      <text x="18" y="26" fill="#fbbf24" class="mono-font" font-size="9" font-weight="700">REVISOR</text>
+      <text x="80" y="26" fill="#f8fafc" class="body-font" font-size="12" font-weight="600">Auditoría de Calidad</text>
+
+      <circle cx="348" cy="22" r="4" fill="#10b981"/>
+      <text x="290" y="25" fill="#34d399" class="mono-font" font-size="9">DONE</text>
+
+      <text x="12" y="52" fill="#94a3b8" class="mono-font" font-size="10">0 errores de tipado · 0 tokens residuales</text>
+      <text x="12" y="70" fill="#cbd5e1" class="mono-font" font-size="10">Verificación de contraste WCAG 2.2 AAA.</text>
+      <rect x="12" y="86" width="346" height="4" rx="2" fill="#162035"/>
+      <rect x="12" y="86" width="346" height="4" rx="2" fill="#f59e0b"/>
+    </g>
+  </g>
+
+  <!-- ==================== CENTER COLUMN: CIRCULAR RING ENGINE & TELEMETRY ==================== -->
+  <g transform="translate(490, 192)">
+    <rect x="0" y="0" width="620" height="580" rx="14" fill="url(#cardGrad)" stroke="url(#cyanBorder)" stroke-width="1.5"/>
+
+    <!-- Header -->
+    <g transform="translate(24, 20)">
+      <rect x="0" y="0" width="28" height="28" rx="6" fill="#06b6d4" fill-opacity="0.15"/>
+      <polygon points="14,6 22,22 6,22" fill="none" stroke="#06b6d4" stroke-width="1.5"/>
+      <text x="38" y="18" fill="#f8fafc" class="title-font" font-size="14">Circular Ring Engine &amp; Health</text>
+      <text x="38" y="32" fill="#64748b" class="mono-font" font-size="10">Radial Math: 2πr * (1 - ratio) · Real-time Status Dispatch</text>
+    </g>
+
+    <!-- Central SVG Ring Gauge Visualizer -->
+    <g transform="translate(190, 75)">
+      <!-- Outer Dial -->
+      <circle cx="120" cy="120" r="118" fill="none" stroke="#202b3f" stroke-width="1.5" stroke-dasharray="3,6"/>
+      <circle cx="120" cy="120" r="110" fill="#0a0e17"/>
+
+      <!-- Track 1: System Health (r=100) -->
+      <circle cx="120" cy="120" r="100" fill="none" stroke="#162035" stroke-width="10"/>
+      <circle cx="120" cy="120" r="100" fill="none" stroke="#10b981" stroke-width="10" stroke-linecap="round" stroke-dasharray="628" stroke-dashoffset="0"/>
+
+      <!-- Track 2: Memory Ingestion (r=84) -->
+      <circle cx="120" cy="120" r="84" fill="none" stroke="#162035" stroke-width="8"/>
+      <circle cx="120" cy="120" r="84" fill="none" stroke="#8b5cf6" stroke-width="8" stroke-linecap="round" stroke-dasharray="527" stroke-dashoffset="79"/>
+
+      <!-- Track 3: Token Budget (r=70) -->
+      <circle cx="120" cy="120" r="70" fill="none" stroke="#162035" stroke-width="8"/>
+      <circle cx="120" cy="120" r="70" fill="none" stroke="#06b6d4" stroke-width="8" stroke-linecap="round" stroke-dasharray="439" stroke-dashoffset="240"/>
+
+      <!-- Center HUD Status -->
+      <text x="120" y="105" text-anchor="middle" fill="#64748b" class="mono-font" font-size="10" letter-spacing="0.1em">STATUS</text>
+      <text x="120" y="128" text-anchor="middle" fill="#38bdf8" class="title-font" font-size="20">HEALTHY</text>
+      <text x="120" y="146" text-anchor="middle" fill="#10b981" class="mono-font" font-size="11">100% OPERATIONAL</text>
+    </g>
+
+    <!-- Gauges Legend -->
+    <g transform="translate(40, 335)">
+      <g transform="translate(0, 0)">
+        <rect x="0" y="0" width="160" height="42" rx="8" fill="#0a0e17" stroke="#202b3f"/>
+        <circle cx="16" cy="21" r="5" fill="#10b981"/>
+        <text x="28" y="18" fill="#94a3b8" class="mono-font" font-size="9">HEALTH BUS</text>
+        <text x="28" y="32" fill="#f8fafc" class="body-font" font-size="11" font-weight="700">100% (8/8 MCPs)</text>
+      </g>
+      <g transform="translate(190, 0)">
+        <rect x="0" y="0" width="160" height="42" rx="8" fill="#0a0e17" stroke="#202b3f"/>
+        <circle cx="16" cy="21" r="5" fill="#8b5cf6"/>
+        <text x="28" y="18" fill="#94a3b8" class="mono-font" font-size="9">MEMORY LOAD</text>
+        <text x="28" y="32" fill="#f8fafc" class="body-font" font-size="11" font-weight="700">85% (920 tk)</text>
+      </g>
+      <g transform="translate(380, 0)">
+        <rect x="0" y="0" width="160" height="42" rx="8" fill="#0a0e17" stroke="#202b3f"/>
+        <circle cx="16" cy="21" r="5" fill="#06b6d4"/>
+        <text x="28" y="18" fill="#94a3b8" class="mono-font" font-size="9">TOKEN SPEND</text>
+        <text x="28" y="32" fill="#f8fafc" class="body-font" font-size="11" font-weight="700">45% ($0.14)</text>
+      </g>
+    </g>
+
+    <!-- Recent Sessions Feed with Snippets -->
+    <g transform="translate(24, 400)">
+      <text x="0" y="0" fill="#94a3b8" class="mono-font" font-size="11" font-weight="600" letter-spacing="0.05em">RECENT CONVERSATION SESSIONS &amp; STREAM</text>
+
+      <g transform="translate(0, 15)">
+        <rect x="0" y="0" width="572" height="66" rx="8" fill="#0a0e17" stroke="#202b3f"/>
+        <circle cx="18" cy="22" r="4" fill="#10b981"/>
+        <text x="32" y="25" fill="#f8fafc" class="body-font" font-size="12" font-weight="700">Mejora la interfaz de agent-hub (Iteración 19)</text>
+        <text x="490" y="25" fill="#64748b" class="mono-font" font-size="10">Hace 2m</text>
+        <text x="32" y="48" fill="#94a3b8" class="mono-font" font-size="11">Última respuesta: "Erradicación total de tokens cromáticos residuales y Spec Card #52 creada..."</text>
+      </g>
+
+      <g transform="translate(0, 90)">
+        <rect x="0" y="0" width="572" height="66" rx="8" fill="#0a0e17" stroke="#202b3f"/>
+        <circle cx="18" cy="22" r="4" fill="#38bdf8"/>
+        <text x="32" y="25" fill="#f8fafc" class="body-font" font-size="12" font-weight="700">Workspace CWD Isolation &amp; Flow Tests</text>
+        <text x="490" y="25" fill="#64748b" class="mono-font" font-size="10">Hace 15m</text>
+        <text x="32" y="48" fill="#94a3b8" class="mono-font" font-size="11">Última respuesta: "14/14 tests passing. CWD locked against Windows System32 escape."</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ==================== RIGHT COLUMN: TELEMETRY & TERMINAL MINI-HUD ==================== -->
+  <g transform="translate(1130, 192)">
+    <rect x="0" y="0" width="410" height="580" rx="14" fill="url(#cardGrad)" stroke="#202b3f" stroke-width="1.2"/>
+
+    <!-- Header -->
+    <g transform="translate(20, 20)">
+      <rect x="0" y="0" width="28" height="28" rx="6" fill="#10b981" fill-opacity="0.15"/>
+      <rect x="8" y="8" width="12" height="12" rx="2" fill="none" stroke="#10b981" stroke-width="1.5"/>
+      <text x="38" y="18" fill="#f8fafc" class="title-font" font-size="14">Telemetry &amp; Shell Stream</text>
+      <text x="38" y="32" fill="#64748b" class="mono-font" font-size="10">Multi-day Usage &amp; Active Shell Output</text>
+    </g>
+
+    <!-- Daily Usage Bars -->
+    <g transform="translate(20, 72)">
+      <rect x="0" y="0" width="370" height="175" rx="10" fill="#0a0e17" stroke="#202b3f"/>
+      <text x="14" y="24" fill="#94a3b8" class="mono-font" font-size="10" font-weight="600">DAILY TOKEN &amp; COST VELOCITY</text>
+
+      <!-- Day 1: Hoy -->
+      <g transform="translate(14, 40)">
+        <text x="0" y="12" fill="#cbd5e1" class="mono-font" font-size="10">Hoy</text>
+        <rect x="40" y="2" width="230" height="12" rx="6" fill="#07090e" stroke="#202b3f"/>
+        <rect x="40" y="2" width="195" height="12" rx="6" fill="url(#emeraldBar)"/>
+        <text x="280" y="12" fill="#34d399" class="mono-font" font-size="10">48.2k tk</text>
+      </g>
+
+      <!-- Day 2: Ayer -->
+      <g transform="translate(14, 70)">
+        <text x="0" y="12" fill="#cbd5e1" class="mono-font" font-size="10">Ayer</text>
+        <rect x="40" y="2" width="230" height="12" rx="6" fill="#07090e" stroke="#202b3f"/>
+        <rect x="40" y="2" width="140" height="12" rx="6" fill="#06b6d4"/>
+        <text x="280" y="12" fill="#38bdf8" class="mono-font" font-size="10">34.1k tk</text>
+      </g>
+
+      <!-- Day 3: Hace 2d -->
+      <g transform="translate(14, 100)">
+        <text x="0" y="12" fill="#cbd5e1" class="mono-font" font-size="10">15 Nov</text>
+        <rect x="40" y="2" width="230" height="12" rx="6" fill="#07090e" stroke="#202b3f"/>
+        <rect x="40" y="2" width="165" height="12" rx="6" fill="#8b5cf6"/>
+        <text x="280" y="12" fill="#c084fc" class="mono-font" font-size="10">41.0k tk</text>
+      </g>
+
+      <!-- Day 4: Hace 3d -->
+      <g transform="translate(14, 130)">
+        <text x="0" y="12" fill="#cbd5e1" class="mono-font" font-size="10">14 Nov</text>
+        <rect x="40" y="2" width="230" height="12" rx="6" fill="#07090e" stroke="#202b3f"/>
+        <rect x="40" y="2" width="80" height="12" rx="6" fill="#f59e0b"/>
+        <text x="280" y="12" fill="#fbbf24" class="mono-font" font-size="10">18.5k tk</text>
+      </g>
+    </g>
+
+    <!-- Mini-Terminal Output Live Box -->
+    <g transform="translate(20, 265)">
+      <rect x="0" y="0" width="370" height="285" rx="10" fill="#07090e" stroke="#202b3f"/>
+      
+      <!-- Terminal Header -->
+      <rect x="0" y="0" width="370" height="32" rx="10" fill="#0a0e17"/>
+      <circle cx="16" cy="16" r="4" fill="#f43f5e"/>
+      <circle cx="28" cy="16" r="4" fill="#f59e0b"/>
+      <circle cx="40" cy="16" r="4" fill="#10b981"/>
+      <text x="56" y="20" fill="#94a3b8" class="mono-font" font-size="10">pwsh :: CWD Protected</text>
+      <text x="320" y="20" fill="#10b981" class="mono-font" font-size="10">EXIT: 0</text>
+
+      <!-- Lines -->
+      <g transform="translate(14, 48)">
+        <text x="0" y="12" fill="#38bdf8" class="mono-font" font-size="10">&gt; npm run test:flows</text>
+        <text x="0" y="32" fill="#94a3b8" class="mono-font" font-size="10">▶ flowNameFrom (CA1) ... ✔ pass</text>
+        <text x="0" y="52" fill="#94a3b8" class="mono-font" font-size="10">▶ groupByFlow (CA6, CA8) ... ✔ pass</text>
+        <text x="0" y="72" fill="#94a3b8" class="mono-font" font-size="10">▶ isSystemOrAppDir ... ✔ pass</text>
+        <text x="0" y="92" fill="#10b981" class="mono-font" font-size="10">ℹ pass 14, fail 0, duration: 53.5ms</text>
+        
+        <text x="0" y="122" fill="#38bdf8" class="mono-font" font-size="10">&gt; npm run build:webview</text>
+        <text x="0" y="142" fill="#94a3b8" class="mono-font" font-size="10">✓ 1565 modules transformed.</text>
+        <text x="0" y="162" fill="#34d399" class="mono-font" font-size="10">dist/webview/assets/index.js 841.78 kB</text>
+        <text x="0" y="182" fill="#c084fc" class="mono-font" font-size="10">✓ built in 1.99s with zero errors.</text>
+        
+        <text x="0" y="212" fill="#06b6d4" class="mono-font" font-size="10">PS C:\...\agent-hub&gt; <tspan fill="#ffffff" class="cursor-blink">_</tspan></text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ==================== BOTTOM HUD STATUS DOCK ==================== -->
+  <g transform="translate(60, 792)">
+    <rect x="0" y="0" width="1480" height="198" rx="14" fill="url(#cardGrad)" stroke="#202b3f" stroke-width="1.2"/>
+
+    <g transform="translate(24, 20)">
+      <text x="0" y="0" fill="#f8fafc" class="title-font" font-size="15">HUD Dock System Navigation &amp; Workspace Quick-Switch</text>
+      <text x="0" y="18" fill="#64748b" class="mono-font" font-size="11">Tactical switching between specialized views with instant keyboard shortcuts</text>
+
+      <!-- Tab Buttons Grid -->
+      <g transform="translate(0, 36)">
+        <!-- Tab 1: Chat -->
+        <g transform="translate(0, 0)">
+          <rect x="0" y="0" width="195" height="110" rx="10" fill="#0a0e17" stroke="#06b6d4" stroke-width="1.2"/>
+          <text x="16" y="28" fill="#38bdf8" class="mono-font" font-size="12" font-weight="700">01. CHAT</text>
+          <text x="150" y="28" fill="#64748b" class="mono-font" font-size="10">Ctrl+1</text>
+          <text x="16" y="52" fill="#cbd5e1" class="body-font" font-size="11">Compositor táctico, diffs y stream multimodelo.</text>
+          <text x="16" y="90" fill="#10b981" class="mono-font" font-size="10">● Activo ahora</text>
+        </g>
+
+        <!-- Tab 2: Agentes -->
+        <g transform="translate(206, 0)">
+          <rect x="0" y="0" width="195" height="110" rx="10" fill="#0a0e17" stroke="#202b3f"/>
+          <text x="16" y="28" fill="#f8fafc" class="mono-font" font-size="12" font-weight="700">02. AGENTES</text>
+          <text x="150" y="28" fill="#64748b" class="mono-font" font-size="10">Ctrl+2</text>
+          <text x="16" y="52" fill="#94a3b8" class="body-font" font-size="11">Topología de escuadrón, matriz kanban e intercom.</text>
+          <text x="16" y="90" fill="#94a3b8" class="mono-font" font-size="10">4 roles en equipo</text>
+        </g>
+
+        <!-- Tab 3: Memoria -->
+        <g transform="translate(412, 0)">
+          <rect x="0" y="0" width="195" height="110" rx="10" fill="#0a0e17" stroke="#202b3f"/>
+          <text x="16" y="28" fill="#f8fafc" class="mono-font" font-size="12" font-weight="700">03. MEMORIA</text>
+          <text x="150" y="28" fill="#64748b" class="mono-font" font-size="10">Ctrl+3</text>
+          <text x="16" y="52" fill="#94a3b8" class="body-font" font-size="11">Matriz de experiencia, reglas tácticas y contexto.</text>
+          <text x="16" y="90" fill="#c084fc" class="mono-font" font-size="10">24 lecciones</text>
+        </g>
+
+        <!-- Tab 4: Docs -->
+        <g transform="translate(618, 0)">
+          <rect x="0" y="0" width="195" height="110" rx="10" fill="#0a0e17" stroke="#202b3f"/>
+          <text x="16" y="28" fill="#f8fafc" class="mono-font" font-size="12" font-weight="700">04. DOCS</text>
+          <text x="150" y="28" fill="#64748b" class="mono-font" font-size="10">Ctrl+4</text>
+          <text x="16" y="52" fill="#94a3b8" class="body-font" font-size="11">Visor seguro sandbox con preview responsiva.</text>
+          <text x="16" y="90" fill="#94a3b8" class="mono-font" font-size="10">Desktop / Móvil</text>
+        </g>
+
+        <!-- Tab 5: MCPs -->
+        <g transform="translate(824, 0)">
+          <rect x="0" y="0" width="195" height="110" rx="10" fill="#0a0e17" stroke="#202b3f"/>
+          <text x="16" y="28" fill="#f8fafc" class="mono-font" font-size="12" font-weight="700">05. MCPS</text>
+          <text x="150" y="28" fill="#64748b" class="mono-font" font-size="10">Ctrl+5</text>
+          <text x="16" y="52" fill="#94a3b8" class="body-font" font-size="11">Malla de servidores stdio/SSE y catálogo de herramientas.</text>
+          <text x="16" y="90" fill="#10b981" class="mono-font" font-size="10">8 conectados</text>
+        </g>
+
+        <!-- Tab 6: Telemetría -->
+        <g transform="translate(1030, 0)">
+          <rect x="0" y="0" width="195" height="110" rx="10" fill="#0a0e17" stroke="#202b3f"/>
+          <text x="16" y="28" fill="#f8fafc" class="mono-font" font-size="12" font-weight="700">06. MÉTRICAS</text>
+          <text x="150" y="28" fill="#64748b" class="mono-font" font-size="10">Ctrl+6</text>
+          <text x="16" y="52" fill="#94a3b8" class="body-font" font-size="11">Auditoría de costes, latencias p95 y consumo diario.</text>
+          <text x="16" y="90" fill="#34d399" class="mono-font" font-size="10">$0.142 gastado</text>
+        </g>
+
+        <!-- Tab 7: Cuentas -->
+        <g transform="translate(1236, 0)">
+          <rect x="0" y="0" width="195" height="110" rx="10" fill="#0a0e17" stroke="#202b3f"/>
+          <text x="16" y="28" fill="#f8fafc" class="mono-font" font-size="12" font-weight="700">07. CUENTAS</text>
+          <text x="150" y="28" fill="#64748b" class="mono-font" font-size="10">Ctrl+7</text>
+          <text x="16" y="52" fill="#94a3b8" class="body-font" font-size="11">Perfiles de conexión, cuotas de tokens y llaves.</text>
+          <text x="16" y="90" fill="#94a3b8" class="mono-font" font-size="10">Antigravity / Gemini</text>
+        </g>
+      </g>
+    </g>
+  </g>
+
+  <!-- Footer -->
+  <g transform="translate(60, 1015)">
+    <text x="0" y="0" fill="#64748b" class="mono-font" font-size="10">AGENTHUB TACTICAL HUD ARCHITECTURE · SPEC CARD #53 · LIVE COMMAND CENTER</text>
+    <text x="1480" y="0" text-anchor="end" fill="#64748b" class="mono-font" font-size="10">WCAG 2.2 AAA COMPLIANT · STRICT 5-LAYER COLOR TOKEN PURITY · 60 FPS MOTION</text>
+  </g>
+</svg>

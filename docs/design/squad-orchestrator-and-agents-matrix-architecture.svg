@@ -1,0 +1,224 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="100%" height="100%" style="background:#07090e; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <defs>
+    <linearGradient id="hud-bg-51" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0a0e17" />
+      <stop offset="50%" stop-color="#07090e" />
+      <stop offset="100%" stop-color="#04060a" />
+    </linearGradient>
+    <linearGradient id="cyan-teal-grad-51" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#06b6d4" />
+      <stop offset="50%" stop-color="#14b8a6" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+    <filter id="neon-glow-51" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <pattern id="grid-51" width="28" height="28" patternUnits="userSpaceOnUse">
+      <path d="M 28 0 L 0 0 0 28" fill="none" stroke="#162035" stroke-width="0.75" stroke-opacity="0.5" />
+      <circle cx="28" cy="28" r="0.7" fill="#14b8a6" fill-opacity="0.2" />
+    </pattern>
+  </defs>
+
+  <rect width="1280" height="720" fill="url(#hud-bg-51)" />
+  <rect width="1280" height="720" fill="url(#grid-51)" />
+
+  <!-- Master Header Bar -->
+  <rect x="36" y="22" width="1208" height="68" rx="14" fill="#0c1220" stroke="#202b3f" stroke-width="1.5" />
+  <circle cx="70" cy="56" r="18" fill="#14b8a6" fill-opacity="0.15" stroke="#14b8a6" stroke-width="1.5" />
+  <circle cx="66" cy="52" r="4" fill="none" stroke="#14b8a6" stroke-width="1.8" />
+  <circle cx="76" cy="54" r="3" fill="none" stroke="#14b8a6" stroke-width="1.8" />
+  <path d="M60 62 C60 58, 72 58, 72 62" fill="none" stroke="#14b8a6" stroke-width="1.8" />
+  <text x="100" y="48" fill="#f8fafc" font-size="15" font-weight="800" letter-spacing="0.5">AGENTHUB // SQUAD ORCHESTRATOR &amp; AGENTS MATRIX ARCHITECTURE</text>
+  <text x="100" y="68" fill="#94a3b8" font-size="11" font-mono="true">TACTICAL HUD SPEC CARD #51 • SQUAD DISPATCHER • TOPOLOGY GRAPH • KANBAN BOARD • SAFE MERGE/DISCARD</text>
+
+  <rect x="850" y="36" width="210" height="38" rx="8" fill="#14b8a6" fill-opacity="0.12" stroke="#14b8a6" stroke-width="1.2" />
+  <circle cx="868" cy="55" r="4" fill="#14b8a6" filter="url(#neon-glow-51)" />
+  <text x="880" y="59" fill="#14b8a6" font-size="11" font-weight="800" font-mono="true">MULTI-VIEW SYNC ACTIVE</text>
+
+  <rect x="1070" y="36" width="160" height="38" rx="8" fill="#10b981" fill-opacity="0.12" stroke="#10b981" stroke-width="1.2" />
+  <circle cx="1088" cy="55" r="4" fill="#10b981" filter="url(#neon-glow-51)" />
+  <text x="1100" y="59" fill="#10b981" font-size="11" font-weight="800" font-mono="true">ISOLATED WORKTREE</text>
+
+  <!-- Left Main Container: Squad Dispatcher & Pipeline Lifecycle -->
+  <rect x="36" y="104" width="600" height="420" rx="14" fill="#0c1220" stroke="#202b3f" stroke-width="1.5" />
+  <rect x="36" y="104" width="600" height="42" rx="14" fill="#0f172a" />
+  <rect x="36" y="145" width="600" height="1" fill="#202b3f" />
+  <circle cx="56" cy="125" r="5" fill="#f43f5e" />
+  <circle cx="72" cy="125" r="5" fill="#f59e0b" />
+  <circle cx="88" cy="125" r="5" fill="#10b981" />
+  <text x="108" y="129" fill="#f8fafc" font-size="12" font-weight="700">SQUAD DISPATCHER &amp; PRESET MATRIX</text>
+  <text x="490" y="129" fill="#14b8a6" font-size="10" font-mono="true">SPAWN ENGINE</text>
+
+  <!-- Formations Grid -->
+  <g transform="translate(56, 160)">
+    <!-- Preset 1 -->
+    <rect x="0" y="0" width="272" height="68" rx="8" fill="#07090e" stroke="#06b6d4" stroke-width="1.2" />
+    <circle cx="24" cy="24" r="8" fill="#06b6d4" fill-opacity="0.2" />
+    <path d="M20 24 L28 24 M24 20 L24 28" stroke="#06b6d4" stroke-width="1.5" />
+    <text x="40" y="24" fill="#f8fafc" font-size="11" font-weight="bold">Full Protocol</text>
+    <text x="40" y="40" fill="#94a3b8" font-size="9" font-mono="true">Arquitecto ➔ Tester ➔ Dev ➔ Revisor</text>
+    <rect x="180" y="14" width="80" height="18" rx="4" fill="#06b6d4" fill-opacity="0.15" />
+    <text x="190" y="27" fill="#06b6d4" font-size="9" font-mono="true" font-weight="bold">4 AGENTES</text>
+
+    <!-- Preset 2 -->
+    <rect x="288" y="0" width="272" height="68" rx="8" fill="#07090e" stroke="#202b3f" stroke-width="1" />
+    <circle cx="312" cy="24" r="8" fill="#10b981" fill-opacity="0.2" />
+    <path d="M308 24 L316 24" stroke="#10b981" stroke-width="1.5" />
+    <text x="328" y="24" fill="#f8fafc" font-size="11" font-weight="bold">TDD Pair (Pruebas)</text>
+    <text x="328" y="40" fill="#94a3b8" font-size="9" font-mono="true">Tester (Falla) ➔ Dev (Pasa)</text>
+    <rect x="468" y="14" width="80" height="18" rx="4" fill="#10b981" fill-opacity="0.15" />
+    <text x="478" y="27" fill="#10b981" font-size="9" font-mono="true" font-weight="bold">2 AGENTES</text>
+
+    <!-- Preset 3 -->
+    <rect x="0" y="78" width="272" height="68" rx="8" fill="#07090e" stroke="#202b3f" stroke-width="1" />
+    <circle cx="24" cy="102" r="8" fill="#f59e0b" fill-opacity="0.2" />
+    <text x="21" y="106" fill="#f59e0b" font-size="10" font-weight="bold">⚡</text>
+    <text x="40" y="102" fill="#f8fafc" font-size="11" font-weight="bold">Fast Fix (Solución Rápida)</text>
+    <text x="40" y="118" fill="#94a3b8" font-size="9" font-mono="true">Desarrollador ➔ Revisor</text>
+    <rect x="180" y="92" width="80" height="18" rx="4" fill="#f59e0b" fill-opacity="0.15" />
+    <text x="190" y="105" fill="#f59e0b" font-size="9" font-mono="true" font-weight="bold">2 AGENTES</text>
+
+    <!-- Preset 4 -->
+    <rect x="288" y="78" width="272" height="68" rx="8" fill="#07090e" stroke="#202b3f" stroke-width="1" />
+    <circle cx="312" cy="102" r="8" fill="#8b5cf6" fill-opacity="0.2" />
+    <text x="309" y="106" fill="#8b5cf6" font-size="10" font-weight="bold">🛡</text>
+    <text x="328" y="102" fill="#f8fafc" font-size="11" font-weight="bold">Code Review &amp; Security</text>
+    <text x="328" y="118" fill="#94a3b8" font-size="9" font-mono="true">Revisor ➔ Auditor de Seguridad</text>
+    <rect x="468" y="92" width="80" height="18" rx="4" fill="#8b5cf6" fill-opacity="0.15" />
+    <text x="478" y="105" fill="#8b5cf6" font-size="9" font-mono="true" font-weight="bold">2 AGENTES</text>
+  </g>
+
+  <!-- Objective Input Simulation -->
+  <rect x="56" y="320" width="560" height="60" rx="8" fill="#07090e" stroke="#202b3f" stroke-width="1" />
+  <text x="70" y="338" fill="#94a3b8" font-size="10" font-mono="true">OBJETIVO DEL ESCUADRÓN (Misión inicial coordinada):</text>
+  <text x="70" y="360" fill="#f8fafc" font-size="11">Implementar pruebas unitarias y refactorizar el gestor de workspaces aislado...</text>
+
+  <!-- Isolation & Action Checkboxes -->
+  <g transform="translate(56, 394)">
+    <rect x="0" y="0" width="16" height="16" rx="4" fill="#14b8a6" />
+    <path d="M4 8 L7 11 L12 5" stroke="#07090e" stroke-width="2" fill="none" />
+    <text x="24" y="13" fill="#cbd5e1" font-size="11" font-weight="bold">Copia aparte aislada (Git Worktree)</text>
+    <text x="24" y="28" fill="#94a3b8" font-size="9.5" font-mono="true">No altera la rama activa; requiere fusión explícita</text>
+
+    <rect x="300" y="0" width="16" height="16" rx="4" fill="#07090e" stroke="#202b3f" stroke-width="1.5" />
+    <text x="324" y="13" fill="#cbd5e1" font-size="11">Aprobar cada traspaso</text>
+    <text x="324" y="28" fill="#94a3b8" font-size="9.5" font-mono="true">Pausa automática entre agentes</text>
+  </g>
+
+  <!-- Dispatch Button -->
+  <rect x="56" y="445" width="560" height="38" rx="8" fill="url(#cyan-teal-grad-51)" />
+  <text x="220" y="469" fill="#07090e" font-size="12" font-weight="900" font-mono="true">⚡ LANZAR ESCUADRÓN AUTÓNOMO</text>
+
+  <!-- Right Main Container: Multi-View Modes & Topology Canvas -->
+  <rect x="656" y="104" width="588" height="420" rx="14" fill="#0c1220" stroke="#202b3f" stroke-width="1.5" />
+  <rect x="656" y="104" width="588" height="42" rx="14" fill="#0f172a" />
+  <rect x="656" y="145" width="588" height="1" fill="#202b3f" />
+  <circle cx="676" cy="125" r="5" fill="#f43f5e" />
+  <circle cx="692" cy="125" r="5" fill="#f59e0b" />
+  <circle cx="708" cy="125" r="5" fill="#10b981" />
+  <text x="728" y="129" fill="#f8fafc" font-size="12" font-weight="700">MULTI-VIEW MATRIX &amp; LIVE TOPOLOGY</text>
+  <text x="1070" y="129" fill="#10b981" font-size="10" font-mono="true">3 MODOS SYNC</text>
+
+  <!-- View Switcher Pills -->
+  <rect x="676" y="158" width="260" height="28" rx="6" fill="#07090e" stroke="#202b3f" stroke-width="1" />
+  <rect x="678" y="160" width="80" height="24" rx="5" fill="#14b8a6" fill-opacity="0.2" stroke="#14b8a6" stroke-width="1" />
+  <text x="696" y="176" fill="#14b8a6" font-size="10" font-mono="true" font-weight="bold">Topología</text>
+
+  <rect x="764" y="160" width="80" height="24" rx="5" fill="transparent" />
+  <text x="790" y="176" fill="#94a3b8" font-size="10" font-mono="true">Lista</text>
+
+  <rect x="850" y="160" width="80" height="24" rx="5" fill="transparent" />
+  <text x="872" y="176" fill="#94a3b8" font-size="10" font-mono="true">Tablero</text>
+
+  <!-- Topology Graph Simulated View -->
+  <rect x="676" y="196" width="548" height="210" rx="10" fill="#07090e" stroke="#202b3f" stroke-width="1" />
+
+  <!-- Node 1: Arquitecto -->
+  <g transform="translate(696, 216)">
+    <rect width="110" height="60" rx="8" fill="#0c1220" stroke="#06b6d4" stroke-width="1.5" />
+    <circle cx="16" cy="18" r="4" fill="#06b6d4" />
+    <text x="26" y="21" fill="#f8fafc" font-size="10" font-weight="bold">Arquitecto</text>
+    <text x="14" y="36" fill="#06b6d4" font-size="8.5" font-mono="true">gemini-2.5-pro</text>
+    <text x="14" y="49" fill="#10b981" font-size="8" font-mono="true">✓ Especificado</text>
+  </g>
+
+  <!-- Arrow 1 to 2 -->
+  <line x1="806" y1="246" x2="846" y2="246" stroke="#06b6d4" stroke-width="1.8" stroke-dasharray="3,3" />
+  <polygon points="846,243 852,246 846,249" fill="#06b6d4" />
+
+  <!-- Node 2: Tester -->
+  <g transform="translate(854, 216)">
+    <rect width="110" height="60" rx="8" fill="#0c1220" stroke="#f59e0b" stroke-width="1.5" />
+    <circle cx="16" cy="18" r="4" fill="#f59e0b" />
+    <text x="26" y="21" fill="#f8fafc" font-size="10" font-weight="bold">Tester (TDD)</text>
+    <text x="14" y="36" fill="#f59e0b" font-size="8.5" font-mono="true">gemini-2.5-flash</text>
+    <text x="14" y="49" fill="#10b981" font-size="8" font-mono="true">✓ 14/14 tests</text>
+  </g>
+
+  <!-- Arrow 2 to 3 -->
+  <line x1="964" y1="246" x2="1004" y2="246" stroke="#f59e0b" stroke-width="1.8" stroke-dasharray="3,3" />
+  <polygon points="1004,243 1010,246 1004,249" fill="#f59e0b" />
+
+  <!-- Node 3: Desarrollador -->
+  <g transform="translate(1012, 216)">
+    <rect width="110" height="60" rx="8" fill="#0c1220" stroke="#8b5cf6" stroke-width="1.5" />
+    <circle cx="16" cy="18" r="4" fill="#8b5cf6" />
+    <text x="26" y="21" fill="#f8fafc" font-size="10" font-weight="bold">Desarrollador</text>
+    <text x="14" y="36" fill="#8b5cf6" font-size="8.5" font-mono="true">claude-3.7-sonnet</text>
+    <text x="14" y="49" fill="#06b6d4" font-size="8" font-mono="true">⚡ Escribiendo</text>
+  </g>
+
+  <!-- Intercom Live Transmission Row -->
+  <g transform="translate(676, 416)">
+    <rect width="548" height="92" rx="8" fill="#07090e" stroke="#202b3f" stroke-width="1" />
+    <text x="16" y="22" fill="#94a3b8" font-size="10" font-mono="true" font-weight="bold">INTERCOMUNICADOR DE ESCUADRÓN (Live Stream):</text>
+    
+    <rect x="16" y="32" width="516" height="24" rx="4" fill="#0c1220" />
+    <text x="26" y="48" fill="#06b6d4" font-size="9.5" font-mono="true" font-weight="bold">Arquitecto ➔ Tester:</text>
+    <text x="160" y="48" fill="#cbd5e1" font-size="9.5" font-mono="true">«Especificación lista en /docs/specs. Crea tests fallidos.»</text>
+
+    <rect x="16" y="60" width="516" height="24" rx="4" fill="#0c1220" />
+    <text x="26" y="76" fill="#f59e0b" font-size="9.5" font-mono="true" font-weight="bold">Tester ➔ Dev:</text>
+    <text x="120" y="76" fill="#cbd5e1" font-size="9.5" font-mono="true">«Tests listos en tests/flows.test.ts. Implementa safe-path.»</text>
+  </g>
+
+  <!-- Bottom Strip: Coordination & Quality Verification -->
+  <rect x="36" y="540" width="1208" height="152" rx="14" fill="#0c1220" stroke="#202b3f" stroke-width="1.5" />
+  <rect x="36" y="540" width="1208" height="36" rx="14" fill="#0f172a" />
+  <rect x="36" y="575" width="1208" height="1" fill="#202b3f" />
+  <text x="56" y="563" fill="#f8fafc" font-size="12" font-weight="700">SQUAD COORDINATION &amp; WORKSPACE ISOLATION VERIFICATION</text>
+  <text x="1030" y="563" fill="#10b981" font-size="10" font-mono="true">ALL CRITERIA VERIFIED (100%)</text>
+
+  <!-- Metric 1 -->
+  <g transform="translate(56, 590)">
+    <rect width="270" height="84" rx="10" fill="#07090e" stroke="#202b3f" stroke-width="1" />
+    <text x="16" y="24" fill="#94a3b8" font-size="11" font-weight="bold">MULTI-AGENT COORDINATION</text>
+    <text x="16" y="52" fill="#06b6d4" font-size="22" font-weight="900" font-mono="true">0 ESCAPES</text>
+    <text x="16" y="72" fill="#10b981" font-size="10" font-mono="true">Safe Handoff Dispatch PASS</text>
+  </g>
+
+  <!-- Metric 2 -->
+  <g transform="translate(346, 590)">
+    <rect width="270" height="84" rx="10" fill="#07090e" stroke="#202b3f" stroke-width="1" />
+    <text x="16" y="24" fill="#94a3b8" font-size="11" font-weight="bold">WORKTREE GIT ISOLATION</text>
+    <text x="16" y="52" fill="#14b8a6" font-size="22" font-weight="900" font-mono="true">100% ISOLATED</text>
+    <text x="16" y="72" fill="#10b981" font-size="10" font-mono="true">Merge / Discard Safe PASS</text>
+  </g>
+
+  <!-- Metric 3 -->
+  <g transform="translate(636, 590)">
+    <rect width="270" height="84" rx="10" fill="#07090e" stroke="#202b3f" stroke-width="1" />
+    <text x="16" y="24" fill="#94a3b8" font-size="11" font-weight="bold">SYSTEM32 BLOCK FILTER</text>
+    <text x="16" y="52" fill="#10b981" font-size="22" font-weight="900" font-mono="true">isSystemOrAppDir</text>
+    <text x="16" y="72" fill="#10b981" font-size="10" font-mono="true">Host Safety Verified PASS</text>
+  </g>
+
+  <!-- Metric 4 -->
+  <g transform="translate(926, 590)">
+    <rect width="298" height="84" rx="10" fill="#07090e" stroke="#202b3f" stroke-width="1" />
+    <text x="16" y="24" fill="#94a3b8" font-size="11" font-weight="bold">HUD TOKEN HARMONIZATION</text>
+    <text x="16" y="52" fill="#8b5cf6" font-size="22" font-weight="900" font-mono="true">#202b3f / #162035</text>
+    <text x="16" y="72" fill="#10b981" font-size="10" font-mono="true">0 #202b3f in AgentsView PASS</text>
+  </g>
+</svg>

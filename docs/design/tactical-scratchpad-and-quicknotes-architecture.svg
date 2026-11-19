@@ -1,0 +1,294 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" style="background:#07090e; font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;">
+  <defs>
+    <!-- Background Grid -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#162035" stroke-width="0.8" opacity="0.4"/>
+    </pattern>
+    <radialGradient id="cyan-glow" cx="50%" cy="0%" r="70%">
+      <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#07090e" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="amber-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#202b3f" stop-opacity="0.8"/>
+    </linearGradient>
+    <linearGradient id="emerald-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#202b3f" stop-opacity="0.8"/>
+    </linearGradient>
+    <filter id="shadow-drop" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.65"/>
+    </filter>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="1600" height="900" fill="#07090e"/>
+  <rect width="1600" height="900" fill="url(#grid)"/>
+  <rect width="1600" height="500" fill="url(#cyan-glow)"/>
+
+  <!-- Master Header -->
+  <g transform="translate(48, 36)">
+    <!-- Brand / Badge -->
+    <rect x="0" y="0" width="132" height="26" rx="6" fill="#0c1220" stroke="#f59e0b" stroke-width="1.2"/>
+    <text x="12" y="17" fill="#fbbf24" font-size="11" font-weight="700" letter-spacing="1.5" font-family="ui-monospace, monospace">SPEC CARD #62</text>
+
+    <text x="148" y="18" fill="#64748b" font-size="12" font-family="ui-monospace, monospace">|</text>
+    <text x="164" y="18" fill="#94a3b8" font-size="12" font-weight="600" letter-spacing="0.5">SECTION 2.O TACTICAL SCRATCHPAD &amp; QUICK NOTES ENGINE</text>
+
+    <!-- Master Title -->
+    <text x="0" y="62" fill="#f8fafc" font-size="28" font-weight="800" letter-spacing="-0.5">Borrador Táctico, Persistencia Markdown y Despacho Contextual</text>
+    <text x="0" y="86" fill="#94a3b8" font-size="14">Autoguardado debounced (1500ms) en .agent-hub/scratchpad.md, atajos de teclado HUD, formateo de tareas e inyección en el chat del agente</text>
+
+    <!-- Top Right Telemetry Badges -->
+    <g transform="translate(1120, 10)">
+      <rect x="0" y="0" width="384" height="64" rx="10" fill="#0a0e17" stroke="#202b3f" stroke-width="1.2" filter="url(#shadow-drop)"/>
+      <circle cx="24" cy="32" r="6" fill="#f59e0b"/>
+      <circle cx="24" cy="32" r="10" fill="none" stroke="#f59e0b" stroke-width="1.5" opacity="0.4"/>
+      <text x="42" y="27" fill="#f8fafc" font-size="12" font-weight="700">SCRATCHPAD ENGINE: ONLINE</text>
+      <text x="42" y="45" fill="#64748b" font-size="10" font-family="ui-monospace, monospace">Debounce 1500ms • Ctrl+Enter Send • 2-Step Clear</text>
+      <rect x="300" y="16" width="70" height="32" rx="6" fill="#0c1220" stroke="#f59e0b" stroke-width="1"/>
+      <text x="314" y="36" fill="#fbbf24" font-size="12" font-weight="800" font-family="ui-monospace, monospace">60 FPS</text>
+    </g>
+  </g>
+
+  <!-- Three Architecture Pillars -->
+
+  <!-- ================= PILLAR 1: DEBOUNCED AUTOSAVE & PERSISTENCE ================= -->
+  <g transform="translate(48, 150)">
+    <rect x="0" y="0" width="470" height="540" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.4" filter="url(#shadow-drop)"/>
+    <rect x="0" y="0" width="470" height="48" rx="14" fill="#0c1220"/>
+    <path d="M 0 48 L 470 48" stroke="#202b3f" stroke-width="1.2"/>
+
+    <!-- Pillar 1 Header -->
+    <rect x="16" y="12" width="24" height="24" rx="6" fill="#f59e0b" fill-opacity="0.15" stroke="#f59e0b" stroke-width="1"/>
+    <path d="M 23 24 L 28 19 L 33 24" fill="none" stroke="#fbbf24" stroke-width="1.5"/>
+    <text x="48" y="28" fill="#f8fafc" font-size="14" font-weight="700">1. Persistencia &amp; Debounce Engine</text>
+    <rect x="360" y="14" width="94" height="20" rx="4" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+    <text x="372" y="28" fill="#94a3b8" font-size="10" font-family="ui-monospace, monospace">1500ms Timer</text>
+
+    <!-- Content 1 -->
+    <g transform="translate(20, 68)">
+      <!-- Step 1: Input event -->
+      <rect x="0" y="0" width="430" height="74" rx="8" fill="#07090e" stroke="#202b3f" stroke-width="1"/>
+      <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700" font-family="ui-monospace, monospace">01. CAPTURA DE ESCRITURA REACTIVA</text>
+      <text x="14" y="42" fill="#e2e8f0" font-size="11">Modificación de `text` dispara `setSaved(false)` inmediato.</text>
+      <text x="14" y="60" fill="#64748b" font-size="10" font-family="ui-monospace, monospace">onChange(e) => setText(val) &amp;&amp; setSaved(false)</text>
+
+      <!-- Arrow down -->
+      <path d="M 215 80 L 215 96" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3,3"/>
+      <polygon points="212,96 215,102 218,96" fill="#f59e0b"/>
+
+      <!-- Step 2: Debounced useEffect -->
+      <g transform="translate(0, 108)">
+        <rect x="0" y="0" width="430" height="84" rx="8" fill="#07090e" stroke="#f59e0b" stroke-width="1.2"/>
+        <text x="14" y="22" fill="#fbbf24" font-size="11" font-weight="700" font-family="ui-monospace, monospace">02. DEBOUNCE ASÍNCRONO RESPETUOSO</text>
+        <text x="14" y="42" fill="#e2e8f0" font-size="11">Temporizador de 1.5s reiniciado por pulsación continua.</text>
+        <rect x="14" y="52" width="402" height="22" rx="4" fill="#162035"/>
+        <text x="22" y="67" fill="#f59e0b" font-size="10" font-family="ui-monospace, monospace">clearTimeout(timer); timer = setTimeout(onSave, 1500);</text>
+      </g>
+
+      <!-- Arrow down -->
+      <path d="M 215 198 L 215 214" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3,3"/>
+      <polygon points="212,214 215,220 218,214" fill="#f59e0b"/>
+
+      <!-- Step 3: Physical target -->
+      <g transform="translate(0, 226)">
+        <rect x="0" y="0" width="430" height="74" rx="8" fill="#07090e" stroke="#10b981" stroke-width="1.2"/>
+        <text x="14" y="22" fill="#34d399" font-size="11" font-weight="700" font-family="ui-monospace, monospace">03. ARCHIVO DESTINO .agent-hub/scratchpad.md</text>
+        <text x="14" y="42" fill="#e2e8f0" font-size="11">Persistido en disco local dentro del workspace del usuario.</text>
+        <text x="14" y="60" fill="#94a3b8" font-size="10" font-family="ui-monospace, monospace">Safe write via postToHost({ command: 'saveScratchpad' })</text>
+      </g>
+
+      <!-- Sync to Documents View -->
+      <g transform="translate(0, 318)">
+        <rect x="0" y="0" width="430" height="110" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">INTEGRACIÓN CON VISOR DE DOCUMENTOS</text>
+        <text x="14" y="42" fill="#94a3b8" font-size="11">Despacha `CustomEvent('agenthub:open-document')` para</text>
+        <text x="14" y="58" fill="#94a3b8" font-size="11">abrir el scratchpad directamente en la vista completa con</text>
+        <text x="14" y="74" fill="#94a3b8" font-size="11">árbol virtual, outline AST y sandbox previewer.</text>
+        <rect x="14" y="82" width="220" height="20" rx="4" fill="#162035"/>
+        <text x="22" y="96" fill="#22d3ee" font-size="9" font-family="ui-monospace, monospace">window.dispatchEvent(event)</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ================= PILLAR 2: HOTKEY MATRIX & CONTEXT INJECTION ================= -->
+  <g transform="translate(565, 150)">
+    <rect x="0" y="0" width="470" height="540" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.4" filter="url(#shadow-drop)"/>
+    <rect x="0" y="0" width="470" height="48" rx="14" fill="#0c1220"/>
+    <path d="M 0 48 L 470 48" stroke="#202b3f" stroke-width="1.2"/>
+
+    <!-- Pillar 2 Header -->
+    <rect x="16" y="12" width="24" height="24" rx="6" fill="#06b6d4" fill-opacity="0.15" stroke="#06b6d4" stroke-width="1"/>
+    <circle cx="28" cy="24" r="5" fill="none" stroke="#22d3ee" stroke-width="1.5"/>
+    <text x="48" y="28" fill="#f8fafc" font-size="14" font-weight="700">2. Inyección de Contexto &amp; Atajos</text>
+    <rect x="360" y="14" width="94" height="20" rx="4" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+    <text x="374" y="28" fill="#22d3ee" font-size="10" font-family="ui-monospace, monospace">Ctrl+Enter ↵</text>
+
+    <!-- Content 2 -->
+    <g transform="translate(20, 68)">
+      <!-- Hotkeys card -->
+      <rect x="0" y="0" width="430" height="150" rx="8" fill="#07090e" stroke="#202b3f" stroke-width="1"/>
+      <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700" font-family="ui-monospace, monospace">MATRIZ DE TECLADO TÁCTICA</text>
+
+      <!-- Key 1: Ctrl+Enter -->
+      <g transform="translate(14, 34)">
+        <rect x="0" y="0" width="68" height="22" rx="4" fill="#162035" stroke="#06b6d4" stroke-width="1"/>
+        <text x="8" y="15" fill="#22d3ee" font-size="10" font-family="ui-monospace, monospace" font-weight="700">Ctrl+↵</text>
+        <text x="80" y="15" fill="#e2e8f0" font-size="11">Despacha el borrador al chat activo y cierra drawer.</text>
+      </g>
+
+      <!-- Key 2: Ctrl+S -->
+      <g transform="translate(14, 62)">
+        <rect x="0" y="0" width="68" height="22" rx="4" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+        <text x="12" y="15" fill="#94a3b8" font-size="10" font-family="ui-monospace, monospace" font-weight="700">Ctrl+S</text>
+        <text x="80" y="15" fill="#e2e8f0" font-size="11">Fuerza guardado sincrónico inmediato a disco.</text>
+      </g>
+
+      <!-- Key 3: Tab -->
+      <g transform="translate(14, 90)">
+        <rect x="0" y="0" width="68" height="22" rx="4" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+        <text x="18" y="15" fill="#94a3b8" font-size="10" font-family="ui-monospace, monospace" font-weight="700">Tab</text>
+        <text x="80" y="15" fill="#e2e8f0" font-size="11">Inserta 2 espacios sin perder foco del textarea.</text>
+      </g>
+
+      <!-- Key 4: Escape -->
+      <g transform="translate(14, 118)">
+        <rect x="0" y="0" width="68" height="22" rx="4" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+        <text x="16" y="15" fill="#94a3b8" font-size="10" font-family="ui-monospace, monospace" font-weight="700">Esc</text>
+        <text x="80" y="15" fill="#e2e8f0" font-size="11">Cierra el cajón lateral preservando contenido intacto.</text>
+      </g>
+
+      <!-- Arrow down -->
+      <path d="M 215 158 L 215 174" stroke="#06b6d4" stroke-width="1.5" stroke-dasharray="3,3"/>
+      <polygon points="212,174 215,180 218,174" fill="#06b6d4"/>
+
+      <!-- Payload envelope card -->
+      <g transform="translate(0, 186)">
+        <rect x="0" y="0" width="430" height="154" rx="8" fill="#07090e" stroke="#06b6d4" stroke-width="1.2"/>
+        <text x="14" y="24" fill="#22d3ee" font-size="11" font-weight="700" font-family="ui-monospace, monospace">ESTRUCTURA DE CARGA ÚTIL ENVIADA AL AGENTE</text>
+        
+        <rect x="14" y="36" width="402" height="104" rx="6" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="26" y="56" fill="#38bdf8" font-size="10" font-family="ui-monospace, monospace">[CONTEXTO DEL SCRATCHPAD DE TRABAJO]</text>
+        <text x="26" y="76" fill="#94a3b8" font-size="10" font-family="ui-monospace, monospace"># Requerimientos para Iteración 29</text>
+        <text x="26" y="94" fill="#e2e8f0" font-size="10" font-family="ui-monospace, monospace">- [x] Verificar consistencia de 5 capas de elevación</text>
+        <text x="26" y="112" fill="#e2e8f0" font-size="10" font-family="ui-monospace, monospace">- [ ] Ejecutar auditoría de componentes auxiliares</text>
+        <text x="26" y="130" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">-> Disparado a onSendToAgent(payload) en Composer</text>
+      </g>
+
+      <!-- Telemetry chip -->
+      <g transform="translate(0, 354)">
+        <rect x="0" y="0" width="430" height="74" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#f8fafc" font-size="11" font-weight="700">TELEMETRÍA DE PALABRAS &amp; CARACTERES</text>
+        <text x="14" y="42" fill="#94a3b8" font-size="11">Cálculo no intrusivo en tiempo real en pie del drawer:</text>
+        <text x="14" y="60" fill="#22d3ee" font-size="10" font-family="ui-monospace, monospace">words = text.trim().split(/\s+/).length · {text.length} car.</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ================= PILLAR 3: TASK STAGING & DESTRUCTIVE SAFETY ================= -->
+  <g transform="translate(1082, 150)">
+    <rect x="0" y="0" width="470" height="540" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.4" filter="url(#shadow-drop)"/>
+    <rect x="0" y="0" width="470" height="48" rx="14" fill="#0c1220"/>
+    <path d="M 0 48 L 470 48" stroke="#202b3f" stroke-width="1.2"/>
+
+    <!-- Pillar 3 Header -->
+    <rect x="16" y="12" width="24" height="24" rx="6" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="1"/>
+    <path d="M 22 24 L 26 28 L 34 20" fill="none" stroke="#34d399" stroke-width="1.5"/>
+    <text x="48" y="28" fill="#f8fafc" font-size="14" font-weight="700">3. Formato Rápido &amp; Blindaje FSM</text>
+    <rect x="360" y="14" width="94" height="20" rx="4" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+    <text x="372" y="28" fill="#34d399" font-size="10" font-family="ui-monospace, monospace">Task Stager</text>
+
+    <!-- Content 3 -->
+    <g transform="translate(20, 68)">
+      <!-- Task checklist helper -->
+      <rect x="0" y="0" width="430" height="110" rx="8" fill="#07090e" stroke="#10b981" stroke-width="1"/>
+      <text x="14" y="22" fill="#34d399" font-size="11" font-weight="700" font-family="ui-monospace, monospace">INSERCIÓN AUTOMÁTICA DE TAREAS GFM</text>
+      <text x="14" y="42" fill="#e2e8f0" font-size="11">1-click inserta prefijo `- [ ] ` con salto de línea inteligente:</text>
+      <rect x="14" y="52" width="402" height="46" rx="4" fill="#162035"/>
+      <text x="22" y="69" fill="#94a3b8" font-size="10" font-family="ui-monospace, monospace">setText(curr => `${curr}${!curr.endsWith('\n') ? '\n' : ''}- [ ] `)</text>
+      <text x="22" y="87" fill="#34d399" font-size="10" font-family="ui-monospace, monospace">setSaved(false) -> Reactiva auto-guardado debounced</text>
+
+      <!-- Destructive clear FSM -->
+      <g transform="translate(0, 126)">
+        <rect x="0" y="0" width="430" height="154" rx="8" fill="#07090e" stroke="#f43f5e" stroke-width="1.2"/>
+        <text x="14" y="22" fill="#fb7185" font-size="11" font-weight="700" font-family="ui-monospace, monospace">MÁQUINA DE ESTADOS FSM: VACIADO SEGURO</text>
+        <text x="14" y="42" fill="#e2e8f0" font-size="11">Evita pérdidas accidentales por clic erróneo en papelera:</text>
+
+        <!-- State 1 -->
+        <g transform="translate(14, 52)">
+          <rect x="0" y="0" width="180" height="42" rx="6" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+          <text x="10" y="18" fill="#94a3b8" font-size="10" font-weight="700">Estado 0: Reposo</text>
+          <text x="10" y="32" fill="#64748b" font-size="9">Botón de papelera habilitado</text>
+        </g>
+
+        <!-- Arrow -->
+        <path d="M 200 73 L 224 73" stroke="#fb7185" stroke-width="1.5"/>
+        <polygon points="224,70 230,73 224,76" fill="#fb7185"/>
+
+        <!-- State 2 -->
+        <g transform="translate(236, 52)">
+          <rect x="0" y="0" width="180" height="42" rx="6" fill="#4c0519" stroke="#f43f5e" stroke-width="1"/>
+          <text x="10" y="18" fill="#fda4af" font-size="10" font-weight="700">Estado 1: ¿Vaciar? Sí / X</text>
+          <text x="10" y="32" fill="#f43f5e" font-size="9">Confirmación activa</text>
+        </g>
+
+        <!-- Subtext -->
+        <text x="14" y="116" fill="#94a3b8" font-size="10">Si confirma "Sí": `setText('')` + persiste vaciado en disco.</text>
+        <text x="14" y="134" fill="#94a3b8" font-size="10">Si pulsa "X" o hace clic fuera: cancela sin alterar notas.</text>
+      </g>
+
+      <!-- Clipboard Copy engine -->
+      <g transform="translate(0, 296)">
+        <rect x="0" y="0" width="430" height="132" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">PORTAPAPELES &amp; FEEDBACK VISUAL</text>
+        <text x="14" y="42" fill="#94a3b8" font-size="11">Copia mediante `navigator.clipboard.writeText(text)` con</text>
+        <text x="14" y="58" fill="#94a3b8" font-size="11">animación de icono `Copy` -> `Check` esmeralda durante 1.5s.</text>
+        <rect x="14" y="70" width="220" height="22" rx="4" fill="#162035"/>
+        <text x="22" y="85" fill="#34d399" font-size="10" font-family="ui-monospace, monospace">setCopied(true) -> timer 1500ms</text>
+        <text x="14" y="112" fill="#64748b" font-size="9">Cero bloqueos síncronos ni alertas modales intrusivas.</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ================= BOTTOM TELEMETRY / ARCHITECTURE SUMMARY BAR ================= -->
+  <g transform="translate(48, 712)">
+    <rect x="0" y="0" width="1504" height="152" rx="12" fill="#0a0e17" stroke="#202b3f" stroke-width="1.2" filter="url(#shadow-drop)"/>
+
+    <g transform="translate(24, 20)">
+      <text x="0" y="18" fill="#f8fafc" font-size="14" font-weight="700" letter-spacing="0.5">RESUMEN DE INTEGRACIÓN TÁCTICA: CINCO CAPAS DE ELEVACIÓN CANÓNICAS</text>
+
+      <g transform="translate(0, 36)">
+        <!-- Layer 1 -->
+        <rect x="0" y="0" width="280" height="66" rx="8" fill="#07090e" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">CAPA 1: #07090e</text>
+        <text x="14" y="40" fill="#94a3b8" font-size="10">Drawer backdrop &amp; editor background</text>
+        <text x="14" y="54" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">Textarea canvas libre de reflejos</text>
+
+        <!-- Layer 2 -->
+        <rect x="296" y="0" width="280" height="66" rx="8" fill="#0a0e17" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">CAPA 2: #0a0e17</text>
+        <text x="14" y="40" fill="#94a3b8" font-size="10">Header &amp; drawer container boundaries</text>
+        <text x="14" y="54" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">Backdrop blur 95% opacity</text>
+
+        <!-- Layer 3 -->
+        <rect x="592" y="0" width="280" height="66" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">CAPA 3: #0c1220</text>
+        <text x="14" y="40" fill="#94a3b8" font-size="10">Action buttons &amp; code chips</text>
+        <text x="14" y="54" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">Hover states &amp; save pill</text>
+
+        <!-- Layer 4 -->
+        <rect x="888" y="0" width="280" height="66" rx="8" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+        <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="700">CAPA 4: #162035</text>
+        <text x="14" y="40" fill="#94a3b8" font-size="10">Active hover &amp; keyboard shortcuts</text>
+        <text x="14" y="54" fill="#64748b" font-size="9" font-family="ui-monospace, monospace">Tactical pill background</text>
+
+        <!-- Layer 5 -->
+        <rect x="1184" y="0" width="272" height="66" rx="8" fill="#202b3f" stroke="#06b6d4" stroke-width="1"/>
+        <text x="14" y="22" fill="#22d3ee" font-size="11" font-weight="700">CAPA 5: #202b3f</text>
+        <text x="14" y="40" fill="#e2e8f0" font-size="10">Bordes estructurales &amp; separadores</text>
+        <text x="14" y="54" fill="#94a3b8" font-size="9" font-family="ui-monospace, monospace">Contrast ratio &gt; 7:1 WCAG AAA</text>
+      </g>
+    </g>
+  </g>
+</svg>

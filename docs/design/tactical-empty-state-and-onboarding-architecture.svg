@@ -1,0 +1,247 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1050" width="1600" height="1050">
+  <defs>
+    <!-- Background Gradients -->
+    <radialGradient id="bgGlow" cx="50%" cy="20%" r="75%">
+      <stop offset="0%" stop-color="#0e172a" stop-opacity="0.85"/>
+      <stop offset="55%" stop-color="#07090e" stop-opacity="0.98"/>
+      <stop offset="100%" stop-color="#040608" stop-opacity="1"/>
+    </radialGradient>
+    <radialGradient id="cyanCenter" cx="50%" cy="40%" r="35%">
+      <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#06b6d4" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Card Backgrounds & Borders -->
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0c1220"/>
+      <stop offset="100%" stop-color="#0a0e17"/>
+    </linearGradient>
+    <linearGradient id="cyanBorder" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.8"/>
+      <stop offset="50%" stop-color="#202b3f" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#0891b2" stop-opacity="0.3"/>
+    </linearGradient>
+
+    <!-- Grid Pattern -->
+    <pattern id="tacticalGrid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#162035" stroke-width="0.75" stroke-opacity="0.45"/>
+      <circle cx="0" cy="0" r="1" fill="#06b6d4" fill-opacity="0.3"/>
+    </pattern>
+  </defs>
+
+  <style>
+    .title-font { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 800; }
+    .mono-font { font-family: 'JetBrains Mono', 'Fira Code', Menlo, Monaco, Consolas, monospace; }
+    .body-font { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+  </style>
+
+  <!-- Deep Obsidian Void Canvas -->
+  <rect width="1600" height="1050" fill="#07090e"/>
+  <rect width="1600" height="1050" fill="url(#bgGlow)"/>
+  <rect width="1600" height="1050" fill="url(#tacticalGrid)"/>
+  <rect width="1600" height="1050" fill="url(#cyanCenter)" pointer-events="none"/>
+
+  <!-- Top Tactical Nav Header -->
+  <g transform="translate(60, 45)">
+    <rect x="0" y="0" width="1480" height="74" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.2"/>
+    
+    <rect x="18" y="16" width="42" height="42" rx="10" fill="#0c1220" stroke="#06b6d4" stroke-width="1.5"/>
+    <path d="M 39 24 L 46 38 L 32 38 Z" fill="none" stroke="#06b6d4" stroke-width="2"/>
+    <circle cx="39" cy="42" r="2.5" fill="#14b8a6"/>
+
+    <text x="74" y="36" fill="#f8fafc" class="title-font" font-size="19" letter-spacing="-0.02em">AGENTHUB TACTICAL HUD <tspan fill="#06b6d4">::</tspan> SPEC CARD #56</text>
+    <text x="74" y="52" fill="#94a3b8" class="mono-font" font-size="11" letter-spacing="0.05em">EMPTY-STATE ONBOARDING &amp; ZERO-SESSION LAUNCH DECK ARCHITECTURE</text>
+
+    <!-- Header Badges -->
+    <g transform="translate(1040, 20)">
+      <rect x="0" y="0" width="130" height="34" rx="8" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+      <circle cx="16" cy="17" r="4" fill="#10b981"/>
+      <text x="28" y="22" fill="#34d399" class="mono-font" font-size="11" font-weight="600">ZERO GAPS</text>
+
+      <rect x="140" y="0" width="140" height="34" rx="8" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+      <text x="14" y="22" fill="#38bdf8" class="mono-font" font-size="11" font-weight="600">EMPTY CHAT HUD</text>
+
+      <rect x="290" y="0" width="140" height="34" rx="8" fill="#162035" stroke="#06b6d4" stroke-width="1.2"/>
+      <circle cx="304" cy="17" r="4" fill="#06b6d4"/>
+      <text x="316" y="22" fill="#38bdf8" class="mono-font" font-size="11" font-weight="600">CTA READY</text>
+    </g>
+  </g>
+
+  <!-- ==================== LEFT COLUMN: EMPTY-STATE COMPONENT ANATOMY ==================== -->
+  <g transform="translate(60, 145)">
+    <rect x="0" y="0" width="725" height="530" rx="16" fill="url(#cardGrad)" stroke="url(#cyanBorder)" stroke-width="1.5"/>
+
+    <g transform="translate(24, 24)">
+      <rect x="0" y="0" width="34" height="34" rx="8" fill="#06b6d4" fill-opacity="0.12" stroke="#06b6d4" stroke-width="1.2"/>
+      <rect x="10" y="10" width="14" height="14" rx="3" fill="none" stroke="#06b6d4" stroke-width="1.6"/>
+      <text x="46" y="20" fill="#f8fafc" class="title-font" font-size="16">Empty State Component Visual Hierarchy</text>
+      <text x="46" y="34" fill="#64748b" class="mono-font" font-size="11">App.tsx :: shownTab === 'chat' &amp;&amp; !session Graceful Fallback Deck</text>
+    </g>
+
+    <!-- Simulated UI Box -->
+    <g transform="translate(130, 80)">
+      <rect x="0" y="0" width="465" height="280" rx="16" fill="#0a0e17" stroke="#202b3f" stroke-width="1.2"/>
+      
+      <!-- Central Glow Icon -->
+      <g transform="translate(202, 30)">
+        <rect x="0" y="0" width="60" height="60" rx="14" fill="#0c1220" stroke="#06b6d4" stroke-width="1.5"/>
+        <path d="M 20 22 L 40 22 C 43 22 45 24 45 27 L 45 37 C 45 40 43 42 40 42 L 26 42 L 20 47 Z" fill="none" stroke="#06b6d4" stroke-width="1.8"/>
+      </g>
+
+      <!-- Headings -->
+      <text x="232" y="125" text-anchor="middle" fill="#f8fafc" class="mono-font" font-size="13" font-weight="800">SIN CONVERSACIÓN ACTIVA</text>
+      <text x="232" y="148" text-anchor="middle" fill="#94a3b8" class="body-font" font-size="11">Inicia un nuevo chat con la IA o selecciona una tarea desde el Centro de Mando.</text>
+
+      <!-- CTA Buttons -->
+      <g transform="translate(85, 180)">
+        <!-- Primary Button -->
+        <rect x="0" y="0" width="165" height="42" rx="10" fill="#06b6d4"/>
+        <text x="82" y="26" text-anchor="middle" fill="#07090e" class="mono-font" font-size="11" font-weight="800">+ NUEVO CHAT</text>
+
+        <!-- Secondary Button -->
+        <rect x="180" y="0" width="140" height="42" rx="10" fill="#0c1220" stroke="#202b3f"/>
+        <text x="250" y="26" text-anchor="middle" fill="#f8fafc" class="mono-font" font-size="11" font-weight="700">CENTRO MANDO</text>
+      </g>
+    </g>
+
+    <!-- Architecture Callout -->
+    <g transform="translate(24, 385)">
+      <rect x="0" y="0" width="677" height="120" rx="10" fill="#0a0e17" stroke="#202b3f"/>
+      <g transform="translate(16, 16)">
+        <text x="0" y="12" fill="#38bdf8" class="mono-font" font-size="11" font-weight="700">// Anti-Void Guarantee:</text>
+        <text x="0" y="32" fill="#cbd5e1" class="mono-font" font-size="10">Previously, when state.activeSessionId was null, shownTab === 'chat' rendered blank.</text>
+        <text x="0" y="52" fill="#34d399" class="mono-font" font-size="10">Now: Gracefully catches empty states with instant interactive navigation triggers.</text>
+        <text x="0" y="74" fill="#c084fc" class="mono-font" font-size="10">Performance: 0 additional bundle overhead, reuses existing CSS &amp; state dispatches.</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ==================== RIGHT COLUMN: ONBOARDING FLOW & WORKSPACE INITIALIZATION ==================== -->
+  <g transform="translate(815, 145)">
+    <rect x="0" y="0" width="725" height="530" rx="16" fill="url(#cardGrad)" stroke="#202b3f" stroke-width="1.5"/>
+
+    <g transform="translate(24, 24)">
+      <rect x="0" y="0" width="34" height="34" rx="8" fill="#10b981" fill-opacity="0.12" stroke="#10b981" stroke-width="1.2"/>
+      <path d="M 12 17 L 16 21 L 22 13" fill="none" stroke="#10b981" stroke-width="2"/>
+      <text x="46" y="20" fill="#f8fafc" class="title-font" font-size="16">Workspace Onboarding State Machine</text>
+      <text x="46" y="34" fill="#64748b" class="mono-font" font-size="11">From Fresh Clone to Multi-Agent Squad Orchestration in 3 Steps</text>
+    </g>
+
+    <!-- 3-Step Flow Diagram -->
+    <g transform="translate(24, 75)">
+      <rect x="0" y="0" width="677" height="110" rx="12" fill="#0a0e17" stroke="#202b3f" stroke-width="1"/>
+      <text x="16" y="24" fill="#94a3b8" class="mono-font" font-size="10" font-weight="600" letter-spacing="0.05em">FIRST-RUN INITIALIZATION PIPELINE</text>
+
+      <!-- Step 1 -->
+      <g transform="translate(18, 38)">
+        <rect x="0" y="0" width="180" height="56" rx="8" fill="#0c1220" stroke="#06b6d4" stroke-width="1.2"/>
+        <text x="12" y="24" fill="#38bdf8" class="body-font" font-size="11" font-weight="700">1. Workspace Picker</text>
+        <text x="12" y="42" fill="#64748b" class="mono-font" font-size="9">Select Safe CWD (Anti-System32)</text>
+      </g>
+
+      <path d="M 204 66 L 228 66" stroke="#06b6d4" stroke-width="1.8" stroke-dasharray="3,2"/>
+      <polygon points="228,63 234,66 228,69" fill="#06b6d4"/>
+
+      <!-- Step 2 -->
+      <g transform="translate(240, 38)">
+        <rect x="0" y="0" width="180" height="56" rx="8" fill="#0c1220" stroke="#8b5cf6" stroke-width="1.2"/>
+        <text x="12" y="24" fill="#c084fc" class="body-font" font-size="11" font-weight="700">2. Squad Dispatch</text>
+        <text x="12" y="42" fill="#64748b" class="mono-font" font-size="9">Select Template or Single Chat</text>
+      </g>
+
+      <path d="M 426 66 L 450 66" stroke="#10b981" stroke-width="1.8" stroke-dasharray="3,2"/>
+      <polygon points="450,63 456,66 450,69" fill="#10b981"/>
+
+      <!-- Step 3 -->
+      <g transform="translate(462, 38)">
+        <rect x="0" y="0" width="195" height="56" rx="8" fill="#065f46" fill-opacity="0.3" stroke="#10b981" stroke-width="1.2"/>
+        <text x="12" y="24" fill="#34d399" class="body-font" font-size="11" font-weight="700">3. Active Execution</text>
+        <text x="12" y="42" fill="#a7f3d0" class="mono-font" font-size="9">Chat Stream &amp; File Worktree</text>
+      </g>
+    </g>
+
+    <!-- Recommended Task Quick Starters -->
+    <g transform="translate(24, 205)">
+      <text x="0" y="0" fill="#94a3b8" class="mono-font" font-size="11" font-weight="600" letter-spacing="0.05em">RECOMMENDED PROMPT ACCELERATORS</text>
+
+      <g transform="translate(0, 15)">
+        <rect x="0" y="0" width="677" height="66" rx="10" fill="#0a0e17" stroke="#202b3f"/>
+        <rect x="14" y="14" width="70" height="20" rx="4" fill="#162035" stroke="#06b6d4" stroke-width="0.8"/>
+        <text x="20" y="28" fill="#38bdf8" class="mono-font" font-size="9">FRONTEND</text>
+        <text x="96" y="28" fill="#f8fafc" class="body-font" font-size="12" font-weight="600">Crear nuevo componente React con Tailwind y TypeScript</text>
+        <text x="14" y="50" fill="#94a3b8" class="mono-font" font-size="10">Aplica tokens tácticos, soporte de tema oscuro y tipografía monoespaciada.</text>
+      </g>
+
+      <g transform="translate(0, 90)">
+        <rect x="0" y="0" width="677" height="66" rx="10" fill="#0a0e17" stroke="#202b3f"/>
+        <rect x="14" y="14" width="60" height="20" rx="4" fill="#162035" stroke="#10b981" stroke-width="0.8"/>
+        <text x="20" y="28" fill="#34d399" class="mono-font" font-size="9">TESTING</text>
+        <text x="86" y="28" fill="#f8fafc" class="body-font" font-size="12" font-weight="600">Escribir pruebas unitarias TDD con node --test</text>
+        <text x="14" y="50" fill="#94a3b8" class="mono-font" font-size="10">Verifica flujos, manejo de errores y compatibilidad de plataforma sin latencia.</text>
+      </g>
+
+      <g transform="translate(0, 165)">
+        <rect x="0" y="0" width="677" height="66" rx="10" fill="#0a0e17" stroke="#202b3f"/>
+        <rect x="14" y="14" width="70" height="20" rx="4" fill="#162035" stroke="#f59e0b" stroke-width="0.8"/>
+        <text x="20" y="28" fill="#fbbf24" class="mono-font" font-size="9">SECURITY</text>
+        <text x="96" y="28" fill="#f8fafc" class="body-font" font-size="12" font-weight="600">Auditar permisos de CWD y variables de entorno</text>
+        <text x="14" y="50" fill="#94a3b8" class="mono-font" font-size="10">Garantiza aislamiento seguro en el workspace y máscara de credenciales de API.</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ==================== BOTTOM ROW: SPEC CARD DIRECTORY SUMMARY ==================== -->
+  <g transform="translate(60, 695)">
+    <rect x="0" y="0" width="1480" height="295" rx="16" fill="url(#cardGrad)" stroke="#202b3f" stroke-width="1.2"/>
+
+    <g transform="translate(24, 24)">
+      <text x="0" y="0" fill="#f8fafc" class="title-font" font-size="16">Global Tactical HUD Milestone Metrics (Iteración 23)</text>
+      <text x="0" y="18" fill="#64748b" class="mono-font" font-size="11">System verification metrics and total production stability overview</text>
+
+      <!-- 4 Highlight KPI Cards -->
+      <g transform="translate(0, 36)">
+        <!-- Card 1 -->
+        <g transform="translate(0, 0)">
+          <rect x="0" y="0" width="345" height="150" rx="10" fill="#0a0e17" stroke="#202b3f"/>
+          <text x="20" y="32" fill="#64748b" class="mono-font" font-size="11" font-weight="700">SPEC CARDS</text>
+          <text x="20" y="70" fill="#38bdf8" class="title-font" font-size="32">56</text>
+          <text x="20" y="100" fill="#94a3b8" class="body-font" font-size="11">Planos vectoriales maestros en SVG cubriendo 100% de subsistemas.</text>
+          <text x="20" y="130" fill="#10b981" class="mono-font" font-size="10">● Catálogo Completo</text>
+        </g>
+
+        <!-- Card 2 -->
+        <g transform="translate(365, 0)">
+          <rect x="0" y="0" width="345" height="150" rx="10" fill="#0a0e17" stroke="#202b3f"/>
+          <text x="20" y="32" fill="#64748b" class="mono-font" font-size="11" font-weight="700">SUITES DE FLUJOS</text>
+          <text x="20" y="70" fill="#34d399" class="title-font" font-size="32">14 / 14</text>
+          <text x="20" y="100" fill="#94a3b8" class="body-font" font-size="11">100% pruebas unitarias superadas en 54.1ms con mock shims.</text>
+          <text x="20" y="130" fill="#10b981" class="mono-font" font-size="10">● Zero Regresiones</text>
+        </g>
+
+        <!-- Card 3 -->
+        <g transform="translate(730, 0)">
+          <rect x="0" y="0" width="345" height="150" rx="10" fill="#0a0e17" stroke="#202b3f"/>
+          <text x="20" y="32" fill="#64748b" class="mono-font" font-size="11" font-weight="700">PUREZA CROMÁTICA</text>
+          <text x="20" y="70" fill="#c084fc" class="title-font" font-size="32">0 RESIDUAL</text>
+          <text x="20" y="100" fill="#94a3b8" class="body-font" font-size="11">Erradicación absoluta de tokens antiguos en código y diagramas.</text>
+          <text x="20" y="130" fill="#10b981" class="mono-font" font-size="10">● 5 Capas Puras</text>
+        </g>
+
+        <!-- Card 4 -->
+        <g transform="translate(1095, 0)">
+          <rect x="0" y="0" width="335" height="150" rx="10" fill="#0a0e17" stroke="#202b3f"/>
+          <text x="20" y="32" fill="#64748b" class="mono-font" font-size="11" font-weight="700">ACCESIBILIDAD</text>
+          <text x="20" y="70" fill="#fbbf24" class="title-font" font-size="32">AAA 100%</text>
+          <text x="20" y="100" fill="#94a3b8" class="body-font" font-size="11">Ratios &gt; 9:1, trampas de foco APG cíclicas y navegación teclado.</text>
+          <text x="20" y="130" fill="#10b981" class="mono-font" font-size="10">● WCAG 2.2 Certificado</text>
+        </g>
+      </g>
+    </g>
+  </g>
+
+  <!-- Footer -->
+  <g transform="translate(60, 1015)">
+    <text x="0" y="0" fill="#64748b" class="mono-font" font-size="10">AGENTHUB TACTICAL HUD ARCHITECTURE · SPEC CARD #56 · ONBOARDING &amp; EMPTY STATE</text>
+    <text x="1480" y="0" text-anchor="end" fill="#64748b" class="mono-font" font-size="10">STANDARDS: WCAG 2.2 AAA · W3C APG · STRICT 5-LAYER TOKEN HARMONY</text>
+  </g>
+</svg>

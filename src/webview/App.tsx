@@ -389,6 +389,7 @@ export const App: React.FC = () => {
     postToHost({ command: 'switchSession', sessionId });
   }, []);
   const sp = useSplit(state.sessions);
+  const splitOn = !!session && isSplitActive(sp, session.id);
   // El servidor solo manda los mensajes del chat activo y visibles; las columnas y la ventana suelta piden los suyos.
   const soloParam = new URLSearchParams(location.search).get('solo');
   const visibleKey = [activeSessionId, ...sp.ids, ...(soloParam ? [soloParam] : [])].filter(Boolean).join(',');
@@ -502,10 +503,22 @@ export const App: React.FC = () => {
 
   const runTerminalCommand = useCallback((cmd: string, terminalId?: string) => {
     const targetId = terminalId || activeTerminalIdRef.current || 'default';
-    const cwd = sessionRef.current?.projectPath || workspaceOverviewRef.current.workspaceDir || undefined;
-    const shell = terminalTabsRef.current.find((t) => t.id === targetId)?.shell;
+    const tab = terminalTabsRef.current.find((t) => t.id === targetId);
+    const cwd = tab?.cwd || sessionRef.current?.projectPath || workspaceOverviewRef.current.workspaceDir || undefined;
+    const shell = tab?.shell;
     setIsTerminalOpen(true);
     postToHost({ command: 'runTerminalCommand', terminalId: targetId, commandLine: cmd, cwd, shell });
+  }, []);
+
+  const openTerminalAt = useCallback((dir: string) => {
+    const existing = terminalTabsRef.current.find((t) => t.cwd === dir);
+    const id = existing?.id ?? `term-${Date.now().toString(36)}`;
+    if (!existing) {
+      const title = dir.split(/[\\/]/).filter(Boolean).pop() ?? dir;
+      setTerminalTabs((prev) => [...prev, { id, title, cwd: dir, output: '', running: false }]);
+    }
+    setActiveTerminalId(id);
+    setIsTerminalOpen(true);
   }, []);
 
   const createTerminalTab = useCallback(() => {
@@ -758,13 +771,13 @@ export const App: React.FC = () => {
   if (soloId) {
     if (soloSession) {
       return (
-        <div className="h-screen flex flex-col bg-zinc-950 text-zinc-200 overflow-hidden">
+        <div className="h-screen flex flex-col bg-[#07090e] text-slate-200 overflow-hidden">
           {/* Barra superior de ventana flotante */}
-          <div className="flex items-center justify-between px-3 py-1.5 bg-zinc-900/90 border-b border-zinc-800 text-xs select-none shrink-0 backdrop-blur z-10">
+          <div className="flex items-center justify-between px-3 py-1.5 bg-[#0a0e17]/95 border-b border-[#202b3f] text-xs select-none shrink-0 backdrop-blur z-10">
             <div className="flex items-center gap-2 min-w-0">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-              <span className="font-semibold text-zinc-200 truncate">{soloSession.title || 'Chat Flotante'}</span>
-              <span className="text-[10px] text-zinc-500 truncate hidden min-[400px]:inline">({soloSession.modelId})</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(16,185,129,0.8)] animate-pulse shrink-0" />
+              <span className="font-mono font-semibold text-slate-200 truncate">{soloSession.title || 'Chat Flotante'}</span>
+              <span className="text-[10px] font-mono text-slate-500 truncate hidden min-[400px]:inline">({soloSession.modelId})</span>
             </div>
             <div className="flex items-center gap-1.5 shrink-0">
               {isElectron() && (
@@ -775,13 +788,13 @@ export const App: React.FC = () => {
                     setIsPinned(!isPinned);
                   }}
                   title={isPinned ? 'Fijado encima (haz clic para desfijar o usa Ctrl+Shift+T)' : 'Desfijado (haz clic para fijar encima o usa Ctrl+Shift+T)'}
-                  className={`flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium border transition cursor-pointer ${
+                  className={`flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-mono font-medium border transition cursor-pointer ${
                     isPinned
-                      ? 'bg-indigo-600/20 text-indigo-300 border-indigo-500/40 shadow-sm'
-                      : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-400 border-zinc-700'
+                      ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40 shadow-sm'
+                      : 'bg-[#0c1220] hover:bg-[#162035] text-slate-400 border-[#202b3f]'
                   }`}
                 >
-                  <Pin className={`w-3 h-3 ${isPinned ? 'rotate-45 text-indigo-400' : ''}`} />
+                  <Pin className={`w-3 h-3 ${isPinned ? 'rotate-45 text-cyan-400' : ''}`} />
                   <span className="hidden min-[380px]:inline">{isPinned ? 'Fijado' : 'Fijar'}</span>
                 </button>
               )}
@@ -791,7 +804,7 @@ export const App: React.FC = () => {
                   window.location.href = window.location.origin + window.location.pathname;
                 }}
                 title="Abrir vista completa de AgentHub"
-                className="p-1 rounded text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition cursor-pointer"
+                className="p-1 rounded text-slate-400 hover:text-cyan-300 hover:bg-[#0c1220] transition cursor-pointer"
               >
                 <Maximize2 className="w-3.5 h-3.5" />
               </button>
@@ -804,25 +817,25 @@ export const App: React.FC = () => {
       );
     }
     return (
-      <div className="h-screen flex flex-col items-center justify-center p-6 bg-zinc-950 text-zinc-400 select-none">
-        <Loader2 className="w-6 h-6 text-indigo-500 animate-spin mb-3" />
-        <span className="text-xs text-zinc-500">Cargando conversación flotante...</span>
+      <div className="h-screen flex flex-col items-center justify-center p-6 bg-[#07090e] text-slate-400 select-none">
+        <Loader2 className="w-6 h-6 text-cyan-400 animate-spin mb-3" />
+        <span className="text-xs font-mono text-slate-500">Cargando conversación flotante...</span>
       </div>
     );
   }
 
   return (
-    <div data-density={density} className="flex flex-col h-screen bg-zinc-950 text-zinc-100 overflow-hidden relative">
+    <div data-density={density} className="flex flex-col h-screen bg-[#07090e] text-slate-100 overflow-hidden relative selection:bg-cyan-500/30 selection:text-cyan-200">
       {/* Los lectores de pantalla anuncian cada aviso nuevo (agente terminó, pregunta, fallo). */}
       <div className="sr-only" role="status" aria-live="polite">{state.notices[state.notices.length - 1]?.text}</div>
-      <div className={`flex items-center justify-between ${density === 'compact' ? 'px-2 py-1' : 'px-3 py-1.5'} border-b border-zinc-800 shrink-0 max-[420px]:flex-wrap max-[420px]:gap-y-1`}>
+      <div className={`flex items-center justify-between ${density === 'compact' ? 'px-2 py-1' : 'px-3 py-1.5'} bg-[#0a0e17]/95 backdrop-blur-md border-b border-[#202b3f] shrink-0 max-[420px]:flex-wrap max-[420px]:gap-y-1 z-20`}>
         <div className={`flex items-center gap-2 min-w-0 max-[420px]:w-full ${focusMode ? 'invisible' : ''}`}>
-          <div className="flex items-center shrink-0 pr-2 border-r border-zinc-800">
+          <div className="flex items-center shrink-0 pr-2 border-r border-[#202b3f]">
             <AgentHubBrand compact={density === 'compact'} onClick={() => setActiveTab(activeTab === 'hud' ? 'chat' : 'hud')} />
           </div>
           {/* Con varias columnas cada una trae su propio selector; el global confundiría de qué chat es la carpeta. */}
-          {!(session && isSplitActive(sp, session.id)) && (
-          <div className="hidden sm:flex items-center shrink-0 pr-2 border-r border-zinc-800">
+          {!splitOn && (
+          <div className="hidden sm:flex items-center shrink-0 pr-2 border-r border-[#202b3f]">
             <WorkspacePicker
               sessionId={session?.id}
               currentDir={session?.projectPath || workspaceOverview.workspaceDir}
@@ -830,8 +843,14 @@ export const App: React.FC = () => {
             />
           </div>
           )}
-          <div ref={tabStripRef} className="relative flex items-center gap-1.5 min-w-0 overflow-x-auto no-scrollbar max-[900px]:[mask-image:linear-gradient(to_right,#000_calc(100%-14px),transparent)]">
-          {tabPill && <span aria-hidden className="hub-tab-pill absolute rounded-md bg-indigo-600 shadow shadow-indigo-500/30" style={tabPill} />}
+          <div ref={tabStripRef} className="relative flex items-center gap-1 min-w-0 overflow-x-auto no-scrollbar max-[900px]:[mask-image:linear-gradient(to_right,#000_calc(100%-14px),transparent)]">
+          {tabPill && (
+            <span
+              aria-hidden
+              className="hub-tab-pill absolute rounded-md bg-gradient-to-r from-cyan-500/25 via-teal-500/30 to-cyan-500/20 border border-cyan-400/40 shadow-[0_0_14px_rgba(6,182,212,0.3)] backdrop-blur-sm pointer-events-none"
+              style={tabPill}
+            />
+          )}
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
             return (
@@ -841,12 +860,14 @@ export const App: React.FC = () => {
                 aria-label={tab.label}
                 aria-current={isActive ? 'page' : undefined}
                 title={tab.label}
-                className={`relative z-10 flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-colors shrink-0 ${
-                  isActive ? 'text-white' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60'
+                className={`relative z-10 flex items-center justify-center gap-1.5 px-3 py-1 rounded-md text-xs font-mono transition-all duration-200 shrink-0 select-none ${
+                  isActive
+                    ? 'text-cyan-200 font-semibold drop-shadow-[0_0_8px_rgba(6,182,212,0.5)]'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-[#0c1220]/70'
                 }`}
               >
                 {tab.icon}
-                <span className={isActive ? undefined : 'hidden min-[1360px]:inline'}>{tab.label}</span>
+                <span className={isActive ? undefined : 'hidden lg:inline'}>{tab.label}</span>
               </button>
             );
           })}
@@ -856,7 +877,11 @@ export const App: React.FC = () => {
         <div className="flex items-center gap-1 min-w-0 overflow-x-auto no-scrollbar max-[900px]:[mask-image:linear-gradient(to_right,#000_calc(100%-14px),transparent)]">
           <button
             onClick={toggleFocus}
-            className={`p-1.5 rounded hover:bg-zinc-800 transition ${focusMode ? 'text-indigo-300' : 'text-zinc-400 hover:text-zinc-200'}`}
+            className={`p-1.5 rounded-md transition cursor-pointer ${
+              focusMode
+                ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-[0_0_8px_rgba(6,182,212,0.2)]'
+                : 'text-slate-400 hover:text-cyan-300 hover:bg-[#0c1220] border border-transparent'
+            }`}
             aria-label={focusMode ? 'Salir del modo enfoque' : 'Modo enfoque'}
             aria-pressed={focusMode}
             title={`${focusMode ? 'Salir del modo enfoque' : 'Modo enfoque'} (Ctrl+Shift+F)`}
@@ -867,47 +892,51 @@ export const App: React.FC = () => {
           {!focusMode && (<>
           <button
             onClick={toggleFilesSidebar}
-            className={`p-1.5 rounded transition cursor-pointer relative ${
-              isFilesSidebarOpen ? 'bg-indigo-600/30 text-indigo-300 border border-indigo-500/40' : 'hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200'
+            className={`p-1.5 rounded-md transition cursor-pointer relative ${
+              isFilesSidebarOpen
+                ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-[0_0_8px_rgba(6,182,212,0.2)]'
+                : 'hover:bg-[#0c1220] text-slate-400 hover:text-slate-200 border border-transparent'
             }`}
             aria-label="Panel de archivos y cambios Git"
             title={`Explorador de Archivos y Git (${workspaceOverview.gitFiles.length} cambios)`}
           >
             <FolderGit2 className="w-3.5 h-3.5" />
             {workspaceOverview.gitFiles.length > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 px-1 rounded-full bg-amber-500 text-zinc-950 text-[9px] font-bold leading-none py-0.5">
+              <span className="absolute -top-0.5 -right-0.5 px-1 rounded-full bg-amber-500 text-slate-950 text-[9px] font-mono font-bold leading-none py-0.5 shadow-sm">
                 {workspaceOverview.gitFiles.length}
               </span>
             )}
           </button>
           <button
             onClick={() => setIsSpotlightOpen(true)}
-            className="p-1.5 rounded hover:bg-zinc-800 text-zinc-400 hover:text-amber-300 transition"
+            className="p-1.5 rounded-md hover:bg-[#0c1220] text-slate-400 hover:text-amber-300 border border-transparent transition cursor-pointer"
             aria-label="Lanzador rápido Spotlight (Alt+Espacio)"
             title="Lanzador rápido Spotlight (Alt+Espacio)"
           >
-            <Zap className="w-3.5 h-3.5" />
+            <Zap className="w-3.5 h-3.5 text-amber-400" />
           </button>
           <button
             onClick={() => setIsTerminalOpen((v) => !v)}
-            className={`relative p-1.5 rounded transition ${
-              isTerminalOpen ? 'bg-emerald-600/20 text-emerald-300 border border-emerald-500/30' : 'hover:bg-zinc-800 text-zinc-400 hover:text-emerald-300'
+            className={`relative p-1.5 rounded-md transition cursor-pointer ${
+              isTerminalOpen
+                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-[0_0_8px_rgba(16,185,129,0.2)]'
+                : 'hover:bg-[#0c1220] text-slate-400 hover:text-emerald-300 border border-transparent'
             }`}
             aria-label="Terminal Shell integrada (Ctrl+`)"
             title="Terminal Shell integrada (Ctrl+`)"
           >
             <Terminal className="w-3.5 h-3.5" />
             {terminalTabs.some((t) => t.running) ? (
-              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-amber-400 animate-pulse shadow-[0_0_6px_rgba(245,158,11,0.8)]" />
             ) : terminalBadge ? (
               <span
                 className={`absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full ${
-                  terminalBadge === 'error' ? 'bg-rose-400' : 'bg-emerald-400'
+                  terminalBadge === 'error' ? 'bg-rose-400 shadow-[0_0_6px_rgba(244,63,94,0.8)]' : 'bg-emerald-400 shadow-[0_0_6px_rgba(16,185,129,0.8)]'
                 }`}
               />
             ) : null}
           </button>
-          <GitBranchBadge
+          {!splitOn && <GitBranchBadge
             branch={branchesData.currentBranch}
             branches={branchesData.branches}
             squadBranches={branchesData.squadBranches}
@@ -917,10 +946,10 @@ export const App: React.FC = () => {
             onOpenManager={openBranchManager}
             currentDir={session?.projectPath || workspaceOverview.workspaceDir}
             className="hidden sm:inline-flex"
-          />
+          />}
           <button
             onClick={runSecurityAudit}
-            className="p-1.5 rounded hover:bg-zinc-800 text-zinc-400 hover:text-amber-300 transition cursor-pointer"
+            className="p-1.5 rounded-md hover:bg-[#0c1220] text-slate-400 hover:text-amber-300 border border-transparent transition cursor-pointer"
             aria-label="Auditar Seguridad, Entorno y SQL"
             title="Auditar Seguridad, Entorno y SQL del proyecto"
           >
@@ -928,7 +957,7 @@ export const App: React.FC = () => {
           </button>
           <button
             onClick={openScratchpad}
-            className="p-1.5 rounded hover:bg-zinc-800 text-zinc-400 hover:text-indigo-300 transition cursor-pointer"
+            className="p-1.5 rounded-md hover:bg-[#0c1220] text-slate-400 hover:text-cyan-300 border border-transparent transition cursor-pointer"
             aria-label="Borrador de Trabajo / Scratchpad"
             title="Borrador de Trabajo / Scratchpad (.agent-hub/scratchpad.md)"
           >
@@ -936,8 +965,8 @@ export const App: React.FC = () => {
           </button>
           <button
             onClick={toggleSound}
-            className={`p-1.5 rounded hover:bg-zinc-800 transition cursor-pointer ${
-              soundEnabled ? 'text-zinc-400 hover:text-indigo-300' : 'text-zinc-600'
+            className={`p-1.5 rounded-md hover:bg-[#0c1220] border border-transparent transition cursor-pointer ${
+              soundEnabled ? 'text-cyan-400 hover:text-cyan-300' : 'text-slate-600 hover:text-slate-400'
             }`}
             aria-label={soundEnabled ? 'Silenciar alertas de audio' : 'Activar alertas de audio'}
             title={soundEnabled ? 'Alertas sonoras activas' : 'Alertas sonoras silenciadas'}
@@ -946,7 +975,7 @@ export const App: React.FC = () => {
           </button>
           <button
             onClick={toggleDensity}
-            className="p-1.5 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition"
+            className="p-1.5 rounded-md hover:bg-[#0c1220] text-slate-400 hover:text-slate-200 border border-transparent transition cursor-pointer"
             aria-label={`Densidad: ${density === 'compact' ? 'Compacto' : 'Cómodo'}. Cambiar`}
             title={`Densidad: ${density === 'compact' ? 'Compacto' : 'Cómodo'} (clic para cambiar)`}
           >
@@ -954,16 +983,21 @@ export const App: React.FC = () => {
           </button>
           <button
             onClick={handleOpenMain}
-            className="p-1.5 rounded hover:bg-zinc-800 text-zinc-400 hover:text-indigo-300 transition cursor-pointer"
+            className="p-1.5 rounded-md hover:bg-[#0c1220] text-slate-400 hover:text-cyan-300 border border-transparent transition cursor-pointer"
             aria-label="Modo Central / Pestaña Principal (Ctrl+Alt+M)"
             title="Modo Central: enfoca el chat activo y colapsa paneles (Ctrl+Alt+M)"
           >
             <Maximize className="w-3.5 h-3.5" />
           </button>
+          {!splitOn && (<>
           <button
             onClick={() => session && sp.toggle(session.id)}
             aria-pressed={!!session && sp.ids.includes(session.id)}
-            className={`p-1.5 rounded hover:bg-zinc-800 transition cursor-pointer ${session && sp.ids.includes(session.id) ? 'text-indigo-300' : 'text-zinc-400'} hover:text-indigo-300`}
+            className={`p-1.5 rounded-md transition cursor-pointer ${
+              session && sp.ids.includes(session.id)
+                ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-[0_0_8px_rgba(6,182,212,0.2)]'
+                : 'hover:bg-[#0c1220] text-slate-400 hover:text-cyan-300 border border-transparent'
+            }`}
             aria-label="Ver varios chats a la vez"
             title="Ver varios chats a la vez: agrega o quita este chat de la vista en columnas"
           >
@@ -971,7 +1005,7 @@ export const App: React.FC = () => {
           </button>
           <button
             onClick={handleSplitBeside}
-            className="p-1.5 rounded hover:bg-zinc-800 text-zinc-400 hover:text-indigo-300 transition cursor-pointer"
+            className="p-1.5 rounded-md hover:bg-[#0c1220] text-slate-400 hover:text-cyan-300 border border-transparent transition cursor-pointer"
             aria-label="Panel Lateral Dividido (Ctrl+Alt+B)"
             title="Panel Lateral Dividido: divide el espacio en paneles paralelos (Ctrl+Alt+B)"
           >
@@ -979,15 +1013,16 @@ export const App: React.FC = () => {
           </button>
           <button
             onClick={handlePopOut}
-            className="p-1.5 rounded hover:bg-zinc-800 text-zinc-400 hover:text-indigo-300 transition cursor-pointer"
+            className="p-1.5 rounded-md hover:bg-[#0c1220] text-slate-400 hover:text-cyan-300 border border-transparent transition cursor-pointer"
             aria-label="Desacoplar a Ventana Flotante Independiente (Ctrl+Alt+W)"
             title="Desacoplar a Ventana Flotante Independiente (Ctrl+Alt+W)"
           >
             <AppWindow className="w-3.5 h-3.5" />
           </button>
+          </>)}
           <button
             onClick={handleOpenExternal}
-            className="p-1.5 rounded hover:bg-zinc-800 text-zinc-400 hover:text-indigo-300 transition cursor-pointer"
+            className="p-1.5 rounded-md hover:bg-[#0c1220] text-slate-400 hover:text-cyan-300 border border-transparent transition cursor-pointer"
             aria-label="Abrir en Navegador Web / PWA Externa (localhost:3710)"
             title="Abrir en Navegador Web / PWA Externa (localhost:3710)"
           >
@@ -995,11 +1030,11 @@ export const App: React.FC = () => {
           </button>
           <button
             onClick={handleRefresh}
-            className="p-1.5 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition cursor-pointer"
+            className="p-1.5 rounded-md hover:bg-[#0c1220] text-slate-400 hover:text-slate-200 border border-transparent transition cursor-pointer"
             aria-label="Refrescar estado"
             title="Refrescar estado"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-indigo-400' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-cyan-400' : ''}`} />
           </button>
           {isStandaloneBrowser() && (
             <button
@@ -1010,7 +1045,7 @@ export const App: React.FC = () => {
                   : 'vscode://';
                 window.open(uri, '_blank');
               }}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/40 text-xs font-medium whitespace-nowrap shrink-0 transition cursor-pointer"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/40 text-xs font-mono font-medium whitespace-nowrap shrink-0 transition cursor-pointer shadow-sm"
               title="Abrir este proyecto en Visual Studio Code"
             >
               <Code2 className="w-3.5 h-3.5" />
@@ -1022,14 +1057,14 @@ export const App: React.FC = () => {
       </div>
 
       {offline && (
-        <div role="alert" className="flex items-center justify-center gap-1.5 px-3 py-1 bg-amber-500/15 border-b border-amber-500/30 text-[11px] text-amber-200 shrink-0">
-          <Loader2 className="w-3 h-3 animate-spin" aria-hidden />
-          Sin conexión con el servidor de AgentHub. Reconectando…
+        <div role="alert" className="flex items-center justify-center gap-2 px-3 py-1 bg-amber-500/10 border-b border-amber-500/25 text-[11px] font-mono text-amber-300 shrink-0 shadow-[inset_0_1px_0_rgba(245,158,11,0.2)]">
+          <Loader2 className="w-3 h-3 animate-spin text-amber-400" aria-hidden />
+          <span><strong className="font-bold tracking-wide">[OFFLINE HUD]</strong> Sin conexión con el servidor de AgentHub. Reconectando…</span>
         </div>
       )}
 
       {!focusMode && runningSessions.length + waitingSessions.length > 0 && (
-        <div className="flex items-center gap-1.5 px-3 py-1.5 border-b border-zinc-800 overflow-x-auto shrink-0" aria-label="Agentes en curso">
+        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#07090e]/80 border-b border-[#202b3f] overflow-x-auto shrink-0 no-scrollbar" aria-label="Agentes en curso">
           {[...runningSessions, ...waitingSessions].map((running) => {
             const role = running.protocolRole;
             const position = state.waitingSessionIds.indexOf(running.id) + 1;
@@ -1043,11 +1078,11 @@ export const App: React.FC = () => {
                 onClick={() => openChat(running.id)}
                 title={`${agentName(running)}${role ? ` · ${PROTOCOL_ROLES[role]?.label ?? role}` : ''}`}
                 style={accent ? { borderColor: accent } : undefined}
-                className={`flex items-center gap-1 px-2 py-0.5 rounded-full border text-[11px] shrink-0 transition hover:brightness-125 ${(role && ROLE_COLORS[role]) || 'border-zinc-700 bg-zinc-800/40 text-zinc-300'}`}
+                className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border text-[11px] font-mono shrink-0 transition hover:brightness-125 ${(role && ROLE_COLORS[role]) || 'border-[#202b3f] bg-[#0a0e17] text-slate-300 hover:border-cyan-500/40'}`}
               >
-                {position > 0 ? <Clock className="w-3 h-3" aria-hidden /> : <Loader2 className="w-3 h-3 animate-spin" aria-hidden />}
-                <span className="max-w-[120px] truncate">{agentName(running)}</span>
-                {position > 0 && <span className="font-mono text-zinc-400">En espera #{position}</span>}
+                {position > 0 ? <Clock className="w-3 h-3 text-amber-400" aria-hidden /> : <Loader2 className="w-3 h-3 animate-spin text-cyan-400" aria-hidden />}
+                <span className="max-w-[120px] truncate font-medium">{agentName(running)}</span>
+                {position > 0 && <span className="font-mono text-amber-400/80">#espera {position}</span>}
               </button>
             );
           })}
@@ -1107,18 +1142,44 @@ export const App: React.FC = () => {
                 dispatch={dispatch}
                 switchSession={switchSession}
                 recentDirs={workspaceOverview.recentWorkspaces}
-                currentBranch={branchesData.currentBranch}
-                branches={branchesData.branches}
-                squadBranches={branchesData.squadBranches}
-                gitFilesCount={workspaceOverview.gitFiles.length}
                 onCheckoutBranch={checkoutGitBranch}
                 onCreateBranch={createGitBranch}
                 onOpenBranchManager={openBranchManager}
+                onOpenTerminal={openTerminalAt}
                 onOpenHistory={() => setDrawerMode('history')}
                 onNewTask={() => setDrawerMode('newTask')}
               />
             </div>
           </>
+        )}
+        {shownTab === 'chat' && !session && (
+          <div className="flex-1 min-w-0 h-full flex flex-col items-center justify-center p-6 text-center select-none bg-[#07090e]">
+            <div className="w-full max-w-md p-6 rounded-2xl bg-[#0a0e17] border border-[#202b3f] shadow-2xl space-y-4 animate-modal-pop">
+              <div className="w-12 h-12 mx-auto rounded-2xl bg-[#0c1220] border border-cyan-500/40 flex items-center justify-center text-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.15)]">
+                <MessageSquare className="w-6 h-6" />
+              </div>
+              <div className="space-y-1">
+                <h2 className="text-sm font-black uppercase tracking-wider text-slate-100 font-mono">Sin conversación activa</h2>
+                <p className="text-xs text-slate-400 font-mono">Inicia un nuevo chat con la IA o selecciona una tarea desde el Centro de Mando.</p>
+              </div>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setDrawerMode('newTask')}
+                  className="w-full sm:w-auto px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs font-mono transition shadow-lg shadow-cyan-500/20 cursor-pointer"
+                >
+                  + Iniciar Nuevo Chat
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('hud')}
+                  className="w-full sm:w-auto px-4 py-2 rounded-xl bg-[#0c1220] hover:bg-[#162035] text-slate-200 border border-[#202b3f] text-xs font-mono transition cursor-pointer"
+                >
+                  Centro de Mando
+                </button>
+              </div>
+            </div>
+          </div>
         )}
 
         {shownTab === 'agents' && (

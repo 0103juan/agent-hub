@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tactical Scratchpad &amp; Quick Notes Engine — Showcase</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.2; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.05); }
+    }
+    .pulse-glow { animation: pulseGlow 4s ease-in-out infinite; }
+    /* Canonical Elevation Layers */
+    .bg-layer-1 { background-color: #07090e; }
+    .bg-layer-2 { background-color: #0a0e17; }
+    .bg-layer-3 { background-color: #0c1220; }
+    .bg-layer-4 { background-color: #162035; }
+    .border-layer-5 { border-color: #202b3f; }
+  </style>
+</head>
+<body class="bg-[#07090e] text-slate-200 font-sans h-full overflow-hidden flex flex-col antialiased selection:bg-amber-500/30 selection:text-amber-200">
+
+  <!-- Top Tactical Navigation Bar -->
+  <header class="h-14 border-b border-[#202b3f] bg-[#0a0e17] flex items-center justify-between px-6 shrink-0 z-20">
+    <div class="flex items-center gap-3">
+      <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-400 font-mono font-bold text-sm">
+        #62
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-sm font-bold tracking-tight text-white">Borrador Táctico y Motor de Notas Rápidas</h1>
+          <span class="px-2 py-0.5 text-[10px] font-mono rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">SPEC CARD #62</span>
+        </div>
+        <p class="text-[11px] text-slate-400 font-mono">Persistencia `.agent-hub/scratchpad.md` · Debounce 1500ms · Inyección Ctrl+Enter</p>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="flex items-center gap-3">
+      <div class="hidden sm:flex items-center gap-2 px-3 py-1 rounded-lg bg-[#0c1220] border border-[#202b3f] text-xs font-mono text-slate-400">
+        <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+        <span>AUTOSAVE DEBOUNCE: <strong class="text-amber-300 font-bold" id="debounce-status">INACTIVO</strong></span>
+      </div>
+
+      <button id="toggle-drawer-btn" class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/50 text-xs font-bold font-mono transition shadow-sm cursor-pointer">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        <span>ABRIR BORRADOR</span>
+        <span class="text-[10px] bg-amber-950/60 px-1 py-0.5 rounded text-amber-200">Ctrl+Shift+S</span>
+      </button>
+
+      <a href="master-design-portal-and-component-gallery-showcase.html" class="px-3 py-1.5 rounded-lg bg-[#0c1220] hover:bg-[#162035] text-slate-300 hover:text-white border border-[#202b3f] text-xs font-medium transition cursor-pointer">
+        Volver al Portal
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Canvas: Simulated Agent Chat / IDE Workspace -->
+  <main class="flex-1 relative flex overflow-hidden">
+    <!-- Left Workspace (Agent Hub Chat View) -->
+    <section class="flex-1 flex flex-col bg-[#07090e] border-r border-[#202b3f] overflow-hidden">
+      <!-- Simulated Chat Header -->
+      <div class="h-10 border-b border-[#202b3f] bg-[#0a0e17] px-4 flex items-center justify-between text-xs font-mono text-slate-400">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+          <span class="font-bold text-slate-200">SESIÓN ACTIVA:</span>
+          <span class="text-cyan-300">architect-agent-stream #049</span>
+        </div>
+        <div class="text-[11px] text-slate-500">
+          Presiona <kbd class="px-1.5 py-0.5 rounded bg-[#162035] text-slate-300 border border-[#202b3f]">Ctrl+Enter</kbd> en el borrador para despachar contexto
+        </div>
+      </div>
+
+      <!-- Messages Stream -->
+      <div id="chat-stream" class="flex-1 p-6 overflow-y-auto space-y-4">
+        <!-- Agent Initial Message -->
+        <div class="flex items-start gap-3 max-w-3xl">
+          <div class="w-8 h-8 rounded-lg bg-cyan-950/80 border border-cyan-500/40 flex items-center justify-center text-cyan-300 text-xs font-bold font-mono shrink-0">
+            AH
+          </div>
+          <div class="flex-1 bg-[#0a0e17] border border-[#202b3f] rounded-xl p-4 shadow-lg space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-cyan-300 font-mono">AgentHub Core</span>
+              <span class="text-[10px] text-slate-500 font-mono">01:24:00</span>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              El entorno de trabajo está sincronizado con el espacio actual. Si necesitas preparar requerimientos, listas de verificación o notas temporales antes de iniciar un flujo autónomo, utiliza el <strong>Borrador Táctico</strong> a la derecha. Todo se almacena automáticamente en <code class="text-amber-400 bg-[#07090e] px-1 py-0.5 rounded font-mono">.agent-hub/scratchpad.md</code>.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Composer Mock -->
+      <div class="p-4 border-t border-[#202b3f] bg-[#0a0e17] flex items-center gap-2">
+        <input type="text" id="chat-input" placeholder="Escribe un mensaje al agente..." class="flex-1 bg-[#07090e] border border-[#202b3f] rounded-xl px-4 py-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500">
+        <button id="chat-send" class="px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold text-xs transition">Enviar</button>
+      </div>
+    </section>
+
+    <!-- Right Simulated Scratchpad Drawer (Replicates ScratchpadDrawer.tsx Exactly) -->
+    <aside id="scratchpad-drawer" class="w-96 bg-[#07090e] border-l border-[#202b3f] shadow-2xl flex flex-col text-xs z-30 transition-all duration-300 ease-in-out">
+      <!-- Drawer Header -->
+      <div class="flex items-center justify-between p-3.5 border-b border-[#202b3f] bg-[#0a0e17]/95 backdrop-blur-md shrink-0">
+        <div class="flex items-center gap-2 text-slate-200 font-bold tracking-wide" title="Borrador de trabajo (.agent-hub/scratchpad.md)">
+          <div class="p-1 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-400">
+            <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          </div>
+          <span>Borrador Táctico</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+          <!-- Open in Document Editor Button -->
+          <button id="open-doc-btn" class="p-1.5 rounded-lg hover:bg-[#0c1220] text-slate-400 hover:text-cyan-300 border border-transparent hover:border-[#202b3f] transition cursor-pointer" title="Abrir scratchpad.md en el visor de documentos">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+          </button>
+
+          <!-- Add Task Button -->
+          <button id="add-task-btn" class="p-1.5 rounded-lg hover:bg-[#0c1220] text-slate-400 hover:text-emerald-300 border border-transparent hover:border-[#202b3f] transition cursor-pointer" title="Añadir una tarea (- [ ])">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+          </button>
+
+          <!-- Trash / Clear FSM Container -->
+          <div id="clear-container" class="inline-flex items-center">
+            <button id="trash-btn" class="p-1.5 rounded-lg hover:bg-[#0c1220] text-slate-400 hover:text-rose-400 border border-transparent hover:border-[#202b3f] transition cursor-pointer" title="Vaciar el borrador">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            </button>
+          </div>
+
+          <!-- Copy Button -->
+          <button id="copy-btn" class="p-1.5 rounded-lg hover:bg-[#0c1220] text-slate-400 hover:text-white border border-transparent hover:border-[#202b3f] transition cursor-pointer" title="Copiar contenido">
+            <svg id="copy-icon" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+          </button>
+
+          <!-- Save Button / Pill Indicator -->
+          <button id="save-pill" class="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-mono font-semibold transition cursor-pointer border bg-[#0c1220] text-slate-400 border-[#202b3f]" title="Guardar en .agent-hub/scratchpad.md (Ctrl+S; también se guarda solo)">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+            <span id="save-status-text">Guardado</span>
+          </button>
+
+          <!-- Close Drawer Button -->
+          <button id="close-drawer-btn" class="p-1.5 rounded-lg hover:bg-[#0c1220] text-slate-400 hover:text-white border border-transparent hover:border-[#202b3f] transition cursor-pointer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Editor Textarea Canvas -->
+      <div class="flex-1 p-3 bg-[#07090e] flex flex-col">
+        <textarea id="scratchpad-editor" placeholder="Escribe notas, tareas, snippets o requerimientos temporales..." class="flex-1 w-full p-3 bg-transparent border border-[#202b3f]/70 rounded-xl text-slate-200 font-mono text-xs resize-none focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30 leading-relaxed placeholder-slate-600 selection:bg-cyan-500/35 shadow-inner"># Borrador de Trabajo Táctico
+
+- [x] Consolidar capas canónicas (#07090e a #202b3f)
+- [ ] Ejecutar prueba de persistencia debounce
+- [ ] Inyectar notas en el flujo de ejecución
+
+## Snippet de Configuración
+```json
+{
+  "autosaveDebounceMs": 1500,
+  "hotkeys": {
+    "send": "Ctrl+Enter",
+    "save": "Ctrl+S"
+  }
+}
+```</textarea>
+      </div>
+
+      <!-- Drawer Footer -->
+      <div class="p-3 border-t border-[#202b3f] bg-[#07090e] flex items-center justify-between gap-2 shrink-0 font-mono">
+        <span id="telemetry-counter" class="min-w-0 truncate text-[10px] text-slate-400" title=".agent-hub/scratchpad.md">
+          32 palabras · 318 car.
+        </span>
+        <button id="send-to-agent-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-slate-950 text-xs font-bold whitespace-nowrap shrink-0 transition cursor-pointer shadow-md shadow-cyan-600/30">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+          <span>Enviar al Agente</span>
+          <span class="opacity-70 text-[9px] bg-cyan-950/60 text-cyan-200 px-1 py-0.2 rounded font-mono">Ctrl+↵</span>
+        </button>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Interactive JavaScript Logic -->
+  <script>
+    const editor = document.getElementById('scratchpad-editor');
+    const savePill = document.getElementById('save-pill');
+    const saveStatusText = document.getElementById('save-status-text');
+    const telemetryCounter = document.getElementById('telemetry-counter');
+    const debounceStatus = document.getElementById('debounce-status');
+    const sendBtn = document.getElementById('send-to-agent-btn');
+    const chatStream = document.getElementById('chat-stream');
+    const copyBtn = document.getElementById('copy-btn');
+    const copyIcon = document.getElementById('copy-icon');
+    const addTaskBtn = document.getElementById('add-task-btn');
+    const clearContainer = document.getElementById('clear-container');
+    const trashBtn = document.getElementById('trash-btn');
+    const toggleDrawerBtn = document.getElementById('toggle-drawer-btn');
+    const closeDrawerBtn = document.getElementById('close-drawer-btn');
+    const drawer = document.getElementById('scratchpad-drawer');
+    const openDocBtn = document.getElementById('open-doc-btn');
+
+    let debounceTimer = null;
+    let isSaved = true;
+
+    function updateTelemetry() {
+      const text = editor.value;
+      const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+      telemetryCounter.textContent = `${words} palabras · ${text.length} car.`;
+    }
+
+    function triggerAutosave() {
+      isSaved = false;
+      savePill.className = "flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-mono font-semibold transition cursor-pointer border bg-amber-500/20 text-amber-300 border-amber-500/50";
+      saveStatusText.textContent = "Pendiente...";
+      debounceStatus.textContent = "CONTANDO (1500ms)";
+      debounceStatus.className = "text-amber-400 font-bold animate-pulse";
+
+      if (debounceTimer) clearTimeout(debounceTimer);
+
+      debounceTimer = setTimeout(() => {
+        isSaved = true;
+        savePill.className = "flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-mono font-semibold transition cursor-pointer border bg-emerald-600/20 text-emerald-300 border-emerald-500/40";
+        saveStatusText.textContent = "Guardado";
+        debounceStatus.textContent = "SINCRONIZADO";
+        debounceStatus.className = "text-emerald-400 font-bold";
+        setTimeout(() => {
+          if (isSaved) {
+            savePill.className = "flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-mono font-semibold transition cursor-pointer border bg-[#0c1220] text-slate-400 border-[#202b3f]";
+            debounceStatus.textContent = "INACTIVO";
+            debounceStatus.className = "text-slate-400 font-bold";
+          }
+        }, 1200);
+      }, 1500);
+    }
+
+    editor.addEventListener('input', () => {
+      updateTelemetry();
+      triggerAutosave();
+    });
+
+    // Hotkey handler matching React component
+    editor.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        if (debounceTimer) clearTimeout(debounceTimer);
+        isSaved = true;
+        savePill.className = "flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-mono font-semibold transition cursor-pointer border bg-emerald-600 text-white border-emerald-500 shadow-sm";
+        saveStatusText.textContent = "Guardado (Ctrl+S)";
+        debounceStatus.textContent = "FORZADO";
+        setTimeout(() => {
+          savePill.className = "flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-mono font-semibold transition cursor-pointer border bg-[#0c1220] text-slate-400 border-[#202b3f]";
+          saveStatusText.textContent = "Guardado";
+          debounceStatus.textContent = "INACTIVO";
+        }, 1200);
+      } else if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        sendToAgent();
+      } else if (e.key === 'Tab' && !e.shiftKey) {
+        e.preventDefault();
+        const start = editor.selectionStart;
+        const end = editor.selectionEnd;
+        editor.value = editor.value.substring(0, start) + "  " + editor.value.substring(end);
+        editor.selectionStart = editor.selectionEnd = start + 2;
+        triggerAutosave();
+        updateTelemetry();
+      } else if (e.key === 'Escape') {
+        drawer.classList.toggle('hidden');
+      }
+    });
+
+    // Global toggle hotkey
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        drawer.classList.toggle('hidden');
+      }
+    });
+
+    function sendToAgent() {
+      const text = editor.value.trim();
+      if (!text) return;
+
+      const payload = `[CONTEXTO DEL SCRATCHPAD DE TRABAJO]\n\n${text}`;
+
+      // Append user payload to chat stream
+      const msgDiv = document.createElement('div');
+      msgDiv.className = "flex items-start gap-3 max-w-3xl ml-auto justify-end";
+      msgDiv.innerHTML = `
+        <div class="flex-1 bg-[#0c1220] border border-cyan-500/40 rounded-xl p-4 shadow-lg space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-cyan-300 font-mono">Borrador Inyectado</span>
+            <span class="text-[10px] text-slate-500 font-mono">Ahora</span>
+          </div>
+          <pre class="text-xs text-slate-200 font-mono whitespace-pre-wrap leading-relaxed">${escapeHtml(payload)}</pre>
+        </div>
+        <div class="w-8 h-8 rounded-lg bg-cyan-600 flex items-center justify-center text-slate-950 text-xs font-bold font-mono shrink-0">
+          U
+        </div>
+      `;
+      chatStream.appendChild(msgDiv);
+      chatStream.scrollTop = chatStream.scrollHeight;
+    }
+
+    sendBtn.addEventListener('click', sendToAgent);
+
+    // Add Task Button
+    addTaskBtn.addEventListener('click', () => {
+      const curr = editor.value;
+      const next = `${curr}${curr && !curr.endsWith('\n') ? '\n' : ''}- [ ] `;
+      editor.value = next;
+      editor.focus();
+      triggerAutosave();
+      updateTelemetry();
+    });
+
+    // Two-step Destructive Clear FSM
+    function renderClearNormal() {
+      clearContainer.innerHTML = `
+        <button id="trash-btn" class="p-1.5 rounded-lg hover:bg-[#0c1220] text-slate-400 hover:text-rose-400 border border-transparent hover:border-[#202b3f] transition cursor-pointer" title="Vaciar el borrador">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+        </button>
+      `;
+      document.getElementById('trash-btn').addEventListener('click', renderClearConfirm);
+    }
+
+    function renderClearConfirm() {
+      clearContainer.innerHTML = `
+        <span class="flex items-center gap-1.5 text-[11px] font-mono text-rose-300 bg-rose-950/60 border border-rose-800/60 px-2 py-0.5 rounded-md">
+          ¿Vaciar?
+          <button id="confirm-clear-yes" class="px-1.5 py-0.2 rounded bg-rose-600 hover:bg-rose-500 text-white font-bold cursor-pointer">Sí</button>
+          <button id="confirm-clear-no" class="text-slate-400 hover:text-white cursor-pointer"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+        </span>
+      `;
+      document.getElementById('confirm-clear-yes').addEventListener('click', () => {
+        editor.value = '';
+        triggerAutosave();
+        updateTelemetry();
+        renderClearNormal();
+      });
+      document.getElementById('confirm-clear-no').addEventListener('click', renderClearNormal);
+    }
+
+    trashBtn.addEventListener('click', renderClearConfirm);
+
+    // Copy to clipboard
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(editor.value).then(() => {
+        copyIcon.outerHTML = `<svg id="copy-icon" class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>`;
+        setTimeout(() => {
+          document.getElementById('copy-icon').outerHTML = `<svg id="copy-icon" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>`;
+        }, 1500);
+      });
+    });
+
+    // Toggle Drawer Visibility
+    toggleDrawerBtn.addEventListener('click', () => drawer.classList.toggle('hidden'));
+    closeDrawerBtn.addEventListener('click', () => drawer.classList.add('hidden'));
+
+    openDocBtn.addEventListener('click', () => {
+      alert("Disparando CustomEvent('agenthub:open-document', { detail: '.agent-hub/scratchpad.md' })\n\nSe abre en el Visor Táctico de Documentos con AST Outline y Device Sandboxing.");
+    });
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    updateTelemetry();
+  </script>
+</body>
+</html>

@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentHub // Tactical Composer & Action Palette Showcase</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-void: #07090e;
+      --bg-carbon: #0a0e17;
+      --bg-surface: #0c1220;
+      --bg-card: #0e131f;
+      --border-subtle: #162035;
+      --border-strong: #202b3f;
+      --cyan-primary: #06b6d4;
+      --cyan-glow: rgba(6, 182, 212, 0.4);
+      --emerald-accent: #10b981;
+      --amber-accent: #f59e0b;
+      --rose-accent: #f43f5e;
+      --violet-accent: #8b5cf6;
+      --text-main: #f8fafc;
+      --text-muted: #cbd5e1;
+      --text-dim: #94a3b8;
+      --text-faint: #64748b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-void);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .font-mono { font-family: 'Fira Code', monospace; }
+
+    .grid-bg {
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(6, 182, 212, 0.08), transparent 60%),
+        radial-gradient(circle at 100% 100%, rgba(139, 92, 246, 0.05), transparent 50%),
+        linear-gradient(to right, rgba(22, 32, 53, 0.35) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(22, 32, 53, 0.35) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 28px 28px, 28px 28px;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 6px 12px;
+      font-size: 11.5px;
+      font-weight: 600;
+      border-radius: 8px;
+      border: 1px solid var(--border-strong);
+      background: #131927;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s ease-in-out;
+      text-decoration: none;
+    }
+    .btn:hover {
+      background: #1a2337;
+      color: #fff;
+      border-color: #334460;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #06b6d4, #14b8a6);
+      color: #07090e;
+      border: none;
+      font-weight: 800;
+      box-shadow: 0 0 12px rgba(6, 182, 212, 0.35);
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #0891b2, #0d9488);
+      color: #07090e;
+      box-shadow: 0 0 16px rgba(6, 182, 212, 0.5);
+    }
+    .btn-violet {
+      background: rgba(139, 92, 246, 0.15);
+      border-color: rgba(139, 92, 246, 0.35);
+      color: var(--violet-accent);
+    }
+    .btn-violet:hover {
+      background: rgba(139, 92, 246, 0.25);
+      color: #fff;
+    }
+    .btn-emerald {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: rgba(16, 185, 129, 0.35);
+      color: var(--emerald-accent);
+    }
+    .btn-emerald:hover {
+      background: rgba(16, 185, 129, 0.25);
+      color: #fff;
+    }
+
+    /* Modal Animation */
+    @keyframes modalPop {
+      0% { opacity: 0; transform: scale(0.97) translateY(8px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .modal-anim { animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+    /* Voice Wave Animation */
+    @keyframes pulseWave {
+      0%, 100% { transform: scaleY(0.4); opacity: 0.6; }
+      50% { transform: scaleY(1.2); opacity: 1; }
+    }
+    .wave-bar {
+      width: 3px;
+      height: 14px;
+      background: var(--rose-accent);
+      border-radius: 2px;
+      animation: pulseWave 0.8s ease-in-out infinite;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-void); }
+    ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  </style>
+</head>
+<body class="grid-bg">
+
+  <!-- TOP HEADER -->
+  <header style="background: rgba(10, 14, 23, 0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-strong); padding: 14px 24px; position: sticky; top: 0; z-index: 40;">
+    <div style="max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 34px; height: 34px; border-radius: 9px; background: linear-gradient(135deg, var(--cyan-primary), var(--violet-accent)); display: flex; align-items: center; justify-content: center; color: #07090e; font-size: 16px; font-weight: 900; box-shadow: 0 0 12px var(--cyan-glow);">
+          ⚡
+        </div>
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <h1 style="font-size: 15px; font-weight: 800; color: #fff;">Tactical Composer & Action Palette</h1>
+            <span style="font-size: 10px; font-family: 'Fira Code', monospace; font-weight: 700; color: var(--cyan-primary); background: rgba(6,182,212,0.15); border: 1px solid rgba(6,182,212,0.3); padding: 1px 7px; border-radius: 5px;">SPEC CARD #46</span>
+          </div>
+          <p style="font-size: 11px; color: var(--text-dim); margin-top: 1px;" class="font-mono">
+            Compositor Multimodal • Motor de Acciones • Bandeja ODD • 0% Fugas Cromáticas
+          </p>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <button class="btn btn-violet" onclick="toggleLoopMode()">
+          🔁 <span id="loopStatusLabel">Loop: Desactivado</span>
+        </button>
+        <button class="btn btn-emerald" onclick="openActionPalette()">
+          🔧 Paleta de Acciones (Ctrl+K)
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN WORKSPACE -->
+  <main style="max-width: 1200px; margin: 0 auto; padding: 24px 20px; flex: 1; width: 100%; display: flex; flex-direction: column; gap: 20px;">
+    
+    <!-- DEMO SIMULATION CARD: THE COMPOSER -->
+    <div style="background: var(--bg-surface); border: 1px solid var(--border-strong); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 15px 35px -10px rgba(0,0,0,0.8);">
+      
+      <!-- Top Title & Metrics -->
+      <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-subtle); pb: 12px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--cyan-primary); box-shadow: 0 0 8px var(--cyan-primary);"></span>
+          <span style="font-size: 12.5px; font-weight: 800; color: #fff;">Compositor Táctico Interactivo</span>
+        </div>
+        <div style="font-size: 11px; color: var(--text-dim);" class="font-mono">
+          Modelo: <span style="color: var(--cyan-primary); font-weight: 700;">Claude 3.5 Sonnet</span> (200k tokens)
+        </div>
+      </div>
+
+      <!-- Live Voice Dictation Banner (When active) -->
+      <div id="voiceBanner" style="display: none; align-items: center; justify-content: space-between; padding: 10px 14px; background: rgba(244,63,94,0.12); border: 1px solid rgba(244,63,94,0.35); border-radius: 10px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 3px;">
+            <div class="wave-bar" style="animation-delay: 0s;"></div>
+            <div class="wave-bar" style="animation-delay: 0.2s;"></div>
+            <div class="wave-bar" style="animation-delay: 0.4s;"></div>
+            <div class="wave-bar" style="animation-delay: 0.1s;"></div>
+          </div>
+          <span style="font-size: 11.5px; font-weight: 700; color: var(--rose-accent);">Grabando dictado de voz...</span>
+          <span style="font-size: 11px; color: var(--text-dim);" class="font-mono" id="voiceTimer">00:04</span>
+        </div>
+        <button class="btn" style="background: rgba(244,63,94,0.2); color: var(--rose-accent); border-color: var(--rose-accent); padding: 4px 10px;" onclick="stopVoiceDictation()">
+          Detener Dictado
+        </button>
+      </div>
+
+      <!-- Attachment Chips Tray -->
+      <div id="attachmentTray" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 12px; background: var(--bg-void); border: 1px solid var(--border-subtle); border-radius: 10px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; font-size: 10.5px; color: var(--text-dim);" class="font-mono">
+          <span><span style="color: var(--cyan-primary); font-weight: 700;">●</span> <span id="chipCountLabel">2 adjuntos activos</span> • <span id="chipTokenLabel">~1,420 tokens</span></span>
+          <button style="background: none; border: none; color: var(--rose-accent); cursor: pointer; font-size: 10.5px;" onclick="clearAttachments()">Quitar todos</button>
+        </div>
+        
+        <div id="chipsContainer" style="display: flex; flex-wrap: wrap; gap: 6px; width: 100%;">
+          <div class="chip" style="display: flex; align-items: center; gap: 6px; font-size: 11px; padding: 4px 8px; border-radius: 6px; background: rgba(6,182,212,0.15); border: 1px solid rgba(6,182,212,0.35); color: var(--cyan-primary);" class="font-mono">
+            <span>📄 src/host/safe-path.ts</span>
+            <span style="font-size: 10px; opacity: 0.7;">(3.4 KB)</span>
+            <button style="background: none; border: none; color: inherit; cursor: pointer;" onclick="this.parentElement.remove(); updateChipsCount();">✕</button>
+          </div>
+          <div class="chip" style="display: flex; align-items: center; gap: 6px; font-size: 11px; padding: 4px 8px; border-radius: 6px; background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.35); color: var(--emerald-accent);" class="font-mono">
+            <span>± git diff main...HEAD</span>
+            <span style="font-size: 10px; opacity: 0.7;">(+48 / -12)</span>
+            <button style="background: none; border: none; color: inherit; cursor: pointer;" onclick="this.parentElement.remove(); updateChipsCount();">✕</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action & Context Bar Row -->
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+        <!-- Left: Context Buttons -->
+        <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+          <button class="btn" onclick="addContextAttachment('📄 Editor Activo (MessageList.tsx)', 840)">
+            📎 Contexto
+          </button>
+          <button class="btn" onclick="addContextAttachment('📁 docs/specs/flujos.md', 520)">
+            📁 Archivos
+          </button>
+          <button class="btn" onclick="addContextAttachment('± git diff staging', 310)">
+            ± Diff
+          </button>
+          <button class="btn" style="color: var(--amber-accent); border-color: rgba(245,158,11,0.3);" onclick="addContextAttachment('⚠️ 0 Errores / 2 Avisos TS', 180)">
+            ⚠️ Problemas
+          </button>
+        </div>
+
+        <!-- Right: Actions & Squad Flows -->
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <button class="btn btn-emerald" onclick="simulateRunAction('tests')">
+            ▶ Test
+          </button>
+          <button class="btn" onclick="simulateRunAction('semantic-commit')">
+            ✨ Commit
+          </button>
+          <button class="btn btn-violet" onclick="toggleSquadDrawer()" id="btnFlowsDrawer">
+            ⚙ Flujos <span style="font-size: 9px; background: var(--violet-accent); color: #fff; padding: 0 4px; border-radius: 10px; margin-left: 2px;">4</span> ▾
+          </button>
+          <button class="btn" onclick="openActionPalette()">
+            🔧 Acciones
+          </button>
+        </div>
+      </div>
+
+      <!-- Squad Flows Drawer (Expandable) -->
+      <div id="squadDrawer" style="display: none; background: var(--bg-carbon); border: 1px solid var(--border-strong); border-radius: 12px; padding: 16px; margin-top: 4px;" class="modal-anim">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 14px;">👥</span>
+            <span style="font-size: 12px; font-weight: 800; color: #fff;" class="font-mono">LANZAR EQUIPO DE AGENTES // PIPELINE TDD</span>
+          </div>
+          <span style="font-size: 10.5px; color: var(--emerald-accent); font-weight: 700;" class="font-mono">✓ CWD Aislado por Chat</span>
+        </div>
+
+        <!-- Pipeline Sequence Visual -->
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px;">
+          <div style="background: var(--bg-surface); border: 1px solid var(--violet-accent); border-radius: 8px; padding: 10px;">
+            <div style="font-size: 10px; font-weight: 800; color: var(--violet-accent);" class="font-mono">01 // ARQUITECTO</div>
+            <div style="font-size: 11px; color: #fff; font-weight: 600; margin-top: 2px;">Contrato &amp; API</div>
+            <div style="font-size: 10px; color: var(--text-faint); margin-top: 2px;">Escribe especificaciones</div>
+          </div>
+          <div style="background: var(--bg-surface); border: 1px solid var(--emerald-accent); border-radius: 8px; padding: 10px;">
+            <div style="font-size: 10px; font-weight: 800; color: var(--emerald-accent);" class="font-mono">02 // TESTER</div>
+            <div style="font-size: 11px; color: #fff; font-weight: 600; margin-top: 2px;">Pruebas Red</div>
+            <div style="font-size: 10px; color: var(--text-faint); margin-top: 2px;">Escribe suites unitarias</div>
+          </div>
+          <div style="background: var(--bg-surface); border: 1px solid var(--cyan-primary); border-radius: 8px; padding: 10px;">
+            <div style="font-size: 10px; font-weight: 800; color: var(--cyan-primary);" class="font-mono">03 // DEVELOPER</div>
+            <div style="font-size: 11px; color: #fff; font-weight: 600; margin-top: 2px;">Código Green</div>
+            <div style="font-size: 10px; color: var(--text-faint); margin-top: 2px;">Implementa solución</div>
+          </div>
+          <div style="background: var(--bg-surface); border: 1px solid var(--amber-accent); border-radius: 8px; padding: 10px;">
+            <div style="font-size: 10px; font-weight: 800; color: var(--amber-accent);" class="font-mono">04 // REVISOR</div>
+            <div style="font-size: 11px; color: #fff; font-weight: 600; margin-top: 2px;">Auditoría Diff</div>
+            <div style="font-size: 10px; color: var(--text-faint); margin-top: 2px;">Seguridad &amp; refactor</div>
+          </div>
+        </div>
+
+        <!-- Checkbox Options -->
+        <div style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 11.5px; color: var(--text-muted); pt: 8px; border-top: 1px solid var(--border-subtle);">
+          <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+            <input type="checkbox" checked style="accent-color: var(--cyan-primary);">
+            <span>Copia aparte (Worktree git aislado)</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+            <input type="checkbox" checked style="accent-color: var(--cyan-primary);">
+            <span>Aprobar cada traspaso secuencial</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+            <input type="checkbox" style="accent-color: var(--cyan-primary);">
+            <span>Plan primero (solo lectura inicial)</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Main Input Box with Auto-Grow and Tokens Estimator -->
+      <div style="background: var(--bg-void); border: 1px solid var(--border-strong); border-radius: 12px; overflow: hidden; transition: border-color 0.15s;" id="composerBox">
+        <textarea 
+          id="promptInput" 
+          rows="3" 
+          placeholder="Pregunta a Claude 3.5 Sonnet, @ para agentes y archivos, / para comandos rápidos..." 
+          style="width: 100%; background: transparent; border: none; padding: 14px; font-size: 13px; color: #fff; font-family: inherit; resize: none; outline: none; line-height: 1.6;"
+          oninput="handlePromptInput(this)"
+          onfocus="document.getElementById('composerBox').style.borderColor='var(--cyan-primary)'"
+          onblur="document.getElementById('composerBox').style.borderColor='var(--border-strong)'"
+        >Refactoriza el router de sesiones para garantizar que cada agente corra estrictamente en su CWD asignado sin fugas a System32.</textarea>
+
+        <!-- Composer Bottom Toolbar -->
+        <div style="padding: 8px 14px; background: rgba(10, 14, 23, 0.95); border-top: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+          
+          <div style="display: flex; align-items: center; gap: 10px; font-size: 11px; color: var(--text-dim);" class="font-mono">
+            <span id="sendKeyHint" style="background: #131927; padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border-strong); color: #fff;">Ctrl+⏎ Enviar</span>
+            <button style="background: none; border: none; color: var(--cyan-primary); cursor: pointer; text-decoration: underline;" onclick="toggleEnterMode()">Cambiar a ⏎</button>
+            <span>•</span>
+            <span id="tokenEstimatorBadge" style="color: var(--emerald-accent); font-weight: 700;">~182 tokens</span>
+            <span>•</span>
+            <span id="lineCountBadge">1 línea</span>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <button class="btn" style="padding: 5px 10px;" onclick="startVoiceDictation()" title="Dictado por voz">
+              🎤 Dictar
+            </button>
+            <button class="btn btn-primary" onclick="submitPrompt()">
+              Enviar ↗
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RECENT ACTIVITY LOG CARD -->
+    <div style="background: var(--bg-card); border: 1px solid var(--border-strong); border-radius: 12px; padding: 16px;">
+      <h3 style="font-size: 12px; font-weight: 800; color: #fff; margin-bottom: 8px;" class="font-mono">LOG DE ACTIVIDAD TÁCTICA // DESPACHO EN TIEMPO REAL</h3>
+      <div id="logConsole" style="background: var(--bg-void); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 12px; font-family: 'Fira Code', monospace; font-size: 11px; color: var(--text-muted); max-height: 120px; overflow-y: auto; line-height: 1.6;">
+        <div><span style="color: var(--cyan-primary);">[SYSTEM]</span> Tactical Composer v2.4 inicializado. 0 fugas de tokens.</div>
+        <div><span style="color: var(--emerald-accent);">[CWD]</span> Verificado: C:\Users\juan0\Documents\GitHub\portafolio\agent-hub (repo git activo).</div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ACTION PALETTE MODAL SHELL -->
+  <div id="actionPaletteModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 100; align-items: center; justify-content: center; padding: 20px;" onclick="if(event.target===this) closeActionPalette()">
+    <div style="background: var(--bg-card); border: 1px solid var(--border-strong); border-radius: 16px; width: 100%; max-width: 640px; box-shadow: 0 25px 60px rgba(0,0,0,0.9); overflow: hidden;" class="modal-anim">
+      
+      <!-- Modal Header -->
+      <div style="padding: 14px 18px; border-bottom: 1px solid var(--border-strong); display: flex; align-items: center; justify-content: space-between; background: rgba(10,14,23,0.98);">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 16px;">🔧</span>
+          <h2 style="font-size: 13.5px; font-weight: 800; color: #fff;">Acciones Rápidas del Workspace</h2>
+          <span style="font-size: 10px; font-family: 'Fira Code', monospace; color: var(--cyan-primary); background: rgba(6,182,212,0.15); padding: 1px 6px; border-radius: 4px;">41 ACCIONES</span>
+        </div>
+        <button class="btn" style="padding: 4px 8px;" onclick="closeActionPalette()">✕</button>
+      </div>
+
+      <!-- Search Input -->
+      <div style="padding: 12px 18px; background: var(--bg-void); border-bottom: 1px solid var(--border-subtle);">
+        <input 
+          type="text" 
+          id="actionSearchInput" 
+          placeholder="Buscar acción (tests, git, secretos, arquitectura, lint)..." 
+          style="width: 100%; background: var(--bg-surface); border: 1px solid var(--border-strong); border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #fff; font-family: 'Fira Code', monospace; outline: none;"
+          oninput="filterActionList(this.value)"
+        >
+      </div>
+
+      <!-- Action Items List -->
+      <div id="actionsList" style="padding: 12px; max-height: 340px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;">
+        <!-- Injected via JS -->
+      </div>
+
+      <!-- Modal Footer -->
+      <div style="padding: 10px 18px; background: rgba(10,14,23,0.95); border-top: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between; font-size: 10.5px; color: var(--text-dim);" class="font-mono">
+        <span>Enter ejecuta la primera coincidencia</span>
+        <span>Esc cierra</span>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const WORKSPACE_ACTIONS = [
+      { id: 'tests', label: 'Ejecutar pruebas del proyecto', cat: 'tests', desc: 'Lanza npm test / cargo test / pytest / go test', icon: '▶', color: '#10b981' },
+      { id: 'impacted-tests', label: 'Pruebas impactadas por el diff', cat: 'tests', desc: 'Ejecuta solo tests afectados por cambios recientes', icon: '⚡', color: '#f59e0b' },
+      { id: 'dependency-audit', label: 'Auditar vulnerabilidades npm/pip/cargo', cat: 'security', desc: 'Comprueba CVEs activos y dependencias obsoletas', icon: '🛡️', color: '#f43f5e' },
+      { id: 'scan-secrets', label: 'Escanear credenciales y secretos', cat: 'security', desc: 'Detecta claves de API, JWTs y variables .env', icon: '🔒', color: '#f43f5e' },
+      { id: 'semantic-commit', label: 'Generar Conventional Commit con IA', cat: 'git', desc: 'Crea mensaje feat/fix a partir de git diff', icon: '✨', color: '#06b6d4' },
+      { id: 'audit-branch', label: 'Auditar rama actual contra main', cat: 'git', desc: 'git diff main...HEAD con análisis estático', icon: '⎇', color: '#f59e0b' },
+      { id: 'worktree', label: 'Crear rama en worktree aislado', cat: 'git', desc: 'Espacio de trabajo paralelo sin ensuciar la copia actual', icon: '🌿', color: '#10b981' },
+      { id: 'c4-diagram', label: 'Generar diagrama C4 de arquitectura', cat: 'arch', desc: 'Visualización estructural en SVG/Mermaid', icon: '📐', color: '#8b5cf6' },
+      { id: 'review-diff', label: 'Revisión exhaustiva de código (Code Review)', cat: 'arch', desc: 'Analiza legibilidad, acoplamiento y riesgos', icon: '👁️', color: '#8b5cf6' }
+    ];
+
+    let ctrlEnterMode = true;
+    let loopActive = false;
+    let isVoiceActive = false;
+    let voiceInterval = null;
+    let voiceSeconds = 0;
+
+    function handlePromptInput(textarea) {
+      const text = textarea.value;
+      const tokens = Math.max(1, Math.round(text.length / 4));
+      const lines = text.split('\n').length;
+      document.getElementById('tokenEstimatorBadge').innerText = `~${tokens} tokens`;
+      document.getElementById('lineCountBadge').innerText = `${lines} línea${lines === 1 ? '' : 's'}`;
+    }
+
+    function toggleEnterMode() {
+      ctrlEnterMode = !ctrlEnterMode;
+      document.getElementById('sendKeyHint').innerText = ctrlEnterMode ? 'Ctrl+⏎ Enviar' : '⏎ Enviar';
+      logMessage(`Modo de envío conmutado a: ${ctrlEnterMode ? 'Ctrl+Enter' : 'Enter simple'}`);
+    }
+
+    function toggleLoopMode() {
+      loopActive = !loopActive;
+      const label = document.getElementById('loopStatusLabel');
+      const textarea = document.getElementById('promptInput');
+      label.innerText = loopActive ? 'Loop: ACTIVO' : 'Loop: Desactivado';
+      if (loopActive) {
+        if (!textarea.value.startsWith('/loop ')) textarea.value = '/loop ' + textarea.value;
+        logMessage(`[LOOP PROTOCOL] Activado. Las instrucciones correrán en bucle continuo.`);
+      } else {
+        textarea.value = textarea.value.replace(/^\/loop\s*/, '');
+        logMessage(`[LOOP PROTOCOL] Desactivado.`);
+      }
+      handlePromptInput(textarea);
+    }
+
+    function toggleSquadDrawer() {
+      const drawer = document.getElementById('squadDrawer');
+      const isOpen = drawer.style.display === 'block';
+      drawer.style.display = isOpen ? 'none' : 'block';
+      logMessage(`Bandeja de flujos ODD: ${isOpen ? 'Plegada' : 'Desplegada'}`);
+    }
+
+    function addContextAttachment(name, tokens) {
+      const container = document.getElementById('chipsContainer');
+      const chip = document.createElement('div');
+      chip.className = 'chip';
+      chip.style.cssText = "display: flex; align-items: center; gap: 6px; font-size: 11px; padding: 4px 8px; border-radius: 6px; background: rgba(6,182,212,0.15); border: 1px solid rgba(6,182,212,0.35); color: var(--cyan-primary); font-family: 'Fira Code', monospace;";
+      chip.innerHTML = `<span>${name}</span> <span style="font-size: 10px; opacity: 0.7;">(~${tokens} tok)</span> <button style="background: none; border: none; color: inherit; cursor: pointer;" onclick="this.parentElement.remove(); updateChipsCount();">✕</button>`;
+      container.appendChild(chip);
+      updateChipsCount();
+      logMessage(`Adjunto agregado: ${name} (~${tokens} tokens)`);
+    }
+
+    function clearAttachments() {
+      document.getElementById('chipsContainer').innerHTML = '';
+      updateChipsCount();
+      logMessage(`Todos los adjuntos fueron removidos del contexto.`);
+    }
+
+    function updateChipsCount() {
+      const count = document.querySelectorAll('.chip').length;
+      document.getElementById('chipCountLabel').innerText = `${count} adjunto${count === 1 ? '' : 's'} activo${count === 1 ? '' : 's'}`;
+    }
+
+    function startVoiceDictation() {
+      isVoiceActive = true;
+      voiceSeconds = 0;
+      document.getElementById('voiceBanner').style.display = 'flex';
+      voiceInterval = setInterval(() => {
+        voiceSeconds++;
+        const mins = String(Math.floor(voiceSeconds / 60)).padStart(2, '0');
+        const secs = String(voiceSeconds % 60).padStart(2, '0');
+        document.getElementById('voiceTimer').innerText = `${mins}:${secs}`;
+      }, 1000);
+      logMessage(`[VOICE RECOGNITION] Micrófono abierto. Transcribiendo audio en vivo...`);
+    }
+
+    function stopVoiceDictation() {
+      isVoiceActive = false;
+      clearInterval(voiceInterval);
+      document.getElementById('voiceBanner').style.display = 'none';
+      const textarea = document.getElementById('promptInput');
+      textarea.value += ' y verificar que los tests pasen con 0 regresiones.';
+      handlePromptInput(textarea);
+      logMessage(`[VOICE RECOGNITION] Audio procesado y anexado al prompt.`);
+    }
+
+    function submitPrompt() {
+      const textarea = document.getElementById('promptInput');
+      const text = textarea.value.trim();
+      if (!text) return;
+      logMessage(`[DISPATCH] Prompt enviado a Claude 3.5 Sonnet: «${text.slice(0, 60)}...»`);
+      alert(`Prompt despachado al motor de ejecución con éxito:\n\n${text}`);
+    }
+
+    function simulateRunAction(actionId) {
+      logMessage(`[ACTION RUNNER] Ejecutando acción: ${actionId}...`);
+      setTimeout(() => logMessage(`[ACTION RUNNER] Acción '${actionId}' completada con código 0 [EXIT OK]`), 600);
+    }
+
+    function openActionPalette() {
+      document.getElementById('actionPaletteModal').style.display = 'flex';
+      renderActionList(WORKSPACE_ACTIONS);
+      setTimeout(() => document.getElementById('actionSearchInput').focus(), 50);
+    }
+
+    function closeActionPalette() {
+      document.getElementById('actionPaletteModal').style.display = 'none';
+    }
+
+    function filterActionList(q) {
+      const filtered = WORKSPACE_ACTIONS.filter(a => 
+        a.label.toLowerCase().includes(q.toLowerCase()) || 
+        a.desc.toLowerCase().includes(q.toLowerCase())
+      );
+      renderActionList(filtered);
+    }
+
+    function renderActionList(list) {
+      const container = document.getElementById('actionsList');
+      if (list.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: var(--text-faint); padding: 24px;" class="font-mono">No hay acciones con ese filtro</div>';
+        return;
+      }
+      container.innerHTML = list.map(a => `
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 8px; cursor: pointer; transition: all 0.15s;" onmouseover="this.style.borderColor='var(--cyan-primary)'" onmouseout="this.style.borderColor='var(--border-subtle)'" onclick="simulateRunAction('${a.id}'); closeActionPalette();">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 14px; color: ${a.color};">${a.icon}</span>
+            <div>
+              <div style="font-size: 12px; font-weight: 700; color: #fff;">${a.label}</div>
+              <div style="font-size: 10.5px; color: var(--text-dim);">${a.desc}</div>
+            </div>
+          </div>
+          <span style="font-size: 10px; color: ${a.color}; font-family: 'Fira Code', monospace; font-weight: 700; background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px;">EJECUTAR</span>
+        </div>
+      `).join('');
+    }
+
+    function logMessage(msg) {
+      const consoleEl = document.getElementById('logConsole');
+      const row = document.createElement('div');
+      const time = new Date().toLocaleTimeString();
+      row.innerHTML = `<span style="color: var(--text-faint);">[${time}]</span> ${msg}`;
+      consoleEl.prepend(row);
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeActionPalette();
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        openActionPalette();
+      }
+    });
+  </script>
+</body>
+</html>

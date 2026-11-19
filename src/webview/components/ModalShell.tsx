@@ -45,14 +45,21 @@ export const ModalShell: React.FC<Props> = ({ title, icon, widthClass = 'max-w-s
 
   return (
     <div
-      className="fixed inset-0 bg-black/70 flex items-center justify-center p-3 z-50"
+      className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 z-50 animate-backdrop-fade"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <div ref={dialogRef} onKeyDown={trapFocus} role="dialog" aria-modal="true" aria-label={title} className={`select-text bg-zinc-900 border border-zinc-700 rounded-xl w-full ${widthClass} max-h-[85vh] flex flex-col shadow-2xl overflow-hidden`}>
-        <div className="p-3 border-b border-zinc-800 flex items-center justify-between bg-zinc-950/60">
-          <h3 className="text-xs font-semibold text-zinc-100 flex items-center gap-1.5">
+      <div
+        ref={dialogRef}
+        onKeyDown={trapFocus}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        className={`select-text bg-[#0a0e17] border border-[#202b3f] rounded-2xl w-full ${widthClass} max-h-[85vh] flex flex-col shadow-2xl shadow-black/80 overflow-hidden animate-modal-pop`}
+      >
+        <div className="px-4 py-3 border-b border-[#202b3f] flex items-center justify-between bg-[#07090e]/95 backdrop-blur-md shrink-0">
+          <h3 className="text-xs font-bold text-slate-100 flex items-center gap-2 tracking-wide">
             {icon}
             <span>{title}</span>
           </h3>
@@ -60,7 +67,7 @@ export const ModalShell: React.FC<Props> = ({ title, icon, widthClass = 'max-w-s
             type="button"
             aria-label="Cerrar"
             onClick={onClose}
-            className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#0c1220] border border-transparent hover:border-[#202b3f] transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>

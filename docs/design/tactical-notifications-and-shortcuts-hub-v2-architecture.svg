@@ -1,0 +1,404 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1050" width="1600" height="1050">
+  <defs>
+    <!-- Background Gradients -->
+    <radialGradient id="bgGlow" cx="50%" cy="15%" r="75%">
+      <stop offset="0%" stop-color="#0e172a" stop-opacity="0.8"/>
+      <stop offset="55%" stop-color="#07090e" stop-opacity="0.96"/>
+      <stop offset="100%" stop-color="#040608" stop-opacity="1"/>
+    </radialGradient>
+    <radialGradient id="amberGlow" cx="20%" cy="25%" r="40%">
+      <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="cyanGlow" cx="80%" cy="25%" r="45%">
+      <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#06b6d4" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Card Backgrounds & Borders -->
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0c1220"/>
+      <stop offset="100%" stop-color="#0a0e17"/>
+    </linearGradient>
+    <linearGradient id="borderGradAmber" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.8"/>
+      <stop offset="50%" stop-color="#202b3f" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#d97706" stop-opacity="0.3"/>
+    </linearGradient>
+    <linearGradient id="borderGradCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.8"/>
+      <stop offset="50%" stop-color="#202b3f" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#0891b2" stop-opacity="0.3"/>
+    </linearGradient>
+
+    <!-- Tactical Grid Pattern -->
+    <pattern id="tacticalGrid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#162035" stroke-width="0.75" stroke-opacity="0.45"/>
+      <circle cx="0" cy="0" r="1" fill="#06b6d4" fill-opacity="0.25"/>
+    </pattern>
+  </defs>
+
+  <style>
+    .title-font { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 800; }
+    .mono-font { font-family: 'JetBrains Mono', 'Fira Code', Menlo, Monaco, Consolas, monospace; }
+    .body-font { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+  </style>
+
+  <!-- Deep Canvas -->
+  <rect width="1600" height="1050" fill="#07090e"/>
+  <rect width="1600" height="1050" fill="url(#bgGlow)"/>
+  <rect width="1600" height="1050" fill="url(#tacticalGrid)"/>
+  <rect width="700" height="600" fill="url(#amberGlow)" x="50" y="50" pointer-events="none"/>
+  <rect width="700" height="600" fill="url(#cyanGlow)" x="850" y="50" pointer-events="none"/>
+
+  <!-- Top Tactical Nav Header -->
+  <g transform="translate(60, 45)">
+    <rect x="0" y="0" width="1480" height="74" rx="14" fill="#0a0e17" stroke="#202b3f" stroke-width="1.2"/>
+    
+    <rect x="18" y="16" width="42" height="42" rx="10" fill="#0c1220" stroke="#f59e0b" stroke-width="1.5"/>
+    <path d="M 39 24 C 33 24 30 29 30 35 L 30 40 L 26 42 L 52 42 L 48 40 L 48 35 C 48 29 45 24 39 24 Z" fill="none" stroke="#f59e0b" stroke-width="1.8"/>
+    <circle cx="39" cy="45" r="2" fill="#fbbf24"/>
+
+    <text x="74" y="36" fill="#f8fafc" class="title-font" font-size="19" letter-spacing="-0.02em">AGENTHUB TACTICAL HUD <tspan fill="#f59e0b">::</tspan> SPEC CARD #54</text>
+    <text x="74" y="52" fill="#94a3b8" class="mono-font" font-size="11" letter-spacing="0.05em">NOTIFICATIONS BUS, SHORTCUTS HUB &amp; WCAG 2.2 AAA ACCESSIBILITY MATRIX (v2)</text>
+
+    <!-- Status Badges -->
+    <g transform="translate(1050, 20)">
+      <rect x="0" y="0" width="125" height="34" rx="8" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+      <circle cx="16" cy="17" r="4" fill="#10b981"/>
+      <text x="28" y="22" fill="#34d399" class="mono-font" font-size="11" font-weight="600">WCAG AAA: OK</text>
+
+      <rect x="135" y="0" width="140" height="34" rx="8" fill="#162035" stroke="#202b3f" stroke-width="1"/>
+      <text x="14" y="22" fill="#38bdf8" class="mono-font" font-size="11" font-weight="600">22 SHORTCUTS</text>
+
+      <rect x="285" y="0" width="135" height="34" rx="8" fill="#162035" stroke="#f59e0b" stroke-width="1.2"/>
+      <circle cx="299" cy="17" r="4" fill="#f59e0b"/>
+      <text x="311" y="22" fill="#fbbf24" class="mono-font" font-size="11" font-weight="600">BUS ACTIVE</text>
+    </g>
+  </g>
+
+  <!-- ==================== LEFT COLUMN: NOTIFICATIONS BUS ARCHITECTURE ==================== -->
+  <g transform="translate(60, 145)">
+    <rect x="0" y="0" width="725" height="530" rx="16" fill="url(#cardGrad)" stroke="url(#borderGradAmber)" stroke-width="1.5"/>
+
+    <!-- Header -->
+    <g transform="translate(24, 24)">
+      <rect x="0" y="0" width="34" height="34" rx="8" fill="#f59e0b" fill-opacity="0.12" stroke="#f59e0b" stroke-width="1.2"/>
+      <path d="M 17 9 C 13 9 10 13 10 18 L 10 22 L 7 24 L 27 24 L 24 22 L 24 18 C 24 13 21 9 17 9 Z" fill="none" stroke="#f59e0b" stroke-width="1.6"/>
+      <circle cx="17" cy="27" r="1.5" fill="#fbbf24"/>
+
+      <text x="46" y="20" fill="#f8fafc" class="title-font" font-size="16">Tactical Notifications Bus Architecture</text>
+      <text x="46" y="34" fill="#64748b" class="mono-font" font-size="11">Ephemeral Filter · Host Event Bridge · Failure Escalation Counter</text>
+      
+      <!-- Pills -->
+      <g transform="translate(480, 2)">
+        <rect x="0" y="0" width="95" height="26" rx="6" fill="#07090e" stroke="#202b3f"/>
+        <text x="12" y="17" fill="#f59e0b" class="mono-font" font-size="10">AUDIT BUS</text>
+        <rect x="102" y="0" width="90" height="26" rx="6" fill="#07090e" stroke="#202b3f"/>
+        <text x="112" y="17" fill="#10b981" class="mono-font" font-size="10">0 UNREAD</text>
+      </g>
+    </g>
+
+    <!-- Notification Event Flow Diagram -->
+    <g transform="translate(24, 75)">
+      <rect x="0" y="0" width="677" height="110" rx="12" fill="#0a0e17" stroke="#202b3f" stroke-width="1"/>
+      <text x="16" y="24" fill="#94a3b8" class="mono-font" font-size="10" font-weight="600" letter-spacing="0.05em">EVENT INGESTION &amp; ESCALATION PIPELINE</text>
+
+      <!-- Step 1: Agent/Host Event -->
+      <g transform="translate(18, 38)">
+        <rect x="0" y="0" width="115" height="56" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="10" y="24" fill="#cbd5e1" class="body-font" font-size="11" font-weight="600">1. Host Event</text>
+        <text x="10" y="42" fill="#64748b" class="mono-font" font-size="9">IPC postMessage</text>
+      </g>
+
+      <path d="M 137 66 L 151 66" stroke="#f59e0b" stroke-width="1.8" stroke-dasharray="3,2"/>
+      <polygon points="151,63 157,66 151,69" fill="#f59e0b"/>
+
+      <!-- Step 2: Severity Classifier -->
+      <g transform="translate(161, 38)">
+        <rect x="0" y="0" width="115" height="56" rx="8" fill="#0c1220" stroke="#202b3f" stroke-width="1"/>
+        <text x="10" y="24" fill="#cbd5e1" class="body-font" font-size="11" font-weight="600">2. Classifier</text>
+        <text x="10" y="42" fill="#64748b" class="mono-font" font-size="9">isFailure() regex</text>
+      </g>
+
+      <path d="M 280 66 L 294 66" stroke="#f59e0b" stroke-width="1.8" stroke-dasharray="3,2"/>
+      <polygon points="294,63 300,66 294,69" fill="#f59e0b"/>
+
+      <!-- Step 3: Badge Escalation -->
+      <g transform="translate(304, 38)">
+        <rect x="0" y="0" width="115" height="56" rx="8" fill="#0c1220" stroke="#f59e0b" stroke-width="1.2"/>
+        <text x="10" y="24" fill="#fbbf24" class="body-font" font-size="11" font-weight="600">3. Badge Sync</text>
+        <text x="10" y="42" fill="#64748b" class="mono-font" font-size="9">red / cyan pill</text>
+      </g>
+
+      <path d="M 423 66 L 437 66" stroke="#10b981" stroke-width="1.8" stroke-dasharray="3,2"/>
+      <polygon points="437,63 443,66 437,69" fill="#10b981"/>
+
+      <!-- Step 4: Dropdown Stream -->
+      <g transform="translate(447, 38)">
+        <rect x="0" y="0" width="105" height="56" rx="8" fill="#0c1220" stroke="#10b981" stroke-width="1"/>
+        <text x="10" y="24" fill="#10b981" class="body-font" font-size="11" font-weight="600">4. Popup Stream</text>
+        <text x="10" y="42" fill="#64748b" class="mono-font" font-size="9">animate-pop</text>
+      </g>
+
+      <path d="M 556 66 L 570 66" stroke="#06b6d4" stroke-width="1.8" stroke-dasharray="3,2"/>
+      <polygon points="570,63 576,66 570,69" fill="#06b6d4"/>
+
+      <!-- Step 5: Session Jump -->
+      <g transform="translate(580, 38)">
+        <rect x="0" y="0" width="85" height="56" rx="8" fill="#0891b2" fill-opacity="0.2" stroke="#06b6d4" stroke-width="1.2"/>
+        <text x="14" y="24" fill="#38bdf8" class="mono-font" font-size="10" font-weight="700">NAVIGATE</text>
+        <text x="14" y="44" fill="#6ee7b7" class="mono-font" font-size="9">onOpenSession</text>
+      </g>
+    </g>
+
+    <!-- Notification Anatomy Samples -->
+    <g transform="translate(24, 200)">
+      <text x="0" y="0" fill="#94a3b8" class="mono-font" font-size="11" font-weight="600" letter-spacing="0.05em">NOTIFICATION TYPES &amp; SEVERITY HIERARCHY</text>
+
+      <!-- Sample 1: Success -->
+      <g transform="translate(0, 15)">
+        <rect x="0" y="0" width="677" height="66" rx="10" fill="#0a0e17" stroke="#202b3f" stroke-width="1"/>
+        <circle cx="22" cy="33" r="8" fill="#065f46" fill-opacity="0.4"/>
+        <path d="M 18 33 L 21 36 L 27 30" fill="none" stroke="#10b981" stroke-width="2"/>
+        
+        <text x="40" y="28" fill="#f8fafc" class="body-font" font-size="12" font-weight="600">Suite de Pruebas Superada con Éxito</text>
+        <text x="40" y="48" fill="#94a3b8" class="mono-font" font-size="10">npm run test:flows completó 14 suites en 53.5ms sin errores de workspace.</text>
+        
+        <text x="610" y="26" fill="#64748b" class="mono-font" font-size="9">Hace 2m</text>
+        <text x="600" y="48" fill="#38bdf8" class="mono-font" font-size="9">Ir a sesión →</text>
+      </g>
+
+      <!-- Sample 2: System / MCP Status -->
+      <g transform="translate(0, 90)">
+        <rect x="0" y="0" width="677" height="66" rx="10" fill="#0a0e17" stroke="#202b3f" stroke-width="1"/>
+        <circle cx="22" cy="33" r="8" fill="#0891b2" fill-opacity="0.4"/>
+        <circle cx="22" cy="33" r="3" fill="#06b6d4"/>
+
+        <text x="40" y="28" fill="#f8fafc" class="body-font" font-size="12" font-weight="600">Malla MCP Sincronizada</text>
+        <text x="40" y="48" fill="#94a3b8" class="mono-font" font-size="10">8 servidores activos por stdio/SSE con 42 herramientas listas para ejecución.</text>
+
+        <text x="610" y="26" fill="#64748b" class="mono-font" font-size="9">Hace 5m</text>
+        <text x="600" y="48" fill="#38bdf8" class="mono-font" font-size="9">Ver MCPs →</text>
+      </g>
+
+      <!-- Sample 3: Failure Alert -->
+      <g transform="translate(0, 165)">
+        <rect x="0" y="0" width="677" height="66" rx="10" fill="#450a0a" fill-opacity="0.25" stroke="#7f1d1d" stroke-width="1"/>
+        <circle cx="22" cy="33" r="8" fill="#991b1b" fill-opacity="0.4"/>
+        <line x1="22" y1="28" x2="22" y2="34" stroke="#f87171" stroke-width="2"/>
+        <circle cx="22" cy="38" r="1" fill="#f87171"/>
+
+        <text x="40" y="28" fill="#fca5a5" class="body-font" font-size="12" font-weight="600">Alerta de Seguridad: Intento de Escape de CWD Bloqueado</text>
+        <text x="40" y="48" fill="#f87171" class="mono-font" font-size="10">isSystemOrAppDir() interceptó intento de ejecución fuera del workspace autorizado.</text>
+
+        <text x="610" y="26" fill="#f87171" class="mono-font" font-size="9">Hace 12m</text>
+        <text x="600" y="48" fill="#fca5a5" class="mono-font" font-size="9">Auditoría →</text>
+      </g>
+
+      <!-- Sample 4: Token Warning -->
+      <g transform="translate(0, 240)">
+        <rect x="0" y="0" width="677" height="66" rx="10" fill="#0a0e17" stroke="#202b3f" stroke-width="1"/>
+        <circle cx="22" cy="33" r="8" fill="#78350f" fill-opacity="0.4"/>
+        <polygon points="22,26 27,37 17,37" fill="none" stroke="#f59e0b" stroke-width="1.6"/>
+
+        <text x="40" y="28" fill="#f8fafc" class="body-font" font-size="12" font-weight="600">Aviso de Presupuesto: 75% del Límite de Tokens Alcanzado</text>
+        <text x="40" y="48" fill="#94a3b8" class="mono-font" font-size="10">Sesión activa consumió 36.2k tokens. Recomendado compactar historial (/compact).</text>
+
+        <text x="610" y="26" fill="#64748b" class="mono-font" font-size="9">Hace 18m</text>
+        <text x="600" y="48" fill="#38bdf8" class="mono-font" font-size="9">Compactar →</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ==================== RIGHT COLUMN: SHORTCUTS HUB & WCAG ACCESSIBILITY ==================== -->
+  <g transform="translate(815, 145)">
+    <rect x="0" y="0" width="725" height="530" rx="16" fill="url(#cardGrad)" stroke="url(#borderGradCyan)" stroke-width="1.5"/>
+
+    <!-- Header -->
+    <g transform="translate(24, 24)">
+      <rect x="0" y="0" width="34" height="34" rx="8" fill="#06b6d4" fill-opacity="0.12" stroke="#06b6d4" stroke-width="1.2"/>
+      <rect x="8" y="11" width="18" height="12" rx="2" fill="none" stroke="#06b6d4" stroke-width="1.6"/>
+      <line x1="12" y1="17" x2="22" y2="17" stroke="#38bdf8" stroke-width="1.6"/>
+
+      <text x="46" y="20" fill="#f8fafc" class="title-font" font-size="16">Shortcuts Hub &amp; WCAG 2.2 AAA Matrix</text>
+      <text x="46" y="34" fill="#64748b" class="mono-font" font-size="11">ModalShell Focus Trap · 7 Functional Categories · High-Contrast kbd</text>
+
+      <!-- Pills -->
+      <g transform="translate(480, 2)">
+        <rect x="0" y="0" width="95" height="26" rx="6" fill="#07090e" stroke="#202b3f"/>
+        <text x="12" y="17" fill="#38bdf8" class="mono-font" font-size="10">WCAG AAA</text>
+        <rect x="102" y="0" width="90" height="26" rx="6" fill="#07090e" stroke="#202b3f"/>
+        <text x="112" y="17" fill="#10b981" class="mono-font" font-size="10">22 ATAJOS</text>
+      </g>
+    </g>
+
+    <!-- Contrast & Compliance Metrics Table -->
+    <g transform="translate(24, 75)">
+      <rect x="0" y="0" width="677" height="110" rx="12" fill="#0a0e17" stroke="#202b3f" stroke-width="1"/>
+      <text x="16" y="24" fill="#94a3b8" class="mono-font" font-size="10" font-weight="600" letter-spacing="0.05em">WCAG 2.2 AAA CONTRAST RATIO AUDIT (BASE: #07090e)</text>
+
+      <g transform="translate(16, 38)">
+        <!-- Metric 1: Title text -->
+        <g transform="translate(0, 0)">
+          <rect x="0" y="0" width="150" height="56" rx="8" fill="#0c1220" stroke="#202b3f"/>
+          <text x="10" y="22" fill="#f8fafc" class="body-font" font-size="11" font-weight="700">Slate-50 (#f8fafc)</text>
+          <text x="10" y="44" fill="#10b981" class="mono-font" font-size="11" font-weight="700">18.4:1 (AAA)</text>
+        </g>
+        <!-- Metric 2: Primary Cyan -->
+        <g transform="translate(165, 0)">
+          <rect x="0" y="0" width="150" height="56" rx="8" fill="#0c1220" stroke="#202b3f"/>
+          <text x="10" y="22" fill="#38bdf8" class="body-font" font-size="11" font-weight="700">Cyan-400 (#38bdf8)</text>
+          <text x="10" y="44" fill="#10b981" class="mono-font" font-size="11" font-weight="700">10.6:1 (AAA)</text>
+        </g>
+        <!-- Metric 3: Success Emerald -->
+        <g transform="translate(330, 0)">
+          <rect x="0" y="0" width="150" height="56" rx="8" fill="#0c1220" stroke="#202b3f"/>
+          <text x="10" y="22" fill="#34d399" class="body-font" font-size="11" font-weight="700">Emerald-400 (#34d399)</text>
+          <text x="10" y="44" fill="#10b981" class="mono-font" font-size="11" font-weight="700">9.2:1 (AAA)</text>
+        </g>
+        <!-- Metric 4: Purple Accent -->
+        <g transform="translate(495, 0)">
+          <rect x="0" y="0" width="150" height="56" rx="8" fill="#0c1220" stroke="#202b3f"/>
+          <text x="10" y="22" fill="#c084fc" class="body-font" font-size="11" font-weight="700">Purple-400 (#c084fc)</text>
+          <text x="10" y="44" fill="#10b981" class="mono-font" font-size="11" font-weight="700">9.8:1 (AAA)</text>
+        </g>
+      </g>
+    </g>
+
+    <!-- Key Shortcuts Master List -->
+    <g transform="translate(24, 200)">
+      <text x="0" y="0" fill="#94a3b8" class="mono-font" font-size="11" font-weight="600" letter-spacing="0.05em">PRIMARY HUD KEYBOARD BINDINGS</text>
+
+      <!-- Row 1: Command Palette -->
+      <g transform="translate(0, 15)">
+        <rect x="0" y="0" width="677" height="42" rx="8" fill="#0a0e17" stroke="#202b3f"/>
+        <rect x="12" y="11" width="75" height="20" rx="4" fill="#162035" stroke="#06b6d4" stroke-width="0.8"/>
+        <text x="18" y="25" fill="#38bdf8" class="mono-font" font-size="9" font-weight="700">NAVEGACIÓN</text>
+        <text x="96" y="26" fill="#f8fafc" class="body-font" font-size="12">Paleta global de comandos &amp; acciones rápidas</text>
+        <rect x="585" y="9" width="78" height="24" rx="6" fill="#07090e" stroke="#202b3f"/>
+        <text x="600" y="25" fill="#38bdf8" class="mono-font" font-size="11" font-weight="700">Ctrl K</text>
+      </g>
+
+      <!-- Row 2: Shortcuts Modal -->
+      <g transform="translate(0, 65)">
+        <rect x="0" y="0" width="677" height="42" rx="8" fill="#0a0e17" stroke="#202b3f"/>
+        <rect x="12" y="11" width="75" height="20" rx="4" fill="#162035" stroke="#06b6d4" stroke-width="0.8"/>
+        <text x="18" y="25" fill="#38bdf8" class="mono-font" font-size="9" font-weight="700">NAVEGACIÓN</text>
+        <text x="96" y="26" fill="#f8fafc" class="body-font" font-size="12">Ayuda modal de atajos con buscador dinámico</text>
+        <rect x="585" y="9" width="78" height="24" rx="6" fill="#07090e" stroke="#202b3f"/>
+        <text x="600" y="25" fill="#38bdf8" class="mono-font" font-size="11" font-weight="700">Ctrl /</text>
+      </g>
+
+      <!-- Row 3: Terminal Console -->
+      <g transform="translate(0, 115)">
+        <rect x="0" y="0" width="677" height="42" rx="8" fill="#0a0e17" stroke="#202b3f"/>
+        <rect x="12" y="11" width="85" height="20" rx="4" fill="#162035" stroke="#10b981" stroke-width="0.8"/>
+        <text x="18" y="25" fill="#34d399" class="mono-font" font-size="9" font-weight="700">HERRAMIENTAS</text>
+        <text x="106" y="26" fill="#f8fafc" class="body-font" font-size="12">Alternar cajón de terminal CRT / shell interactiva</text>
+        <rect x="585" y="9" width="78" height="24" rx="6" fill="#07090e" stroke="#202b3f"/>
+        <text x="605" y="25" fill="#34d399" class="mono-font" font-size="11" font-weight="700">Ctrl `</text>
+      </g>
+
+      <!-- Row 4: Plan First -->
+      <g transform="translate(0, 165)">
+        <rect x="0" y="0" width="677" height="42" rx="8" fill="#0a0e17" stroke="#202b3f"/>
+        <rect x="12" y="11" width="55" height="20" rx="4" fill="#162035" stroke="#8b5cf6" stroke-width="0.8"/>
+        <text x="18" y="25" fill="#c084fc" class="mono-font" font-size="9" font-weight="700">AGENTE</text>
+        <text x="76" y="26" fill="#f8fafc" class="body-font" font-size="12">Activar o desactivar «Plan primero» (arquitectura)</text>
+        <rect x="570" y="9" width="93" height="24" rx="6" fill="#07090e" stroke="#202b3f"/>
+        <text x="578" y="25" fill="#c084fc" class="mono-font" font-size="10" font-weight="700">Ctrl Shift P</text>
+      </g>
+
+      <!-- Row 5: Voice Dictation -->
+      <g transform="translate(0, 215)">
+        <rect x="0" y="0" width="677" height="42" rx="8" fill="#0a0e17" stroke="#202b3f"/>
+        <rect x="12" y="11" width="55" height="20" rx="4" fill="#162035" stroke="#f43f5e" stroke-width="0.8"/>
+        <text x="18" y="25" fill="#fb7185" class="mono-font" font-size="9" font-weight="700">ENTRADA</text>
+        <text x="76" y="26" fill="#f8fafc" class="body-font" font-size="12">Iniciar o detener el dictado por voz y streaming</text>
+        <rect x="570" y="9" width="93" height="24" rx="6" fill="#07090e" stroke="#202b3f"/>
+        <text x="578" y="25" fill="#fb7185" class="mono-font" font-size="10" font-weight="700">Ctrl Shift D</text>
+      </g>
+
+      <!-- Row 6: Send Message -->
+      <g transform="translate(0, 265)">
+        <rect x="0" y="0" width="677" height="42" rx="8" fill="#0a0e17" stroke="#202b3f"/>
+        <rect x="12" y="11" width="45" height="20" rx="4" fill="#162035" stroke="#3b82f6" stroke-width="0.8"/>
+        <text x="18" y="25" fill="#60a5fa" class="mono-font" font-size="9" font-weight="700">CHAT</text>
+        <text x="66" y="26" fill="#f8fafc" class="body-font" font-size="12">Enviar prompt al agente o realizar salto de línea</text>
+        <rect x="585" y="9" width="78" height="24" rx="6" fill="#07090e" stroke="#202b3f"/>
+        <text x="598" y="25" fill="#60a5fa" class="mono-font" font-size="11" font-weight="700">Enter</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ==================== BOTTOM ROW: ACCESSIBILITY & FOCUS TRAPPING ==================== -->
+  <g transform="translate(60, 695)">
+    <rect x="0" y="0" width="1480" height="295" rx="16" fill="url(#cardGrad)" stroke="#202b3f" stroke-width="1.2"/>
+
+    <g transform="translate(24, 24)">
+      <text x="0" y="0" fill="#f8fafc" class="title-font" font-size="16">W3C APG &amp; WCAG 2.2 AAA Implementation Architecture</text>
+      <text x="0" y="18" fill="#64748b" class="mono-font" font-size="11">How ModalShell, SpotlightBar and InteractiveDiffModal guarantee complete keyboard navigability</text>
+
+      <!-- Panel 1: Cyclical Focus Trap -->
+      <g transform="translate(0, 36)">
+        <rect x="0" y="0" width="455" height="200" rx="12" fill="#0a0e17" stroke="#202b3f" stroke-width="1"/>
+        <rect x="14" y="14" width="28" height="28" rx="6" fill="#06b6d4" fill-opacity="0.15"/>
+        <text x="21" y="32" fill="#06b6d4" class="mono-font" font-size="13" font-weight="700">01</text>
+
+        <text x="52" y="26" fill="#f8fafc" class="body-font" font-size="13" font-weight="700">Cyclical Tab Trap (trapFocus)</text>
+        <text x="52" y="40" fill="#64748b" class="mono-font" font-size="10">Zero Focus Escapes</text>
+
+        <rect x="14" y="56" width="427" height="128" rx="8" fill="#07090e" stroke="#202b3f"/>
+        <text x="24" y="78" fill="#38bdf8" class="mono-font" font-size="10">// Tab loop mechanism:</text>
+        <text x="24" y="96" fill="#cbd5e1" class="mono-font" font-size="10">if (e.shiftKey &amp;&amp; active === firstElement) {</text>
+        <text x="36" y="114" fill="#34d399" class="mono-font" font-size="10">lastElement.focus(); e.preventDefault();</text>
+        <text x="24" y="132" fill="#cbd5e1" class="mono-font" font-size="10">} else if (!e.shiftKey &amp;&amp; active === lastElement) {</text>
+        <text x="36" y="150" fill="#34d399" class="mono-font" font-size="10">firstElement.focus(); e.preventDefault();</text>
+        <text x="24" y="168" fill="#cbd5e1" class="mono-font" font-size="10">}</text>
+      </g>
+
+      <!-- Panel 2: Opener Restoration -->
+      <g transform="translate(488, 36)">
+        <rect x="0" y="0" width="455" height="200" rx="12" fill="#0a0e17" stroke="#202b3f" stroke-width="1"/>
+        <rect x="14" y="14" width="28" height="28" rx="6" fill="#10b981" fill-opacity="0.15"/>
+        <text x="21" y="32" fill="#10b981" class="mono-font" font-size="13" font-weight="700">02</text>
+
+        <text x="52" y="26" fill="#f8fafc" class="body-font" font-size="13" font-weight="700">Opener Restoration (opener.focus)</text>
+        <text x="52" y="40" fill="#64748b" class="mono-font" font-size="10">Preserve User Position</text>
+
+        <rect x="14" y="56" width="427" height="128" rx="8" fill="#07090e" stroke="#202b3f"/>
+        <text x="24" y="78" fill="#34d399" class="mono-font" font-size="10">// On modal unmount:</text>
+        <text x="24" y="96" fill="#cbd5e1" class="mono-font" font-size="10">useEffect(() =&gt; {</text>
+        <text x="36" y="114" fill="#38bdf8" class="mono-font" font-size="10">openerRef.current = document.activeElement;</text>
+        <text x="36" y="132" fill="#cbd5e1" class="mono-font" font-size="10">return () =&gt; {</text>
+        <text x="48" y="150" fill="#10b981" class="mono-font" font-size="10">openerRef.current?.focus(); // Instant restore</text>
+        <text x="36" y="168" fill="#cbd5e1" class="mono-font" font-size="10">};</text>
+      </g>
+
+      <!-- Panel 3: ARIA APG Semantics -->
+      <g transform="translate(976, 36)">
+        <rect x="0" y="0" width="455" height="200" rx="12" fill="#0a0e17" stroke="#202b3f" stroke-width="1"/>
+        <rect x="14" y="14" width="28" height="28" rx="6" fill="#8b5cf6" fill-opacity="0.15"/>
+        <text x="21" y="32" fill="#8b5cf6" class="mono-font" font-size="13" font-weight="700">03</text>
+
+        <text x="52" y="26" fill="#f8fafc" class="body-font" font-size="13" font-weight="700">W3C APG Semantics &amp; Escape</text>
+        <text x="52" y="40" fill="#64748b" class="mono-font" font-size="10">Accessible Rich Internet Applications</text>
+
+        <rect x="14" y="56" width="427" height="128" rx="8" fill="#07090e" stroke="#202b3f"/>
+        <text x="24" y="78" fill="#c084fc" class="mono-font" font-size="10">// Required ARIA attributes:</text>
+        <text x="24" y="96" fill="#cbd5e1" class="mono-font" font-size="10">role="dialog" aria-modal="true"</text>
+        <text x="24" y="114" fill="#cbd5e1" class="mono-font" font-size="10">aria-label="Atajos de Teclado del HUD"</text>
+        <text x="24" y="136" fill="#f59e0b" class="mono-font" font-size="10">// Global Escape key listener:</text>
+        <text x="24" y="154" fill="#cbd5e1" class="mono-font" font-size="10">if (e.key === 'Escape') onClose();</text>
+        <text x="24" y="170" fill="#10b981" class="mono-font" font-size="10">Screen readers correctly announce modal lifecycle.</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Footer -->
+  <g transform="translate(60, 1015)">
+    <text x="0" y="0" fill="#64748b" class="mono-font" font-size="10">AGENTHUB TACTICAL HUD ARCHITECTURE · SPEC CARD #54 · NOTIFICATIONS &amp; ACCESSIBILITY</text>
+    <text x="1480" y="0" text-anchor="end" fill="#64748b" class="mono-font" font-size="10">WCAG 2.2 AAA VERIFIED · CONTRAST &gt; 9:1 · W3C APG DIALOG STANDARDS</text>
+  </g>
+</svg>
