@@ -15,6 +15,8 @@
     "build:standalone": "esbuild src/server/standalone.ts --bundle --minify --outfile=dist/standalone.js --alias:vscode=./src/server/vscode-shim.ts --format=cjs --platform=node --sourcemap",
     "build:electron": "esbuild src/electron/main.ts --bundle --minify --outfile=dist/electron/main.js --alias:vscode=./src/server/vscode-shim.ts --external:electron --format=cjs --platform=node",
     "build:webview": "vite build",
+    "postbuild:webview": "node scripts/link-installed-app.js",
+    "postbuild:electron": "node scripts/link-installed-app.js",
     "build": "npm run build:standalone && npm run build:electron && npm run build:webview",
     "start:server": "node bin/agent-hub.js",
     "desktop": "node bin/agent-hub.js --desktop",

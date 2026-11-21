@@ -81,5 +81,5 @@ Lección: la cabecera de columna usa `backdrop-blur` (crea contexto de apilamien
 Evidencia: src/webview/components/FloatingPanel.tsx, usado por WorkspacePicker.tsx y GitBranchBadge.tsx; cabecera en SplitWorkspace.tsx.
 
 Señal: un cambio del webview compila bien pero la app de escritorio sigue mostrando lo de antes.
-Lección: AgentHub.exe instalado lee `%LOCALAPPDATA%\Programs\AgentHub\resources\app\dist`; tras un `package:win` eso es una copia y no el junction al repo. `npm run update` lo re-enlaza pero mata el proceso (y la conversación si corre dentro); sin reiniciar basta copiar `dist/webview` ahí y recargar con Ctrl+R.
-Evidencia: actualizar.ps1; `(Get-Item ...\resources\app\dist).LinkType` vacío.
+Lección: AgentHub.exe instalado lee `%LOCALAPPDATA%\Programs\AgentHub\resources\app\dist`, que debe ser un junction al `dist` del repo; `postbuild:webview`/`postbuild:electron` lo rehacen solos tras un `package:win`. Basta compilar y Ctrl+R (cambios de electron/main requieren reabrir); no hace falta copiar nada a mano.
+Evidencia: scripts/link-installed-app.js; `(Get-Item ...\resources\app\dist -Force).LinkType` → Junction.
