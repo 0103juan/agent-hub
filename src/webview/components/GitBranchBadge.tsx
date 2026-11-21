@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { GitBranch, Check, ChevronDown, Search, Plus, ExternalLink, X, RefreshCw, GitMerge } from 'lucide-react';
 import { postToHost } from '../vscode-api';
+import { FloatingPanel } from './FloatingPanel';
 
 export interface GitBranchBadgeProps {
   branch?: string;
@@ -34,6 +35,7 @@ export const GitBranchBadge: React.FC<GitBranchBadgeProps> = ({
   const [isCreating, setIsCreating] = useState(false);
   const [newBranchName, setNewBranchName] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const isGit = Boolean(branch && branch.trim());
@@ -59,7 +61,7 @@ export const GitBranchBadge: React.FC<GitBranchBadgeProps> = ({
         setOpen(false);
         return;
       }
-      if (e instanceof MouseEvent && containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      if (e instanceof MouseEvent && containerRef.current && !containerRef.current.contains(e.target as Node) && !panelRef.current?.contains(e.target as Node)) {
         setOpen(false);
       }
     };
@@ -84,7 +86,7 @@ export const GitBranchBadge: React.FC<GitBranchBadgeProps> = ({
           <span className="truncate max-w-[90px] text-slate-400">Sin Git</span>
         </button>
         {open && (
-          <div className="absolute left-0 top-full mt-1.5 w-68 bg-[#0a0e17] border border-[#202b3f] rounded-xl shadow-2xl shadow-black/80 p-3.5 z-50 text-xs">
+          <FloatingPanel anchorRef={containerRef} panelRef={panelRef} className="w-68 bg-[#0a0e17] border border-[#202b3f] rounded-xl shadow-2xl shadow-black/80 p-3.5 text-xs">
             <div className="font-semibold text-slate-200 mb-1 flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-amber-400"></span>
               Sin repositorio Git
@@ -103,7 +105,7 @@ export const GitBranchBadge: React.FC<GitBranchBadgeProps> = ({
               <Plus className="w-3.5 h-3.5" />
               Inicializar Git aquí (git init)
             </button>
-          </div>
+          </FloatingPanel>
         )}
       </div>
     );
@@ -214,7 +216,7 @@ export const GitBranchBadge: React.FC<GitBranchBadgeProps> = ({
 
       {/* Popover / Menú Desplegable con Ramas */}
       {open && (
-        <div className="absolute left-0 top-full mt-1.5 z-50 w-80 p-2.5 rounded-xl bg-[#0a0e17] border border-[#202b3f] shadow-2xl shadow-black/80 space-y-2.5 text-xs animate-modal-pop">
+        <FloatingPanel anchorRef={containerRef} panelRef={panelRef} className="w-80 p-2.5 rounded-xl bg-[#0a0e17] border border-[#202b3f] shadow-2xl shadow-black/80 space-y-2.5 text-xs animate-modal-pop">
           {/* Cabecera: Rama Activa y Estado */}
           <div className="p-2.5 rounded-lg bg-[#07090e] border border-[#202b3f] space-y-1.5">
             <div className="flex items-center justify-between">
@@ -427,7 +429,7 @@ export const GitBranchBadge: React.FC<GitBranchBadgeProps> = ({
               </button>
             )}
           </div>
-        </div>
+        </FloatingPanel>
       )}
     </div>
   );

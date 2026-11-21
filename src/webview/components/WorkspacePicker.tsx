@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Folder, FolderGit2, FolderOpen, ExternalLink, Code2, Check, Clock, ChevronDown, ChevronRight, ArrowUp, Star, Search, Copy } from 'lucide-react';
 import { postToHost, openInVsCode } from '../vscode-api';
 import { normalizeText } from '../../shared/workspace-actions';
+import { FloatingPanel } from './FloatingPanel';
 
 const FAVORITES_KEY = 'agent-hub.favoriteDirs';
 
@@ -24,6 +25,7 @@ export interface WorkspacePickerProps {
 export const WorkspacePicker: React.FC<WorkspacePickerProps> = ({ currentDir, recentDirs, sessionId }) => {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const [filter, setFilter] = useState('');
   const [reposOnly, setReposOnly] = useState(false);
   const [favorites, setFavorites] = useState<string[]>(readFavorites);
@@ -65,7 +67,8 @@ export const WorkspacePicker: React.FC<WorkspacePickerProps> = ({ currentDir, re
 
   useEffect(() => {
     const onClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      if (containerRef.current && !containerRef.current.contains(target) && !panelRef.current?.contains(target)) {
         setOpen(false);
       }
     };
@@ -108,12 +111,26 @@ export const WorkspacePicker: React.FC<WorkspacePickerProps> = ({ currentDir, re
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full mt-1.5 z-50 w-84 sm:w-96 p-2.5 rounded-xl bg-[#0a0e17] border border-[#202b3f] shadow-2xl shadow-black/80 space-y-2.5 text-xs animate-modal-pop">
+        <FloatingPanel
+          anchorRef={containerRef}
+          panelRef={panelRef}
+          className="w-84 sm:w-96 p-2.5 rounded-xl bg-[#0a0e17] border border-[#202b3f] shadow-2xl shadow-black/80 space-y-2.5 text-xs animate-modal-pop"
+        >
           <div className="space-y-1 pb-1.5 border-b border-[#202b3f]">
             <span className="text-[10px] uppercase font-mono font-semibold text-slate-400 tracking-wider">Espacio de Trabajo Activo</span>
-            <div className="text-[11px] font-mono text-cyan-300 break-all p-2 rounded-lg bg-[#07090e] border border-[#202b3f]">
-              {currentDir ?? 'Ninguno (Modo global)'}
-            </div>
+            {currentDir ? (
+              <button
+                type="button"
+                onClick={openInExplorer}
+                title="Abrir esta carpeta en el Explorador de archivos"
+                className="group w-full flex items-start gap-2 text-left text-[11px] font-mono text-cyan-300 break-all p-2 rounded-lg bg-[#07090e] border border-[#202b3f] hover:border-cyan-500/50 hover:bg-[#0c1220] hover:text-cyan-200 focus:outline-none focus-visible:ring-1 focus-visible:ring-cyan-500 transition cursor-pointer"
+              >
+                <span className="flex-1 min-w-0">{currentDir}</span>
+                <ExternalLink className="w-3 h-3 mt-0.5 shrink-0 text-slate-500 group-hover:text-cyan-400 transition" aria-hidden="true" />
+              </button>
+            ) : (
+              <div className="text-[11px] font-mono text-slate-400 p-2 rounded-lg bg-[#07090e] border border-[#202b3f]">Ninguno (Modo global)</div>
+            )}
           </div>
 
           <div className="space-y-1.5">
@@ -312,7 +329,7 @@ export const WorkspacePicker: React.FC<WorkspacePickerProps> = ({ currentDir, re
               </div>
             </div>
           )}
-        </div>
+        </FloatingPanel>
       )}
     </div>
   );

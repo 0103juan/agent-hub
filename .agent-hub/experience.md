@@ -75,3 +75,11 @@ Evidencia: `src/webview/components/chat/syntax-highlighter.tsx`, `src/webview/st
 Señal: un componente que se repite por columna o por chat muestra rama, cambios git o carpeta.
 Lección: `branchesData` y `workspaceOverview` de App son solo los del chat activo; pasarlos a cada columna pinta la misma rama en todas. Pide `getDirGitStatus` por `projectPath` y guarda las respuestas `gitBranches`/`dirGitStatus` por `msg.dir` (el host devuelve el mismo `dir` que recibió).
 Evidencia: src/webview/components/SplitWorkspace.tsx (useDirGit); antes recibía `currentBranch` global con 'main' por defecto.
+
+Señal: un desplegable (absolute z-50) se ve bien en un chat solo pero queda debajo del contenido dentro de las columnas.
+Lección: la cabecera de columna usa `backdrop-blur` (crea contexto de apilamiento) y la columna `overflow-hidden`, así que ningún z-index lo saca; pinta el menú con `FloatingPanel` (portal a body, `position: fixed`) y en el clic-fuera comprueba también `panelRef`.
+Evidencia: src/webview/components/FloatingPanel.tsx, usado por WorkspacePicker.tsx y GitBranchBadge.tsx; cabecera en SplitWorkspace.tsx.
+
+Señal: un cambio del webview compila bien pero la app de escritorio sigue mostrando lo de antes.
+Lección: AgentHub.exe instalado lee `%LOCALAPPDATA%\Programs\AgentHub\resources\app\dist`; tras un `package:win` eso es una copia y no el junction al repo. `npm run update` lo re-enlaza pero mata el proceso (y la conversación si corre dentro); sin reiniciar basta copiar `dist/webview` ahí y recargar con Ctrl+R.
+Evidencia: actualizar.ps1; `(Get-Item ...\resources\app\dist).LinkType` vacío.
